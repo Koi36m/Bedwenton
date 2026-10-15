@@ -1,0 +1,8 @@
+Delivered 7 M2 test classes only (--tests per class), build/test-results deleted before each run:
+== NONE
+BUILD SUCCESSFUL (all selected tests passed)
+== C09
+BUILD SUCCESSFUL (all selected tests passed)
+== C01
+44 tests completed, 2 failed
+Summary: NONE 44/44 pass; C09 44/44 pass (gap); C01 2 failing.

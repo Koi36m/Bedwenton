@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.time.M2ReviewFindingsTest" tests="3" skipped="0" failures="3" errors="0" timestamp="2026-10-15T09:26:24.933Z" hostname="vm" time="0.052">
+  <properties/>
+  <testcase name="A3 (option c only): a FOREVER timing never reports AFTER, even when the cycle index exceeds 2^63" classname="workshop.vfx.math.time.M2ReviewFindingsTest" time="0.044">
+    <failure message="org.opentest4j.AssertionFailedError: FOREVER reported AFTER: TimingSample[stage=AFTER, cycle=9223372036854775806, progress=1.0] ==&gt; expected: not equal but was: &lt;AFTER&gt;" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: FOREVER reported AFTER: TimingSample[stage=AFTER, cycle=9223372036854775806, progress=1.0] ==&gt; expected: not equal but was: &lt;AFTER&gt;
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at app//org.junit.jupiter.api.AssertNotEquals.failEqual(AssertNotEquals.java:277)
+	at app//org.junit.jupiter.api.AssertNotEquals.assertNotEquals(AssertNotEquals.java:263)
+	at app//org.junit.jupiter.api.Assertions.assertNotEquals(Assertions.java:2832)
+	at app//workshop.vfx.math.time.M2ReviewFindingsTest.a3ForeverNeverAfter(M2ReviewFindingsTest.java:47)
+	at java.base@25.0.4.1/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <testcase name="A2 (option b only): a no-op control still advances the last control instant, so a later control may not precede it" classname="workshop.vfx.math.time.M2ReviewFindingsTest" time="0.005">
+    <failure message="org.opentest4j.AssertionFailedError: 150 precedes the last control at 200 ==&gt; Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown." type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: 150 precedes the last control at 200 ==&gt; Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+	at app//org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)
+	at app//org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:39)
+	at app//org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3153)
+	at app//workshop.vfx.math.time.M2ReviewFindingsTest.a2NoOpControlAdvancesTheControlClock(M2ReviewFindingsTest.java:40)
+	at java.base@25.0.4.1/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <testcase name="R1 (proposal P-R1): COSMETIC differences use wrapping subtraction, as System.nanoTime's Javadoc prescribes" classname="workshop.vfx.math.time.M2ReviewFindingsTest" time="0.002">
+    <failure message="java.lang.ArithmeticException: TimePoint.ticksSince: instant difference overflows long" type="java.lang.ArithmeticException">java.lang.ArithmeticException: TimePoint.ticksSince: instant difference overflows long
+	at workshop.vfx.math.time.TimePoint.ticksSince(TimePoint.java:27)
+	at workshop.vfx.math.time.M2ReviewFindingsTest.r1CosmeticWrapAround(M2ReviewFindingsTest.java:30)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

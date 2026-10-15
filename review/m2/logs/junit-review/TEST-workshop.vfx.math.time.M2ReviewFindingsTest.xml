@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.time.M2ReviewFindingsTest" tests="3" skipped="3" failures="0" errors="0" timestamp="2026-10-15T09:30:34.206Z" hostname="vm" time="0.0">
+  <properties/>
+  <testcase name="A3 (option c only): a FOREVER timing never reports AFTER, even when the cycle index exceeds 2^63" classname="workshop.vfx.math.time.M2ReviewFindingsTest" time="0.0">
+    <skipped/>
+  </testcase>
+  <testcase name="A2 (option b only): a no-op control still advances the last control instant, so a later control may not precede it" classname="workshop.vfx.math.time.M2ReviewFindingsTest" time="0.0">
+    <skipped/>
+  </testcase>
+  <testcase name="R1 (proposal P-R1): COSMETIC differences use wrapping subtraction, as System.nanoTime's Javadoc prescribes" classname="workshop.vfx.math.time.M2ReviewFindingsTest" time="0.0">
+    <skipped/>
+  </testcase>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

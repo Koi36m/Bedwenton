@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.time.TimingTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-15T09:22:30.454Z" hostname="vm" time="0.267">
+  <properties/>
+  <testcase name="Integer exactness: integer delay, duration and local time give the exact stage and cycle and a once-rounded progress (section 6.3)" classname="workshop.vfx.math.time.TimingTest" time="0.106"/>
+  <testcase name="Phase precision does not depend on elapsed time: exact remainder, unlike frac(u / d) (sections 5, 6.4)" classname="workshop.vfx.math.time.TimingTest" time="0.001"/>
+  <testcase name="Fuzz: for every finite input the sample is valid, ACTIVE forward progress is below 1, nothing throws (sections 5, 6)" classname="workshop.vfx.math.time.TimingTest" time="0.072"/>
+  <testcase name="sample rejects non-finite local time (IAE) and an unrepresentable elapsed time (ArithmeticException) (sections 5, 7)" classname="workshop.vfx.math.time.TimingTest" time="0.001"/>
+  <testcase name="PING_PONG: odd cycles run backwards as (d - r) / d, values are continuous at every turn, the end value depends on parity (section 5)" classname="workshop.vfx.math.time.TimingTest" time="0.0"/>
+  <testcase name="Validation: finite delay, finite positive duration, cycles &gt;= 1, ONCE has exactly one cycle (sections 5, 7)" classname="workshop.vfx.math.time.TimingTest" time="0.003"/>
+  <testcase name="LOOP: half-open cycles [n d, (n+1) d); finite cycles end in AFTER with cycle = cycles - 1 and progress 1 (section 5)" classname="workshop.vfx.math.time.TimingTest" time="0.001"/>
+  <testcase name="ONCE: BEFORE below the delay, ACTIVE on [0, d) with progress u/d &lt; 1, AFTER from d on with progress 1 (section 5)" classname="workshop.vfx.math.time.TimingTest" time="0.0"/>
+  <testcase name="Delay: u = local - delay; negative delays start part-way; -0.0 elapsed time gives +0.0 progress (section 5)" classname="workshop.vfx.math.time.TimingTest" time="0.0"/>
+  <testcase name="TimingSample validates stage, cycle &gt;= 0 and progress in [0, 1] (sections 5, 7)" classname="workshop.vfx.math.time.TimingTest" time="0.002"/>
+  <testcase name="Within one pass progress is monotone in local time: non-decreasing forward, non-increasing backward (section 5)" classname="workshop.vfx.math.time.TimingTest" time="0.076"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

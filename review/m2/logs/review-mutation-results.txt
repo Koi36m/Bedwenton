@@ -1,0 +1,17 @@
+Mutation analysis of the review tests alone (M2ReviewAdversarialTest) against Codex's production code 1e85682,
+one injected defect at a time in a scratch copy (never in the repository).
+
+C01 (signed zero not normalized) review-tests-failing=0 
+C02 (cycle from floor(u / d)) review-tests-failing=2 Boundary oracle: on and next to 11; The 2^51 cycle-exact domain is suf
+C03 (end of run off by one) review-tests-failing=4 Boundary oracle: on and next to 11; Exhaustive small integers: every d; Integer control scripts: random pa; Subnormal and extreme durations: e
+C04 (backward pass rounded differently) review-tests-failing=3 Exhaustive small integers: every d; Integer control scripts: random pa; PING_PONG mirror symmetry: for int
+C05 (ping-pong end ignores parity) review-tests-failing=3 Boundary oracle: on and next to 11; Exhaustive small integers: every d; Integer control scripts: random pa
+C06 (ping-pong parity inverted) review-tests-failing=4 Boundary oracle: on and next to 11; Exhaustive small integers: every d; Integer control scripts: random pa; Subnormal and extreme durations: e
+C07 (resume counts the paused span) review-tests-failing=1 Integer control scripts: random pa
+C08 (fused multiply-add) review-tests-failing=1 Re-anchoring error: GAME stays wit
+C09 (rate validated after evaluation) review-tests-failing=1 Validation order: control-instant 
+C10 (restart keeps pause) review-tests-failing=1 Integer control scripts: random pa
+C11 (cosmetic reciprocal) review-tests-failing=1 COSMETIC differences beyond 2^53 n
+C12 (seek clears pause) review-tests-failing=1 Integer control scripts: random pa
+C13 (pause does not re-anchor) review-tests-failing=2 Integer control scripts: random pa; Validation order: control-instant 
+C14 (remainder via floor (not exact)) review-tests-failing=2 Boundary oracle: on and next to 11; The 2^51 cycle-exact domain is suf

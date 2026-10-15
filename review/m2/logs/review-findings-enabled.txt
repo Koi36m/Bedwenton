@@ -1,0 +1,33 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.1.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :compileJava UP-TO-DATE
+> Task :processResources NO-SOURCE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources UP-TO-DATE
+> Task :testClasses UP-TO-DATE
+
+> Task :test FAILED
+
+M2ReviewFindingsTest > A3 (option c only): a FOREVER timing never reports AFTER, even when the cycle index exceeds 2^63 FAILED
+    org.opentest4j.AssertionFailedError at M2ReviewFindingsTest.java:47
+
+M2ReviewFindingsTest > A2 (option b only): a no-op control still advances the last control instant, so a later control may not precede it FAILED
+    org.opentest4j.AssertionFailedError at M2ReviewFindingsTest.java:40
+
+M2ReviewFindingsTest > R1 (proposal P-R1): COSMETIC differences use wrapping subtraction, as System.nanoTime's Javadoc prescribes FAILED
+    java.lang.ArithmeticException at M2ReviewFindingsTest.java:30
+
+3 tests completed, 3 failed
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///home/user/bedwenton/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to generate a Build Scan (Powered by Develocity).
+
+BUILD FAILED in 8s
+4 actionable tasks: 1 executed, 3 up-to-date
