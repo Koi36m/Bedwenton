@@ -1,0 +1,38 @@
+== Easing monotonicity probe (adjacent doubles in dense windows; python float = IEEE double)
+smoothstep_direct      violations=16411 worst=1.11e-16 out_of_range=0 f(0),f(1),f(.5)=(0.0, 1.0, 0.5)
+smoothstep_split       violations= 3328 worst=5.55e-17 out_of_range=0 f(0),f(1),f(.5)=(0.0, 1.0, 0.5)
+smootherstep_direct    violations=171941 worst=1.55e-15 out_of_range=3750 f(0),f(1),f(.5)=(0.0, 1.0, 0.5)
+smootherstep_split     violations=  698 worst=5.55e-17 out_of_range=0 f(0),f(1),f(.5)=(0.0, 1.0, 0.5)
+in2                    violations=    0 worst=0 out_of_range=0 f(0),f(1),f(.5)=(0.0, 1.0, 0.25)
+out2                   violations=    0 worst=0 out_of_range=0 f(0),f(1),f(.5)=(0.0, 1.0, 0.75)
+inout2                 violations=    0 worst=0 out_of_range=0 f(0),f(1),f(.5)=(0.0, 1.0, 0.5)
+in3                    violations=    0 worst=0 out_of_range=0 f(0),f(1),f(.5)=(0.0, 1.0, 0.125)
+out3                   violations=    0 worst=0 out_of_range=0 f(0),f(1),f(.5)=(0.0, 1.0, 0.875)
+inout3                 violations=    0 worst=0 out_of_range=0 f(0),f(1),f(.5)=(0.0, 1.0, 0.5)
+in4                    violations=    0 worst=0 out_of_range=0 f(0),f(1),f(.5)=(0.0, 1.0, 0.0625)
+out4                   violations=    0 worst=0 out_of_range=0 f(0),f(1),f(.5)=(0.0, 1.0, 0.9375)
+inout4                 violations=    0 worst=0 out_of_range=0 f(0),f(1),f(.5)=(0.0, 1.0, 0.5)
+in5                    violations=    0 worst=0 out_of_range=0 f(0),f(1),f(.5)=(0.0, 1.0, 0.03125)
+out5                   violations=    0 worst=0 out_of_range=0 f(0),f(1),f(.5)=(0.0, 1.0, 0.96875)
+inout5                 violations=    0 worst=0 out_of_range=0 f(0),f(1),f(.5)=(0.0, 1.0, 0.5)
+
+== Easing accuracy probe vs exact rationals
+smoothstep     max abs error = 1.65e-16 = 1.49 * 2^-53  (direct: 1.25)
+smootherstep   max abs error = 1.97e-16 = 1.78 * 2^-53  (direct: 18.92)
+in2            max abs error = 5.55e-17 = 0.50 * 2^-53
+out2           max abs error = 1.65e-16 = 1.49 * 2^-53
+inout2         max abs error = 8.32e-17 = 0.75 * 2^-53
+in3            max abs error = 1.07e-16 = 0.96 * 2^-53
+out3           max abs error = 2.48e-16 = 2.24 * 2^-53
+inout3         max abs error = 1.08e-16 = 0.97 * 2^-53
+in4            max abs error = 1.53e-16 = 1.38 * 2^-53
+out4           max abs error = 3.29e-16 = 2.96 * 2^-53
+inout4         max abs error = 1.25e-16 = 1.13 * 2^-53
+in5            max abs error = 1.85e-16 = 1.66 * 2^-53
+out5           max abs error = 4.17e-16 = 3.76 * 2^-53
+inout5         max abs error = 1.44e-16 = 1.30 * 2^-53
+
+== Trigonometry probe (Java 25.0.4.1)
+Java 25.0.4.1+1-LTS-5: Math.sin != StrictMath.sin in 670833 of 20000000 cases; cos: 669465; example x=2.1763733008329815 Math=0.822173799793663 Strict=0.8221737997936629
+sin(2*PI) = -2.4492935982947064E-16  (turn-reduced: exactly 0)
+radians: cos(2*PI*t) at t=1e6+0.25 -> 5.071534413372362E-10 ; turn-reduced -> 0.0 exactly

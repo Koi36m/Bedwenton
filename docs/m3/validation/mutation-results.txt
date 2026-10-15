@@ -1,0 +1,29 @@
+Mutation analysis: 25 defects injected one at a time into the throwaway reference; the 38 M3 tests rerun each time.
+
+X01 (radian phase instead of turn reduction) failing=5 M3ReferenceVectorTest.spiral.csv: 549 spiral cases a; SpiralTest.Exact quarter-turn points for ; SpiralTest.Large turn counts: quarter pha; SpiralTest.M1 CONVENTIONS 5: starting at ; SpiralTest.Seams: a closed spiral (equal 
+X02 (java.lang.Math trigonometry) failing=1 M3BoundaryTest.Portability: no java.lang.Math
+X03 (clockwise instead of counter-clockwise) failing=9 M3ReferenceVectorTest.spiral.csv: 549 spiral cases a; PosedCurveTest.A placed circle lies in the pl; PosedCurveTest.Derivatives transform as direc; PosedCurveTest.Orientation by Frame: Quat.fro; SpiralTest.Derivatives agree with central; SpiralTest.Exact quarter-turn points for ; SpiralTest.Full Heal ring (r cos th, 0, r; SpiralTest.Large turn counts: quarter pha; SpiralTest.M1 CONVENTIONS 5: starting at 
+X04 (clockwise factory wrong) failing=3 SpiralTest.Factories: circle, arc, helix,; SpiralTest.Full Heal ring (r cos th, 0, r; SpiralTest.M1 CONVENTIONS 5: starting at 
+X05 (no constant-radius rule) failing=1 SpiralTest.Seams: a closed spiral (equal 
+X06 (radius end not exact) failing=1 M3ReferenceVectorTest.spiral.csv: 549 spiral cases a
+X07 (derivative misses radius change) failing=3 M3ReferenceVectorTest.spiral.csv: 549 spiral cases a; PosedCurveTest.Derivatives transform as direc; SpiralTest.Derivatives agree with central
+X08 (angular speed without 2 pi) failing=4 M3ReferenceVectorTest.spiral.csv: 549 spiral cases a; PosedCurveTest.Derivatives transform as direc; SpiralTest.Derivatives agree with central; SpiralTest.Helix and spirals: radius inte
+X09 (second derivative sign) failing=3 M3ReferenceVectorTest.spiral.csv: 549 spiral cases a; PosedCurveTest.Derivatives transform as direc; SpiralTest.Derivatives agree with central
+X10 (negative phase not wrapped) failing=3 M3ReferenceVectorTest.spiral.csv: 549 spiral cases a; SpiralTest.Exact quarter-turn points for ; SpiralTest.Full Heal ring (r cos th, 0, r
+X11 (quadrant table error) failing=4 M3ReferenceVectorTest.spiral.csv: 549 spiral cases a; PosedCurveTest.Derivatives transform as direc; SpiralTest.Derivatives agree with central; SpiralTest.Full Heal ring (r cos th, 0, r
+X12 (closed ignores rise) failing=1 SpiralTest.Seams: a closed spiral (equal 
+X13 (de Casteljau weight error) failing=5 BezierTest.Degree elevation: a line and a; BezierTest.Derivatives agree with central; BezierTest.End derivatives: B'(0) = n (P1; BezierTest.Endpoints are exact for arbitr; M3ReferenceVectorTest.bezier.csv: 645 line, quadrati
+X14 (cubic derivative factor) failing=4 BezierTest.Degree elevation: a line and a; BezierTest.Derivatives agree with central; BezierTest.End derivatives: B'(0) = n (P1; M3ReferenceVectorTest.bezier.csv: 645 line, quadrati
+X15 (quadratic second derivative factor) failing=2 BezierTest.Derivatives agree with central; M3ReferenceVectorTest.bezier.csv: 645 line, quadrati
+X16 (line end not exact) failing=1 BezierTest.Endpoints are exact for arbitr
+X17 (direct smootherstep (inaccurate near 1)) failing=2 EasingTest.Range and accuracy fuzz: 0 <= ; M3ReferenceVectorTest.easing.csv: 1,155 cases, 450 e
+X18 (no input clamping) failing=2 EasingTest.Endpoints and clamping: f(t) =; M3ReferenceVectorTest.easing.csv: 1,155 cases, 450 e
+X19 (NaN accepted) failing=1 EasingTest.Endpoints and clamping: f(t) =
+X20 (in-out scale error) failing=6 EasingTest.Closed-form values at hand-che; EasingTest.Continuity: IN_OUT easings joi; EasingTest.Power easings are exactly mono; EasingTest.Range and accuracy fuzz: 0 <= ; EasingTest.Symmetry f(1 - t) = 1 - f(t) f; M3ReferenceVectorTest.easing.csv: 1,155 cases, 450 e
+X21 (wrong power) failing=4 EasingTest.Closed-form values at hand-che; EasingTest.Range and accuracy fuzz: 0 <= ; EasingTest.Symmetry f(1 - t) = 1 - f(t) f; M3ReferenceVectorTest.easing.csv: 1,155 cases, 450 e
+X22 (derivative ignores scale) failing=1 PosedCurveTest.Derivatives transform as direc
+X23 (derivative translated like a point) failing=2 PosedCurveTest.A placed circle lies in the pl; PosedCurveTest.Derivatives transform as direc
+X24 (spiral accepts NaN t) failing=2 PosedCurveTest.Validation: curve and pose are; SpiralTest.Validation: radii finite and >
+X25 (negative radius accepted) failing=1 SpiralTest.Validation: radii finite and >
+
+Detected: 25 of 25

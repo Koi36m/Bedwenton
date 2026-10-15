@@ -1,0 +1,4 @@
+worst error / contract bound (reference implementation, ROUNDED rows):
+ easing 0.159
+ bezier point 0.130, derivative 0.112, second 0.012
+ spiral point 0.417, derivative 0.417, second 0.426
