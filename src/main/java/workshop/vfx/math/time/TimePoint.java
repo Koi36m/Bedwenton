@@ -20,12 +20,15 @@ public record TimePoint(TimeDomain domain, long value) {
         if (origin == null || origin.domain != domain) {
             throw new IllegalArgumentException("TimePoint.ticksSince: origin must have the same domain");
         }
+        if (domain == TimeDomain.COSMETIC) {
+            return (double) (value - origin.value) / 50_000_000.0;
+        }
         long delta;
         try {
             delta = Math.subtractExact(value, origin.value);
         } catch (ArithmeticException e) {
             throw new ArithmeticException("TimePoint.ticksSince: instant difference overflows long");
         }
-        return domain == TimeDomain.GAME ? (double) delta : (double) delta / 50_000_000.0;
+        return (double) delta;
     }
 }

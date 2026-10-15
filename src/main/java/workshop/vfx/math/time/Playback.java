@@ -63,7 +63,9 @@ public record Playback(TimePoint anchor, double anchorTicks, double rate, boolea
 
     private void validateControl(TimePoint at, String operation) {
         validateDomain(at, operation);
-        if (at.value() < anchor.value()) {
+        boolean before = anchor.domain() == TimeDomain.COSMETIC
+                ? at.value() - anchor.value() < 0 : at.value() < anchor.value();
+        if (before) {
             throw new IllegalArgumentException(operation + ": control instant precedes anchor");
         }
     }
