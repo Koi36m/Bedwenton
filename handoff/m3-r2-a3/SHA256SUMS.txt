@@ -1,0 +1,6 @@
+85c40416dad0372031b24c4f3b851c1f663bb3bf4fc6062ab97d5e7d32e5df39  GIT-CHECKPOINT.txt
+d24b8f02684353636bd2fd134d0d138960d2ff9b9a8d2c4c34484425b9938e0f  VERIFICATION-REPORT.md
+db6ac483d5e84c0b6fb5335e0dc27d7a7a5811bad9c19b004c69e00347bec062  minecraft-vfx-math-M3-r2-a3-source.zip
+b1dd8d53b0d43bfe7ec2c0a2aa5b3e6e172bfcb3240c31bc3e831817c87e4086  minecraft-vfx-math-M3-r2-a3.git.bundle
+30c0866eb35608a297fa883210b656cc249056dc10bbdf2facaf4df6d7e359e4  production-vs-spec.diff
+cebfc59ff76b5506581e22d62b137528fa0e13676ff9c6eecce7a19dc431faa6  test-summary.csv

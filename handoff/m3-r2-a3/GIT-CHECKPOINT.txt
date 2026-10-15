@@ -1,0 +1,8 @@
+Implementation branch: m3-curves-paths
+Accepted M2 baseline: e3b79bae1476e549d49b29dcf361e7da50fe67db
+M3 R1: 7d0ee2b97f246ba27b19111fa3b585febf0ee0c6
+M3 R2: 37152118093df38c95bc392e966bb23b4a435dd9
+M3 R2+A3: fe5c9fdd3e8da44517573332b163ca9af9a58d1b
+M3 production: d76258f343e28a8acb43f3ad8ba776adcabdd575
+M3 evidence: e38b841ae1d473c855b69315a3774212ea61235c
+Final M3 acceptance pending owner decision after independent adversarial review. No main merge or M4 work.
