@@ -1,7 +1,7 @@
 # M2 test specification and acceptance criteria
 
-Status: PROPOSED, with the contract. Tests: `src/test/java/workshop/vfx/math/time` (44 test methods in 7 classes,
-plus the helper `M2Support`). Golden vectors: `src/test/resources/m2/golden` (4 CSV files, 3,176 rows, and
+Status: APPROVED, revision 2 (2026-10-15); see section 5 for the revision-2 additions. Revision-1 tests:
+`src/test/java/workshop/vfx/math/time` (44 test methods in 7 classes, plus the helper `M2Support`). Golden vectors: `src/test/resources/m2/golden` (4 CSV files, 3,176 rows, and
 `MANIFEST.sha256`). Generator: `tools/generate_m2_golden_vectors.py`.
 
 ## 1. Methodology
@@ -112,3 +112,35 @@ standard library only, deterministic). The output must be byte-identical to the 
 
 Before the implementation exists, the M2 tests do not compile. This is expected; it was the same for M1's
 "tests as delivered" commit.
+
+## 5. Revision 2 (owner decisions on the independent review, 2026-10-15)
+
+**Expectation changes, each documented in `M2-AMENDMENT-R2.md` section 4:**
+- One assertion in `TimePointTest.invalidUse`: COSMETIC `MIN - MAX` was an `ArithmeticException` and is now
+  `+1 ns = 2e-8` ticks.
+- One row of `timepoint.csv`: `COSMETIC,-9223372036854775808,1` was `OVERFLOW` and is now `0x1.5798ee2308c3ap+37`.
+- The `MANIFEST.sha256` line for `timepoint.csv`.
+- The generator's COSMETIC rule.
+- No other expected value changes; every other golden byte is unchanged.
+
+**Tests added permanently:**
+- `M2ReviewAdversarialTest` (13), from the independent review.
+- `M2Revision2Test` (9): P-R1 wrap-around forwards and backwards, zero elapsed time, the 2^63 interval edge,
+  playback and control across the wrap, translation invariance across the wrap, unchanged domain mismatch and GAME
+  behaviour; P-A2 ordering against the stored anchor; P-A3 FOREVER limit.
+- `src/test/resources/m2/review/boundary_cases.csv`: 2,235 exact-rational cases, with
+  `review/m2/generate_boundary_vectors.py`.
+
+**Removed from the active suite:** `M2ReviewFindingsTest`, whose three disabled tests asserted alternatives the owner
+rejected (A2 option b, A3 option c) or are now superseded by `M2Revision2Test` (R1). The source is preserved
+unchanged in `review/m2/historical/M2ReviewFindingsTest.java.txt` and in commit `a9d86c3`.
+
+**Revision-2 acceptance criteria.** These replace criteria 3 and 5 of section 4; the other criteria are unchanged.
+- **3'.** The test sources, golden files, review resources and generators are byte-identical to the revision-2
+  amendment package (`SHA256SUMS.txt`).
+- **5'.** With JDK 25 and the Gradle 9.1.0 wrapper: **191 tests, 191 passed, 0 failed, 0 skipped**
+  (M1 125, revision-1 M2 44, review 13, revision 2 9), and `./gradlew check` succeeds.
+- **Reference point before the fix:** on `1e856820` exactly 6 tests fail: `TimePointTest.invalidUse`,
+  `M2GoldenVectorTest.timePoints`, and 4 `M2Revision2Test` wrap tests.
+- **Production diff:** limited to `TimePoint.ticksSince` (COSMETIC branch) and `Playback`'s control-ordering check
+  (`M2-AMENDMENT-R2.md` section 5).

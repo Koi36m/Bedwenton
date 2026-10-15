@@ -1,6 +1,8 @@
 # M2 design decisions: options and recommendations
 
-Status: **PROPOSED, not approved.** Each decision below changes what M2 contains. The contract
+Status: **APPROVED** (DM2-1 to DM2-9, recommended options; implemented in revision 1). Revision 2 refines DM2-3 for COSMETIC wrap-around (`M2-AMENDMENT-R2.md`, P-R1) and changes no decision. The text below is the original proposal, kept for its reasoning.
+
+Original status: **PROPOSED, not approved.** Each decision below changes what M2 contains. The contract
 (`M2-IMPLEMENTATION-CONTRACT.md`) and the tests are written against the **recommended** option in each case. If the
 owner chooses differently, the affected contract sections and tests are named so they can be revised before Codex
 starts.

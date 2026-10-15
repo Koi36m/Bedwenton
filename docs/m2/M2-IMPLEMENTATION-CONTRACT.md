@@ -1,10 +1,14 @@
 # M2 Implementation Contract: `workshop.vfx.math.time` (deterministic animation time)
 
 Audience: the engineer implementing the production source (Codex).
-Status: **PROPOSED, revision 1. Not authorized for implementation** until the owner approves it together with the
-decisions in `M2-DESIGN-DECISIONS.md` (DM2-1 to DM2-9). The tests in `src/test/java/workshop/vfx/math/time` are the
-executable form of this contract. Where this document and a test disagree, stop and report the disagreement; do
-not change either silently.
+Status: **APPROVED, revision 2 (2026-10-15).** Revision 1 (approved with decisions DM2-1 to DM2-9) was implemented
+by Codex in `1e856820e606275c019f09d6f196bcf6a5a5138d`. **Revision 2** applies the owner's decisions on the
+independent review: P-A1, P-A2, P-A3 (wording only) and P-R1 (COSMETIC wrap-around, a production correction).
+Changed clauses are marked **[R2]** and listed with their rationale in `M2-AMENDMENT-R2.md`. Revision 1 is preserved
+in Git history (`2493a753d9c6e19f29a59ca445c0e54627b94523`) and in the handoff ZIP
+`minecraft-vfx-math-M2-handoff-r1.zip` (SHA-256 `ce791599a7ba755a2a23f8002940808115c6dd71e99a27aa7f878f47b6ce040a`).
+The tests in `src/test/java/workshop/vfx/math/time` are the executable form of this contract. Where this document
+and a test disagree, stop and report the disagreement; do not change either silently.
 
 Baseline: M1 Revision 4, accepted (`74710d338eb8fcb48a64763fa277e1c7be475bba`, evidence
 `9e3f3acde0db4b9d0a202ba4f7f396c132843597`). **Nothing in M1 changes**: no file under
@@ -81,8 +85,17 @@ public record TimePoint(TimeDomain domain, long value) {
 - Compact constructor: `domain` must not be null, else `IllegalArgumentException`. Any `long` value is valid.
 - `ticksSince(origin)`, exactly:
   1. `origin` null, or `origin.domain() != domain`: `IllegalArgumentException`.
-  2. `long delta = Math.subtractExact(value, origin.value())`. Overflow is an `ArithmeticException`.
-  3. GAME: return `(double) delta`. COSMETIC: return `(double) delta / 50_000_000.0`.
+  2. GAME: `long delta = Math.subtractExact(value, origin.value())`; overflow is an `ArithmeticException`. Return
+     `(double) delta`.
+  3. **[R2]** COSMETIC: `long delta = value - origin.value()`, using Java's **wrapping** two's-complement subtraction,
+     which never throws. Return `(double) delta / 50_000_000.0`.
+- **[R2] COSMETIC interval restriction.** COSMETIC values follow `System.nanoTime` semantics: the origin is arbitrary,
+  values may be negative, and they may wrap from `Long.MAX_VALUE` to `Long.MIN_VALUE` while time moves forward. The
+  wrapping difference lies in [-2^63, 2^63 - 1] and equals the true elapsed time **only if the true elapsed time is
+  less than 2^63 ns (about 292 years) in magnitude**. A difference of exactly -2^63 is read as 2^63 ns backwards.
+  Larger true intervals alias modulo 2^64 and cannot be detected; this is the same restriction that
+  `System.nanoTime` states.
+- GAME tick counters are ordinary integers that never wrap, so GAME keeps checked subtraction and raw ordering.
 - Consequences (tested): GAME differences are exact for `|delta| <= 2^53`. COSMETIC differences are the correctly
   rounded quotient for `|delta| <= 2^53` ns (104 days); beyond that, `delta` rounds once before the division.
 
@@ -121,8 +134,13 @@ it never throws except as stated.
 **Control operations.** Every operation takes the instant `at` at which it happens and returns a new `Playback`.
 Common validation first, in this order:
 1. `at` null, or `at.domain() != anchor.domain()`: `IllegalArgumentException`.
-2. `at.value() < anchor.value()`: `IllegalArgumentException` (control events never go back in time; `at` equal to
-   the anchor is allowed).
+2. **[R2]** `at` precedes the **stored anchor**: `IllegalArgumentException`. GAME: `at.value() < anchor.value()`.
+   COSMETIC: `at.value() - anchor.value() < 0`, with wrapping subtraction, so that order follows elapsed time across
+   the `Long.MAX_VALUE` wrap (section 3). `at` equal to the anchor is allowed.
+   The comparison is only against the anchor stored in this `Playback`, which is the instant of the last control
+   operation that produced a new value. **The API keeps no history of control events.** No-op controls (`pause`
+   while paused, `resume` while playing) return `this` and do not move the anchor, so a later control is checked
+   against the earlier anchor, not against the no-op's instant.
 
 | Operation | Result `(anchor, anchorTicks, rate, paused)` | Notes |
 |---|---|---|
@@ -134,7 +152,8 @@ Common validation first, in this order:
 
 Here `L(at)` means `localTicks(at)`. Where an operation re-anchors at `L(at)` (pause, withRate), a non-finite
 `L(at)` is an `ArithmeticException` (a derived value that is not representable, as for M1's `Pose`). An overflowing
-instant difference inside `L(at)` is also an `ArithmeticException`.
+GAME instant difference inside `L(at)` is also an `ArithmeticException`; **[R2]** COSMETIC differences wrap and never
+overflow.
 
 ## 5. Timing: `RepeatMode`, `Timing`, `TimingSample`
 
@@ -158,7 +177,15 @@ public record TimingSample(Stage stage, long cycle, double progress) {
 
 **`Timing` invariants (`IllegalArgumentException`):** `mode` not null; `delayTicks` finite (it may be negative: the
 animation starts part-way through); `durationTicks` finite and `> 0` (so `-0.0` and `0.0` are rejected);
-`cycles >= 1`; and `mode == ONCE` requires `cycles == 1`. `FOREVER` means "more cycles than will ever be sampled".
+`cycles >= 1`; and `mode == ONCE` requires `cycles == 1`.
+
+**[R2] Representational limit of `FOREVER`.** `FOREVER` is `Long.MAX_VALUE`, and `sample` compares the cycle index
+as `n >= (double) cycles`, where `(double) Long.MAX_VALUE` is 2^63. A FOREVER timing therefore reports `AFTER`
+(with `cycle = Long.MAX_VALUE - 1` and progress 1) once the cycle index reaches 2^63, that is when
+elapsed/duration >= 2^63. Two examples: a duration of `Double.MIN_VALUE` with 1 tick elapsed, and a duration of 1
+tick after 2^63 ticks (about 1.5e10 years at 20 TPS). This is far outside the guaranteed domain
+(elapsed/duration < 2^51, section 6.4), and it is a documented limitation, not an error. No unlimited-precision
+cycle counter is provided. Within the guaranteed domain a FOREVER timing never reports `AFTER`.
 `withDelay` and `withCycles` return new values and validate the same way.
 
 **`TimingSample` invariants (`IllegalArgumentException`):** `stage` not null; `cycle >= 0`; `progress` in [0, 1]
@@ -200,7 +227,7 @@ Conventions this fixes (DM2-6):
 
 - Evaluation is a pure function of its arguments. No clock reads (`System.nanoTime`, `System.currentTimeMillis`,
   `java.time`), no randomness, no threads, no mutable static state (`M2BoundaryTest`).
-- **[fact]** The operations used (`+ - * /`, `%`, `Math.rint`, `Math.subtractExact`, long-to-double and
+- **[fact]** The operations used (`+ - * /`, `%`, `Math.rint`, `Math.subtractExact`, wrapping `long` subtraction, long-to-double and
   double-to-long conversion) are exactly specified by IEEE-754 and the Java Language Specification. All Java
   floating-point arithmetic has been strict since Java 17 (JEP 306). Implemented in the order of sections 3 to 5,
   the results are **bit-identical on every conforming JVM** and reproducible in any IEEE-754 language (the Python
@@ -240,12 +267,31 @@ and by every integer row of the generator against exact fractions.
 
 | Quantity | Guaranteed domain | Guarantee |
 |---|---|---|
-| `TimePoint.ticksSince` | `abs(delta) <= 2^53` | GAME exact; COSMETIC correctly rounded |
+| `TimePoint.ticksSince` | `abs(delta) <= 2^53`; **[R2]** COSMETIC also requires the true elapsed time to be below 2^63 ns in magnitude | GAME exact; COSMETIC correctly rounded |
 | `Playback.localTicks` | `abs(anchorTicks)` and `abs(rate * ticksSince(anchor))` at most 2^1022 | finite; at most 2 roundings; exact under 6.3 |
-| control events | as above | each re-anchoring adds at most `1.5 * 2^-52 * max abs(local)`; tested with 2x headroom over 10,000 events |
+| control events **[R2]** | as above | each re-anchoring adds at most `c * 2^-52 * M`, with `M = max(abs(anchorTicks), abs(result))` and `c = 1.5` (GAME), `2.5` (COSMETIC, `abs(delta) <= 2^53` ns) or `3.5` (COSMETIC, `abs(delta) > 2^53` ns); derivation in 6.4.1 |
 | `Timing.sample` | finite `localTicks`; `abs(localTicks - delayTicks)` finite | always a valid sample, never throws |
 | cycle index | `(localTicks - delayTicks) / durationTicks < 2^51` | exact floor of the once-rounded elapsed time over the duration |
 | progress | as above | forward: correctly rounded `r / d` with `r` exact; backward: within 2 ulp |
+
+#### 6.4.1 Re-anchoring rounding bound **[R2]** (derivation)
+
+`pause` and `withRate` store `L(at) = fl(A + fl(k * D))`, where `A = anchorTicks`, `k = rate` and `D` is the
+converted elapsed time. Each IEEE-754 operation adds a relative error of at most `u = 2^-53`. Write
+`M = max(abs(A), abs(result))`; then `abs(k * D) <= abs(result) + abs(A) <= 2M`, up to first order.
+- **GAME:** `D = (double) delta` is exact for `abs(delta) <= 2^53`. The product contributes `u * 2M` and the sum
+  `u * M`, so the error is at most `3uM = 1.5 * 2^-52 * M`.
+- **COSMETIC, `abs(delta) <= 2^53` ns:** `D = fl(delta / 5e7)` adds `u * abs(k * D) <= 2uM`, so the total is
+  `5uM = 2.5 * 2^-52 * M`.
+- **COSMETIC, `abs(delta) > 2^53` ns:** `(double) delta` also rounds, adding another `2uM`, so the total is
+  `7uM = 3.5 * 2^-52 * M`.
+
+Revision 1 stated 1.5 for all domains, which omitted the conversion roundings. Counterexample (COSMETIC, below
+2^53 ns): `Playback.start(cosmeticNanos(0), -0x1.f77c448775a2dp18, 0x1.16f13d3b52584p-1)`, then
+`.withRate(cosmeticNanos(113_443_124_582_639L), 1.0)`. The error is `2.87e-10 = 1.79 * 2^-52 * M`. The corrected
+bounds are checked over 150,000 random cases (`M2ReviewAdversarialTest.reanchoringErrorBounds`). The production
+arithmetic is unchanged. The bounds are first-order; second-order terms (order `u^2`) are negligible at these
+magnitudes. Over `n` control events the errors add, at most `n * c * 2^-52 * max M`.
 
 - **No drift.** Nothing accumulates per frame (6.2). Ten million consecutive ticks from tick 2^40 evaluate to exact
   integers (`longRunningNoDrift`).
@@ -262,6 +308,8 @@ and by every integer row of the generator against exact fractions.
 - A GAME counter that restarts (for example on a server restart) produces instants before the anchor. Evaluation
   then returns the extrapolated value (normally `BEFORE` in `Timing`), and control operations throw
   `IllegalArgumentException`. The caller starts a new `Playback` on the new counter.
+- **[R2]** A COSMETIC value that wraps from `Long.MAX_VALUE` to `Long.MIN_VALUE` is not a discontinuity: differences
+  and control ordering use wrapping subtraction (sections 3 and 4) and stay continuous across the wrap.
 - A COSMETIC gap (server freeze, GC pause, an asynchronous task that missed frames) shows as a jump forward by the
   real elapsed time, which is the wall-clock truth. To exclude a gap, the caller pauses and resumes, or seeks back
   (DM2-8; `M2DeterminismTest.discontinuities`).
@@ -273,7 +321,7 @@ and by every integer row of the generator against exact fractions.
 | Condition | Exception |
 |---|---|
 | null argument or null field; non-finite `anchorTicks`, `rate`, seek target, delay or duration; duration `<= 0`; `cycles < 1`; ONCE with `cycles != 1`; mismatched domains; a control instant before the anchor; non-finite `localTicks` passed to `sample`; an invalid `TimingSample` | `IllegalArgumentException` |
-| instant difference overflows `long`; non-finite re-anchored value in `pause` or `withRate`; non-finite elapsed time in `sample` | `ArithmeticException` |
+| GAME instant difference overflows `long` (**[R2]** COSMETIC differences wrap and never throw); non-finite re-anchored value in `pause` or `withRate`; non-finite elapsed time in `sample` | `ArithmeticException` |
 | `TickTime` conversions; `localTicks` producing infinity | never throw (raw IEEE) |
 
 Exception messages name the operation and the reason. Only the exception types are tested.

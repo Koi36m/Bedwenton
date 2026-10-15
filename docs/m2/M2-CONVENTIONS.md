@@ -1,6 +1,6 @@
 # M2 conventions: time, units and mathematical facts
 
-Status: PROPOSED, together with `M2-IMPLEMENTATION-CONTRACT.md`. M1's `docs/CONVENTIONS.md` stays in force
+Status: APPROVED, revision 2 (2026-10-15), together with `M2-IMPLEMENTATION-CONTRACT.md`; [R2] marks the changes. M1's `docs/CONVENTIONS.md` stays in force
 unchanged: axes, handedness, rotation direction and composition order.
 
 ## 1. Units and signs
@@ -8,7 +8,7 @@ unchanged: axes, handedness, rotation direction and composition order.
 | Quantity | Unit | Type | Notes |
 |---|---|---|---|
 | GAME instant | server ticks | `long` | a monotonic server tick counter supplied by the adapter |
-| COSMETIC instant | nanoseconds | `long` | from a monotonic source such as `System.nanoTime()`; the origin is arbitrary, only differences matter |
+| COSMETIC instant | nanoseconds | `long` | from a monotonic source such as `System.nanoTime()`; the origin is arbitrary, only differences matter. **[R2]** Values may wrap past `Long.MAX_VALUE`; differences use wrapping subtraction and are valid for true intervals below 2^63 ns |
 | local animation time | ticks | `double` | 1 local tick = 1 game tick (GAME) or 50 ms (COSMETIC) |
 | delay, duration | local ticks | `double` | duration > 0 |
 | rate | local ticks per input tick | `double` | negative plays in reverse; `abs(rate)` is the speed multiplier |
@@ -61,6 +61,8 @@ Each fact is checked by the named test or by the golden-vector generator (`tools
 | F8 | Java floating-point arithmetic has been strict since Java 17 (JEP 306); `+ - * / %`, `Math.rint` and conversions are fully specified, so results are bit-identical across JVMs. `Math.sin` and `Math.cos` are not (1 ulp freedom); `StrictMath` is | contract 6.1; bitwise golden tests |
 | F9 | `-0.0 - 0.0 = -0.0`, so a signed zero has to be normalized explicitly | `TimingTest.delay` |
 | F10 | `1 / 50,000,000` rounds to `2e-8`; 50,000,000 ns divides evenly into one tick | `TimePointTest` |
+| F11 **[R2]** | `System.nanoTime` (JDK 25 Javadoc): "nanoseconds since some fixed but arbitrary origin time (perhaps in the future, so values may be negative)"; elapsed time is `t1 - t0` and comparisons use `t1 - t0 >= x` "because of the possibility of numerical overflow"; differences spanning more than about 292 years (2^63 ns) are not computed correctly | `M2Revision2Test` |
+| F12 **[R2]** | Each IEEE-754 operation adds a relative error of at most 2^-53; re-anchoring therefore errs by at most 1.5, 2.5 or 3.5 x 2^-52 x M (GAME, COSMETIC below 2^53 ns, COSMETIC beyond) | contract 6.4.1, `M2ReviewAdversarialTest.reanchoringErrorBounds` |
 
 ## 5. Design preferences (not facts)
 
