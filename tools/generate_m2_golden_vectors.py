@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Golden reference vectors for M2 (deterministic animation time).
 
+Revision 2 (Amendment P-R1): COSMETIC differences use Java's wrapping signed-long subtraction (System.nanoTime
+semantics). This changes exactly one row of timepoint.csv (COSMETIC, Long.MIN_VALUE, 1) and the manifest; see
+docs/m2/M2-AMENDMENT-R2.md. Every other row is byte-identical to revision 1.
+
 Independent of the Java code. Python floats are IEEE-754 binary64 with correctly rounded + - * /, `math.fmod` is
 the exact remainder (Java `%` on doubles), `float(int)` rounds to nearest-even like Java's long-to-double
 conversion, and `round(float)` is round-half-even like `Math.rint`. Mirroring the operation order of
@@ -36,12 +40,19 @@ def hx(x):
 
 # ------------------------------------------------------------------ specified operations (contract section 4)
 
+def wrap64(x):
+    """Java's wrapping signed 64-bit subtraction result (two's complement)."""
+    return ((x + 2 ** 63) % 2 ** 64) - 2 ** 63
+
+
 def ticks_since(domain, value, origin):
+    if domain == "COSMETIC":
+        # [R2] System.nanoTime semantics: wrapping subtraction, never an overflow
+        return float(wrap64(value - origin)) / 50_000_000.0
     delta = value - origin
     if delta < LONG_MIN or delta > LONG_MAX:
-        return None  # ArithmeticException
-    d = float(delta)
-    return d if domain == "GAME" else d / 50_000_000.0
+        return None  # ArithmeticException (GAME only)
+    return float(delta)
 
 
 def timing_sample(delay, duration, mode, cycles, local):

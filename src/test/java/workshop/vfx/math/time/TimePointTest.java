@@ -69,7 +69,8 @@ class TimePointTest {
         assertThrows(IllegalArgumentException.class, () -> TimePoint.gameTick(1).ticksSince(null));
         assertThrows(ArithmeticException.class, () -> TimePoint.gameTick(Long.MAX_VALUE).ticksSince(TimePoint.gameTick(-1)));
         assertThrows(ArithmeticException.class, () -> TimePoint.gameTick(Long.MIN_VALUE).ticksSince(TimePoint.gameTick(1)));
-        assertThrows(ArithmeticException.class, () -> TimePoint.cosmeticNanos(Long.MIN_VALUE).ticksSince(TimePoint.cosmeticNanos(Long.MAX_VALUE)));
+        // [R2, P-R1] COSMETIC wraps like System.nanoTime: MIN - MAX is +1 ns (revision 1 expected ArithmeticException)
+        assertBits(2e-8, TimePoint.cosmeticNanos(Long.MIN_VALUE).ticksSince(TimePoint.cosmeticNanos(Long.MAX_VALUE)), "wrapped +1 ns");
         // the extreme representable differences do not throw
         assertBits(9.223372036854775807E18, TimePoint.gameTick(Long.MAX_VALUE).ticksSince(TimePoint.gameTick(0)), "Long.MAX_VALUE ticks");
         assertBits(-1.0, TimePoint.gameTick(Long.MIN_VALUE).ticksSince(TimePoint.gameTick(Long.MIN_VALUE + 1)), "adjacent at the bottom");
