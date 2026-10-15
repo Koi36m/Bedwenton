@@ -1,0 +1,6 @@
+Branch: m2-r2-verification
+R1 evidence/base: 80927177469d89b985d3b57a3219652a994d6d4b
+Exact amendment head: 88702655a3f8c0428160a74f9193af7cc41b0b87
+R2 production implementation: 15f6564b2580d3722b625c9be96e57f2580c81a3
+R2 verification evidence: e3b79bae1476e549d49b29dcf361e7da50fe67db
+Final M2 acceptance remains pending owner review. No main merge or force push.

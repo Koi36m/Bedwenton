@@ -1,0 +1,36 @@
+diff --git a/src/main/java/workshop/vfx/math/time/Playback.java b/src/main/java/workshop/vfx/math/time/Playback.java
+index a9f0c9b..2bb3c4c 100644
+--- a/src/main/java/workshop/vfx/math/time/Playback.java
++++ b/src/main/java/workshop/vfx/math/time/Playback.java
+@@ -63,7 +63,9 @@ public record Playback(TimePoint anchor, double anchorTicks, double rate, boolea
+ 
+     private void validateControl(TimePoint at, String operation) {
+         validateDomain(at, operation);
+-        if (at.value() < anchor.value()) {
++        boolean before = anchor.domain() == TimeDomain.COSMETIC
++                ? at.value() - anchor.value() < 0 : at.value() < anchor.value();
++        if (before) {
+             throw new IllegalArgumentException(operation + ": control instant precedes anchor");
+         }
+     }
+diff --git a/src/main/java/workshop/vfx/math/time/TimePoint.java b/src/main/java/workshop/vfx/math/time/TimePoint.java
+index 7c3930c..0d5fd87 100644
+--- a/src/main/java/workshop/vfx/math/time/TimePoint.java
++++ b/src/main/java/workshop/vfx/math/time/TimePoint.java
+@@ -20,12 +20,15 @@ public record TimePoint(TimeDomain domain, long value) {
+         if (origin == null || origin.domain != domain) {
+             throw new IllegalArgumentException("TimePoint.ticksSince: origin must have the same domain");
+         }
++        if (domain == TimeDomain.COSMETIC) {
++            return (double) (value - origin.value) / 50_000_000.0;
++        }
+         long delta;
+         try {
+             delta = Math.subtractExact(value, origin.value);
+         } catch (ArithmeticException e) {
+             throw new ArithmeticException("TimePoint.ticksSince: instant difference overflows long");
+         }
+-        return domain == TimeDomain.GAME ? (double) delta : (double) delta / 50_000_000.0;
++        return (double) delta;
+     }
+ }
