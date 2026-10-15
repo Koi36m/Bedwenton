@@ -1,0 +1,30 @@
+Mutation analysis: 25 defects injected one at a time into the throwaway reference; M2 tests rerun each time.
+Format: id rc(1 = build failed because tests failed) failing=<count> <failing tests, truncated>
+
+M01 rc=1 failing=2 M2GoldenVectorTest.tick_seconds.csv: ticksToSeconds and sec; TickTimeTest.ticksToSeconds is ticks / 20.0, the corr
+M02 rc=1 failing=2 M2GoldenVectorTest.tick_seconds.csv: ticksToSeconds and sec; TickTimeTest.secondsToTicks is seconds * 20.0; the se
+M03 rc=1 failing=3 M2GoldenVectorTest.playback.csv: 29 control scripts, every ; M2GoldenVectorTest.timepoint.csv: ticksSince bit for bit, i; TimePointTest.COSMETIC ticksSince is the exact nanosec
+M04 rc=1 failing=3 M2GoldenVectorTest.timepoint.csv: ticksSince bit for bit, i; PlaybackTest.Unrepresentable results: instant overflo; TimePointTest.Mixing domains or passing null is an Ill
+M05 rc=1 failing=1 TimePointTest.Mixing domains or passing null is an Ill
+M06 rc=1 failing=1 PlaybackTest.pause holds the value exactly, even far 
+M07 rc=1 failing=6 M2DeterminismTest.Discontinuities: a cosmetic gap jumps fo; M2DeterminismTest.Integer pause/resume chains are exact: l; M2GoldenVectorTest.playback.csv: 29 control scripts, every ; PlaybackTest.Unrepresentable results: instant overflo; PlaybackTest.pause holds the value exactly, even far ; PlaybackTest.withRate keeps the value continuous at t
+M08 rc=1 failing=5 M2DeterminismTest.Discontinuities: a cosmetic gap jumps fo; M2DeterminismTest.Integer pause/resume chains are exact: l; M2GoldenVectorTest.playback.csv: 29 control scripts, every ; PlaybackTest.pause holds the value exactly, even far ; PlaybackTest.withRate keeps the value continuous at t
+M09 rc=1 failing=3 M2DeterminismTest.Discontinuities: a cosmetic gap jumps fo; PlaybackTest.Control instants: same domain, not befor; PlaybackTest.pause on a paused playback and resume on
+M10 rc=1 failing=2 M2GoldenVectorTest.playback.csv: 29 control scripts, every ; PlaybackTest.seek sets the value at the instant and k
+M11 rc=1 failing=2 M2GoldenVectorTest.playback.csv: 29 control scripts, every ; PlaybackTest.seek sets the value at the instant and k
+M12 rc=1 failing=5 M2DeterminismTest.Fractional rate chains: the error after ; M2DeterminismTest.Reversal: a negative rate runs a timing ; M2GoldenVectorTest.playback.csv: 29 control scripts, every ; PlaybackTest.Unrepresentable results: instant overflo; PlaybackTest.withRate keeps the value continuous at t
+M13 rc=1 failing=6 M2DeterminismTest.Long-running: 10 million consecutive tic; M2GoldenVectorTest.timing.csv: stage, cycle and progress bi; TimingTest.Integer exactness: integer delay, durati; TimingTest.LOOP: half-open cycles [n d, ; TimingTest.PING_PONG: odd cycles run backwards as ; TimingTest.Phase precision does not depend on elaps
+M14 rc=1 failing=7 M2DeterminismTest.Low TPS: GAME time follows ticks ; M2GoldenVectorTest.timing.csv: stage, cycle and progress bi; TimingTest.Delay: u = local - delay; negative delay; TimingTest.Integer exactness: integer delay, durati; TimingTest.LOOP: half-open cycles [n d, ; TimingTest.ONCE: BEFORE below the delay, ACTIVE on ; TimingTest.PING_PONG: odd cycles run backwards as 
+M15 rc=1 failing=3 M2GoldenVectorTest.timing.csv: stage, cycle and progress bi; TimingTest.Integer exactness: integer delay, durati; TimingTest.PING_PONG: odd cycles run backwards as 
+M16 rc=1 failing=5 M2GoldenVectorTest.timing.csv: stage, cycle and progress bi; TimingTest.Delay: u = local - delay; negative delay; TimingTest.Integer exactness: integer delay, durati; TimingTest.ONCE: BEFORE below the delay, ACTIVE on ; TimingTest.PING_PONG: odd cycles run backwards as 
+M17 rc=1 failing=2 M2GoldenVectorTest.timing.csv: stage, cycle and progress bi; TimingTest.Delay: u = local - delay; negative delay
+M18 rc=1 failing=1 M2GoldenVectorTest.timing.csv: stage, cycle and progress bi
+M19 rc=1 failing=2 M2GoldenVectorTest.timing.csv: stage, cycle and progress bi; TimingTest.Integer exactness: integer delay, durati
+M20 rc=1 failing=1 TimingTest.Validation: finite delay, finite positiv
+M21 rc=1 failing=1 TimingTest.Validation: finite delay, finite positiv
+M22 rc=1 failing=1 TimingTest.TimingSample validates stage, cycle >= 0
+M23 rc=1 failing=2 M2GoldenVectorTest.playback.csv: 29 control scripts, every ; PlaybackTest.seek sets the value at the instant and k
+M24 rc=1 failing=1 M2GoldenVectorTest.playback.csv: 29 control scripts, every 
+M25 rc=1 failing=1 PlaybackTest.Unrepresentable results: instant overflo
+
+Detected: 25 of 25

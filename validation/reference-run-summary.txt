@@ -1,0 +1,33 @@
+Validation of the M2 tests against a THROWAWAY reference implementation written from the contract.
+The reference implementation is NOT part of this package and is not the M2 implementation.
+Base: 9e3f3acde0db4b9d0a202ba4f7f396c132843597 (accepted M1 Revision 4 evidence commit) plus the M2 test files of this package.
+
+java version "25.0.4.1" 2026-08-18 LTS
+Gradle 9.1.0
+Ant:           Apache Ant(TM) version 1.10.15 compiled on August 25 2024
+Launcher JVM:  25.0.4.1 (Oracle Corporation 25.0.4.1+1-LTS-5)
+OS:            Linux 6.18.44-fc-v138 amd64
+
+Clean run: ./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test, then check
+workshop.vfx.math.core.Amendment3AcceptanceTest         tests= 10 not-passed=0
+workshop.vfx.math.core.BoundaryTest                     tests=  2 not-passed=0
+workshop.vfx.math.core.ConventionsTest                  tests= 10 not-passed=0
+workshop.vfx.math.core.FrameTest                        tests= 11 not-passed=0
+workshop.vfx.math.core.JomlOracleTest                   tests=  4 not-passed=0
+workshop.vfx.math.core.M0RegressionTest                 tests=  6 not-passed=0
+workshop.vfx.math.core.MathUtilTest                     tests=  4 not-passed=0
+workshop.vfx.math.core.NumericPolicyTest                tests= 13 not-passed=0
+workshop.vfx.math.core.PolicyClarificationTest          tests=  9 not-passed=0
+workshop.vfx.math.core.PoseTest                         tests= 12 not-passed=0
+workshop.vfx.math.core.QuatTest                         tests= 17 not-passed=0
+workshop.vfx.math.core.ReviewAdversarialTest            tests= 18 not-passed=0
+workshop.vfx.math.core.Vec3Test                         tests=  9 not-passed=0
+workshop.vfx.math.time.M2BoundaryTest                   tests=  3 not-passed=0
+workshop.vfx.math.time.M2DeterminismTest                tests=  8 not-passed=0
+workshop.vfx.math.time.M2GoldenVectorTest               tests=  5 not-passed=0
+workshop.vfx.math.time.PlaybackTest                     tests=  9 not-passed=0
+workshop.vfx.math.time.TickTimeTest                     tests=  4 not-passed=0
+workshop.vfx.math.time.TimePointTest                    tests=  4 not-passed=0
+workshop.vfx.math.time.TimingTest                       tests= 11 not-passed=0
+TOTAL 169 tests, not passed: 0
+check: BUILD SUCCESSFUL in 6s
