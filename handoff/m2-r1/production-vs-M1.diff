@@ -1,0 +1,247 @@
+diff --git a/src/main/java/workshop/vfx/math/time/Playback.java b/src/main/java/workshop/vfx/math/time/Playback.java
+new file mode 100644
+index 0000000..a9f0c9b
+--- /dev/null
++++ b/src/main/java/workshop/vfx/math/time/Playback.java
+@@ -0,0 +1,78 @@
++package workshop.vfx.math.time;
++
++/** Immutable affine mapping from an explicit instant to local animation ticks. */
++public record Playback(TimePoint anchor, double anchorTicks, double rate, boolean paused) {
++    public Playback {
++        if (anchor == null || !Double.isFinite(anchorTicks) || !Double.isFinite(rate)) {
++            throw new IllegalArgumentException("Playback: nonnull anchor and finite anchorTicks and rate required");
++        }
++    }
++
++    public static Playback start(TimePoint at) {
++        return new Playback(at, 0.0, 1.0, false);
++    }
++
++    public static Playback start(TimePoint at, double initialTicks, double rate) {
++        return new Playback(at, initialTicks, rate, false);
++    }
++
++    public double localTicks(TimePoint t) {
++        validateDomain(t, "Playback.localTicks");
++        if (paused) return anchorTicks;
++        return anchorTicks + rate * t.ticksSince(anchor);
++    }
++
++    public Playback pause(TimePoint at) {
++        validateControl(at, "Playback.pause");
++        if (paused) return this;
++        return new Playback(at, reanchorTicks(at, "Playback.pause"), rate, true);
++    }
++
++    public Playback resume(TimePoint at) {
++        validateControl(at, "Playback.resume");
++        if (!paused) return this;
++        return new Playback(at, anchorTicks, rate, false);
++    }
++
++    public Playback withRate(TimePoint at, double rate) {
++        validateControl(at, "Playback.withRate");
++        if (!Double.isFinite(rate)) {
++            throw new IllegalArgumentException("Playback.withRate: rate must be finite");
++        }
++        return new Playback(at, reanchorTicks(at, "Playback.withRate"), rate, paused);
++    }
++
++    public Playback seek(TimePoint at, double ticks) {
++        validateControl(at, "Playback.seek");
++        if (!Double.isFinite(ticks)) {
++            throw new IllegalArgumentException("Playback.seek: ticks must be finite");
++        }
++        return new Playback(at, ticks, rate, paused);
++    }
++
++    public Playback restart(TimePoint at) {
++        validateControl(at, "Playback.restart");
++        return new Playback(at, 0.0, rate, false);
++    }
++
++    private void validateDomain(TimePoint at, String operation) {
++        if (at == null || at.domain() != anchor.domain()) {
++            throw new IllegalArgumentException(operation + ": instant must have the anchor domain");
++        }
++    }
++
++    private void validateControl(TimePoint at, String operation) {
++        validateDomain(at, operation);
++        if (at.value() < anchor.value()) {
++            throw new IllegalArgumentException(operation + ": control instant precedes anchor");
++        }
++    }
++
++    private double reanchorTicks(TimePoint at, String operation) {
++        double ticks = localTicks(at);
++        if (!Double.isFinite(ticks)) {
++            throw new ArithmeticException(operation + ": re-anchored ticks are not finite");
++        }
++        return ticks;
++    }
++}
+diff --git a/src/main/java/workshop/vfx/math/time/RepeatMode.java b/src/main/java/workshop/vfx/math/time/RepeatMode.java
+new file mode 100644
+index 0000000..3f5fa48
+--- /dev/null
++++ b/src/main/java/workshop/vfx/math/time/RepeatMode.java
+@@ -0,0 +1,6 @@
++package workshop.vfx.math.time;
++
++/** Direction and repetition of successive timing passes. */
++public enum RepeatMode {
++    ONCE, LOOP, PING_PONG
++}
+diff --git a/src/main/java/workshop/vfx/math/time/TickTime.java b/src/main/java/workshop/vfx/math/time/TickTime.java
+new file mode 100644
+index 0000000..3c0cddc
+--- /dev/null
++++ b/src/main/java/workshop/vfx/math/time/TickTime.java
+@@ -0,0 +1,17 @@
++package workshop.vfx.math.time;
++
++/** Nominal tick/second conversions, using the specified IEEE-754 operation order. */
++public final class TickTime {
++    public static final long TICKS_PER_SECOND = 20L;
++    public static final long NANOS_PER_TICK = 50_000_000L;
++
++    private TickTime() { }
++
++    public static double ticksToSeconds(double ticks) {
++        return ticks / 20.0;
++    }
++
++    public static double secondsToTicks(double seconds) {
++        return seconds * 20.0;
++    }
++}
+diff --git a/src/main/java/workshop/vfx/math/time/TimeDomain.java b/src/main/java/workshop/vfx/math/time/TimeDomain.java
+new file mode 100644
+index 0000000..afd5842
+--- /dev/null
++++ b/src/main/java/workshop/vfx/math/time/TimeDomain.java
+@@ -0,0 +1,6 @@
++package workshop.vfx.math.time;
++
++/** Domain of a caller-supplied instant. */
++public enum TimeDomain {
++    GAME, COSMETIC
++}
+diff --git a/src/main/java/workshop/vfx/math/time/TimePoint.java b/src/main/java/workshop/vfx/math/time/TimePoint.java
+new file mode 100644
+index 0000000..7c3930c
+--- /dev/null
++++ b/src/main/java/workshop/vfx/math/time/TimePoint.java
+@@ -0,0 +1,31 @@
++package workshop.vfx.math.time;
++
++/** An exact tick count or nanosecond count; no clock is read by this value. */
++public record TimePoint(TimeDomain domain, long value) {
++    public TimePoint {
++        if (domain == null) {
++            throw new IllegalArgumentException("TimePoint: domain must not be null");
++        }
++    }
++
++    public static TimePoint gameTick(long tick) {
++        return new TimePoint(TimeDomain.GAME, tick);
++    }
++
++    public static TimePoint cosmeticNanos(long nanos) {
++        return new TimePoint(TimeDomain.COSMETIC, nanos);
++    }
++
++    public double ticksSince(TimePoint origin) {
++        if (origin == null || origin.domain != domain) {
++            throw new IllegalArgumentException("TimePoint.ticksSince: origin must have the same domain");
++        }
++        long delta;
++        try {
++            delta = Math.subtractExact(value, origin.value);
++        } catch (ArithmeticException e) {
++            throw new ArithmeticException("TimePoint.ticksSince: instant difference overflows long");
++        }
++        return domain == TimeDomain.GAME ? (double) delta : (double) delta / 50_000_000.0;
++    }
++}
+diff --git a/src/main/java/workshop/vfx/math/time/Timing.java b/src/main/java/workshop/vfx/math/time/Timing.java
+new file mode 100644
+index 0000000..d862138
+--- /dev/null
++++ b/src/main/java/workshop/vfx/math/time/Timing.java
+@@ -0,0 +1,55 @@
++package workshop.vfx.math.time;
++
++/** Delay and half-open timing passes, evaluated without accumulating state. */
++public record Timing(double delayTicks, double durationTicks, RepeatMode mode, long cycles) {
++    public static final long FOREVER = Long.MAX_VALUE;
++
++    public Timing {
++        if (mode == null || !Double.isFinite(delayTicks) || !Double.isFinite(durationTicks)
++                || durationTicks <= 0.0 || cycles < 1 || (mode == RepeatMode.ONCE && cycles != 1)) {
++            throw new IllegalArgumentException("Timing: finite delay, positive finite duration and valid mode/cycles required");
++        }
++    }
++
++    public static Timing once(double durationTicks) {
++        return new Timing(0.0, durationTicks, RepeatMode.ONCE, 1);
++    }
++
++    public static Timing loop(double durationTicks) {
++        return new Timing(0.0, durationTicks, RepeatMode.LOOP, FOREVER);
++    }
++
++    public static Timing pingPong(double durationTicks) {
++        return new Timing(0.0, durationTicks, RepeatMode.PING_PONG, FOREVER);
++    }
++
++    public Timing withDelay(double delayTicks) {
++        return new Timing(delayTicks, durationTicks, mode, cycles);
++    }
++
++    public Timing withCycles(long cycles) {
++        return new Timing(delayTicks, durationTicks, mode, cycles);
++    }
++
++    public TimingSample sample(double localTicks) {
++        if (!Double.isFinite(localTicks)) {
++            throw new IllegalArgumentException("Timing.sample: localTicks must be finite");
++        }
++        double u = localTicks - delayTicks;
++        if (!Double.isFinite(u)) {
++            throw new ArithmeticException("Timing.sample: elapsed ticks are not finite");
++        }
++        if (u == 0.0) u = 0.0;
++        if (u < 0.0) return new TimingSample(TimingSample.Stage.BEFORE, 0, 0.0);
++        double d = durationTicks;
++        double r = u % d;
++        double n = Math.rint((u - r) / d);
++        if (n >= (double) cycles) {
++            double end = mode == RepeatMode.PING_PONG && (cycles & 1L) == 0 ? 0.0 : 1.0;
++            return new TimingSample(TimingSample.Stage.AFTER, cycles - 1, end);
++        }
++        long k = (long) n;
++        double progress = mode == RepeatMode.PING_PONG && (k & 1L) != 0 ? (d - r) / d : r / d;
++        return new TimingSample(TimingSample.Stage.ACTIVE, k, progress);
++    }
++}
+diff --git a/src/main/java/workshop/vfx/math/time/TimingSample.java b/src/main/java/workshop/vfx/math/time/TimingSample.java
+new file mode 100644
+index 0000000..6b0e0cc
+--- /dev/null
++++ b/src/main/java/workshop/vfx/math/time/TimingSample.java
+@@ -0,0 +1,12 @@
++package workshop.vfx.math.time;
++
++/** Validated timing stage, nonnegative pass index and progress in [0, 1]. */
++public record TimingSample(Stage stage, long cycle, double progress) {
++    public enum Stage { BEFORE, ACTIVE, AFTER }
++
++    public TimingSample {
++        if (stage == null || cycle < 0 || !(progress >= 0.0 && progress <= 1.0)) {
++            throw new IllegalArgumentException("TimingSample: stage, nonnegative cycle and progress in [0, 1] required");
++        }
++    }
++}

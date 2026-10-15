@@ -1,0 +1,7 @@
+Branch: m2-animation-time
+Accepted M1 base: 9e3f3acde0db4b9d0a202ba4f7f396c132843597
+M2 handoff import: 2493a753d9c6e19f29a59ca445c0e54627b94523
+M2 production implementation: 1e856820e606275c019f09d6f196bcf6a5a5138d
+M2 evidence commit: 80927177469d89b985d3b57a3219652a994d6d4b
+No specification bundle was supplied; authorized fallback used.
+No main merge. Final acceptance pending owner decision after independent review.
