@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.time.PlaybackTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-15T09:08:12.266Z" hostname="1a7d890349f4" time="0.137">
+  <properties/>
+  <testcase name="Construction: anchor required, anchorTicks and rate finite; start() is local 0, rate 1, playing (sections 4, 7)" classname="workshop.vfx.math.time.PlaybackTest" time="0.002"/>
+  <testcase name="withRate keeps the value continuous at the switch instant; negative rates reverse; rate 0 freezes without pausing (section 4)" classname="workshop.vfx.math.time.PlaybackTest" time="0.001"/>
+  <testcase name="COSMETIC playback runs at one local tick per 50 ms of supplied nanoseconds (sections 3, 4)" classname="workshop.vfx.math.time.PlaybackTest" time="0.02"/>
+  <testcase name="localTicks = anchorTicks + rate * ticksSince(anchor); integer data give exact integers (sections 4, 6.3)" classname="workshop.vfx.math.time.PlaybackTest" time="0.103"/>
+  <testcase name="seek sets the value at the instant and keeps rate and pause state; restart is local 0, playing, same rate (section 4)" classname="workshop.vfx.math.time.PlaybackTest" time="0.001"/>
+  <testcase name="pause on a paused playback and resume on a playing one return the same object (idempotent), after validating the instant (section 4)" classname="workshop.vfx.math.time.PlaybackTest" time="0.001"/>
+  <testcase name="Unrepresentable results: instant overflow while playing and a non-finite re-anchored value are ArithmeticExceptions (sections 4, 7)" classname="workshop.vfx.math.time.PlaybackTest" time="0.001"/>
+  <testcase name="Control instants: same domain, not before the anchor (equal allowed); localTicks also validates its domain (sections 4, 7)" classname="workshop.vfx.math.time.PlaybackTest" time="0.003"/>
+  <testcase name="pause holds the value exactly, even far in the future; resume continues from it; a paused span adds exactly nothing (section 4)" classname="workshop.vfx.math.time.PlaybackTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

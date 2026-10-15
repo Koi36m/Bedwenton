@@ -1,0 +1,21 @@
+
+ + Options
+     | Auto-detection:     Enabled
+     | Auto-download:      Enabled
+
+ + Debian JRE 21 (21.0.12.1+1-1-deb13u1-Debian)
+     | Location:           /usr/lib/jvm/java-21-openjdk-amd64
+     | Language Version:   21
+     | Vendor:             Debian
+     | Architecture:       amd64
+     | Is JDK:             false
+     | Detected by:        Common Linux Locations
+
+ + Oracle JDK 25 (25.0.4.1+1-LTS-5)
+     | Location:           /workspace/work/toolchains/jdk-25.0.4.1
+     | Language Version:   25
+     | Vendor:             Oracle
+     | Architecture:       amd64
+     | Is JDK:             true
+     | Detected by:        Current JVM
+

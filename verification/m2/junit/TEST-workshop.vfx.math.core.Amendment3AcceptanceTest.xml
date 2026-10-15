@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.core.Amendment3AcceptanceTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-15T09:07:57.292Z" hostname="1a7d890349f4" time="0.474">
+  <properties/>
+  <testcase name="D1: Pose.then names the scale when the scale product is not representable, even if the translation also overflows" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.022"/>
+  <testcase name="A3: Tier 3 inputs reject null with IllegalArgumentException (axisAngle axis, Frame axes, Pose fields)" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.001"/>
+  <testcase name="A1: transportY's y is normalize(newY) to 1e-15 per component (not bitwise), including after antiparallel flips" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.172"/>
+  <testcase name="A4: a hint that is null, non-finite or below LENGTH_EPS is absent; exactly LENGTH_EPS is present" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.008"/>
+  <testcase name="D1: Pose.inverse names the scale when 1/s is not representable, whatever the translation" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.005"/>
+  <testcase name="D1: a translation-only failure names the translation, not the scale; the set of throwing inputs is unchanged" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.002"/>
+  <testcase name="A2: the inverse of a degenerate quaternion is the identity rotation numerically; signed zeros are equivalent" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.009"/>
+  <testcase name="A5: fromHeading(f, u) depends only on the directions of f and u, and equals alignZ(-f, u) with an absent u read as +Y" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.139"/>
+  <testcase name="A6: rotate(v) is within (2|k^2 - 1| + 1e-13)|v| of the rotation by q/|q|, k = |q| within 1e-12 of 1, and finite for |v| &lt;= 1e100" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.105"/>
+  <testcase name="A5: fromHeading's parallel test uses the sine of the angle between the normalized vectors; worked examples" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

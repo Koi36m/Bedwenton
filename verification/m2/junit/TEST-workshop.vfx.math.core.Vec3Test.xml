@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.core.Vec3Test" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-15T09:08:12.027Z" hostname="1a7d890349f4" time="0.015">
+  <properties/>
+  <testcase name="normalizedOr returns unit vectors for ordinary input" classname="workshop.vfx.math.core.Vec3Test" time="0.002"/>
+  <testcase name="normalizedOr is accurate at both ends of the finite range" classname="workshop.vfx.math.core.Vec3Test" time="0.001"/>
+  <testcase name="Algebraic identities on 10,000 seeded random vectors" classname="workshop.vfx.math.core.Vec3Test" time="0.006"/>
+  <testcase name="Constants and basic arithmetic" classname="workshop.vfx.math.core.Vec3Test" time="0.0"/>
+  <testcase name="Full Heal outward-direction pattern: zero offset yields a finite unit fallback for any yaw" classname="workshop.vfx.math.core.Vec3Test" time="0.0"/>
+  <testcase name="Cross product: hand-derived values and right-hand rule" classname="workshop.vfx.math.core.Vec3Test" time="0.0"/>
+  <testcase name="normalizedOr returns the fallback for zero, tiny, NaN and infinite input (M0: Full Heal outward fallback)" classname="workshop.vfx.math.core.Vec3Test" time="0.0"/>
+  <testcase name="lerp: endpoints, midpoint, extrapolation (no clamping)" classname="workshop.vfx.math.core.Vec3Test" time="0.0"/>
+  <testcase name="isFinite detects NaN and infinities; Vec3 itself never validates" classname="workshop.vfx.math.core.Vec3Test" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
