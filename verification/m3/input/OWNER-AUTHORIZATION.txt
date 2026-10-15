@@ -1,0 +1,235 @@
+Minecraft VFX Mathematics Engine — M3 Production Implementation
+
+M3 Revision 2 with Amendment A3 has passed ChatGPT's independent design review.
+
+I authorize the first production implementation of M3 — Curves and Geometry Paths.
+
+All 14 design decisions DM3-1 through DM3-14 are approved, including the Revision 2 phase and error-bound corrections and Amendment A3's underflow corrections.
+
+Repository and baseline
+
+Repository:
+https://github.com/Koi36m/Bedwenton
+
+Accepted M1 evidence:
+9e3f3acde0db4b9d0a202ba4f7f396c132843597
+
+Accepted M2 R2 evidence / M3 baseline:
+e3b79bae1476e549d49b29dcf361e7da50fe67db
+
+Approved M3 specification tip:
+fe5c9fdd3e8da44517573332b163ca9af9a58d1b
+
+Attached:
+minecraft-vfx-math-M3-r2-amendment-a3.zip
+
+Expected ZIP SHA-256:
+3317d69abf0a394ded1383733ac4340b97c2e57a15f25b485f2f36f790d909db
+
+Step 1 — Recover and verify the handoff
+
+Verify the ZIP SHA-256 and CRC.
+
+Verify all 49 entries in its internal SHA256SUMS.txt.
+
+Recover the embedded m3-spec-r2-a3.bundle.
+
+Verify the exact specification history:
+
+M3 R1: 7d0ee2b97f246ba27b19111fa3b585febf0ee0c6
+
+M3 R2: 37152118093df38c95bc392e966bb23b4a435dd9
+
+M3 R2+A3: fe5c9fdd3e8da44517573332b163ca9af9a58d1b
+
+Confirm that the bundle's M3 history descends from the accepted M2 R2 evidence commit.
+
+Preserve those existing commit hashes; do not recreate or rewrite the recovered history.
+
+Create an implementation branch named:
+
+m3-curves-paths
+
+Start from the exact approved M3 specification tip, not the older M2 baseline.
+
+Step 2 — Implement the approved contract
+
+Read these documents in order:
+
+docs/m3/M3-IMPLEMENTATION-CONTRACT.md
+
+docs/m3/M3-CONVENTIONS.md
+
+docs/m3/M3-TEST-SPECIFICATION.md
+
+docs/m3/M3-DESIGN-DECISIONS.md
+
+docs/m3/M3-REVISION-2-CORRECTIONS.md
+
+docs/m3/M3-AMENDMENT-A3.md
+
+docs/m3/README-FOR-CODEX-M3.md
+
+Implement exactly seven public production types:
+
+Curve
+
+LineSegment
+
+QuadraticBezier
+
+CubicBezier
+
+Spiral
+
+PosedCurve
+
+Easing
+
+Package:
+
+workshop.vfx.math.curve
+
+Private or package-private helpers are permitted where needed.
+
+Step 3 — Preserve mathematical requirements
+
+Implement the approved contract faithfully.
+
+Especially important:
+
+Preserve exact Bézier endpoints.
+
+Use M1's Vec3, Pose, Quat and Frame conventions.
+
+Preserve Minecraft's right-handed coordinate system.
+
+Use turns for spiral phases.
+
+Reduce turns * t and startTurn independently before combining their fractional parts.
+
+Use only StrictMath.sin and StrictMath.cos for trigonometry.
+
+Preserve exact quarter turns and periodic seams within the contract's supported numerical conditions.
+
+Preserve the constant-radius special case.
+
+Respect the revised extrapolation-safe radius scale S.
+
+Respect the absolute underflow terms introduced by Amendment A3.
+
+Preserve the documented overflow behavior.
+
+Implement all 15 specified polynomial easing modes.
+
+Follow the supplied public API exactly.
+
+No Math.fma, forbidden trigonometric functions, hidden clocks, randomness, mutable global state, or platform dependencies.
+
+Step 4 — Protect existing milestones
+
+M1 and M2 are frozen.
+
+Do not modify:
+
+Existing M1/M2 production code.
+
+Existing M1/M2 tests or golden vectors.
+
+Accepted mathematical contracts.
+
+Previous verification records.
+
+Existing Minecraft enchantments or plugins.
+
+Do not introduce any production runtime dependency.
+
+M3 may depend on M1 core but must not depend on M2 time.
+
+Step 5 — Preserve the independent test suite
+
+The approved specification contains 51 new M3 JUnit tests across eight test classes.
+
+Combined expected count:
+
+M1: 125
+
+M2: 66
+
+M3: 51
+
+Total: 242
+
+Preserve every supplied test, expectation, reference vector, generator and tolerance exactly.
+
+Do not remove, weaken or alter tests simply to obtain a passing build.
+
+If you discover a genuine contradiction between a test and the approved contract, stop and report it before modifying either.
+
+Step 6 — Run reproducible verification
+
+Use Java 25 and the Gradle 9.1.0 wrapper.
+
+Run:
+
+./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test
+
+./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false check
+
+Acceptance criteria:
+
+242/242 tests passed
+
+0 failures, errors or skips
+
+Gradle check successful
+
+No production runtime dependencies
+
+No production compiler warnings
+
+M1/M2 code and tests unchanged
+
+All M3 reference CSVs regenerate byte-identically
+
+Only the seven authorized M3 production types added, plus necessary private helpers
+
+Independent test counts and mathematical bounds should agree with the approved specification.
+
+Step 7 — Publish review evidence
+
+Provide:
+
+Production implementation commit hash.
+
+Verification evidence commit hash.
+
+Complete source ZIP.
+
+Git bundle preserving the full M3 specification and implementation history.
+
+SHA-256 manifest.
+
+Complete test logs and JUnit XML.
+
+Production diff against the M3 specification tip.
+
+Integrity checks proving M1/M2 preservation.
+
+Reference-data regeneration evidence.
+
+Any remaining limitations or unresolved issues.
+
+Publish to GitHub if authorized and available.
+
+Do not force-push, rewrite specification commits or merge to main.
+
+Stop condition
+
+Stop after the first verified M3 implementation and delivery.
+
+Do not independently declare M3 finally accepted.
+
+Do not begin M4 or modify existing Minecraft plugins.
+
+The next phase is Claude's independent adversarial review of the actual M3 production implementation.

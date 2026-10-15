@@ -1,0 +1,32 @@
+0001-Propose-M3-curves-and-geometry-paths-decisions-contr.patch: PASS 7d0ee2b97f246ba27b19111fa3b585febf0ee0c6 tree 5653dad49475ada023e56483013478cd0c98ff17
+/workspace/work/m3-input/minecraft-vfx-math-M3-r2-amendment-a3/patches/0001-Propose-M3-curves-and-geometry-paths-decisions-contr.patch:967: trailing whitespace.
+X01 (radian phase instead of turn reduction) failing=5 M3ReferenceVectorTest.spiral.csv: 549 spiral cases a; SpiralTest.Exact quarter-turn points for ; SpiralTest.Large turn counts: quarter pha; SpiralTest.M1 CONVENTIONS 5: starting at ; SpiralTest.Seams: a closed spiral (equal 
+/workspace/work/m3-input/minecraft-vfx-math-M3-r2-amendment-a3/patches/0001-Propose-M3-curves-and-geometry-paths-decisions-contr.patch:969: trailing whitespace.
+X03 (clockwise instead of counter-clockwise) failing=9 M3ReferenceVectorTest.spiral.csv: 549 spiral cases a; PosedCurveTest.A placed circle lies in the pl; PosedCurveTest.Derivatives transform as direc; PosedCurveTest.Orientation by Frame: Quat.fro; SpiralTest.Derivatives agree with central; SpiralTest.Exact quarter-turn points for ; SpiralTest.Full Heal ring (r cos th, 0, r; SpiralTest.Large turn counts: quarter pha; SpiralTest.M1 CONVENTIONS 5: starting at 
+/workspace/work/m3-input/minecraft-vfx-math-M3-r2-amendment-a3/patches/0001-Propose-M3-curves-and-geometry-paths-decisions-contr.patch:970: trailing whitespace.
+X04 (clockwise factory wrong) failing=3 SpiralTest.Factories: circle, arc, helix,; SpiralTest.Full Heal ring (r cos th, 0, r; SpiralTest.M1 CONVENTIONS 5: starting at 
+/workspace/work/m3-input/minecraft-vfx-math-M3-r2-amendment-a3/patches/0001-Propose-M3-curves-and-geometry-paths-decisions-contr.patch:971: trailing whitespace.
+X05 (no constant-radius rule) failing=1 SpiralTest.Seams: a closed spiral (equal 
+/workspace/work/m3-input/minecraft-vfx-math-M3-r2-amendment-a3/patches/0001-Propose-M3-curves-and-geometry-paths-decisions-contr.patch:978: trailing whitespace.
+X12 (closed ignores rise) failing=1 SpiralTest.Seams: a closed spiral (equal 
+warning: 5 lines add whitespace errors.
+
+0002-Propose-M3-revision-2-exact-startTurn-reduction-and-.patch: PASS 37152118093df38c95bc392e966bb23b4a435dd9 tree 9c9111c7633440e10e877183ca9f65a94d09f22a
+/workspace/work/m3-input/minecraft-vfx-math-M3-r2-amendment-a3/patches/0002-Propose-M3-revision-2-exact-startTurn-reduction-and-.patch:1083: trailing whitespace.
+X16 (line end not exact) failing=1 BezierTest.Endpoints are exact for arbitrary 
+warning: 1 line adds whitespace errors.
+
+0003-Amend-M3-revision-2-A3-absolute-underflow-terms-and-.patch: PASS fe5c9fdd3e8da44517573332b163ca9af9a58d1b tree bec91ba98dc29e80d01c25960c9bf81e1a643758
+/workspace/work/m3-input/minecraft-vfx-math-M3-r2-amendment-a3/patches/0003-Amend-M3-revision-2-A3-absolute-underflow-terms-and-.patch:608: trailing whitespace.
+X16 (line end not exact) failing=1 BezierTest.Endpoints are exact for arbitrary 
+/workspace/work/m3-input/minecraft-vfx-math-M3-r2-amendment-a3/patches/0003-Amend-M3-revision-2-A3-absolute-underflow-terms-and-.patch:623: trailing whitespace.
+T02 (control: phase term 4096x too tight (the bound is not vacuous)) failing=2 M3ReferenceVectorTest.spiral.csv: 959 spiral cases again; M3UnderflowTest.A3: the test tolerances are never 
+/workspace/work/m3-input/minecraft-vfx-math-M3-r2-amendment-a3/patches/0003-Amend-M3-revision-2-A3-absolute-underflow-terms-and-.patch:624: trailing whitespace.
+T03 (A3 original fault: revision 2 spiral point bound (no underflow term)) failing=1 M3UnderflowTest.A3: the test tolerances are never 
+/workspace/work/m3-input/minecraft-vfx-math-M3-r2-amendment-a3/patches/0003-Amend-M3-revision-2-A3-absolute-underflow-terms-and-.patch:625: trailing whitespace.
+T04 (derivative underflow term without the S part (subnormal turns)) failing=2 M3UnderflowTest.A3: subnormal turns (w = 2 pi turn; M3UnderflowTest.A3: the test tolerances are never 
+/workspace/work/m3-input/minecraft-vfx-math-M3-r2-amendment-a3/patches/0003-Amend-M3-revision-2-A3-absolute-underflow-terms-and-.patch:626: trailing whitespace.
+T05 (second-derivative underflow term without w^2 (amplified radius underflow)) failing=3 M3UnderflowTest.A3: radii, rise and products in th; M3UnderflowTest.A3: the radius underflow error is ; M3UnderflowTest.A3: the test tolerances are never 
+warning: squelched 3 whitespace errors
+warning: 8 lines add whitespace errors.
+

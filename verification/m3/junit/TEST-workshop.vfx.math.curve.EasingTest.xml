@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.curve.EasingTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-15T20:38:24.518Z" hostname="1a7d890349f4" time="5.696">
+  <properties/>
+  <testcase name="Composition with M2: easing a TimingSample progress keeps [0, 1] and the ends (section 6, DM3-13)" classname="workshop.vfx.math.curve.EasingTest" time="0.012"/>
+  <testcase name="Continuity: IN_OUT easings join at 1/2; smoothstep/smootherstep have zero slope at both ends (C1/C2 ends) (section 6)" classname="workshop.vfx.math.curve.EasingTest" time="0.001"/>
+  <testcase name="Range and accuracy fuzz: 0 &lt;= f &lt;= 1 and |f - exact| &lt;= 2^-50 against an exact rational evaluation (section 6)" classname="workshop.vfx.math.curve.EasingTest" time="4.125"/>
+  <testcase name="Power easings are exactly monotone on doubles; smoothstep and smootherstep are monotone up to 2^-49 (section 6, DM3-11)" classname="workshop.vfx.math.curve.EasingTest" time="1.277"/>
+  <testcase name="Symmetry f(1 - t) = 1 - f(t) for symmetric easings and duality OUT(t) = 1 - IN(1 - t), to 2^-49 (section 6)" classname="workshop.vfx.math.curve.EasingTest" time="0.266"/>
+  <testcase name="Endpoints and clamping: f(t) = 0 for t &lt;= 0 (including -0.0 and -infinity), 1 for t &gt;= 1 (including +infinity); NaN is rejected (section 6)" classname="workshop.vfx.math.curve.EasingTest" time="0.001"/>
+  <testcase name="Closed-form values at hand-checked points (section 6)" classname="workshop.vfx.math.curve.EasingTest" time="0.001"/>
+  <testcase name="Exactly the 15 specified easings exist, in the specified order (section 6)" classname="workshop.vfx.math.curve.EasingTest" time="0.009"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

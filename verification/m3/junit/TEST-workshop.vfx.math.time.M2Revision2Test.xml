@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.time.M2Revision2Test" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-15T20:38:42.533Z" hostname="1a7d890349f4" time="0.036">
+  <properties/>
+  <testcase name="P-R1: GAME keeps checked subtraction and raw ordering: no wrap-around for tick counters (sections 3, 4)" classname="workshop.vfx.math.time.M2Revision2Test" time="0.001"/>
+  <testcase name="P-R1: COSMETIC playback evaluates and accepts control events across the wrap; earlier instants are rejected by wrapped order (section 4 [R2])" classname="workshop.vfx.math.time.M2Revision2Test" time="0.001"/>
+  <testcase name="P-A2: no-op controls return the same object and keep the stored anchor; the next control is checked against that anchor only (section 4 [R2])" classname="workshop.vfx.math.time.M2Revision2Test" time="0.001"/>
+  <testcase name="P-A3: FOREVER reports AFTER only when the cycle index reaches 2^63 (documented limitation, section 5 [R2])" classname="workshop.vfx.math.time.M2Revision2Test" time="0.001"/>
+  <testcase name="P-R1: translating a COSMETIC history so that it crosses the wrap changes no bit (section 3 [R2])" classname="workshop.vfx.math.time.M2Revision2Test" time="0.027"/>
+  <testcase name="P-R1: the wrapping difference d is valid for |true elapsed| &lt; 2^63; d = -2^63 is read as 2^63 ns backwards (section 3 [R2])" classname="workshop.vfx.math.time.M2Revision2Test" time="0.001"/>
+  <testcase name="P-R1: COSMETIC ticksSince across the Long.MAX_VALUE -&gt; Long.MIN_VALUE wrap is the elapsed time, forwards and backwards (section 3 [R2])" classname="workshop.vfx.math.time.M2Revision2Test" time="0.001"/>
+  <testcase name="P-R1: domain checks are unchanged: mixing COSMETIC and GAME is an IllegalArgumentException, also near the wrap (sections 3, 4)" classname="workshop.vfx.math.time.M2Revision2Test" time="0.002"/>
+  <testcase name="P-R1: zero elapsed time is +0.0 everywhere, including at both ends of the long range (section 3 [R2])" classname="workshop.vfx.math.time.M2Revision2Test" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

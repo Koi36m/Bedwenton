@@ -1,0 +1,9 @@
+ .../java/workshop/vfx/math/curve/CubicBezier.java  |  37 ++++++++
+ src/main/java/workshop/vfx/math/curve/Curve.java   |  15 +++
+ .../java/workshop/vfx/math/curve/CurveChecks.java  |  20 ++++
+ src/main/java/workshop/vfx/math/curve/Easing.java  |  55 +++++++++++
+ .../java/workshop/vfx/math/curve/LineSegment.java  |  26 +++++
+ .../java/workshop/vfx/math/curve/PosedCurve.java   |  25 +++++
+ .../workshop/vfx/math/curve/QuadraticBezier.java   |  27 ++++++
+ src/main/java/workshop/vfx/math/curve/Spiral.java  | 105 +++++++++++++++++++++
+ 8 files changed, 310 insertions(+)

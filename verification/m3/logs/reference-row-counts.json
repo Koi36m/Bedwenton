@@ -1,0 +1,23 @@
+{
+  "bezier.csv": {
+    "rows": 645,
+    "classes": {
+      "EXACT": 189,
+      "ROUNDED": 456
+    }
+  },
+  "easing.csv": {
+    "rows": 1155,
+    "classes": {
+      "EXACT": 450,
+      "ROUNDED": 705
+    }
+  },
+  "spiral.csv": {
+    "rows": 959,
+    "classes": {
+      "EXACT": 197,
+      "ROUNDED": 762
+    }
+  }
+}

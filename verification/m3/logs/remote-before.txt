@@ -1,0 +1,14 @@
+ref: refs/heads/main	HEAD
+870c9fd75bf9a7a9d619179993d37f2b6487b081	HEAD
+8397c04b55f7d506e8fec79fca120ce297e8ae22	refs/heads/m1-core-transforms
+8401142720d3c91093ec02fb9dd354381f6da9ec	refs/heads/m1-r4-handoff
+9e3f3acde0db4b9d0a202ba4f7f396c132843597	refs/heads/m1-r4-verification
+0ec01087b9c9727f51274e4bbc66f00b2038c6f4	refs/heads/m1-review-handoff
+80927177469d89b985d3b57a3219652a994d6d4b	refs/heads/m2-animation-time
+2a222cee03cdd9e9009706530a6e764a83f9bcfd	refs/heads/m2-handoff
+88702655a3f8c0428160a74f9193af7cc41b0b87	refs/heads/m2-r2-amendment
+6e91440beb59804fad5c7019322f895a33a539e1	refs/heads/m2-r2-handoff
+e3b79bae1476e549d49b29dcf361e7da50fe67db	refs/heads/m2-r2-verification
+870c9fd75bf9a7a9d619179993d37f2b6487b081	refs/heads/main
+802d9e7f95ccf8fdfd3879d99313794faa2c08d1	refs/heads/review/m1-claude
+870c9fd75bf9a7a9d619179993d37f2b6487b081	refs/tags/baseline-scaffold

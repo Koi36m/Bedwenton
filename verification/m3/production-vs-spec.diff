@@ -1,0 +1,358 @@
+diff --git a/src/main/java/workshop/vfx/math/curve/CubicBezier.java b/src/main/java/workshop/vfx/math/curve/CubicBezier.java
+new file mode 100644
+index 0000000..d5f2752
+--- /dev/null
++++ b/src/main/java/workshop/vfx/math/curve/CubicBezier.java
+@@ -0,0 +1,37 @@
++package workshop.vfx.math.curve;
++
++import workshop.vfx.math.core.Vec3;
++
++/** Cubic Bernstein curve evaluated by de Casteljau interpolation. */
++public record CubicBezier(Vec3 p0, Vec3 p1, Vec3 p2, Vec3 p3) implements Curve {
++    public CubicBezier {
++        CurveChecks.control(p0);
++        CurveChecks.control(p1);
++        CurveChecks.control(p2);
++        CurveChecks.control(p3);
++    }
++
++    public Vec3 point(double t) {
++        CurveChecks.parameter(t);
++        Vec3 a = p0.lerp(p1, t);
++        Vec3 b = p1.lerp(p2, t);
++        Vec3 c = p2.lerp(p3, t);
++        return a.lerp(b, t).lerp(b.lerp(c, t), t);
++    }
++
++    public Vec3 derivative(double t) {
++        CurveChecks.parameter(t);
++        Vec3 a = p1.sub(p0);
++        Vec3 b = p2.sub(p1);
++        Vec3 c = p3.sub(p2);
++        return a.lerp(b, t).lerp(b.lerp(c, t), t).mul(3);
++    }
++
++    public Vec3 secondDerivative(double t) {
++        CurveChecks.parameter(t);
++        Vec3 a = p1.sub(p0);
++        Vec3 b = p2.sub(p1);
++        Vec3 c = p3.sub(p2);
++        return b.sub(a).lerp(c.sub(b), t).mul(6);
++    }
++}
+diff --git a/src/main/java/workshop/vfx/math/curve/Curve.java b/src/main/java/workshop/vfx/math/curve/Curve.java
+new file mode 100644
+index 0000000..7e1f533
+--- /dev/null
++++ b/src/main/java/workshop/vfx/math/curve/Curve.java
+@@ -0,0 +1,15 @@
++package workshop.vfx.math.curve;
++
++import workshop.vfx.math.core.Pose;
++import workshop.vfx.math.core.Vec3;
++
++/** A local-space path and its analytic derivatives with respect to its parameter. */
++public interface Curve {
++    Vec3 point(double t);
++    Vec3 derivative(double t);
++    Vec3 secondDerivative(double t);
++
++    default Curve transformed(Pose pose) {
++        return new PosedCurve(this, pose);
++    }
++}
+diff --git a/src/main/java/workshop/vfx/math/curve/CurveChecks.java b/src/main/java/workshop/vfx/math/curve/CurveChecks.java
+new file mode 100644
+index 0000000..07f66a6
+--- /dev/null
++++ b/src/main/java/workshop/vfx/math/curve/CurveChecks.java
+@@ -0,0 +1,20 @@
++package workshop.vfx.math.curve;
++
++import workshop.vfx.math.core.Vec3;
++
++/** Shared validation; finite extrapolation is deliberately allowed. */
++final class CurveChecks {
++    private CurveChecks() { }
++
++    static void control(Vec3 value) {
++        if (value == null || !value.isFinite()) {
++            throw new IllegalArgumentException("Curve: control point must be nonnull and finite");
++        }
++    }
++
++    static void parameter(double t) {
++        if (!Double.isFinite(t)) {
++            throw new IllegalArgumentException("Curve evaluation: parameter must be finite");
++        }
++    }
++}
+diff --git a/src/main/java/workshop/vfx/math/curve/Easing.java b/src/main/java/workshop/vfx/math/curve/Easing.java
+new file mode 100644
+index 0000000..bbf8ac0
+--- /dev/null
++++ b/src/main/java/workshop/vfx/math/curve/Easing.java
+@@ -0,0 +1,55 @@
++package workshop.vfx.math.curve;
++
++/** Polynomial easing on [0, 1], with clamped inputs and outputs. */
++public enum Easing {
++    LINEAR, SMOOTHSTEP, SMOOTHERSTEP,
++    QUAD_IN, QUAD_OUT, QUAD_IN_OUT,
++    CUBIC_IN, CUBIC_OUT, CUBIC_IN_OUT,
++    QUART_IN, QUART_OUT, QUART_IN_OUT,
++    QUINT_IN, QUINT_OUT, QUINT_IN_OUT;
++
++    public double apply(double progress) {
++        if (Double.isNaN(progress)) {
++            throw new IllegalArgumentException("Easing.apply: progress must not be NaN");
++        }
++        if (progress <= 0) return 0.0;
++        if (progress >= 1) return 1.0;
++        double t = progress;
++        double result = switch (this) {
++            case LINEAR -> t;
++            case SMOOTHSTEP -> t <= 0.5 ? smooth(t) : 1 - smooth(1 - t);
++            case SMOOTHERSTEP -> t <= 0.5 ? smoother(t) : 1 - smoother(1 - t);
++            case QUAD_IN -> power(t, 2);
++            case QUAD_OUT -> 1 - power(1 - t, 2);
++            case QUAD_IN_OUT -> inOut(t, 2);
++            case CUBIC_IN -> power(t, 3);
++            case CUBIC_OUT -> 1 - power(1 - t, 3);
++            case CUBIC_IN_OUT -> inOut(t, 3);
++            case QUART_IN -> power(t, 4);
++            case QUART_OUT -> 1 - power(1 - t, 4);
++            case QUART_IN_OUT -> inOut(t, 4);
++            case QUINT_IN -> power(t, 5);
++            case QUINT_OUT -> 1 - power(1 - t, 5);
++            case QUINT_IN_OUT -> inOut(t, 5);
++        };
++        return Math.max(0.0, Math.min(1.0, result));
++    }
++
++    private static double smooth(double t) {
++        return t * t * (3 - 2 * t);
++    }
++
++    private static double smoother(double t) {
++        return t * t * t * (t * (6 * t - 15) + 10);
++    }
++
++    private static double power(double t, int n) {
++        double result = t;
++        for (int i = 1; i < n; i++) result *= t;
++        return result;
++    }
++
++    private static double inOut(double t, int n) {
++        return t < 0.5 ? (1 << (n - 1)) * power(t, n) : 1 - power(2 - 2 * t, n) / 2;
++    }
++}
+diff --git a/src/main/java/workshop/vfx/math/curve/LineSegment.java b/src/main/java/workshop/vfx/math/curve/LineSegment.java
+new file mode 100644
+index 0000000..58cbe01
+--- /dev/null
++++ b/src/main/java/workshop/vfx/math/curve/LineSegment.java
+@@ -0,0 +1,26 @@
++package workshop.vfx.math.curve;
++
++import workshop.vfx.math.core.Vec3;
++
++/** Degree-one Bernstein curve, with finite parameters extrapolated. */
++public record LineSegment(Vec3 start, Vec3 end) implements Curve {
++    public LineSegment {
++        CurveChecks.control(start);
++        CurveChecks.control(end);
++    }
++
++    public Vec3 point(double t) {
++        CurveChecks.parameter(t);
++        return start.lerp(end, t);
++    }
++
++    public Vec3 derivative(double t) {
++        CurveChecks.parameter(t);
++        return end.sub(start);
++    }
++
++    public Vec3 secondDerivative(double t) {
++        CurveChecks.parameter(t);
++        return Vec3.ZERO;
++    }
++}
+diff --git a/src/main/java/workshop/vfx/math/curve/PosedCurve.java b/src/main/java/workshop/vfx/math/curve/PosedCurve.java
+new file mode 100644
+index 0000000..433ff58
+--- /dev/null
++++ b/src/main/java/workshop/vfx/math/curve/PosedCurve.java
+@@ -0,0 +1,25 @@
++package workshop.vfx.math.curve;
++
++import workshop.vfx.math.core.Pose;
++import workshop.vfx.math.core.Vec3;
++
++/** Uniform-scale placement: derivatives are scaled directions, never translated. */
++public record PosedCurve(Curve curve, Pose pose) implements Curve {
++    public PosedCurve {
++        if (curve == null || pose == null) {
++            throw new IllegalArgumentException("PosedCurve: curve and pose must not be null");
++        }
++    }
++
++    public Vec3 point(double t) {
++        return pose.toWorld(curve.point(t));
++    }
++
++    public Vec3 derivative(double t) {
++        return pose.rotation().rotate(curve.derivative(t)).mul(pose.scale());
++    }
++
++    public Vec3 secondDerivative(double t) {
++        return pose.rotation().rotate(curve.secondDerivative(t)).mul(pose.scale());
++    }
++}
+diff --git a/src/main/java/workshop/vfx/math/curve/QuadraticBezier.java b/src/main/java/workshop/vfx/math/curve/QuadraticBezier.java
+new file mode 100644
+index 0000000..1b36e56
+--- /dev/null
++++ b/src/main/java/workshop/vfx/math/curve/QuadraticBezier.java
+@@ -0,0 +1,27 @@
++package workshop.vfx.math.curve;
++
++import workshop.vfx.math.core.Vec3;
++
++/** Quadratic Bernstein curve evaluated by de Casteljau interpolation. */
++public record QuadraticBezier(Vec3 p0, Vec3 p1, Vec3 p2) implements Curve {
++    public QuadraticBezier {
++        CurveChecks.control(p0);
++        CurveChecks.control(p1);
++        CurveChecks.control(p2);
++    }
++
++    public Vec3 point(double t) {
++        CurveChecks.parameter(t);
++        return p0.lerp(p1, t).lerp(p1.lerp(p2, t), t);
++    }
++
++    public Vec3 derivative(double t) {
++        CurveChecks.parameter(t);
++        return p1.sub(p0).lerp(p2.sub(p1), t).mul(2);
++    }
++
++    public Vec3 secondDerivative(double t) {
++        CurveChecks.parameter(t);
++        return p2.sub(p1).sub(p1.sub(p0)).mul(2);
++    }
++}
+diff --git a/src/main/java/workshop/vfx/math/curve/Spiral.java b/src/main/java/workshop/vfx/math/curve/Spiral.java
+new file mode 100644
+index 0000000..8f12367
+--- /dev/null
++++ b/src/main/java/workshop/vfx/math/curve/Spiral.java
+@@ -0,0 +1,105 @@
++package workshop.vfx.math.curve;
++
++import workshop.vfx.math.core.Vec3;
++
++/** Circular family about local +Y; positive turns run from +X toward -Z. */
++public record Spiral(double startRadius, double endRadius, double rise, double turns, double startTurn)
++        implements Curve {
++    private static final double TAU = 2 * Math.PI;
++
++    public Spiral {
++        if (!Double.isFinite(startRadius) || startRadius < 0
++                || !Double.isFinite(endRadius) || endRadius < 0
++                || !Double.isFinite(rise) || !Double.isFinite(turns) || !Double.isFinite(startTurn)) {
++            throw new IllegalArgumentException("Spiral: nonnegative finite radii and finite rise, turns and startTurn required");
++        }
++    }
++
++    public static Spiral circle(double radius) {
++        return new Spiral(radius, radius, 0, 1, 0);
++    }
++
++    public static Spiral arc(double radius, double startTurn, double turns) {
++        return new Spiral(radius, radius, 0, turns, startTurn);
++    }
++
++    public static Spiral helix(double radius, double rise, double turns) {
++        return new Spiral(radius, radius, rise, turns, 0);
++    }
++
++    public static Spiral planarSpiral(double r0, double r1, double turns) {
++        return new Spiral(r0, r1, 0, turns, 0);
++    }
++
++    public static Spiral conicalSpiral(double r0, double r1, double rise, double turns) {
++        return new Spiral(r0, r1, rise, turns, 0);
++    }
++
++    public static Spiral horizontalCounterClockwiseFromAbove(double radius) {
++        return circle(radius);
++    }
++
++    public static Spiral horizontalClockwiseFromAbove(double radius) {
++        return new Spiral(radius, radius, 0, -1, 0);
++    }
++
++    public boolean closed() {
++        return startRadius == endRadius && rise == 0 && turns != 0 && Math.rint(turns) == turns;
++    }
++
++    public Vec3 point(double t) {
++        CurveChecks.parameter(t);
++        SinCos cs = phase(t);
++        double r = radius(t);
++        return new Vec3(r * cs.cos, rise * t, -r * cs.sin);
++    }
++
++    public Vec3 derivative(double t) {
++        CurveChecks.parameter(t);
++        SinCos cs = phase(t);
++        double dr = endRadius - startRadius;
++        double w = TAU * turns;
++        double wr = w * radius(t);
++        return new Vec3(dr * cs.cos - wr * cs.sin, rise, -dr * cs.sin - wr * cs.cos);
++    }
++
++    public Vec3 secondDerivative(double t) {
++        CurveChecks.parameter(t);
++        SinCos cs = phase(t);
++        double dr = endRadius - startRadius;
++        double w = TAU * turns;
++        double k = 2 * dr * w;
++        double w2r = w * w * radius(t);
++        return new Vec3(-k * cs.sin - w2r * cs.cos, 0, -k * cs.cos + w2r * cs.sin);
++    }
++
++    private double radius(double t) {
++        return startRadius == endRadius ? startRadius : (1 - t) * startRadius + t * endRadius;
++    }
++
++    private SinCos phase(double t) {
++        // Reduce both operands before combining; unreduced offsets can erase the fraction.
++        double a = fraction(turns * t);
++        double b = fraction(startTurn);
++        double f = fraction(a + b);
++        double quarters = 4 * f;
++        int q = (int) Math.floor(quarters);
++        double x = (quarters - q) * (Math.PI / 2);
++        double c = StrictMath.cos(x);
++        double s = StrictMath.sin(x);
++        return switch (q) {
++            case 1 -> new SinCos(-s, c);
++            case 2 -> new SinCos(-c, -s);
++            case 3 -> new SinCos(s, -c);
++            default -> new SinCos(c, s);
++        };
++    }
++
++    private static double fraction(double x) {
++        double f = x % 1.0;
++        if (f < 0) f += 1.0;
++        return f == 1.0 ? 0.0 : f;
++    }
++
++    private record SinCos(double cos, double sin) { }
++}

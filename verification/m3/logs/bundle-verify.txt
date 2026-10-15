@@ -1,0 +1,7 @@
+/workspace/work/m3-input/minecraft-vfx-math-M3-r2-amendment-a3/m3-spec-r2-a3.bundle is okay
+The bundle contains these 3 refs:
+7d0ee2b97f246ba27b19111fa3b585febf0ee0c6 refs/heads/m3-spec
+37152118093df38c95bc392e966bb23b4a435dd9 refs/heads/m3-spec-r2
+fe5c9fdd3e8da44517573332b163ca9af9a58d1b refs/heads/m3-spec-r2-a3
+The bundle records a complete history.
+The bundle uses this hash algorithm: sha1

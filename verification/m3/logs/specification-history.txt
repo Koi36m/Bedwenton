@@ -1,0 +1,3 @@
+7d0ee2b97f246ba27b19111fa3b585febf0ee0c6 e3b79bae1476e549d49b29dcf361e7da50fe67db Propose M3 curves and geometry paths: decisions, contract, independent tests
+37152118093df38c95bc392e966bb23b4a435dd9 7d0ee2b97f246ba27b19111fa3b585febf0ee0c6 Propose M3 revision 2: exact startTurn reduction and extrapolation-safe spiral bounds
+fe5c9fdd3e8da44517573332b163ca9af9a58d1b 37152118093df38c95bc392e966bb23b4a435dd9 Amend M3 revision 2 (A3): absolute underflow terms and overflow limits
