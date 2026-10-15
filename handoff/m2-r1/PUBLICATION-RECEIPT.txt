@@ -1,0 +1,42 @@
+M2 first implementation publication receipt
+
+Accepted M1 evidence/base: 9e3f3acde0db4b9d0a202ba4f7f396c132843597
+M2 production implementation: 1e856820e606275c019f09d6f196bcf6a5a5138d
+M2 verification evidence/branch m2-animation-time: 80927177469d89b985d3b57a3219652a994d6d4b
+Immutable artifact commit: d656801f1bce80eacb61dfb0da853ecc9c504077
+
+The two new branches were published atomically without force. All pre-existing remote branch/tag refs are unchanged (compared by name and full SHA). Main was not merged. The m2-animation-time worktree is clean. Final M2 acceptance is pending independent review and owner decision.
+
+Actual push output:
+To https://github.com/Koi36m/Bedwenton.git
+ * [new branch]      m2-animation-time -> m2-animation-time
+ * [new branch]      m2-handoff -> m2-handoff
+
+Remote refs immediately after publication:
+ref: refs/heads/main	HEAD
+870c9fd75bf9a7a9d619179993d37f2b6487b081	HEAD
+8397c04b55f7d506e8fec79fca120ce297e8ae22	refs/heads/m1-core-transforms
+8401142720d3c91093ec02fb9dd354381f6da9ec	refs/heads/m1-r4-handoff
+9e3f3acde0db4b9d0a202ba4f7f396c132843597	refs/heads/m1-r4-verification
+0ec01087b9c9727f51274e4bbc66f00b2038c6f4	refs/heads/m1-review-handoff
+80927177469d89b985d3b57a3219652a994d6d4b	refs/heads/m2-animation-time
+d656801f1bce80eacb61dfb0da853ecc9c504077	refs/heads/m2-handoff
+870c9fd75bf9a7a9d619179993d37f2b6487b081	refs/heads/main
+802d9e7f95ccf8fdfd3879d99313794faa2c08d1	refs/heads/review/m1-claude
+870c9fd75bf9a7a9d619179993d37f2b6487b081	refs/tags/baseline-scaffold
+
+Published immutable download validation:
+HTTP GET and byte comparison PASS: minecraft-vfx-math-M2-r1-source.zip
+SHA-256: f6198a5e15616a395aee2dc508014f237126bb9ed9e11fc4eeff5beccbb7b273
+HTTP GET and byte comparison PASS: minecraft-vfx-math-M2-r1.git.bundle
+SHA-256: 7730f159942cde56c7c2eb553c34f94396f15cf9511f5be6215786c198e3b992
+HTTP GET and byte comparison PASS: SHA256SUMS.txt
+SHA-256: 09201c2b6676ebd79a4afdaac22448bb96c22233b06d01d364e4d4137c807e86
+HTTP GET and byte comparison PASS: VERIFICATION-REPORT.md
+SHA-256: 0c8f45fc6d8b03bca5a1ba0a012d6749ff0a1eb7c9b4498b2aea988b5c440b32
+HTTP GET and byte comparison PASS: production-vs-M1.diff
+SHA-256: c904fea741880c1bee456049dc375d5c85acf6040c1dd07aaf5d5c44dd8cc94e
+HTTP GET and byte comparison PASS: all-final-changes-vs-M1.patch
+SHA-256: da65d0da8286cf442fe0440a4a1f2d990c69ba443972726d079f34aac494a9a7
+
+This receipt was added after artifact creation; original deliverable bytes and manifest are unchanged.
