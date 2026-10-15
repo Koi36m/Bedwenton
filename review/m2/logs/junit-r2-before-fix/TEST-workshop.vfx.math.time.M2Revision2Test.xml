@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.time.M2Revision2Test" tests="9" skipped="0" failures="4" errors="0" timestamp="2026-10-15T09:38:56.141Z" hostname="vm" time="0.012">
+  <properties/>
+  <testcase name="P-R1: GAME keeps checked subtraction and raw ordering: no wrap-around for tick counters (sections 3, 4)" classname="workshop.vfx.math.time.M2Revision2Test" time="0.001"/>
+  <testcase name="P-R1: COSMETIC playback evaluates and accepts control events across the wrap; earlier instants are rejected by wrapped order (section 4 [R2])" classname="workshop.vfx.math.time.M2Revision2Test" time="0.001">
+    <failure message="java.lang.ArithmeticException: TimePoint.ticksSince: instant difference overflows long" type="java.lang.ArithmeticException">java.lang.ArithmeticException: TimePoint.ticksSince: instant difference overflows long
+	at workshop.vfx.math.time.TimePoint.ticksSince(TimePoint.java:27)
+	at workshop.vfx.math.time.Playback.localTicks(Playback.java:22)
+	at workshop.vfx.math.time.M2Revision2Test.cosmeticPlaybackAcrossTheWrap(M2Revision2Test.java:66)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <testcase name="P-A2: no-op controls return the same object and keep the stored anchor; the next control is checked against that anchor only (section 4 [R2])" classname="workshop.vfx.math.time.M2Revision2Test" time="0.001"/>
+  <testcase name="P-A3: FOREVER reports AFTER only when the cycle index reaches 2^63 (documented limitation, section 5 [R2])" classname="workshop.vfx.math.time.M2Revision2Test" time="0.0"/>
+  <testcase name="P-R1: translating a COSMETIC history so that it crosses the wrap changes no bit (section 3 [R2])" classname="workshop.vfx.math.time.M2Revision2Test" time="0.001">
+    <failure message="java.lang.IllegalArgumentException: Playback.pause: control instant precedes anchor" type="java.lang.IllegalArgumentException">java.lang.IllegalArgumentException: Playback.pause: control instant precedes anchor
+	at workshop.vfx.math.time.Playback.validateControl(Playback.java:67)
+	at workshop.vfx.math.time.Playback.pause(Playback.java:26)
+	at workshop.vfx.math.time.M2Revision2Test.translationAcrossTheWrap(M2Revision2Test.java:96)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <testcase name="P-R1: the wrapping difference d is valid for |true elapsed| &lt; 2^63; d = -2^63 is read as 2^63 ns backwards (section 3 [R2])" classname="workshop.vfx.math.time.M2Revision2Test" time="0.001">
+    <failure message="java.lang.ArithmeticException: TimePoint.ticksSince: instant difference overflows long" type="java.lang.ArithmeticException">java.lang.ArithmeticException: TimePoint.ticksSince: instant difference overflows long
+	at workshop.vfx.math.time.TimePoint.ticksSince(TimePoint.java:27)
+	at workshop.vfx.math.time.M2Revision2Test.intervalRestriction(M2Revision2Test.java:57)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <testcase name="P-R1: COSMETIC ticksSince across the Long.MAX_VALUE -&gt; Long.MIN_VALUE wrap is the elapsed time, forwards and backwards (section 3 [R2])" classname="workshop.vfx.math.time.M2Revision2Test" time="0.002">
+    <failure message="java.lang.ArithmeticException: TimePoint.ticksSince: instant difference overflows long" type="java.lang.ArithmeticException">java.lang.ArithmeticException: TimePoint.ticksSince: instant difference overflows long
+	at workshop.vfx.math.time.TimePoint.ticksSince(TimePoint.java:27)
+	at workshop.vfx.math.time.M2Revision2Test.cosmeticDifferenceAcrossTheWrap(M2Revision2Test.java:38)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <testcase name="P-R1: domain checks are unchanged: mixing COSMETIC and GAME is an IllegalArgumentException, also near the wrap (sections 3, 4)" classname="workshop.vfx.math.time.M2Revision2Test" time="0.002"/>
+  <testcase name="P-R1: zero elapsed time is +0.0 everywhere, including at both ends of the long range (section 3 [R2])" classname="workshop.vfx.math.time.M2Revision2Test" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

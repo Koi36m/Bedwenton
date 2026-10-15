@@ -300,3 +300,26 @@ reported was reproduced. The conditions are the owner's decisions:
 
 If P-R1 is adopted, Codex changes 2 lines after the revised test and golden files are delivered, then reruns the
 suite under Java 25. M2 final acceptance remains with the owner. M3 has not been started.
+
+## 8. Addendum: owner decisions and contract revision 2 (2026-10-15)
+
+| Finding | Decision | Result |
+|---|---|---|
+| A1 | P-A1 approved | contract 6.4 and new 6.4.1: bounds 1.5 / 2.5 / 3.5 x 2^-52 x M with derivation; production unchanged |
+| A2 | P-A2 approved (option a) | contract 4: ordering against the stored anchor, no control history; behaviour unchanged |
+| A3 | P-A3 approved (option a) | contract 5: FOREVER representational limit documented; behaviour unchanged |
+| R1 | P-R1 approved for correction | contract 3, 4, 6, 7: COSMETIC uses wrapping subtraction and wrapped ordering; GAME unchanged. Codex makes the 2-change production correction (`docs/m2/M2-AMENDMENT-R2.md` section 5) |
+
+**Test suite after revision 2: 191 tests.**
+- M1: 125.
+- Revision-1 M2: 44. One assertion in `TimePointTest` and one golden row are changed, both documented.
+- `M2ReviewAdversarialTest`: 13.
+- `M2Revision2Test`: 9.
+- `M2ReviewFindingsTest` is retired from the active suite; see `HISTORICAL-FINDINGS.md`.
+
+Against `1e85682` exactly 6 tests fail, all of them P-R1. With a throwaway minimal fix, 191 of 191 pass. The
+complete expectation changelog is in `docs/m2/M2-AMENDMENT-R2.md` section 4.
+
+Recommendation for M2 after Codex's correction: re-run the 191-test suite on Java 25 and repeat this review's
+integrity checks on the production diff. If the diff is limited to the two authorized changes and the suite passes,
+I expect to recommend **PASS**. Final acceptance remains the owner's.

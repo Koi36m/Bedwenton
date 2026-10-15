@@ -1,0 +1,9 @@
+Incorrect P-R1 fixes, applied one at a time to the throwaway trial copy (not delivered); only the 7+3 M2 test classes
+in workshop.vfx.math.time were run (build/test-results deleted before each run). Observed results:
+
+W4: GAME ticksSince also wraps (no checked subtraction)  -> 5 failing:
+    M2GoldenVectorTest.timePoints; M2ReviewAdversarialTest.validationOrder; M2Revision2Test.gameUnchanged;
+    PlaybackTest.arithmeticFailures; TimePointTest.invalidUse
+W1: COSMETIC subtraction wraps, control ordering left raw -> 2 failing:
+    M2Revision2Test.cosmeticPlaybackAcrossTheWrap; M2Revision2Test.translationAcrossTheWrap
+Correct minimal fix (r2-trial-fix.diff)                   -> 0 failing (and the full suite: 191/191, check OK)
