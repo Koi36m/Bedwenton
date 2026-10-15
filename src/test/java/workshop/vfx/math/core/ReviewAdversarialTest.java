@@ -23,7 +23,10 @@ import org.junit.jupiter.api.Test;
  * Independent adversarial review of M1 (Claude Code), written against contract revision 3 only.
  *
  * <p>Every assertion here follows from an unambiguous clause of IMPLEMENTATION-CONTRACT.md (revision 3); the
- * clause is named in each display name. References are independent of the production code: exact BigDecimal
+ * clause is named in each display name. Tolerances are the contract's own figures (1e-12 unless a clause states
+ * another). Two tolerances are derived rather than quoted, and justified inline: the conditioning bound for the
+ * alignY x axis, and the Pose round trips at the world border, which are measured in world units (local error
+ * times scale). References are independent of the production code: exact BigDecimal
  * arithmetic for normalization and Gram-Schmidt, Rodrigues' formula for rotations, analytic great-circle
  * positions for slerp. The supplied 97 tests are not modified or relied on.
  */
@@ -100,7 +103,7 @@ class ReviewAdversarialTest {
     // ------------------------------------------------------------ Vec3 / Quat normalization (sections 2 and 3)
 
     @Test
-    @DisplayName("normalizedOr: 1e-15 of the exact unit vector for 200,000 extreme finite inputs; same fallback reference below LENGTH_EPS (section 2)")
+    @DisplayName("normalizedOr: 1e-12 of the exact unit vector for 200,000 extreme finite inputs; same fallback reference below LENGTH_EPS (section 2)")
     void normalizedOrAgainstExactReference() {
         SplittableRandom r = new SplittableRandom(SEED);
         Vec3 fallback = new Vec3(Double.NaN, 2, -3);
@@ -115,7 +118,7 @@ class ReviewAdversarialTest {
             }
             double err = maxAbsDiff(exactUnit(v), n);
             worst = Math.max(worst, err);
-            if (err > 1e-15) {
+            if (err > 1e-12) {
                 fail("normalizedOr(" + v + ") = " + n + ", error " + err);
             }
         }
@@ -123,7 +126,7 @@ class ReviewAdversarialTest {
     }
 
     @Test
-    @DisplayName("Quat.normalized: 1e-15 of the exact unit quaternion for 100,000 extreme inputs; exact IDENTITY for zero (section 3)")
+    @DisplayName("Quat.normalized: 1e-12 of the exact unit quaternion for 100,000 extreme inputs; exact IDENTITY for zero (section 3)")
     void quatNormalizedAgainstExactReference() {
         SplittableRandom r = new SplittableRandom(SEED + 1);
         for (int i = 0; i < 100_000; i++) {
@@ -138,7 +141,7 @@ class ReviewAdversarialTest {
             BigDecimal n = n2.sqrt(MC);
             double err = Math.max(Math.max(Math.abs(q.w() - bw.divide(n, MC).doubleValue()), Math.abs(q.x() - bx.divide(n, MC).doubleValue())),
                     Math.max(Math.abs(q.y() - by.divide(n, MC).doubleValue()), Math.abs(q.z() - bz.divide(n, MC).doubleValue())));
-            if (err > 1e-15) {
+            if (err > 1e-12) {
                 fail("normalized(" + w + ", " + x + ", " + y + ", " + z + ") = " + q + ", error " + err);
             }
         }
@@ -224,12 +227,12 @@ class ReviewAdversarialTest {
             double eps = Math.pow(10, -r.nextDouble(0, 7.5)); // perpendicular fraction, above the 1e-8 threshold
             Vec3 hint = y.normalizedOr(Vec3.Y).mul(r.nextDouble(-1, 1)).add(p.mul(eps)).mul(Math.pow(10, r.nextInt(-3, 4)));
             Frame f = Frame.alignY(y, hint);
-            assertVec(exactUnit(y), f.y(), 1e-15, "y axis");
+            assertVec(exactUnit(y), f.y(), 1e-12, "y axis");
             // the direction of a perpendicular component of relative size eps is determined to about 1e-16 / eps
             Vec3 expected = exactPerpendicularUnit(f.y(), hint);
-            double tol = 1e-15 + 8e-16 / eps;
+            double tol = 1e-12 + 1e-14 / eps; // 1e-14 / eps: 100x headroom over the measured 2.2e-16 / eps
             assertVec(expected, f.x(), tol, "x axis, hint " + hint + ", eps " + eps);
-            assertVec(f.x().cross(f.y()), f.z(), 1e-15, "z = x cross y");
+            assertVec(f.x().cross(f.y()), f.z(), 1e-12, "z = x cross y");
         }
     }
 
@@ -251,13 +254,13 @@ class ReviewAdversarialTest {
             Frame frame = Frame.fromHeading(forward, up);
             assertVec(right, frame.x(), 1e-12, "right");
             assertVec(upAxis, frame.y(), 1e-12, "up");
-            assertVec(fn.negate(), frame.z(), 1e-15, "back");
+            assertVec(fn.negate(), frame.z(), 1e-12, "back");
             assertVec(frame.z(), frame.x().cross(frame.y()), 1e-12, "right x up = back");
         }
     }
 
     @Test
-    @DisplayName("transportY: 200,000-step walk with an antiparallel flip every 1,000 steps stays valid; y within 1e-15 of normalize(newY) (section 4)")
+    @DisplayName("transportY: 200,000-step walk with an antiparallel flip every 1,000 steps stays valid; y within 1e-12 of normalize(newY) (section 4)")
     void transportYLongWalk() {
         SplittableRandom r = new SplittableRandom(SEED + 6);
         Frame f = Frame.WORLD;
@@ -270,7 +273,7 @@ class ReviewAdversarialTest {
             Vec3 y = dir.mul(Math.pow(10, r.nextInt(-11, 300))); // the input length must not matter
             Frame g = Frame.transportY(f, y);
             assertFrameValid(g, 1e-12, "step " + i);
-            assertVec(exactUnit(y), g.y(), 1e-15, "step " + i + " y");
+            assertVec(exactUnit(y), g.y(), 1e-12, "step " + i + " y");
             f = g;
         }
     }
@@ -291,7 +294,7 @@ class ReviewAdversarialTest {
                 Vec3 perp = a.cross(randomUnit(r)).normalizedOr(Vec3.X);
                 Vec3 b = a.mul(-Math.cos(off)).add(perp.mul(Math.sin(off)));
                 Quat q = Quat.shortestArc(a.mul(r.nextDouble(1e-6, 1e6)), b.mul(r.nextDouble(1e-6, 1e6)));
-                assertEquals(1.0, norm(q), 1e-15, "unit");
+                assertEquals(1.0, norm(q), 1e-12, "unit");
                 double err = q.rotate(a).sub(b).length();
                 worst = Math.max(worst, err);
                 assertTrue(err <= tol, "offset " + off + ": error " + err + " > " + tol);
@@ -310,7 +313,7 @@ class ReviewAdversarialTest {
             Vec3 axis = exactUnit(au.cross(e));
             Quat q = Quat.shortestArc(a, a.negate());
             assertEquals(0.0, q.w(), 0.0, "half turn has w = 0 for " + a);
-            assertVec(axis, new Vec3(q.x(), q.y(), q.z()), 1e-15, "half-turn axis for " + a);
+            assertVec(axis, new Vec3(q.x(), q.y(), q.z()), 1e-12, "half-turn axis for " + a);
         }
     }
 
@@ -351,7 +354,7 @@ class ReviewAdversarialTest {
                         b = neg(b); // slerp must take the shortest path regardless of sign
                     }
                     Quat s = Quat.slerp(a, b, t);
-                    assertEquals(1.0, norm(s), 1e-14, "unit result");
+                    assertEquals(1.0, norm(s), 1e-12, "unit result");
                     Vec3 v = randomUnit(r);
                     Vec3 expected = a.rotate(rodrigues(axis, t * phi, v));
                     double err = s.rotate(v).sub(expected).length();
@@ -392,10 +395,10 @@ class ReviewAdversarialTest {
             double y = (1 - t) * a.y() + t * bb.y(), z = (1 - t) * a.z() + t * bb.z();
             double l = Math.sqrt(w * w + x * x + y * y + z * z);
             Quat n = Quat.nlerp(a, b, t);
-            assertEquals(w / l, n.w(), 1e-14, "w");
-            assertEquals(x / l, n.x(), 1e-14, "x");
-            assertEquals(y / l, n.y(), 1e-14, "y");
-            assertEquals(z / l, n.z(), 1e-14, "z");
+            assertEquals(w / l, n.w(), 1e-12, "w");
+            assertEquals(x / l, n.x(), 1e-12, "x");
+            assertEquals(y / l, n.y(), 1e-12, "y");
+            assertEquals(z / l, n.z(), 1e-12, "z");
         }
     }
 
@@ -431,7 +434,7 @@ class ReviewAdversarialTest {
             Quat q = Quat.axisAngle(axis, angle);
             Frame f = q.toFrame();
             Quat back = Quat.fromFrame(f);
-            assertEquals(1.0, norm(back), 1e-15, "unit");
+            assertEquals(1.0, norm(back), 1e-12, "unit");
             assertVec(f.x(), back.rotate(Vec3.X), 1e-12, "image of X, axis " + axis + " angle " + angle);
             assertVec(f.y(), back.rotate(Vec3.Y), 1e-12, "image of Y, axis " + axis + " angle " + angle);
             assertVec(f.z(), back.rotate(Vec3.Z), 1e-12, "image of Z, axis " + axis + " angle " + angle);
@@ -469,11 +472,12 @@ class ReviewAdversarialTest {
             Vec3 p = randomUnit(r).mul(r.nextDouble(0, 50));
             assertVec(a.toWorld(b.toWorld(p)), a.then(b).toWorld(p), 1e-7, "then at the border");
             Vec3 w = a.toWorld(p);
+            // 1e-6 in world units: a local-space error e corresponds to e * scale blocks in the world
             assertVec(p, a.toLocal(w), 1e-6 / a.scale(), "toLocal round trip");
             assertVec(p, a.inverse().toWorld(w), 1e-6 / a.scale(), "inverse round trip");
             Pose id = a.then(a.inverse());
             assertVec(Vec3.ZERO, id.translation(), 1e-6, "a.then(a.inverse()) translation");
-            assertEquals(1.0, id.scale(), 1e-15, "a.then(a.inverse()) scale");
+            assertEquals(1.0, id.scale(), 1e-12, "a.then(a.inverse()) scale");
             assertTrue(id.rotation().angleTo(Quat.IDENTITY) < 1e-12, "a.then(a.inverse()) rotation");
         }
     }
@@ -525,6 +529,6 @@ class ReviewAdversarialTest {
             assertVec(expected, Quat.fromEulerApplyXThenYThenZ(rx, ry, rz).rotate(v), 1e-12, "euler");
         }
         // right-hand rule spot check: +90 degrees about +Y sends +X to -Z (north)
-        assertEquals(0.0, angleBetween(Quat.axisAngle(Vec3.Y, Math.PI / 2).rotate(Vec3.X), Vec3.Z.negate()), 1e-15);
+        assertEquals(0.0, angleBetween(Quat.axisAngle(Vec3.Y, Math.PI / 2).rotate(Vec3.X), Vec3.Z.negate()), 1e-12);
     }
 }

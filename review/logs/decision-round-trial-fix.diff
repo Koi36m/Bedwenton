@@ -1,0 +1,24 @@
+--- /home/user/bedwenton/src/main/java/workshop/vfx/math/core/Pose.java	2026-10-15 07:11:56.509972716 +0000
++++ src/main/java/workshop/vfx/math/core/Pose.java	2026-10-15 07:38:26.028805802 +0000
+@@ -35,9 +35,9 @@
+         return new Pose(t, r, s);
+     }
+     private static void checkResult(String operation, Vec3 t, double s) {
+-        if (!t.isFinite()) throw new ArithmeticException(operation + ": translation is not representable");
+         if (!Double.isFinite(s) || s <= 0) {
+             throw new ArithmeticException(operation + ": scale is not representable");
+         }
++        if (!t.isFinite()) throw new ArithmeticException(operation + ": translation is not representable");
+     }
+ }
+--- /home/user/bedwenton/src/main/java/workshop/vfx/math/core/Quat.java	2026-10-15 07:11:56.509972716 +0000
++++ src/main/java/workshop/vfx/math/core/Quat.java	2026-10-15 07:38:26.028913872 +0000
+@@ -5,7 +5,7 @@
+     public static final Quat IDENTITY = new Quat(1, 0, 0, 0);
+ 
+     public static Quat axisAngle(Vec3 axis, double radians) {
+-        Vec3 unit = axis.normalizedOr(null);
++        Vec3 unit = axis == null ? null : axis.normalizedOr(null);
+         if (unit == null || !Double.isFinite(radians)) {
+             throw new IllegalArgumentException("axisAngle: finite nondegenerate axis and finite angle required");
+         }

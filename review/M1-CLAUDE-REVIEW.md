@@ -307,3 +307,19 @@ formula, convention, tier rule and accuracy figure is met, mostly by orders of m
    degrees apart for short near-vertical headings, and A6 makes a clause impossible to meet. Any resulting code
    changes are re-verified with the tests above.
 3. I1 to I4 are optional and can be deferred to the milestones where curves arrive.
+
+## 7. Addendum: decision round
+
+The owner's decisions on D1 and A1 to A6 are drafted in `docs/AMENDMENT-3-REVIEW-DECISIONS.md` (contract
+revision 4, **proposed**). That round changed the review's test files:
+
+- `ReviewFindingsTest` (7 disabled tests) is replaced by `Amendment3AcceptanceTest` (10 enabled tests). The
+  amendment's section 4 maps each finding to its permanent test.
+- `ReviewAdversarialTest` tolerances are corrected to the contract's figures. 17 assertions had used 1e-15 or 1e-14
+  where the contract promises 1e-12, contradicting this report's statement that every assertion follows from a
+  contract clause.
+- D1 also affects `Pose.then` (both scale and translation overflow), not only `Pose.inverse`.
+
+Current result on 8397c04: 125 tests, 122 passed, **3 failed by design** (`d1InverseScaleFailureNamesScale`,
+`d1ThenScaleFailureNamesScale`, `a3NullAxisIsIllegalArgument`). These are the acceptance criteria for Codex's D1 and
+A3 fixes. The counts in sections 1 and 5 above describe the first review round.

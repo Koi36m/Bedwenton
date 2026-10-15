@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.core.Amendment3AcceptanceTest" tests="10" skipped="0" failures="3" errors="0" timestamp="2026-10-15T07:37:51.360Z" hostname="vm" time="0.708">
+  <properties/>
+  <testcase name="D1: Pose.then names the scale when the scale product is not representable, even if the translation also overflows" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.033">
+    <failure message="org.opentest4j.AssertionFailedError: Pose.then: translation is not representable ==&gt; expected: &lt;true&gt; but was: &lt;false&gt;" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: Pose.then: translation is not representable ==&gt; expected: &lt;true&gt; but was: &lt;false&gt;
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at app//workshop.vfx.math.core.Amendment3AcceptanceTest.d1ThenScaleFailureNamesScale(Amendment3AcceptanceTest.java:50)
+	at java.base@25.0.4.1/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <testcase name="A3: Tier 3 inputs reject null with IllegalArgumentException (axisAngle axis, Frame axes, Pose fields)" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.003">
+    <failure message="org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: &lt;java.lang.IllegalArgumentException&gt; but was: &lt;java.lang.NullPointerException&gt;" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: &lt;java.lang.IllegalArgumentException&gt; but was: &lt;java.lang.NullPointerException&gt;
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at app//org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+	at app//org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at app//org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3128)
+	at app//workshop.vfx.math.core.Amendment3AcceptanceTest.a3NullAxisIsIllegalArgument(Amendment3AcceptanceTest.java:118)
+	at java.base@25.0.4.1/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.lang.NullPointerException: Cannot invoke &quot;workshop.vfx.math.core.Vec3.normalizedOr(workshop.vfx.math.core.Vec3)&quot; because &quot;axis&quot; is null
+	at workshop.vfx.math.core.Quat.axisAngle(Quat.java:8)
+	at workshop.vfx.math.core.Amendment3AcceptanceTest.lambda$a3NullAxisIsIllegalArgument$0(Amendment3AcceptanceTest.java:118)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53)
+	... 6 more
+</failure>
+  </testcase>
+  <testcase name="A1: transportY's y is normalize(newY) to 1e-15 per component (not bitwise), including after antiparallel flips" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.176"/>
+  <testcase name="A4: a hint that is null, non-finite or below LENGTH_EPS is absent; exactly LENGTH_EPS is present" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.014"/>
+  <testcase name="D1: Pose.inverse names the scale when 1/s is not representable, whatever the translation" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.009">
+    <failure message="org.opentest4j.AssertionFailedError: scale named for s=1.0E-310, t=Vec3[x=0.0, y=0.0, z=0.0]: Pose.inverse: translation is not representable ==&gt; expected: &lt;true&gt; but was: &lt;false&gt;" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: scale named for s=1.0E-310, t=Vec3[x=0.0, y=0.0, z=0.0]: Pose.inverse: translation is not representable ==&gt; expected: &lt;true&gt; but was: &lt;false&gt;
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at app//workshop.vfx.math.core.Amendment3AcceptanceTest.d1InverseScaleFailureNamesScale(Amendment3AcceptanceTest.java:39)
+	at java.base@25.0.4.1/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <testcase name="D1: a translation-only failure names the translation, not the scale; the set of throwing inputs is unchanged" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.004"/>
+  <testcase name="A2: the inverse of a degenerate quaternion is the identity rotation numerically; signed zeros are equivalent" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.038"/>
+  <testcase name="A5: fromHeading(f, u) depends only on the directions of f and u, and equals alignZ(-f, u) with an absent u read as +Y" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.109"/>
+  <testcase name="A6: rotate(v) is within (2|k^2 - 1| + 1e-13)|v| of the rotation by q/|q|, k = |q| within 1e-12 of 1, and finite for |v| &lt;= 1e100" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.313"/>
+  <testcase name="A5: fromHeading's parallel test uses the sine of the angle between the normalized vectors; worked examples" classname="workshop.vfx.math.core.Amendment3AcceptanceTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

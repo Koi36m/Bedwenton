@@ -24,12 +24,15 @@ java -version            # must report 25
 ./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false check
 ```
 
-Expected on 8397c04 plus the review tests: 122 tests, 115 passed, 0 failed, 7 skipped (the disabled
-`ReviewFindingsTest`). `ReviewAdversarialTest.runsOnJava25` fails if the test JVM is not Java 25.
+Expected on 8397c04 plus the review tests (decision round): 125 tests, 122 passed, 3 failed by design
+(`Amendment3AcceptanceTest`: two D1 tests and the A3 test; see `docs/AMENDMENT-3-REVIEW-DECISIONS.md` section 5).
+After Codex's D1 and A3 fixes: 125 passed. `ReviewAdversarialTest.runsOnJava25` fails if the test JVM is not Java 25.
+(The first review round's figure was 122 tests, 115 passed, 7 skipped.)
 
-## Running the disabled findings tests
+## Running the disabled findings tests (first round only)
 
-They are expected to fail against 8397c04; each one encodes one reading of the contract. Without editing the
+`ReviewFindingsTest` was removed in the decision round; this section documents how its logged results were produced.
+The tests were expected to fail against 8397c04; each one encoded one reading of the contract. Without editing the
 repository, use a Gradle init script kept outside the project:
 
 ```groovy
@@ -71,7 +74,9 @@ In `logs/probe.txt` the line `transportY 1e6-step walk ... worst=Infinity` is th
 | `logs/baseline-clean-test-attempt1-maven429.txt` | first `clean test`: Maven Central answered HTTP 429 while downloading JUnit (environment, not a test failure) |
 | `logs/baseline-clean-test.txt`, `logs/baseline-check.txt`, `logs/junit-baseline/` | the unmodified 97 tests at 8397c04 |
 | `logs/review-clean-test.txt`, `logs/review-check.txt`, `logs/junit-review/` | 97 + 25 review tests |
-| `logs/review-findings-enabled.txt`, `logs/junit-findings-enabled.xml` | the 7 findings tests forced on |
+| `logs/review-findings-enabled.txt`, `logs/junit-findings-enabled.xml` | first round: the 7 findings tests forced on |
+| `logs/decision-round-clean-test.txt`, `logs/junit-decision-round/` | decision round on 8397c04: 125 tests, 3 failing by design |
+| `logs/decision-round-trial-fix.txt`, `logs/decision-round-trial-fix.diff` | throwaway trial of the minimal D1 and A3 fix (not committed): 125 of 125 passed, `check` succeeded |
 | `logs/probe.txt` | measurements from `probe/Probe.java` and `probe/TransportYUlps.java` |
 
 `$REVIEW_TMP` in the logs stands for the reviewer's scratch directory (Gradle user home, extracted archive).
