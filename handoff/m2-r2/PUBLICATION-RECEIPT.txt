@@ -1,0 +1,45 @@
+M2 Revision 2 publication receipt
+
+Exact original amendment tip: 88702655a3f8c0428160a74f9193af7cc41b0b87
+Production implementation: 15f6564b2580d3722b625c9be96e57f2580c81a3
+Verification evidence / m2-r2-verification: e3b79bae1476e549d49b29dcf361e7da50fe67db
+Immutable artifact commit: 599e7e0a3451ffe4bf28338da01f2de381104ab8
+
+m2-r2-amendment was published intact; verification and handoff branches were published atomically without force. All pre-existing remote branch and tag refs were compared by full SHA and remain unchanged. The verification worktree is clean. No main merge, M3 work, or final M2 acceptance declaration.
+
+Actual final branch push output:
+To https://github.com/Koi36m/Bedwenton.git
+ * [new branch]      m2-r2-verification -> m2-r2-verification
+ * [new branch]      m2-r2-handoff -> m2-r2-handoff
+
+Remote refs after publication:
+ref: refs/heads/main	HEAD
+870c9fd75bf9a7a9d619179993d37f2b6487b081	HEAD
+8397c04b55f7d506e8fec79fca120ce297e8ae22	refs/heads/m1-core-transforms
+8401142720d3c91093ec02fb9dd354381f6da9ec	refs/heads/m1-r4-handoff
+9e3f3acde0db4b9d0a202ba4f7f396c132843597	refs/heads/m1-r4-verification
+0ec01087b9c9727f51274e4bbc66f00b2038c6f4	refs/heads/m1-review-handoff
+80927177469d89b985d3b57a3219652a994d6d4b	refs/heads/m2-animation-time
+2a222cee03cdd9e9009706530a6e764a83f9bcfd	refs/heads/m2-handoff
+88702655a3f8c0428160a74f9193af7cc41b0b87	refs/heads/m2-r2-amendment
+599e7e0a3451ffe4bf28338da01f2de381104ab8	refs/heads/m2-r2-handoff
+e3b79bae1476e549d49b29dcf361e7da50fe67db	refs/heads/m2-r2-verification
+870c9fd75bf9a7a9d619179993d37f2b6487b081	refs/heads/main
+802d9e7f95ccf8fdfd3879d99313794faa2c08d1	refs/heads/review/m1-claude
+870c9fd75bf9a7a9d619179993d37f2b6487b081	refs/tags/baseline-scaffold
+
+Immutable artifact download validation:
+HTTP GET and byte comparison PASS: minecraft-vfx-math-M2-r2-source.zip
+SHA-256: 09439ffae2d4023ddc473ade999dfe64136fcb1e2621a249da213e60b24a3f30
+HTTP GET and byte comparison PASS: minecraft-vfx-math-M2-r2.git.bundle
+SHA-256: 94f296ee3fd64507970f9f19d05400e77d7222a549fa4305190d995b0c9f61f9
+HTTP GET and byte comparison PASS: SHA256SUMS.txt
+SHA-256: 075d1a98186a5fdfd903fee89fd19c3948b81752b958fc32119a00f756658ac6
+HTTP GET and byte comparison PASS: VERIFICATION-REPORT.md
+SHA-256: 538e80c375f8f5603c2c29461e43adb0b91203fb2dd95db20dda3a1bf49f9711
+HTTP GET and byte comparison PASS: production-vs-r1.diff
+SHA-256: 2aaf9ae2158287fcc442933f31f20a77edd7ccce335c969d5a8731a4d9dc75fa
+HTTP GET and byte comparison PASS: test-summary.csv
+SHA-256: 6c3aa872290e7c39a9f2ebacf38d07ee893fdf151dc97a9189cd44993bae9b32
+
+Receipt added after artifact generation. ZIP, bundle and original deliverable manifest remain unchanged. Final M2 acceptance remains pending owner review.
