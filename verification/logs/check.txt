@@ -1,0 +1,13 @@
+> Task :compileJava UP-TO-DATE
+> Task :processResources NO-SOURCE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources UP-TO-DATE
+> Task :testClasses UP-TO-DATE
+> Task :test UP-TO-DATE
+> Task :verifyNoRuntimeDependencies
+> Task :check
+
+BUILD SUCCESSFUL in 995ms
+5 actionable tasks: 1 executed, 4 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.1.0/userguide/configuration_cache_enabling.html

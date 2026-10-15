@@ -1,0 +1,5 @@
+compose_cases.csv: OK
+pose_cases.csv: OK
+pose_large_cases.csv: OK
+rotation_cases.csv: OK
+slerp_cases.csv: OK

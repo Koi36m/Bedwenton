@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.core.NumericPolicyTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-15T06:49:45.194Z" hostname="1a7d890349f4" time="0.203">
+  <properties/>
+  <testcase name="Supported magnitude: Vec3, Quat.rotate and Frame stay finite and homogeneous up to 1e100" classname="workshop.vfx.math.core.NumericPolicyTest" time="0.005"/>
+  <testcase name="Tier 1: Pose.toWorld overflows to infinity (no exception, no clamping); Frame.toWorld likewise" classname="workshop.vfx.math.core.NumericPolicyTest" time="0.004"/>
+  <testcase name="Tier 1: Vec3 and Quat overflow to infinity with no exception and no saturation" classname="workshop.vfx.math.core.NumericPolicyTest" time="0.001"/>
+  <testcase name="Supported magnitude: Pose with scale and translation up to 1e100 is finite and accurate; compositions of two stay finite" classname="workshop.vfx.math.core.NumericPolicyTest" time="0.02"/>
+  <testcase name="Tier 3: Pose.then throws ArithmeticException when scale overflows or underflows to zero; two valid poses never give an invalid one" classname="workshop.vfx.math.core.NumericPolicyTest" time="0.002"/>
+  <testcase name="Tier 1: NaN and infinity propagate by IEEE rules (no sanitizing, no exceptions)" classname="workshop.vfx.math.core.NumericPolicyTest" time="0.001"/>
+  <testcase name="Tier 3: Pose.inverse throws ArithmeticException when the reciprocal scale or inverse translation is not representable" classname="workshop.vfx.math.core.NumericPolicyTest" time="0.003"/>
+  <testcase name="Tier 2: Quat.normalized and inverse are total: finite unit result for every double input, IDENTITY for zero or non-finite" classname="workshop.vfx.math.core.NumericPolicyTest" time="0.062"/>
+  <testcase name="Tier 2: Frame factories always return a valid right-handed frame, WORLD for a degenerate axis, for every double input" classname="workshop.vfx.math.core.NumericPolicyTest" time="0.065"/>
+  <testcase name="Tier 3: constructors keep throwing IllegalArgumentException for invalid inputs" classname="workshop.vfx.math.core.NumericPolicyTest" time="0.001"/>
+  <testcase name="Tier 2: shortestArc is total: unit result for every pair; IDENTITY for degenerate input; correct mapping otherwise" classname="workshop.vfx.math.core.NumericPolicyTest" time="0.03"/>
+  <testcase name="Tier 2: normalizedOr is total: fallback exactly for degenerate input, otherwise a finite unit vector" classname="workshop.vfx.math.core.NumericPolicyTest" time="0.001"/>
+  <testcase name="Tier 3: Pose.then throws ArithmeticException when the composed translation overflows" classname="workshop.vfx.math.core.NumericPolicyTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

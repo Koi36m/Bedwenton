@@ -1,0 +1,17 @@
+Starting a Gradle Daemon (subsequent builds will be faster)
+> Task :wrapper FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':wrapper'.
+> Test of distribution url https://services.gradle.org/distributions/gradle-9.1.0-bin.zip failed. Please check the values set with --gradle-distribution-url and --gradle-version.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to generate a Build Scan (Powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 7s
+1 actionable task: 1 executed
