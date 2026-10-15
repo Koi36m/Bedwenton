@@ -35,9 +35,9 @@ public record Pose(Vec3 translation, Quat rotation, double scale) {
         return new Pose(t, r, s);
     }
     private static void checkResult(String operation, Vec3 t, double s) {
-        if (!t.isFinite()) throw new ArithmeticException(operation + ": translation is not representable");
         if (!Double.isFinite(s) || s <= 0) {
             throw new ArithmeticException(operation + ": scale is not representable");
         }
+        if (!t.isFinite()) throw new ArithmeticException(operation + ": translation is not representable");
     }
 }

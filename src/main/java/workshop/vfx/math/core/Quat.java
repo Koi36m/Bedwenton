@@ -5,7 +5,7 @@ public record Quat(double w, double x, double y, double z) {
     public static final Quat IDENTITY = new Quat(1, 0, 0, 0);
 
     public static Quat axisAngle(Vec3 axis, double radians) {
-        Vec3 unit = axis.normalizedOr(null);
+        Vec3 unit = axis == null ? null : axis.normalizedOr(null);
         if (unit == null || !Double.isFinite(radians)) {
             throw new IllegalArgumentException("axisAngle: finite nondegenerate axis and finite angle required");
         }
