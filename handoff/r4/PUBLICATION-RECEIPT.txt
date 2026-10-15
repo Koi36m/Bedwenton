@@ -1,0 +1,42 @@
+M1 Revision 4 publication receipt
+
+Production fixes: 74710d338eb8fcb48a64763fa277e1c7be475bba
+Verification evidence: 9e3f3acde0db4b9d0a202ba4f7f396c132843597
+Exact review branch: 802d9e7f95ccf8fdfd3879d99313794faa2c08d1
+Immutable artifact commit: 4d436d3b3a6279eb86dbd11d2f82bc35beb54171
+
+The two new branches were published in one atomic Git push without force.
+Original main, m1-core-transforms, baseline-scaffold and review history were preserved.
+The final implementation worktree is clean. Final M1 acceptance remains the owner's decision.
+
+Actual push output:
+To https://github.com/Koi36m/Bedwenton.git
+ * [new branch]      m1-r4-verification -> m1-r4-verification
+ * [new branch]      m1-r4-handoff -> m1-r4-handoff
+
+Observed remote refs immediately after publication:
+ref: refs/heads/main	HEAD
+870c9fd75bf9a7a9d619179993d37f2b6487b081	HEAD
+8397c04b55f7d506e8fec79fca120ce297e8ae22	refs/heads/m1-core-transforms
+4d436d3b3a6279eb86dbd11d2f82bc35beb54171	refs/heads/m1-r4-handoff
+9e3f3acde0db4b9d0a202ba4f7f396c132843597	refs/heads/m1-r4-verification
+0ec01087b9c9727f51274e4bbc66f00b2038c6f4	refs/heads/m1-review-handoff
+870c9fd75bf9a7a9d619179993d37f2b6487b081	refs/heads/main
+802d9e7f95ccf8fdfd3879d99313794faa2c08d1	refs/heads/review/m1-claude
+870c9fd75bf9a7a9d619179993d37f2b6487b081	refs/tags/baseline-scaffold
+
+Download validation at immutable artifact commit:
+HTTP GET and byte comparison PASS: minecraft-vfx-math-M1-r4-source.zip
+SHA-256: 0265da0e19ffb26d05b6029989d01adc46d645585d5baa026046aa09f9359eed
+HTTP GET and byte comparison PASS: minecraft-vfx-math-M1-r4.git.bundle
+SHA-256: 1924568704685b5bcfd77e4c3d0ec595da92e0ad82ff10329e5d6bdfac213b79
+HTTP GET and byte comparison PASS: SHA256SUMS.txt
+SHA-256: 37e8bfbc356ae961812840654f8472e10176f0a8a7e58eb075e414acd009408c
+HTTP GET and byte comparison PASS: VERIFICATION-REPORT.md
+SHA-256: 22d5311716f03ef50d98de6b0471ff4f94191cafc8384ba2121cfacb44fd4b64
+HTTP GET and byte comparison PASS: production.diff
+SHA-256: 67192366025f1d811bcef968c254c4ff48b7d7b8f98c20956e34e676d3bc0ab2
+HTTP GET and byte comparison PASS: test-summary.csv
+SHA-256: 45091fe0393dcdce585c7380bf800c30750ae58c3c26503e4b67902232fc0c2e
+
+This receipt was added after the artifacts were created; original ZIP, bundle and checksum manifest were not modified.
