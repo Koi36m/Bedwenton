@@ -6,6 +6,10 @@ Audience: the engineer implementing the production source (Codex or any other).
 **Revision 3 (Amendment 2): two clarifications, no redesign.** Marked **[R3]**, listed in
 `AMENDMENT-2-CLARIFICATIONS.md`: (A) caller-supplied fallbacks and `clamp` with infinite bounds; (B) the supported
 domain of every operand, including scalar multipliers, interpolation parameters, angles and axes.
+**Revision 4 (Amendment 3): decisions after the independent M1 review, no redesign.** Marked **[R4]**, listed in
+`AMENDMENT-3-REVIEW-DECISIONS.md`: exception attribution in `Pose` (D1); tolerances, equality, null, hint and
+`fromHeading` clarifications (A1 to A5); a corrected `rotate` accuracy bound (A6). Executable form:
+`Amendment3AcceptanceTest`. Revision 3 remains the historical baseline (archive and Git history).
 Clauses that are not marked are unchanged since revision 1.
 Status: specification. The tests in `src/test/java` are the executable form of this contract. Where this
 document and a test disagree, stop and report the disagreement; do not change either silently.
@@ -61,11 +65,16 @@ result and never throw (`MathUtil.clamp` throws only for an invalid range argume
 
 **Tier 3: validated types reject, never repair.**
 - Invalid **inputs** throw `IllegalArgumentException`: `Frame` constructor, `Pose` constructor,
-  `Quat.axisAngle`, `Quat.fromEulerApplyXThenYThenZ` (via `axisAngle`), `MathUtil.clamp` (range).
+  `Quat.axisAngle`, `Quat.fromEulerApplyXThenYThenZ` (via `axisAngle`), `MathUtil.clamp` (range). **[R4]** A
+  `null` argument to any of these is an invalid input. Outside Tier 3, `null` is accepted only where a clause
+  says so (the hints of section 4). Any other `null` operand is outside the API, and its behaviour is
+  unspecified.
 - A **derived** `Pose` that is not representable throws `ArithmeticException`: `Pose.then` and `Pose.inverse`
   (section 5). The inputs were valid, so this is an arithmetic condition, not an argument error.
-- Never clamp, saturate or substitute a default. The exception message should name the operation and the
-  reason (not tested).
+- Never clamp, saturate or substitute a default. The exception message names the operation and the reason.
+  **[R4]** For `Pose.then` and `Pose.inverse` the reason is the first failing check in the order of section 5
+  (scale before translation), and the message contains the word `scale` or `translation` accordingly. Only those
+  words and the operation name are tested.
 
 **Tier 4: domain-restricted operations.** `Quat.slerp`, `nlerp`, `angleTo` and `toFrame` require finite **unit**
 quaternions (and finite `t`, within the domain table for `slerp` and `nlerp`). For such inputs the results are finite and accurate as specified. Outside the domain
@@ -90,7 +99,7 @@ reciprocals in [1e-100, 1e100]; all are far from overflow (1.8e308) and underflo
 | `Vec3.mul(s)` | components at most 1e100 **and** finite scalar `s` with `abs(s)` at most 1e100 |
 | `Vec3.lerp(to, t)` | components at most 1e100 **and** finite `t` with `abs(t)` at most 1e100 |
 | `Quat.mul, dot` | every component magnitude at most 1e100 (unit quaternions included) |
-| `Quat.rotate(v)` | quaternion finite and unit (norm within 1e-12 of 1); `v` components at most 1e100 |
+| `Quat.rotate(v)` | quaternion finite with norm `k` within 1e-12 of 1; `v` components at most 1e100. **[R4]** Result finite; accuracy as in section 6 (it depends on `k`) |
 | `Frame.toWorld, toLocal` | vector components at most 1e100 (frame axes are unit by construction) |
 | `Pose.toWorld, toLocal, directionToWorld` | pose translation components at most 1e100, scale in [1e-100, 1e100]; vector components at most 1e100 |
 | `Pose.then, inverse` | both poses with translation components at most 1e100 and scale in [1e-100, 1e100]; never throws; result scale in [1e-200, 1e200] |
@@ -173,8 +182,8 @@ public record Quat(double w, double x, double y, double z) {
 ```
 
 - **`axisAngle(axis, radians)`**: axis is normalized internally. Throws `IllegalArgumentException` when the
-  axis is non-finite, has magnitude below `LENGTH_EPS`, or `radians` is not finite. Result is
-  `(cos(r/2), sin(r/2) * unitAxis)`.
+  axis is `null` **[R4]**, non-finite, or has magnitude below `LENGTH_EPS`, or when `radians` is not finite.
+  Result is `(cos(r/2), sin(r/2) * unitAxis)`.
 - **`fromEulerApplyXThenYThenZ(rx, ry, rz)`**: equals `qz.mul(qy).mul(qx)` where `qx`, `qy`, `qz` are
   `axisAngle` about +X, +Y, +Z. Rotation about **fixed world axes**: X first, then Y, then Z. This is an
   import helper for the audited Astral Prism order; no other Euler helper exists in M1.
@@ -184,10 +193,18 @@ public record Quat(double w, double x, double y, double z) {
 - **`conjugate`**: `(w, -x, -y, -z)`.
 - **`normalized`**: unit quaternion; zero, or any non-finite component, returns `IDENTITY`. Must be accurate
   for components like `1e200` and `3e-200` (scale by the largest absolute component first).
-- **`inverse`**: `normalized().conjugate()` (these are rotations).
+- **`inverse`**: `normalized().conjugate()` (these are rotations). **[R4]** For a zero or non-finite quaternion this
+  is `IDENTITY.conjugate() = (1, -0.0, -0.0, -0.0)`, the identity rotation. Record `equals` on `Quat` and `Vec3` is
+  structural (`Double.compare` per component). It distinguishes `0.0` from `-0.0` and `q` from `-q`, and is
+  **not** a test of rotational or numerical equality. Specified values, including fallbacks, are numerical: `-0.0`
+  and `0.0` are equal. Only `normalized()`, `shortestArc` and the Frame factories promise to return the `IDENTITY` or
+  `WORLD` *constant*.
 - **`dot`**: 4-component dot product.
 - **`rotate(v)`**: assumes `this` is a unit quaternion (callers normalize). Use
   `v + 2w(u x v) + 2 u x (u x v)` with `u = (x, y, z)`; it is cheaper and more accurate than building `q v q*`.
+  **[R4]** For a quaternion of norm `k`, the formula returns exactly `v + k^2 (R v - v)` in real arithmetic, where
+  `R` is the rotation of `q / k`. Inside the domain the result is finite and lies within
+  `(2 abs(k^2 - 1) + 1e-13) abs(v)` of `R v` (at most about `4.1e-12 abs(v)`).
 - **`angleTo(o)`**: rotation angle in `[0, pi]` between two rotations, sign-insensitive (`q` and `-q` give 0).
   Must be **atan2-based**, not `acos`-based: with `r = this.conjugate().mul(o)`,
   `angle = 2 * atan2(|vector part of r|, |r.w|)`. Tests require 1e-12 absolute accuracy for angles from
@@ -236,6 +253,19 @@ public record Frame(Vec3 x, Vec3 y, Vec3 z) {
 - **Every factory must return a frame that passes this validation at 1e-12** (tests re-check at 1e-12 with
   an independent triple-product test). Reach this by orthogonalizing **twice** (two Gram-Schmidt passes)
   and deriving the third axis by a cross product of the first two.
+- **[R4] Hint processing order.** A hint argument (`xHint`, `yHint`, `up`) is evaluated in exactly this order,
+  after the axis itself has been normalized:
+  1. **Absence, on the hint as supplied (unnormalized).** The hint is *absent* when it is `null`, has a
+     non-finite component, or its largest absolute component is below `LENGTH_EPS` (the `normalizedOr` predicate).
+     A hint whose largest component is exactly `LENGTH_EPS` is present. An absent `xHint` or `yHint` is replaced by
+     the fallback hint (the world axis least aligned with the axis, ties X, Y, Z). An absent `up` in `fromHeading`
+     is replaced by +Y. In the bullets below, "zero/non-finite" means "absent".
+  2. **Normalization.** A present hint is normalized. After this step the hint's length plays no further part;
+     step 1 is the only place where it matters.
+  3. **Parallel test, on the normalized hint.** The component of the normalized hint perpendicular to the
+     normalized axis is computed. If its length is below **1e-8**, the hint counts as parallel and is replaced by
+     the fallback hint of step 1. This includes the +Y substituted for an absent `up`. The fallback hint itself
+     is never parallel, because its perpendicular component is at least `sqrt(2/3)`.
 - **`alignY(y, xHint)`**: `y` axis = `normalize(y)`. If `y` is non-finite or below `LENGTH_EPS`, return
   `WORLD`. `x` axis = the component of `xHint` perpendicular to `y`, normalized. If `xHint` is
   zero/non-finite, or that perpendicular component (computed from the *normalized* hint) has length below
@@ -244,12 +274,26 @@ public record Frame(Vec3 x, Vec3 y, Vec3 z) {
 - **`alignZ(z, yHint)`**: same idea with the roles shifted: `z = normalize(z)`; `y` = component of `yHint`
   perpendicular to `z` (same fallback rules and threshold); `x = y.cross(z)`. Same `WORLD` fallback.
 - **`fromHeading(forward, up)`**: returns `x = right`, `y = up`, `z = back` where `back = -normalize(forward)`.
-  `right = normalize(forward.cross(upHint))`, and `y = right.cross(forward)`. Defaults: `forward` zero or
-  non-finite returns `WORLD` (which is "facing -Z"). `up` null/zero/non-finite is treated as +Y. If `up` is
-  parallel to `forward` (cross product magnitude below 1e-8), use the least-aligned world axis of `forward`
-  (ties X, Y, Z) as the up hint. Handedness: `right.cross(up) = back`.
+  `right = normalize(forward.cross(upHint))`, and `y = right.cross(forward)`.
+  **[R4]** Defaults and degeneracy are defined by
+  `fromHeading(forward, up) = alignZ(-forward, up is absent ? +Y : up)`. That is: `forward` absent returns
+  `WORLD` ("facing -Z"). An absent `up` means +Y. `forward` and `up` count as parallel when the sine of the angle
+  between them, `abs(normalize(forward) x normalize(up))`, is below 1e-8. The input lengths never matter. In that
+  case the up hint is the least-aligned world axis of `forward` (ties X, Y, Z). Handedness: `right x up = back`.
+  Worked examples (tolerance 1e-12):
+
+  | `forward` | `up` | `x` (right) | `y` (up) | `z` (back) | Why |
+  |---|---|---|---|---|---|
+  | (0, 0, 1) | (0, 1, 0) | (-1, 0, 0) | (0, 1, 0) | (0, 0, -1) | facing south |
+  | (0, 1, 0) | (0, 1, 0) | (0, 0, -1) | (1, 0, 0) | (0, -1, 0) | parallel: fallback up +X |
+  | (1e-9, 1e-3, 0) | (0, 1, 0) | (0, 0, 1) | (-0.9999999999995, 9.999999999995e-7, 0) | (-9.999999999995e-7, -0.9999999999995, 0) | sine 1e-6: hint honoured |
+  | (1e-3, 1e3, 0) | (0, 7, 0) | same as previous row | | | lengths ignored |
+  | (1e-9, 1, 0) | (0, 1, 0) | (1, -1e-9, 0) | (0, 0, 1) | (-1e-9, -1, 0) | sine 1e-9: fallback up +Z |
+  | (0, 0, 1) | (1e-13, 0, 0) | (-1, 0, 0) | (0, 1, 0) | (0, 0, -1) | up absent: +Y |
+  | (0, 0, 1) | (1e-12, 0, 0) | (0, 1, 0) | (1, 0, 0) | (0, 0, -1) | up present |
 - **`transportY(prev, newY)`**: carries `prev` to the new Y axis by the **shortest-arc rotation** from
-  `prev.y` to `normalize(newY)` and returns the re-orthogonalized frame (new `y` exactly `normalize(newY)`).
+  `prev.y` to `normalize(newY)` and returns the re-orthogonalized frame (new `y` equals
+  `normalize(newY)` to 1e-15 per component **[R4]**. It is set from `newY`, never obtained by rotating `prev.y`.)
   Zero or non-finite `newY` returns `prev` (the same object). Antiparallel `newY` must still return a valid,
   finite frame (the half-turn axis rule of `shortestArc`).
 - `Frame` has no hidden state and does not normalize in its constructor.
@@ -277,6 +321,9 @@ public record Pose(Vec3 translation, Quat rotation, double scale) {
 - **`inverse()`**: `R' = R.conjugate()`, `s' = 1/s`, `t' = -s' * R'.rotate(t)`.
 - **[R2] Representability check (Tier 3).** `then` and `inverse` compute `t`, `R`, `s` as above and then **check**
   before constructing the result: every component of `t` is finite, and `s` is finite and strictly greater than 0.
+  **[R4]** The scale is checked first, so the exception names the scale whenever the scale is not representable,
+  including when that also made `t` non-finite (`inverse` of a subnormal scale). The set of inputs that throw is
+  unchanged.
   If either check fails they throw **`ArithmeticException`** and return nothing (poses are immutable, so nothing
   is half-updated). They must not clamp, saturate, substitute a default, or reach the `Pose` constructor with an
   invalid value (which would raise the wrong exception type). Consequences, all pinned by `NumericPolicyTest`:
@@ -303,7 +350,7 @@ public record Pose(Vec3 translation, Quat rotation, double scale) {
 | `Frame` factories | orthonormal and right-handed to 1e-12 |
 | `angleTo`, `slerp` angle from `a` | 1e-12 (small angles), 1e-9 (general) |
 | 1,000 compositions without renormalization | norm drift below 1e-12 (measured, see drift test) |
-| **[R2, R3]** Tier 1 operations with every operand inside the supported-domain table of section 0A | finite; absolute error at most 1e-13 times the operand magnitudes involved (see `NumericPolicyTest`, `PolicyClarificationTest`) |
+| **[R2, R3]** Tier 1 operations with every operand inside the supported-domain table of section 0A | finite; absolute error at most 1e-13 times the operand magnitudes involved, **[R4]** except `Quat.rotate`, whose bound for a quaternion of norm `k` is `(2 abs(k^2 - 1) + 1e-13) abs(v)` (section 3) (see `NumericPolicyTest`, `PolicyClarificationTest`) |
 | **[R2, R3]** Tier 2 operations for any `double` operand value | valid, unit (or valid frame) to 1e-12; own fallbacks exactly as specified; caller-supplied fallback returned unchanged |
 
 ## 7. Out of scope for M1
