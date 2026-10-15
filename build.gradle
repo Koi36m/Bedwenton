@@ -1,0 +1,27 @@
+plugins { id 'java' }
+group = 'workshop.vfx'
+version = '0.1.0-m1'
+repositories { mavenCentral() }
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.12.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.joml:joml:1.10.9'
+}
+java { toolchain.languageVersion = JavaLanguageVersion.of(25) }
+tasks.withType(JavaCompile).configureEach {
+    options.release = 25
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-Xlint:all'
+}
+test {
+    useJUnitPlatform()
+    maxHeapSize = '512m'
+    testLogging { events 'passed', 'failed', 'skipped'; showStandardStreams = true }
+}
+tasks.register('verifyNoRuntimeDependencies') {
+    doLast {
+        def files = configurations.runtimeClasspath.files
+        if (!files.isEmpty()) throw new GradleException('Production runtime classpath must be empty, found: ' + files*.name)
+    }
+}
+check.dependsOn 'verifyNoRuntimeDependencies'
