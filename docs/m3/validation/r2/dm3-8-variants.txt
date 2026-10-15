@@ -1,0 +1,27 @@
+DM3-8 clarification: Bezier variants of the revision 2 reference with explicit lerp special cases.
+V1: per component a == b ? a : (1 - t) a + t b.   V2: t == 0 ? a : t == 1 ? b : a + t (b - a).
+
+== V1, revision 2 M3 suite
+workshop.vfx.math.curve.BezierTest                      tests=  7 not-passed=0
+workshop.vfx.math.curve.EasingTest                      tests=  8 not-passed=0
+workshop.vfx.math.curve.M3BoundaryTest                  tests=  3 not-passed=0
+workshop.vfx.math.curve.M3DeterminismTest               tests=  2 not-passed=0
+workshop.vfx.math.curve.M3ReferenceVectorTest           tests=  4 not-passed=0
+workshop.vfx.math.curve.PosedCurveTest                  tests=  5 not-passed=0
+workshop.vfx.math.curve.SpiralTest                      tests= 15 not-passed=0
+TOTAL 44 not passed 0
+
+== V2, revision 2 M3 suite
+workshop.vfx.math.curve.BezierTest                      tests=  7 not-passed=0
+workshop.vfx.math.curve.EasingTest                      tests=  8 not-passed=0
+workshop.vfx.math.curve.M3BoundaryTest                  tests=  3 not-passed=0
+workshop.vfx.math.curve.M3DeterminismTest               tests=  2 not-passed=0
+workshop.vfx.math.curve.M3ReferenceVectorTest           tests=  4 not-passed=0
+workshop.vfx.math.curve.PosedCurveTest                  tests=  5 not-passed=0
+workshop.vfx.math.curve.SpiralTest                      tests= 15 not-passed=0
+TOTAL 44 not passed 0
+
+== exact constancy of a constant cubic (probe)
+r2: constant cubic: points differing from the control point over 100001 t in [-2, 3]: 44284
+v1: constant cubic: points differing from the control point over 100001 t in [-2, 3]: 0
+v2: constant cubic: points differing from the control point over 100001 t in [-2, 3]: 0

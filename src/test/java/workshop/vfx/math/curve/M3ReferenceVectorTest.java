@@ -8,7 +8,9 @@ import static workshop.vfx.math.curve.CurveTestSupport.assertNear;
 import static workshop.vfx.math.curve.CurveTestSupport.csv;
 import static workshop.vfx.math.curve.CurveTestSupport.hex;
 import static workshop.vfx.math.curve.CurveTestSupport.maxAbs;
-import static workshop.vfx.math.curve.CurveTestSupport.phaseErr;
+import static workshop.vfx.math.curve.CurveTestSupport.spiralDerivativeTol;
+import static workshop.vfx.math.curve.CurveTestSupport.spiralPointTol;
+import static workshop.vfx.math.curve.CurveTestSupport.spiralSecondTol;
 import static workshop.vfx.math.curve.CurveTestSupport.vec;
 
 import java.nio.charset.StandardCharsets;
@@ -99,29 +101,22 @@ class M3ReferenceVectorTest {
     }
 
     @Test
-    @DisplayName("spiral.csv: 549 spiral cases against 60-digit Taylor references; exact quarter-turn points; error bounds include phase rounding (sections 5, 7)")
+    @DisplayName("spiral.csv: 959 spiral cases against 60-digit Taylor references (549 revision 1 rows, 410 revision 2 adversarial rows: large startTurn, near seams, radius cancellation); exact quarter-turn points; bounds relative to S (sections 5, 7.2)")
     void spiral() {
         List<String[]> rows = csv("spiral.csv");
-        assertTrue(rows.size() > 500);
+        assertEquals(959, rows.size());
         for (String[] r : rows) {
             double r0 = hex(r[0]), r1 = hex(r[1]), rise = hex(r[2]), turns = hex(r[3]), start = hex(r[4]), t = hex(r[5]);
             Spiral s = new Spiral(r0, r1, rise, turns, start);
             Vec3 ep = vec(r, 7), ed = vec(r, 10), es = vec(r, 13);
             String label = String.join(",", r);
-            double rad = Math.abs(r0 == r1 ? r0 : (1 - t) * r0 + t * r1);
-            double dr = Math.abs(r1 - r0);
-            double w = 2 * Math.PI * Math.abs(turns);
-            double dphi = 2 * Math.PI * phaseErr(turns, start, t); // radians
             if (r[6].equals("EXACT")) {
                 assertExact(ep, s.point(t), label + " point");
             } else {
-                double tolP = 0x1p-49 * (rad + Math.abs(rise * t)) + rad * dphi + Math.ulp(maxAbs(ep));
-                assertNear(ep, s.point(t), tolP, label + " point");
+                assertNear(ep, s.point(t), spiralPointTol(r0, r1, rise, turns, t) + Math.ulp(maxAbs(ep)), label + " point");
             }
-            double wd = dr + w * rad + Math.abs(rise);
-            assertNear(ed, s.derivative(t), 0x1p-48 * wd + wd * dphi + Math.ulp(maxAbs(ed)), label + " derivative");
-            double ws = 2 * dr * w + w * w * rad;
-            assertNear(es, s.secondDerivative(t), 0x1p-47 * ws + ws * dphi + Math.ulp(maxAbs(es)), label + " second");
+            assertNear(ed, s.derivative(t), spiralDerivativeTol(r0, r1, rise, turns, t) + Math.ulp(maxAbs(ed)), label + " derivative");
+            assertNear(es, s.secondDerivative(t), spiralSecondTol(r0, r1, turns, t) + Math.ulp(maxAbs(es)), label + " second");
         }
     }
 }

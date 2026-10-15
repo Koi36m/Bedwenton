@@ -1,6 +1,6 @@
 # M3 architecture proposal: curves and geometry paths
 
-Status: **PROPOSED, not approved** (see `M3-DESIGN-DECISIONS.md`). Candidate baseline: M2 revision 2 evidence
+Status: **PROPOSED, revision 2, not approved** (see `M3-DESIGN-DECISIONS.md` and `M3-REVISION-2-CORRECTIONS.md`). Candidate baseline: M2 revision 2 evidence
 `e3b79bae1476e549d49b29dcf361e7da50fe67db`, on which the 191 M1 and M2 tests pass on Java 25.0.4.1 and Gradle 9.1.0
 (re-run independently for this proposal). M2's formal acceptance must precede M3 production work.
 
@@ -66,6 +66,7 @@ No spell-specific presets are part of M3.
 | numerical risk assessment | `docs/m3/M3-RISKS.md` |
 | test specification and acceptance criteria | `docs/m3/M3-TEST-SPECIFICATION.md` |
 | Codex instructions (for after approval) | `docs/m3/README-FOR-CODEX-M3.md` |
-| independent tests | `src/test/java/workshop/vfx/math/curve/` (38 tests in 7 classes, plus a helper) |
-| reference data and generator | `src/test/resources/m3/reference/` (2,349 rows), `tools/generate_m3_reference_vectors.py` |
-| validation evidence | `docs/m3/validation/` |
+| independent tests | `src/test/java/workshop/vfx/math/curve/` (44 tests in 7 classes, plus a helper) |
+| reference data and generator | `src/test/resources/m3/reference/` (2,759 rows), `tools/generate_m3_reference_vectors.py` |
+| validation evidence | `docs/m3/validation/` (revision 1) and `docs/m3/validation/r2/` (revision 2) |
+| revision 2 correction report | `docs/m3/M3-REVISION-2-CORRECTIONS.md` |

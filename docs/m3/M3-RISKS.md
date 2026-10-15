@@ -1,11 +1,11 @@
 # M3 numerical risk assessment
 
-Status: PROPOSED, with the contract.
+Status: PROPOSED, with the contract (revision 2: R2 and R12 revised, R13 added).
 
 | # | Risk | Effect | Mitigation | Residual |
 |---|---|---|---|---|
 | R1 | `Math` trigonometry differs across JVMs and intrinsics | the same effect renders differently on different servers | `StrictMath` only (DM3-7); a source-scan test forbids `Math.sin/cos/...` | slower than intrinsics (not measured); M1's `Quat.axisAngle` still uses `Math` (unchanged, outside M3) |
-| R2 | Radian phases drift and seams do not close | visible gaps and jitter after long runs | turns with exact reduction (DM3-6) | the phase rounding of `turns * t` still grows with magnitude; practical domain `abs(turns t) <= 2^20` |
+| R2 | Radian phases drift and seams do not close | visible gaps and jitter after long runs | turns with exact reduction of `startTurn` and `turns * t` separately (DM3-6, T2) | the phase rounding of `turns * t` still grows with magnitude; practical domain `abs(turns t) <= 2^20` |
 | R3 | Bezier extrapolation | errors and values grow like `(abs(1-t) + abs(t))^n` | bounds stated; no clamping (callers clamp or ease) | large t gives large coordinates, which is IEEE behaviour |
 | R4 | Cancellation in second derivatives (`P2 - 2P1 + P0`) | relative error large when the true value is small | bound stated in terms of `max abs(P)`, not of the result | the curvature of nearly straight Beziers is noisy |
 | R5 | Zero derivative (coincident handles, zero radius, zero turns) | undefined tangent direction | raw derivative returned; callers use `normalizedOr(fallback)` | the caller must choose a fallback |
@@ -15,7 +15,8 @@ Status: PROPOSED, with the contract.
 | R9 | Pose placement at world-border coordinates (3e7) | absolute rounding of about 1e-8 blocks | M1 accuracy (tested to 1e-7 at the border) | none visible |
 | R10 | Unit confusion (turns vs radians) | wrong angles by a factor of 2π | names say "turn"; the M1 radian APIs are untouched | a review item for adapters |
 | R11 | `closed()` for a zero-radius spiral is true | callers treating it as a ring | documented in the contract | none |
-| R12 | Floating-point `startTurn` with many bits | seams exact, but the start angle rounds when added to the reduced fraction | `T4` holds regardless; `startTurn` enters `dphi` | negligible |
+| R12 | Large `startTurn` (revision 1 finding A1: `frac(frac(turns t) + startTurn)` loses the fraction from 2^52 on, and bits from much smaller magnitudes) | wrong quarter points, a start angle rounded to coarse steps | `startTurn` reduced exactly before the sum (T2); T3 and T5 tested up to `±Double.MAX_VALUE` | input quantization: a double carries its fraction only to `ulp(startTurn)`; callers keep accumulated phases reduced |
+| R13 | Cancellation in the extrapolated radius `(1 - t) r0 + t r1` (revision 1 finding A2) | relative radius error unbounded where `r(t)` is near 0; revision 1's bound relative to `abs(r(t))` rejected correct results | bounds relative to the input scale `S = abs(1 - t) r0 + abs(t) r1` (contract 7.2); radius rule `abs(r~ - r) <= 2^-51 S` | where `r(t)` is about 2^-52 S, its sign and value are noise; avoid extrapolating spirals to where the radius vanishes |
 
 ## Deferred improvements
 

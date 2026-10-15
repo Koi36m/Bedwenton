@@ -1,0 +1,23 @@
+java 25.0.4.1
+== A1: r0=r1=1, rise=0, turns=1, startTurn=2^52, t=0.25; exact phase 2^52+1/4 => (0,0,-1)
+startTurn=4.503599627370496E15  frac(st)=0.0  R1 f=0.0 point=(1.0, 0.0, -0.0) | R2 f=0.25 point=(-0.0, 0.0, -1.0)
+startTurn=-4.503599627370496E15  frac(st)=-0.0  R1 f=-0.0 point=(1.0, 0.0, -0.0) | R2 f=0.25 point=(-0.0, 0.0, -1.0)
+startTurn=9.007199254740992E15  frac(st)=0.0  R1 f=0.0 point=(1.0, 0.0, -0.0) | R2 f=0.25 point=(-0.0, 0.0, -1.0)
+startTurn=-9.007199254740992E15  frac(st)=-0.0  R1 f=-0.0 point=(1.0, 0.0, -0.0) | R2 f=0.25 point=(-0.0, 0.0, -1.0)
+startTurn=1.152921504606847E18  frac(st)=0.0  R1 f=0.0 point=(1.0, 0.0, -0.0) | R2 f=0.25 point=(-0.0, 0.0, -1.0)
+startTurn=1.7976931348623157E308  frac(st)=0.0  R1 f=0.0 point=(1.0, 0.0, -0.0) | R2 f=0.25 point=(-0.0, 0.0, -1.0)
+startTurn=-1.7976931348623157E308  frac(st)=-0.0  R1 f=-0.0 point=(1.0, 0.0, -0.0) | R2 f=0.25 point=(-0.0, 0.0, -1.0)
+startTurn=1.1258999068426242E15  frac(st)=0.25  R1 f=0.5 point=(-1.0, 0.0, 0.0) | R2 f=0.5 point=(-1.0, 0.0, 0.0)
+startTurn=2.2517998136852485E15  frac(st)=0.5  R1 f=0.0 point=(1.0, 0.0, -0.0) | R2 f=0.75 point=(0.0, 0.0, 1.0)
+startTurn=1.0E15  frac(st)=0.0  R1 f=0.25 point=(-0.0, 0.0, -1.0) | R2 f=0.25 point=(-0.0, 0.0, -1.0)
+startTurn=-1.0E15  frac(st)=-0.0  R1 f=0.25 point=(-0.0, 0.0, -1.0) | R2 f=0.25 point=(-0.0, 0.0, -1.0)
+product near 2^51: turns=1, t=2^51-0.25, startTurn=0.5 (exact phase frac 0.25)
+  R1 f=0.25  naive f=0.0  unreduced-product f=0.0  R2 f=0.25
+near seam: turns=1, t=2^-53, startTurn=nextDown(1): exact phase 1 => f must be 0: R2 f=0.0
+near seam: startTurn=-2^-60 frac=0.0  startTurn=-MIN_VALUE frac=0.0  MIN_VALUE frac=4.9E-324
+== A2: r0=1, r1=1.2, rise=0, turns=0, startTurn=0, t=-5
+  exact r = 2.220446049250313080847263336181640625E-16 = 2.220446049250313E-16 (2^-52 = 2.220446049250313E-16)  computed lerp r = 0.0
+  error = 2.220446049250313E-16  revision 1 test tolerance (R from the computed r, + ulp slack) = 4.930380657631324E-32  revision 1 bound with the exact R = 1.0140003587471371E-30
+  S = 12.0  revision 2 point bound 2^-49 S + S dphi = 5.479981965368587E-14  radius bound 2^-51 S = 5.329070518200751E-15
+== alternative radius form (not conforming) r0 + t*(r1-r0): r0=1e6, r1=1, t=1-1e-7
+  exact=1.0999998999473646 lerp err=1.1102230246251565E-16 alt err=2.8591018441659344E-11 2^-51 S=4.884980864027731E-16 2^-49 S=1.9539923456110923E-15

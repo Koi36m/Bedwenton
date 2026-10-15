@@ -1,0 +1,38 @@
+M3 revision 2 tests against a THROWAWAY reference implementation of the revision 2 contract (not delivered, not committed).
+It differs from the revision 1 reference only in Spiral.cs: frac(turns * t) + frac(startTurn).
+Base: e3b79bae1476e549d49b29dcf361e7da50fe67db (M2 R2 evidence) plus the M3 revision 2 test files and reference data.
+java version "25.0.4.1" 2026-08-18 LTS
+Gradle 9.1.0 (project wrapper); fresh copy, clean run: clean test, then check
+
+workshop.vfx.math.core.Amendment3AcceptanceTest         tests= 10 not-passed=0
+workshop.vfx.math.core.BoundaryTest                     tests=  2 not-passed=0
+workshop.vfx.math.core.ConventionsTest                  tests= 10 not-passed=0
+workshop.vfx.math.core.FrameTest                        tests= 11 not-passed=0
+workshop.vfx.math.core.JomlOracleTest                   tests=  4 not-passed=0
+workshop.vfx.math.core.M0RegressionTest                 tests=  6 not-passed=0
+workshop.vfx.math.core.MathUtilTest                     tests=  4 not-passed=0
+workshop.vfx.math.core.NumericPolicyTest                tests= 13 not-passed=0
+workshop.vfx.math.core.PolicyClarificationTest          tests=  9 not-passed=0
+workshop.vfx.math.core.PoseTest                         tests= 12 not-passed=0
+workshop.vfx.math.core.QuatTest                         tests= 17 not-passed=0
+workshop.vfx.math.core.ReviewAdversarialTest            tests= 18 not-passed=0
+workshop.vfx.math.core.Vec3Test                         tests=  9 not-passed=0
+workshop.vfx.math.curve.BezierTest                      tests=  7 not-passed=0
+workshop.vfx.math.curve.EasingTest                      tests=  8 not-passed=0
+workshop.vfx.math.curve.M3BoundaryTest                  tests=  3 not-passed=0
+workshop.vfx.math.curve.M3DeterminismTest               tests=  2 not-passed=0
+workshop.vfx.math.curve.M3ReferenceVectorTest           tests=  4 not-passed=0
+workshop.vfx.math.curve.PosedCurveTest                  tests=  5 not-passed=0
+workshop.vfx.math.curve.SpiralTest                      tests= 15 not-passed=0
+workshop.vfx.math.time.M2BoundaryTest                   tests=  3 not-passed=0
+workshop.vfx.math.time.M2DeterminismTest                tests=  8 not-passed=0
+workshop.vfx.math.time.M2GoldenVectorTest               tests=  5 not-passed=0
+workshop.vfx.math.time.M2ReviewAdversarialTest          tests= 13 not-passed=0
+workshop.vfx.math.time.M2Revision2Test                  tests=  9 not-passed=0
+workshop.vfx.math.time.PlaybackTest                     tests=  9 not-passed=0
+workshop.vfx.math.time.TickTimeTest                     tests=  4 not-passed=0
+workshop.vfx.math.time.TimePointTest                    tests=  4 not-passed=0
+workshop.vfx.math.time.TimingTest                       tests= 11 not-passed=0
+TOTAL 235 not passed 0
+test: BUILD SUCCESSFUL in 34s
+check: BUILD SUCCESSFUL in 7s

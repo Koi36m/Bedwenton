@@ -1,0 +1,38 @@
+Mutation analysis, revision 2 (one mutant at a time; M3 tests only; base = revision 2 throwaway reference and revision 2 tests).
+X01-X25: the revision 1 mutants (X01's pattern adapted to the new reduction line). X26-X29: new phase-reduction mutants.
+T01-T02: test-side mutants applied to the revision 2 tests (T01 reintroduces the A2 bound fault; T02 is a control).
+failing=<number of failing test methods> <names>
+
+X01 (radian phase instead of turn reduction) failing=9 M3ReferenceVectorTest.spiral.csv: 959 spiral cases again; SpiralTest.A1 / T3: quarter-turn phases are e; SpiralTest.A1 / T5: for non-negative startTur; SpiralTest.A1: near-seam offsets (-2^-60, +-M; SpiralTest.Exact quarter-turn points for any ; SpiralTest.Large turn counts: quarter phases ; SpiralTest.M1 CONVENTIONS 5: starting at +X w; SpiralTest.Seams: a closed spiral (equal radi; SpiralTest.T4: seams are exact for every inte
+X02 (java.lang.Math trigonometry) failing=1 M3BoundaryTest.Portability: no java.lang.Math tra
+X03 (clockwise instead of counter-clockwise) failing=11 M3ReferenceVectorTest.spiral.csv: 959 spiral cases again; PosedCurveTest.A placed circle lies in the plane ; PosedCurveTest.Derivatives transform as direction; PosedCurveTest.Orientation by Frame: Quat.fromFra; SpiralTest.A1 / T3: quarter-turn phases are e; SpiralTest.A1: near-seam offsets (-2^-60, +-M; SpiralTest.Derivatives agree with central fin; SpiralTest.Exact quarter-turn points for any ; SpiralTest.Full Heal ring (r cos th, 0, r sin; SpiralTest.Large turn counts: quarter phases ; SpiralTest.M1 CONVENTIONS 5: starting at +X w
+X04 (clockwise factory wrong) failing=3 SpiralTest.Factories: circle, arc, helix, pla; SpiralTest.Full Heal ring (r cos th, 0, r sin; SpiralTest.M1 CONVENTIONS 5: starting at +X w
+X05 (no constant-radius rule) failing=4 M3ReferenceVectorTest.spiral.csv: 959 spiral cases again; SpiralTest.A1 / T3: quarter-turn phases are e; SpiralTest.Seams: a closed spiral (equal radi; SpiralTest.T4: seams are exact for every inte
+X06 (radius end not exact) failing=2 M3ReferenceVectorTest.spiral.csv: 959 spiral cases again; SpiralTest.Radius accuracy relative to S near
+X07 (derivative misses radius change) failing=4 M3ReferenceVectorTest.spiral.csv: 959 spiral cases again; PosedCurveTest.Derivatives transform as direction; SpiralTest.A2: extrapolated radius cancellati; SpiralTest.Derivatives agree with central fin
+X08 (angular speed without 2 pi) failing=5 M3ReferenceVectorTest.spiral.csv: 959 spiral cases again; PosedCurveTest.Derivatives transform as direction; SpiralTest.A1 / T3: quarter-turn phases are e; SpiralTest.Derivatives agree with central fin; SpiralTest.Helix and spirals: radius interpol
+X09 (second derivative sign) failing=3 M3ReferenceVectorTest.spiral.csv: 959 spiral cases again; PosedCurveTest.Derivatives transform as direction; SpiralTest.Derivatives agree with central fin
+X10 (negative phase not wrapped) failing=6 M3ReferenceVectorTest.spiral.csv: 959 spiral cases again; SpiralTest.A1 / T3: quarter-turn phases are e; SpiralTest.A1: near-seam offsets (-2^-60, +-M; SpiralTest.A2: extrapolated radius cancellati; SpiralTest.Exact quarter-turn points for any ; SpiralTest.Full Heal ring (r cos th, 0, r sin
+X11 (quadrant table error) failing=4 M3ReferenceVectorTest.spiral.csv: 959 spiral cases again; PosedCurveTest.Derivatives transform as direction; SpiralTest.Derivatives agree with central fin; SpiralTest.Full Heal ring (r cos th, 0, r sin
+X12 (closed ignores rise) failing=1 SpiralTest.Seams: a closed spiral (equal radi
+X13 (de Casteljau weight error) failing=5 BezierTest.Degree elevation: a line and a qua; BezierTest.Derivatives agree with central fin; BezierTest.End derivatives: B'(0) = n (P1 - P; BezierTest.Endpoints are exact for arbitrary ; M3ReferenceVectorTest.bezier.csv: 645 line, quadratic an
+X14 (cubic derivative factor) failing=4 BezierTest.Degree elevation: a line and a qua; BezierTest.Derivatives agree with central fin; BezierTest.End derivatives: B'(0) = n (P1 - P; M3ReferenceVectorTest.bezier.csv: 645 line, quadratic an
+X15 (quadratic second derivative factor) failing=2 BezierTest.Derivatives agree with central fin; M3ReferenceVectorTest.bezier.csv: 645 line, quadratic an
+X16 (line end not exact) failing=1 BezierTest.Endpoints are exact for arbitrary 
+X17 (direct smootherstep (inaccurate near 1)) failing=2 EasingTest.Range and accuracy fuzz: 0 <= f <=; M3ReferenceVectorTest.easing.csv: 1,155 cases, 450 exact
+X18 (no input clamping) failing=2 EasingTest.Endpoints and clamping: f(t) = 0 f; M3ReferenceVectorTest.easing.csv: 1,155 cases, 450 exact
+X19 (NaN accepted) failing=1 EasingTest.Endpoints and clamping: f(t) = 0 f
+X20 (in-out scale error) failing=6 EasingTest.Closed-form values at hand-checked; EasingTest.Continuity: IN_OUT easings join at; EasingTest.Power easings are exactly monotone; EasingTest.Range and accuracy fuzz: 0 <= f <=; EasingTest.Symmetry f(1 - t) = 1 - f(t) for s; M3ReferenceVectorTest.easing.csv: 1,155 cases, 450 exact
+X21 (wrong power) failing=4 EasingTest.Closed-form values at hand-checked; EasingTest.Range and accuracy fuzz: 0 <= f <=; EasingTest.Symmetry f(1 - t) = 1 - f(t) for s; M3ReferenceVectorTest.easing.csv: 1,155 cases, 450 exact
+X22 (derivative ignores scale) failing=1 PosedCurveTest.Derivatives transform as direction
+X23 (derivative translated like a point) failing=2 PosedCurveTest.A placed circle lies in the plane ; PosedCurveTest.Derivatives transform as direction
+X24 (spiral accepts NaN t) failing=2 PosedCurveTest.Validation: curve and pose are req; SpiralTest.Validation: radii finite and >= 0;
+X25 (negative radius accepted) failing=1 SpiralTest.Validation: radii finite and >= 0;
+X26 (A1 original fault: revision 1 reduction frac(turns t) + startTurn) failing=3 M3ReferenceVectorTest.spiral.csv: 959 spiral cases again; SpiralTest.A1 / T3: quarter-turn phases are e; SpiralTest.A1 / T5: for non-negative startTur
+X27 (naive reduction frac(turns t + startTurn)) failing=5 M3ReferenceVectorTest.spiral.csv: 959 spiral cases again; SpiralTest.A1 / T3: quarter-turn phases are e; SpiralTest.A1 / T5: for non-negative startTur; SpiralTest.Seams: a closed spiral (equal radi; SpiralTest.T4: seams are exact for every inte
+X28 (unreduced product frac(turns t + frac(startTurn))) failing=4 M3ReferenceVectorTest.spiral.csv: 959 spiral cases again; SpiralTest.A1 / T3: quarter-turn phases are e; SpiralTest.Seams: a closed spiral (equal radi; SpiralTest.T4: seams are exact for every inte
+X29 (sum of reduced parts not reduced again (no seam wrap)) failing=4 M3ReferenceVectorTest.spiral.csv: 959 spiral cases again; SpiralTest.A1 / T3: quarter-turn phases are e; SpiralTest.A1: near-seam offsets (-2^-60, +-M; SpiralTest.A2: extrapolated radius cancellati
+T01 (A2 original fault: bounds relative to the floating-point |r(t)| instead of S) failing=2 M3ReferenceVectorTest.spiral.csv: 959 spiral cases again; SpiralTest.A2: extrapolated radius cancellati
+T02 (control: phase term 4096x too tight (the bound is not vacuous)) failing=1 M3ReferenceVectorTest.spiral.csv: 959 spiral cases again
+
+detected: 31 of 31

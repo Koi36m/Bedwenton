@@ -1,0 +1,20 @@
+Worst error / contract bound over the ROUNDED reference rows, revision 2 reference implementation.
+
+== easing and Bezier (unchanged data; revision 1 probe, revision 2 reference). Its spiral line uses the revision 1 bounds and is superseded below.
+worst error / contract bound (reference implementation, ROUNDED rows):
+ easing 0.159
+ bezier point 0.130, derivative 0.112, second 0.012
+ spiral point NaN, derivative 625.455, second 313.204
+
+== spiral, revision 2 bounds (ProbeBoundRatiosR2.java)
+rows 959, EXACT point mismatches 0
+worst error / revision 2 bound, revision 1 rows (1-549):  point 0.417, derivative 0.417, second 0.426
+worst error / revision 2 bound, revision 2 rows (550-959): point 0.221, derivative 0.224, second 0.225
+  worst revision 2 row [0] (r0,r1,turns,startTurn,t): 0x1.4cce2f8dc25aap-2,0x1.4cce2f8dc25aap-2,0x1.8136378b2ab34p+12,0x1.00000000ec4edp+51,-0x1.cb6160ca70d10p+0
+  worst revision 2 row [1] (r0,r1,turns,startTurn,t): 0x1.4cce2f8dc25aap-2,0x1.4cce2f8dc25aap-2,0x1.8136378b2ab34p+12,0x1.00000000ec4edp+51,-0x1.cb6160ca70d10p+0
+  worst revision 2 row [2] (r0,r1,turns,startTurn,t): 0x1.4cce2f8dc25aap-2,0x1.4cce2f8dc25aap-2,0x1.8136378b2ab34p+12,0x1.00000000ec4edp+51,-0x1.cb6160ca70d10p+0
+ROUNDED rows whose point the revision 1 tolerance rejects: 49 (first: 0x1.0000000000000p+0,0x1.3333333333333p+0,0x0.0p+0,0x0.0p+0,0x0.0p+0,-0x1.4000000000000p+2,ROUNDED,0x1.0000000000000p-52...)
+
+Note: the revision 1 spiral bounds (first block) are invalid on the revision 2 rows (finding A2): NaN where the computed
+radius and therefore the bound is 0 while the error is not, and 625x on cancellation rows. The revision 2 bounds hold with
+at least 2.3x headroom on every row.

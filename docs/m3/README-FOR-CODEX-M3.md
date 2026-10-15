@@ -21,8 +21,9 @@ Read in this order:
 - Use only `workshop.vfx.math.core` from the project. Do not use `workshop.vfx.math.time` (DM3-13).
 - Trigonometry only through `StrictMath.sin` and `StrictMath.cos`. Forbidden: `java.lang.Math` trigonometry,
   `pow`, `hypot`, `exp`, `log`, `fma` and `random` (a source-scan test enforces this).
-- Phases in turns with exact reduction (contract 5, T2 to T4). Exact endpoints for Beziers (E1). The constant-radius
-  rule for spirals.
+- Phases in turns with exact reduction (contract 5, T2 to T5): reduce `startTurn` and `turns * t` separately, then
+  add (revision 2). Exact endpoints for Beziers (E1). The constant-radius rule and the radius accuracy rule for
+  spirals (contract 5).
 - No clocks, randomness, threads, mutable statics, I/O, or Paper/Bukkit/Minecraft/JOML types.
 - Do not modify M1, M2, any existing test, golden or reference data, generator, contract or verification record. If
   a test seems wrong, stop and report it.
@@ -33,7 +34,7 @@ Read in this order:
 ```sh
 sha256sum -c SHA256SUMS.txt     # from the handoff package root
 export JAVA_HOME=/path/to/jdk-25 PATH="$JAVA_HOME/bin:$PATH"
-./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test   # 229 tests, 229 passed
+./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test   # 235 tests, 235 passed
 ./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false check
 python3 tools/generate_m3_reference_vectors.py /tmp/m3-ref && diff -r /tmp/m3-ref src/test/resources/m3/reference
 git diff e3b79bae1476e549d49b29dcf361e7da50fe67db --stat -- src/main/java/workshop/vfx/math/core src/main/java/workshop/vfx/math/time src/test/java/workshop/vfx/math/core src/test/java/workshop/vfx/math/time   # empty

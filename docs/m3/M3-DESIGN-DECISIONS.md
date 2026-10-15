@@ -1,6 +1,8 @@
 # M3 design decisions: curves and geometry paths
 
-Status: **PROPOSED, not approved.** The contract and tests implement the **recommended** option of each decision.
+Status: **PROPOSED, revision 2, not approved.** Revision 2 corrects DM3-6 (finding A1) and DM3-12 (finding A2) and
+clarifies DM3-8; DM3-1 to DM3-5, DM3-7, DM3-9 to DM3-11, DM3-13 and DM3-14 are unchanged. Details in
+`M3-REVISION-2-CORRECTIONS.md`. The contract and tests implement the **recommended** option of each decision.
 Every recommendation is for owner review (and for independent review by ChatGPT). Nothing here is approved.
 
 Candidate baseline: M2 revision 2 evidence `e3b79bae1476e549d49b29dcf361e7da50fe67db` (production
@@ -19,13 +21,13 @@ judgement.
 | DM3-3 | Curve abstraction | open interface `Curve` with `point`, `derivative`, `secondDerivative`; immutable records | sealed hierarchy; or a single function object |
 | DM3-4 | Placement | curves defined in local coordinates, placed with M1 `Pose` through `PosedCurve` | each curve stores its own center and frame |
 | DM3-5 | Circular curves | one `Spiral` record with named factories | separate `Circle`, `Arc`, `Helix`, `Spiral` types |
-| DM3-6 | Angle unit for periodic curves | **turns**, with exact phase reduction | radians, like M1 |
+| DM3-6 | Angle unit for periodic curves | **turns**, with exact phase reduction of `startTurn` and `turns * t` separately (R2) | radians, like M1 |
 | DM3-7 | Trigonometry | `StrictMath` | `java.lang.Math` |
-| DM3-8 | Bezier evaluation | de Casteljau with M1-style lerp (exact endpoints) | Bernstein sum; power basis (Horner) |
+| DM3-8 | Bezier evaluation | de Casteljau with M1-style lerp (exact endpoints); explicit special cases allowed (R2) | Bernstein sum; power basis (Horner) |
 | DM3-9 | Tangents and frames | raw derivatives only; unit tangent and frames through M1 (`normalizedOr`, `Frame.transportY`) | unit-tangent, normal and Frenet APIs in M3 |
 | DM3-10 | Arc length | none in M3; M4 owns reparameterization and sampling | arc-length tables in M3 |
 | DM3-11 | Easing | enum of 15 polynomial easings; input clamped to [0, 1]; NaN rejected | open functional interface; overshooting and trigonometric easings |
-| DM3-12 | Determinism and oracles | reproducible per implementation across JVMs; exact classes bitwise; others within proven bounds against independent high-precision oracles | a bitwise replay of a prescribed algorithm (as M2) |
+| DM3-12 | Determinism and oracles | reproducible per implementation across JVMs; exact classes bitwise; others within proven bounds, stated in input scales (R2), against independent high-precision oracles | a bitwise replay of a prescribed algorithm (as M2) |
 | DM3-13 | Dependencies | `curve` depends on `core` only, not on `time` | curves take `TimingSample` directly |
 | DM3-14 | Curvature and higher-order quantities | provide `secondDerivative`; curvature formula documented, not an API | a curvature API with degeneracy rules |
 
@@ -116,6 +118,23 @@ that closedness is a property of the parameters (`closed()`), not of the type.
 - M1 is unaffected; its radian APIs stay as they are. [pref] The deviation from M1's "angles in radians" is limited to
   curve phase parameters, and their names say "turn".
 
+**Revision 2 correction (finding A1).** Revision 1 recommended `f = frac(frac(turns * t) + startTurn)`, which adds
+the **unreduced** `startTurn` to a value in [0, 1). [fact] For `abs(startTurn) >= 2^52` every double is an integer, so
+the sum rounds the fraction away: `startTurn = 2^52`, `turns = 1`, `t = 1/4` gives (1, 0, 0) instead of the exact
+(0, 0, -1), contradicting revision 1's own T3. Smaller offsets lose bits too (at 2^40 the fraction is rounded to
+2^-13 turn). Revision 1's bound hid this behind an `abs(startTurn)` term.
+- **Corrected:** `f = frac(frac(turns * t) + frac(startTurn))`. Each part is reduced exactly before they meet, their
+  sum lies in [0, 2) and rounds at most once (2^-53 turn), and the final `frac` is exact.
+- [fact] Consequences, each tested (`SpiralTest`, revision 2 rows of `spiral.csv`):
+  - T3 holds for `startTurn` of any magnitude, including `±2^52`, `±2^53`, `±2^60` and `±Double.MAX_VALUE`;
+  - T4 holds for every integer t (up to 2^60 tested) and every `startTurn`;
+  - T5 (new): for non-negative `startTurn` the result depends only on `startTurn` mod 1, bit for bit;
+  - the phase bound loses its `abs(startTurn)` term: `dphi = 2 pi 2^-52 (abs(turns t) + 2)`.
+- Also non-conforming: `frac(turns * t + startTurn)` and `frac(turns * t + frac(startTurn))`; both round to the wrong
+  quarter just below `abs(turns * t) = 2^51`.
+- Precision limit (documented in the contract, 7.2): the magnitude of `startTurn` costs no accuracy, but a double can
+  only carry a fraction down to `ulp(startTurn)`. Callers should keep accumulated phases reduced.
+
 ## DM3-7. StrictMath for trigonometry
 
 - **Recommended:** `StrictMath.sin` and `StrictMath.cos`, and no other transcendental function. The M3 boundary test
@@ -140,8 +159,16 @@ that closedness is a property of the parameters (`closed()`), not of the type.
   segments are therefore exact (`BezierTest.exactEndpoints`).
 - [fact, trade-off] The same lerp does **not** keep coincident control points exactly constant:
   `(1 - 0.3) * 3 + 0.3 * 3 = 2.9999999999999996`. The form `a + t (b - a)` would keep constants but lose the exact
-  endpoint. No single lerp gives both. Endpoint exactness is kept, and constancy holds within the error bound
+  endpoint. Endpoint exactness is kept, and constancy holds within the error bound
   (`BezierTest.degenerateGeometry`; M1 review observation I4).
+- **Revision 2 clarification.** The trade-off is a property of **ordinary unbranched** formulas: neither
+  `(1 - t) a + t b` nor `a + t (b - a)` gives both properties. Explicit special cases give both, for example:
+  - `a == b ? a : (1 - t) a + t b` per component (constants exact everywhere, endpoints still exact);
+  - `t == 0 ? a : t == 1 ? b : a + t (b - a)` (endpoints exact by the branch, constants exact by the formula).
+  The spiral radius already uses such a case (`startRadius == endRadius`). [pref] The recommendation stays the plain
+  de Casteljau lerp, without branches, because E3 within the bound is enough for rendering. A conforming
+  implementation **may** add these special cases: E1, E2 and E3 as written accept both, and the revision 2
+  validation runs the suite against such a variant as well (all tests pass).
 
 ## DM3-9. Tangents and frames
 
@@ -198,6 +225,16 @@ derivatives, which is what numerical arc-length integration needs. Constant heli
     proven error bounds against **independent** oracles: exact rationals, the Bernstein form, 60-digit Taylor series,
     quaternion rotation and finite differences. The oracles never copy the recommended algorithm.
 - **Alternative:** M2-style bitwise golden vectors from a replay of a prescribed algorithm.
+- **Revision 2 correction (finding A2).** Revision 1 stated the spiral bounds relative to `R = abs(r(t))`, and its
+  reference test computed R with the same floating-point lerp as the implementation. [fact] Under extrapolation the
+  lerp cancels: `r0 = 1`, `r1 = 1.2`, `t = -5` has the exact radius 2^-52, the lerp gives 0, and the revision 1 bound
+  was about 1.0e-30. The radius error is bounded relative to the input scale `S = abs(1 - t) r0 + abs(t) r1`
+  (`abs(r~ - r) <= 2^-51 S`), not relative to the result. Corrected:
+  - every spiral bound uses S in place of R (contract 7.2). On [0, 1], `S = r(t)`, so nothing is loosened there;
+  - the radius accuracy `2^-51 S` and the exact cases are a normative rule (contract 5);
+  - **principle:** bounds and tolerances are functions of the inputs only, never of a rounded intermediate of the
+    formula under test (which would partly copy the algorithm into the oracle and inherit its cancellation);
+  - new adversarial tests use exact `BigDecimal` radii, phases and a 50-digit pi as oracles.
 - [pref] The brief asks not to impose bitwise expectations on transcendental results without a portable guarantee,
   and not to copy the production algorithm into the oracle. `StrictMath` *is* portable, but bitwise expectations
   would still pin one evaluation order. That buys cross-implementation identity, which M3 does not need, at the cost

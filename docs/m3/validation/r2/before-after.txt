@@ -1,0 +1,65 @@
+M3 revision 2: before/after reproduction (M3 tests only; Java 25.0.4.1, Gradle 9.1.0).
+Throwaway reference implementations, kept outside the repository: revision 1 (frac(frac(turns t) + startTurn)) and
+revision 2 (frac(frac(turns t) + frac(startTurn))); they differ only in that line of Spiral.
+
+== B3: revision 1 suite + revision 1 data, revision 1 reference (revision 1 as delivered: neither fault detected)
+workshop.vfx.math.curve.BezierTest                      tests=  7 not-passed=0
+workshop.vfx.math.curve.EasingTest                      tests=  8 not-passed=0
+workshop.vfx.math.curve.M3BoundaryTest                  tests=  3 not-passed=0
+workshop.vfx.math.curve.M3DeterminismTest               tests=  2 not-passed=0
+workshop.vfx.math.curve.M3ReferenceVectorTest           tests=  4 not-passed=0
+workshop.vfx.math.curve.PosedCurveTest                  tests=  5 not-passed=0
+workshop.vfx.math.curve.SpiralTest                      tests=  9 not-passed=0
+TOTAL 38 not passed 0
+
+== B1 (A1 before): revision 2 suite + revision 2 data, revision 1 reference
+workshop.vfx.math.curve.BezierTest                      tests=  7 not-passed=0
+workshop.vfx.math.curve.EasingTest                      tests=  8 not-passed=0
+workshop.vfx.math.curve.M3BoundaryTest                  tests=  3 not-passed=0
+workshop.vfx.math.curve.M3DeterminismTest               tests=  2 not-passed=0
+workshop.vfx.math.curve.M3ReferenceVectorTest           tests=  4 not-passed=1
+   FAILED spiral.csv: 959 spiral cases against 60-digit Taylor references (549 revision 1 rows, 410 revision 2 adversarial rows: large startTurn, near seams, radius cancellation); exact quarter-turn points; bounds relative to S (sections 5, 7.2): org.opentest4j.AssertionFailedError: 0x1.2000000000000p+3,0x1.2000000000000p+3,0x0.0p+0,0x1.0000000000000p+0,0x1.0000000000000p+52,0x1.0000000000000p-2,EXACT,0x0.0p+0,0x0.0p+0,-0x1.2000000000000p+3,-0x1.c463abeccb2bbp+5,0x0.0p+0,0x0.0p+0,0x0.0p+0,0x0.0p+0,0x1.634e462f60e9ap+8 point: expected exactly
+workshop.vfx.math.curve.PosedCurveTest                  tests=  5 not-passed=0
+workshop.vfx.math.curve.SpiralTest                      tests= 15 not-passed=2
+   FAILED A1 / T5: for non-negative startTurn the result depends only on startTurn mod 1, bitwise; negative offsets agree within the bound: org.opentest4j.AssertionFailedError: startTurn 1.125899906842899E15 vs 1.0, turns=1.6959373698033886, t=-1.5135829970315322 point: expected exactly Vec3[x=-3.8136672352282432, y=2.387959158554341, z=-1.7058645514509254] but was Vec3[x=-4.1778022510585995, y=2.387959158554341, z=0.0]
+   FAILED A1 / T3: quarter-turn phases are exact for startTurn of any magnitude (2^52, -2^52, 2^53, 2^60, +-MAX_VALUE, 2^50 + 1/4, ...) and for negative offsets: org.opentest4j.AssertionFailedError: A1 counterexample: expected exactly Vec3[x=0.0, y=0.0, z=-1.0] but was Vec3[x=1.0, y=0.0, z=-0.0]
+TOTAL 44 not passed 3
+
+== B2 (A2 before): revision 1 suite + revision 2 data, revision 2 reference (the revision 1 tolerance rejects a correct value: the A2 row)
+workshop.vfx.math.curve.BezierTest                      tests=  7 not-passed=0
+workshop.vfx.math.curve.EasingTest                      tests=  8 not-passed=0
+workshop.vfx.math.curve.M3BoundaryTest                  tests=  3 not-passed=0
+workshop.vfx.math.curve.M3DeterminismTest               tests=  2 not-passed=0
+workshop.vfx.math.curve.M3ReferenceVectorTest           tests=  4 not-passed=1
+   FAILED spiral.csv: 549 spiral cases against 60-digit Taylor references; exact quarter-turn points; error bounds include phase rounding (sections 5, 7): org.opentest4j.AssertionFailedError: 0x1.0000000000000p+0,0x1.3333333333333p+0,0x0.0p+0,0x0.0p+0,0x0.0p+0,-0x1.4000000000000p+2,ROUNDED,0x1.0000000000000p-52,-0x0.0p+0,0x0.0p+0,0x1.9999999999998p-3,0x0.0p+0,-0x0.0p+0,0x0.0p+0,0x0.0p+0,0x0.0p+0 point: expected Vec3[x=2.220446049250313E-16, y=-0.0, z=
+workshop.vfx.math.curve.PosedCurveTest                  tests=  5 not-passed=0
+workshop.vfx.math.curve.SpiralTest                      tests=  9 not-passed=0
+TOTAL 38 not passed 1
+
+== Bound-ratio probe (ProbeBoundRatiosR2.java) over spiral.csv, revision 2 reference
+rows 959, EXACT point mismatches 0
+worst error / revision 2 bound, revision 1 rows (1-549):  point 0.417, derivative 0.417, second 0.426
+worst error / revision 2 bound, revision 2 rows (550-959): point 0.221, derivative 0.224, second 0.225
+  worst revision 2 row [0] (r0,r1,turns,startTurn,t): 0x1.4cce2f8dc25aap-2,0x1.4cce2f8dc25aap-2,0x1.8136378b2ab34p+12,0x1.00000000ec4edp+51,-0x1.cb6160ca70d10p+0
+  worst revision 2 row [1] (r0,r1,turns,startTurn,t): 0x1.4cce2f8dc25aap-2,0x1.4cce2f8dc25aap-2,0x1.8136378b2ab34p+12,0x1.00000000ec4edp+51,-0x1.cb6160ca70d10p+0
+  worst revision 2 row [2] (r0,r1,turns,startTurn,t): 0x1.4cce2f8dc25aap-2,0x1.4cce2f8dc25aap-2,0x1.8136378b2ab34p+12,0x1.00000000ec4edp+51,-0x1.cb6160ca70d10p+0
+ROUNDED rows whose point the revision 1 tolerance rejects: 49 (first: 0x1.0000000000000p+0,0x1.3333333333333p+0,0x0.0p+0,0x0.0p+0,0x0.0p+0,-0x1.4000000000000p+2,ROUNDED,0x1.0000000000000p-52...)
+
+== Bound-ratio probe over spiral.csv, revision 1 reference
+rows 959, EXACT point mismatches 79
+worst error / revision 2 bound, revision 1 rows (1-549):  point 0.417, derivative 0.417, second 0.426
+worst error / revision 2 bound, revision 2 rows (550-959): point 379922946266662.900, derivative 284067417974009.300, second 188798654097903.720
+  worst revision 2 row [0] (r0,r1,turns,startTurn,t): 0x1.0000000000000p+0,0x1.0000000000000p+0,0x1.0000000000000p+0,0x1.0000000000000p+52,0x1.0000000000000p-1
+  worst revision 2 row [1] (r0,r1,turns,startTurn,t): 0x1.0000000000000p+0,0x1.0000000000000p+0,0x1.0000000000000p+0,0x1.0000000000000p+52,0x1.0000000000000p-1
+  worst revision 2 row [2] (r0,r1,turns,startTurn,t): 0x1.0000000000000p+0,0x1.0000000000000p+0,0x1.0000000000000p+0,0x1.0000000000000p+52,0x1.0000000000000p-1
+ROUNDED rows whose point the revision 1 tolerance rejects: 49 (first: 0x1.0000000000000p+0,0x1.3333333333333p+0,0x0.0p+0,0x0.0p+0,0x0.0p+0,-0x1.4000000000000p+2,ROUNDED,0x1.0000000000000p-52...)
+
+== After: revision 2 suite + revision 2 data, revision 2 reference (fresh clean run of all 235 tests)
+workshop.vfx.math.curve.BezierTest                      tests=  7 not-passed=0
+workshop.vfx.math.curve.EasingTest                      tests=  8 not-passed=0
+workshop.vfx.math.curve.M3BoundaryTest                  tests=  3 not-passed=0
+workshop.vfx.math.curve.M3DeterminismTest               tests=  2 not-passed=0
+workshop.vfx.math.curve.M3ReferenceVectorTest           tests=  4 not-passed=0
+workshop.vfx.math.curve.PosedCurveTest                  tests=  5 not-passed=0
+workshop.vfx.math.curve.SpiralTest                      tests= 15 not-passed=0
+TOTAL 235 not passed 0

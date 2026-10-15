@@ -109,9 +109,45 @@ final class CurveTestSupport {
         return 0x1p-46 * degree * (degree - 1) * 4 * g * maxAbsControl;
     }
 
-    /** Spiral phase uncertainty in turns: 2^-52 (|turns t| + |startTurn| + 2). */
-    static double phaseErr(double turns, double startTurn, double t) {
-        return 0x1p-52 * (Math.abs(turns * t) + Math.abs(startTurn) + 2);
+    /**
+     * Spiral phase uncertainty in turns (contract 7.2, revision 2): 2^-52 (|turns t| + 2). There is no startTurn term:
+     * T2 reduces startTurn exactly, so only the rounding of turns * t and of the sum of two reduced parts remain.
+     */
+    static double phaseErr(double turns, double t) {
+        return 0x1p-52 * (Math.abs(turns * t) + 2);
+    }
+
+    /**
+     * Spiral radius scale S (contract 7.2, revision 2): startRadius when the radii are equal (the radius is then exact),
+     * otherwise |1 - t| startRadius + |t| endRadius. On [0, 1], S equals the exact radius r(t). Under extrapolation
+     * (1 - t) r0 + t r1 may cancel, and the radius error is relative to S, not to r(t). All terms are non-negative, so
+     * this computation has no cancellation; the factor (1 + 2^-50) covers its own rounding.
+     */
+    static double spiralScale(double startRadius, double endRadius, double t) {
+        if (startRadius == endRadius) {
+            return startRadius;
+        }
+        return (Math.abs(1 - t) * startRadius + Math.abs(t) * endRadius) * (1 + 0x1p-50);
+    }
+
+    /** Spiral point bound: 2^-49 (S + |rise t|) + S dphi. */
+    static double spiralPointTol(double r0, double r1, double rise, double turns, double t) {
+        double s = spiralScale(r0, r1, t);
+        return 0x1p-49 * (s + Math.abs(rise * t)) + s * 2 * Math.PI * phaseErr(turns, t);
+    }
+
+    /** Spiral derivative bound: 2^-48 W + W dphi, W = |dr| + w S + |rise|. */
+    static double spiralDerivativeTol(double r0, double r1, double rise, double turns, double t) {
+        double w = 2 * Math.PI * Math.abs(turns);
+        double big = Math.abs(r1 - r0) * (1 + 0x1p-52) + w * spiralScale(r0, r1, t) + Math.abs(rise);
+        return 0x1p-48 * big + big * 2 * Math.PI * phaseErr(turns, t);
+    }
+
+    /** Spiral second-derivative bound: 2^-47 W2 + W2 dphi, W2 = 2 |dr| w + w^2 S. */
+    static double spiralSecondTol(double r0, double r1, double turns, double t) {
+        double w = 2 * Math.PI * Math.abs(turns);
+        double big = 2 * Math.abs(r1 - r0) * (1 + 0x1p-52) * w + w * w * spiralScale(r0, r1, t);
+        return 0x1p-47 * big + big * 2 * Math.PI * phaseErr(turns, t);
     }
 
     static Vec3 randomVec(SplittableRandom r, double mag) {

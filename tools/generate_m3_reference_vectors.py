@@ -262,7 +262,67 @@ def spiral_rows(rng):
         emit((r0, r1, rise, turns, start), t, "ROUNDED")
     for t in (0.0, 0.125, 0.3, 0.999):  # a million turns
         emit((2.0, 2.0, 0.0, 1048576.0, 0.0), t, "ROUNDED")
+    spiral_adversarial_rows(emit)
     return rows
+
+
+def spiral_adversarial_rows(emit):
+    """Revision 2 rows (findings A1 and A2), emitted after the revision 1 rows with their own seed, so that every
+    revision 1 row stays byte-identical. The oracle is unchanged: the exact rational phase startTurn + turns * t and
+    the exact rational radius (1 - t) r0 + t r1, evaluated by 60-digit Taylor series."""
+    rng = random.Random(20261017)
+    big = [2.0 ** 52, -2.0 ** 52, 2.0 ** 53, -2.0 ** 53, 2.0 ** 52 + 1, -(2.0 ** 52 + 1), 2.0 ** 60, -2.0 ** 60,
+           2.0 ** 51 + 0.5, -(2.0 ** 51 + 0.5), 2.0 ** 50 + 0.25, -(2.0 ** 50 + 0.75), 1e15, -1e15,
+           sys.float_info.max, -sys.float_info.max]
+    # A1, EXACT: quarter-turn phases with integer or quarter startTurn of any magnitude (contract T3)
+    for start in big + [-0.25, -0.75, -1.5, -2.25, -7.0]:
+        for turns, t in ((1.0, 0.25), (1.0, 0.5), (-1.0, 0.25), (3.0, 0.75), (0.25, 1.0), (1.0, -1.25), (2.0, 0.375)):
+            r = rng.randint(1, 64) / 4.0
+            emit((r, r, 0.0, turns, start), t, "EXACT")
+    # A1, EXACT: the product turns * t is a multiple of 1/4 just below 2^51 (T3 limit) and the sum of the reduced
+    # parts crosses 1; adding the unreduced product to startTurn would round to the wrong quarter
+    for t, start in ((2.0 ** 51 - 0.25, 0.5), (2.0 ** 51 - 0.25, 2.0 ** 52 + 2), (-(2.0 ** 51 - 0.75), 0.25),
+                     (2.0 ** 50 + 0.75, 0.75), (2.0 ** 51 - 0.5, 2.0 ** 51 + 0.5)):
+        emit((1.0, 1.0, 0.0, 1.0, start), t, "EXACT")
+    # A1, ROUNDED: large startTurn carrying a fraction (only its fractional part may matter), random turns and t
+    for _ in range(60):
+        k = rng.choice([20, 30, 40, 45, 48, 50, 51])
+        start = rng.choice([1.0, -1.0]) * (2.0 ** k + rng.randint(0, 2 ** 20) * 2.0 ** (k - 52))
+        turns = rng.choice([1.0, -1.0, rng.uniform(-10, 10), rng.uniform(-1e4, 1e4)])
+        t = rng.random() if rng.random() < 0.7 else rng.uniform(-5, 5)
+        r0 = rng.uniform(0, 1) * 10.0 ** rng.choice([0, 1, 3])
+        r1 = rng.choice([r0, rng.uniform(0, 10)]) if 0 <= t <= 1 else r0
+        emit((r0, r1, rng.choice([0.0, rng.uniform(-50, 50)]), turns, start), t, "ROUNDED")
+    # A1, ROUNDED: negative fractional offsets and near-seam values
+    tiny = [-2.0 ** -60, 2.0 ** -60, -5e-324, 5e-324, math.nextafter(1.0, 0.0), -math.nextafter(1.0, 0.0),
+            -math.nextafter(0.25, 0.0), -1e-17, -0.1, -2.7, -(2.0 ** 40 + 0.1)]
+    for start in tiny:
+        for turns, t in ((1.0, 0.0), (1.0, 2.0 ** -53), (-1.0, 2.0 ** -53), (1.0, math.nextafter(1.0, 0.0)), (5.0, 0.3)):
+            emit((3.0, 3.0, 0.0, turns, start), t, "ROUNDED")
+    # A2, ROUNDED: the review counterexample, exact radius 2^-52 while (1 - t) r0 + t r1 rounds to 0
+    emit((1.0, 1.2, 0.0, 0.0, 0.0), -5.0, "ROUNDED")
+    emit((1.0, 1.2, 0.0, 1.0, 0.0), -5.0, "ROUNDED")
+    emit((1.0, 1.2, 2.5, 0.75, 0.1), -5.0, "ROUNDED")
+    # A2, ROUNDED: extrapolated radius cancellation, r1 chosen so that (1 - t) r0 + t r1 is nearly 0 (either sign)
+    for _ in range(80):
+        t = rng.choice([-5.0, -3.0, -1.0, -0.5, 2.0, 3.0, 7.0, -1e3, 1e3, rng.uniform(-50, -0.01), rng.uniform(1.01, 50)])
+        r0 = rng.uniform(0.1, 1) * 10.0 ** rng.choice([-3, 0, 2, 6])
+        r1 = (t - 1) * r0 / t
+        if r1 < 0 or not math.isfinite(r1):
+            continue
+        r1 = rng.choice([r1, math.nextafter(r1, 0.0), math.nextafter(r1, math.inf)])
+        turns = rng.choice([0.0, 1.0, -2.0, rng.uniform(-10, 10)])
+        start = rng.choice([0.0, 0.25, rng.uniform(-3, 3)])
+        emit((r0, r1, rng.choice([0.0, rng.uniform(-5, 5)]), turns, start), t, "ROUNDED")
+    # radius accuracy near an end: very different radii and t close to the end with the small radius; the radius
+    # must be accurate relative to S = |1 - t| r0 + |t| r1 (r0 + t (r1 - r0) is not)
+    for _ in range(60):
+        big_r, small_r = rng.uniform(1, 9) * 10.0 ** rng.choice([3, 6, 9]), rng.uniform(0, 2)
+        u = rng.uniform(0, 2.0 ** -10)
+        if rng.random() < 0.5:
+            emit((big_r, small_r, 0.0, rng.choice([0.0, 1.0, rng.uniform(-5, 5)]), 0.0), 1 - u, "ROUNDED")
+        else:
+            emit((small_r, big_r, 0.0, rng.choice([0.0, 1.0, rng.uniform(-5, 5)]), 0.0), u, "ROUNDED")
 
 
 def write(path, header, rows, comment):

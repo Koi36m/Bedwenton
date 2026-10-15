@@ -1,6 +1,6 @@
 # M3 conventions and supported domains
 
-Status: PROPOSED, with the contract. M1's `docs/CONVENTIONS.md` and the M2 conventions remain in force unchanged.
+Status: PROPOSED, with the contract (revision 2: `startTurn` and extrapolated-radius rows, facts F9 to F12). M1's `docs/CONVENTIONS.md` and the M2 conventions remain in force unchanged.
 
 ## 1. Coordinates and orientation (inherited from M1)
 
@@ -33,8 +33,9 @@ the API.
 |---|---|---|
 | control points, radii, rise | finite, components up to 1e100 | larger values follow IEEE (may overflow) |
 | t (Bezier, line) | finite, `abs(t) <= 1e3` for the stated bounds | the bounds scale with `(abs(1 - t) + abs(t))^n` |
-| t, turns (spiral) | finite; `abs(turns * t) <= 2^20` for sub-nanoradian phase | the phase uncertainty grows like `2^-52 abs(turns t)` turns; exact seams up to `abs(turns * k) < 2^53` |
-| startTurn | finite; small magnitudes preferred | enters the phase uncertainty |
+| t, turns (spiral) | finite; `abs(turns * t) <= 2^20` for sub-nanoradian phase | the phase uncertainty is `2^-52 (abs(turns t) + 2)` turns; exact seams for every integer t with `turns * t` finite (T4) |
+| startTurn | any finite double | reduced exactly (T2); no accuracy cost, but a double carries its fraction only to `ulp(startTurn)` (integers only from 2^52); keep accumulated phases reduced to [0, 1) |
+| spiral radius under extrapolation | finite t | absolute error up to `2^-51 (abs(1 - t) r0 + abs(t) r1)`; `r(t)` may cancel or become negative |
 | easing input | any non-NaN double | clamped to [0, 1] |
 | poses | M1 domain (translation up to 1e100, scale in [1e-100, 1e100]) | M1 contract |
 
@@ -50,3 +51,7 @@ the API.
 | F6 | Power easings by repeated multiplication are exactly monotone; smoothstep and smootherstep are not, under the usual evaluation orders (decreases up to 1.1e-16 direct, 5.6e-17 split; direct smootherstep exceeds 1 and errs by 19 ulp) | probe; `EasingTest.monotonicity` |
 | F7 | All easings, split-evaluated, err by at most 3.8 x 2^-53 against exact rationals | probe; `EasingTest.rangeAndAccuracy` |
 | F8 | Uniform scale only (M1 `Pose`), so ellipses are not expressible by placement | M1 contract section 5 |
+| F9 | `frac(0.25) + 2^52` rounds to 2^52: adding an unreduced `startTurn` loses the fraction (finding A1) | `validation/r2/counterexamples.txt`; `SpiralTest.largeStartTurnExactQuarters` |
+| F10 | `frac(x)` is exact for `x >= 0`; for `x < 0` the `+ 1.0` rounds at most once (`frac(-2^-60) = 0`) | `validation/r2/counterexamples.txt`; `SpiralTest.nearSeamOffsets` |
+| F11 | `(1 - t) r0 + t r1` with `r0 = 1`, `r1 = 1.2`, `t = -5` gives 0; the exact value is 2^-52 (finding A2) | `validation/r2/counterexamples.txt`; `SpiralTest.extrapolatedRadiusCancellation` |
+| F12 | The lerp radius error is at most `2^-51 (abs(1 - t) r0 + abs(t) r1)`; `r0 + t (r1 - r0)` is not bounded by that scale near t = 1 | `M3-REVISION-2-CORRECTIONS.md` section 2; `SpiralTest.radiusAccuracyNearEnds` |
