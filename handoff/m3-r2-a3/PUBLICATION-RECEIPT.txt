@@ -1,0 +1,56 @@
+M3 Revision 2 + Amendment A3 first-pass publication receipt
+
+Accepted M2 baseline: e3b79bae1476e549d49b29dcf361e7da50fe67db
+Original M3 R1: 7d0ee2b97f246ba27b19111fa3b585febf0ee0c6
+Original M3 R2: 37152118093df38c95bc392e966bb23b4a435dd9
+Original M3 R2+A3: fe5c9fdd3e8da44517573332b163ca9af9a58d1b
+Production implementation: d76258f343e28a8acb43f3ad8ba776adcabdd575
+Verification evidence / m3-curves-paths: e38b841ae1d473c855b69315a3774212ea61235c
+Immutable artifact commit: 39a8af0f7ef32af473d827d11c05439456b799cb
+
+Three original specification branches, m3-curves-paths and m3-handoff were published atomically without force. All pre-existing remote branch/tag refs were compared by full SHA and remain unchanged. The implementation worktree is clean. No main merge, acceptance tag, plugin changes or M4 work. Final M3 acceptance remains pending owner decision after independent adversarial review.
+
+Actual push output:
+To https://github.com/Koi36m/Bedwenton.git
+ * [new branch]      m3-spec -> m3-spec
+ * [new branch]      m3-spec-r2 -> m3-spec-r2
+ * [new branch]      m3-spec-r2-a3 -> m3-spec-r2-a3
+ * [new branch]      m3-curves-paths -> m3-curves-paths
+ * [new branch]      m3-handoff -> m3-handoff
+
+Remote refs after publication:
+ref: refs/heads/main	HEAD
+870c9fd75bf9a7a9d619179993d37f2b6487b081	HEAD
+8397c04b55f7d506e8fec79fca120ce297e8ae22	refs/heads/m1-core-transforms
+8401142720d3c91093ec02fb9dd354381f6da9ec	refs/heads/m1-r4-handoff
+9e3f3acde0db4b9d0a202ba4f7f396c132843597	refs/heads/m1-r4-verification
+0ec01087b9c9727f51274e4bbc66f00b2038c6f4	refs/heads/m1-review-handoff
+80927177469d89b985d3b57a3219652a994d6d4b	refs/heads/m2-animation-time
+2a222cee03cdd9e9009706530a6e764a83f9bcfd	refs/heads/m2-handoff
+88702655a3f8c0428160a74f9193af7cc41b0b87	refs/heads/m2-r2-amendment
+6e91440beb59804fad5c7019322f895a33a539e1	refs/heads/m2-r2-handoff
+e3b79bae1476e549d49b29dcf361e7da50fe67db	refs/heads/m2-r2-verification
+e38b841ae1d473c855b69315a3774212ea61235c	refs/heads/m3-curves-paths
+39a8af0f7ef32af473d827d11c05439456b799cb	refs/heads/m3-handoff
+7d0ee2b97f246ba27b19111fa3b585febf0ee0c6	refs/heads/m3-spec
+37152118093df38c95bc392e966bb23b4a435dd9	refs/heads/m3-spec-r2
+fe5c9fdd3e8da44517573332b163ca9af9a58d1b	refs/heads/m3-spec-r2-a3
+870c9fd75bf9a7a9d619179993d37f2b6487b081	refs/heads/main
+802d9e7f95ccf8fdfd3879d99313794faa2c08d1	refs/heads/review/m1-claude
+870c9fd75bf9a7a9d619179993d37f2b6487b081	refs/tags/baseline-scaffold
+
+Immutable artifact download validation:
+HTTP GET and byte comparison PASS: minecraft-vfx-math-M3-r2-a3-source.zip
+SHA-256: db6ac483d5e84c0b6fb5335e0dc27d7a7a5811bad9c19b004c69e00347bec062
+HTTP GET and byte comparison PASS: minecraft-vfx-math-M3-r2-a3.git.bundle
+SHA-256: b1dd8d53b0d43bfe7ec2c0a2aa5b3e6e172bfcb3240c31bc3e831817c87e4086
+HTTP GET and byte comparison PASS: SHA256SUMS.txt
+SHA-256: 569704423e6725a88d5ced2e028d0168eec5301371146984c0e3223a10e77e69
+HTTP GET and byte comparison PASS: VERIFICATION-REPORT.md
+SHA-256: d24b8f02684353636bd2fd134d0d138960d2ff9b9a8d2c4c34484425b9938e0f
+HTTP GET and byte comparison PASS: production-vs-spec.diff
+SHA-256: 30c0866eb35608a297fa883210b656cc249056dc10bbdf2facaf4df6d7e359e4
+HTTP GET and byte comparison PASS: test-summary.csv
+SHA-256: cebfc59ff76b5506581e22d62b137528fa0e13676ff9c6eecce7a19dc431faa6
+
+This receipt was added after artifact creation; original ZIP, bundle and deliverable manifest are unchanged.
