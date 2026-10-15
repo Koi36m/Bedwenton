@@ -235,6 +235,12 @@ derivatives, which is what numerical arc-length integration needs. Constant heli
   - **principle:** bounds and tolerances are functions of the inputs only, never of a rounded intermediate of the
     formula under test (which would partly copy the algorithm into the oracle and inherit its cancellation);
   - new adversarial tests use exact `BigDecimal` radii, phases and a 50-digit pi as oracles.
+- **Amendment A3 (subnormal underflow).** A product that underflows has an absolute error up to `MIN_VALUE / 2`, which
+  no relative bound covers (`r0 = MIN_VALUE`, `r1 = 2 MIN_VALUE`, `t = 1/2`: the exact radius 1.5 MIN_VALUE is not
+  representable). Every bound gets an absolute underflow term in units of `MIN_VALUE`, the radius rule becomes
+  `2^-51 S + 2 MIN_VALUE`, and test tolerances are computed with upward rounding so that they never fall below the
+  contract bounds. The exactness guarantees assume no overflow. Relative parts and all decisions are unchanged
+  (`M3-AMENDMENT-A3.md`).
 - [pref] The brief asks not to impose bitwise expectations on transcendental results without a portable guarantee,
   and not to copy the production algorithm into the oracle. `StrictMath` *is* portable, but bitwise expectations
   would still pin one evaluation order. That buys cross-implementation identity, which M3 does not need, at the cost

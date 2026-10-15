@@ -35,7 +35,9 @@ the API.
 | t (Bezier, line) | finite, `abs(t) <= 1e3` for the stated bounds | the bounds scale with `(abs(1 - t) + abs(t))^n` |
 | t, turns (spiral) | finite; `abs(turns * t) <= 2^20` for sub-nanoradian phase | the phase uncertainty is `2^-52 (abs(turns t) + 2)` turns; exact seams for every integer t with `turns * t` finite (T4) |
 | startTurn | any finite double | reduced exactly (T2); no accuracy cost, but a double carries its fraction only to `ulp(startTurn)` (integers only from 2^52); keep accumulated phases reduced to [0, 1) |
-| spiral radius under extrapolation | finite t | absolute error up to `2^-51 (abs(1 - t) r0 + abs(t) r1)`; `r(t)` may cancel or become negative |
+| spiral radius under extrapolation | finite t | absolute error up to `2^-51 (abs(1 - t) r0 + abs(t) r1) + 2 MIN_VALUE`; `r(t)` may cancel or become negative |
+| subnormal inputs (A3) | allowed | absolute accuracy of a few `MIN_VALUE` (times the `w`, `w^2`, S and `G^n` amplifications of contract 7.2) |
+| finiteness (A3) | coordinates and radii up to 1e100, `abs(turns) <= 1e50`, `abs(t) <= 1e3` | beyond, overflow follows IEEE-754 and the exactness guarantees T3 to T5 do not apply |
 | easing input | any non-NaN double | clamped to [0, 1] |
 | poses | M1 domain (translation up to 1e100, scale in [1e-100, 1e100]) | M1 contract |
 
@@ -54,4 +56,7 @@ the API.
 | F9 | `frac(0.25) + 2^52` rounds to 2^52: adding an unreduced `startTurn` loses the fraction (finding A1) | `validation/r2/counterexamples.txt`; `SpiralTest.largeStartTurnExactQuarters` |
 | F10 | `frac(x)` is exact for `x >= 0`; for `x < 0` the `+ 1.0` rounds at most once (`frac(-2^-60) = 0`) | `validation/r2/counterexamples.txt`; `SpiralTest.nearSeamOffsets` |
 | F11 | `(1 - t) r0 + t r1` with `r0 = 1`, `r1 = 1.2`, `t = -5` gives 0; the exact value is 2^-52 (finding A2) | `validation/r2/counterexamples.txt`; `SpiralTest.extrapolatedRadiusCancellation` |
-| F12 | The lerp radius error is at most `2^-51 (abs(1 - t) r0 + abs(t) r1)`; `r0 + t (r1 - r0)` is not bounded by that scale near t = 1 | `M3-REVISION-2-CORRECTIONS.md` section 2; `SpiralTest.radiusAccuracyNearEnds` |
+| F12 | The lerp radius error is at most `2^-51 (abs(1 - t) r0 + abs(t) r1)` without underflow; `r0 + t (r1 - r0)` is not bounded by that scale near t = 1 | `M3-REVISION-2-CORRECTIONS.md` section 2; `SpiralTest.radiusAccuracyNearEnds` |
+| F13 | `0.5 * MIN_VALUE` rounds to 0 (a tie, to even): `(1 - t) r0 + t r1` gives `MIN_VALUE` for the exact 1.5 `MIN_VALUE`, and no double is closer than 0.5 `MIN_VALUE` (A3) | `validation/a3/underflow-probe.txt`; `M3UnderflowTest.a3Counterexample` |
+| F14 | `fl(2 pi * 7 MIN_VALUE) = 44 MIN_VALUE` (exact 43.98): a subnormal `turns` makes `w` inaccurate, and with r = 1e100 the derivative error is 8.7e-226 | `validation/a3/underflow-probe.txt`; `M3UnderflowTest.subnormalTurns` |
+| F15 | `2^-49 * MIN_VALUE` is 0.0 in plain double arithmetic: tolerances must be rounded upward | `M3UnderflowTest.toleranceHelpersAreUpperBounds` |

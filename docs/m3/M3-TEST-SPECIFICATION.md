@@ -1,7 +1,7 @@
 # M3 test specification and acceptance criteria
 
-Status: PROPOSED, with the contract, revision 2. Tests: `src/test/java/workshop/vfx/math/curve/`, 44 test methods
-in 7 classes plus the helper `CurveTestSupport`. Reference data: `src/test/resources/m3/reference/`, 3 CSV files with
+Status: PROPOSED, with the contract, revision 2 with amendment A3. Tests: `src/test/java/workshop/vfx/math/curve/`,
+51 test methods in 8 classes plus the helper `CurveTestSupport`. Reference data: `src/test/resources/m3/reference/`, 3 CSV files with
 2,759 rows, and `MANIFEST.sha256`. Generator: `tools/generate_m3_reference_vectors.py`. Revision 2 changes are listed
 in `M3-REVISION-2-CORRECTIONS.md` section 8.
 
@@ -22,7 +22,8 @@ Row classes in the reference data:
 - **EXACT** (836 rows): inputs chosen so that the exact value is representable and every conforming evaluation is
   exact (for spirals: the T3 quarter-turn conditions). Compared with `==`, which treats -0.0 and 0.0 as equal.
 - **ROUNDED** (1,923 rows): compared within the contract's section 7 bounds, computed from the inputs only (revision
-  2: the spiral radius scale S, never the floating-point `abs(r(t))`).
+  2: the spiral radius scale S, never the floating-point `abs(r(t))`), with upward rounding and the absolute
+  underflow terms (amendment A3), so that a tolerance is never below the contract bound.
 
 No expected value is produced by running the recommended algorithm.
 
@@ -38,10 +39,13 @@ third-party library and no tutorial or repository code.
 | `SpiralTest` | 15 | 5, 7.2 | validation; factories; **M1 CONVENTIONS 5 circle checks (exact)**; Full Heal and Astral Prism reproduction; exact seams at integer t; 2^20-turn exactness against the radian contrast; shape properties (radius, height, helix speed, curvature); finite differences; exact quarter points. Revision 2: **A1** exact quarters for `startTurn` up to `±MAX_VALUE` and products below 2^51 (T3); period invariance (T5); near-seam offsets; seams for t up to 2^60 (T4); **A2** extrapolated radius cancellation with exact `BigDecimal` oracles; radius accuracy relative to S near the ends |
 | `PosedCurveTest` | 5 | 3 | validation; placed circle geometry (plane, radius, orientation) up to world-border coordinates; composition with `Pose.then`; scaled-direction derivatives; orientation via `Frame.fromHeading` |
 | `M3ReferenceVectorTest` | 4 | 4-7 | manifest; easing (1,155); Bezier and line (645); spiral (959: 549 revision 1 rows unchanged, 410 revision 2 adversarial rows) |
+| `M3UnderflowTest` | 7 | 5, 7.2 (A3) | the A3 counterexample (revision 2 bounds unsatisfiable); radius underflow amplified by `w` and `w^2`; subnormal radii, `rise`, `turns` and Bezier control points against exact `BigDecimal` oracles; tolerance helpers checked against exact contract bounds; T4 up to overflow |
 | `M3DeterminismTest` | 2 | 7.1 | value equality; bit-identical results before and after JIT; path independence |
 | `M3BoundaryTest` | 3 | 1, 2, 7 | API shape; StrictMath-only trigonometry (source scan); purity, dependencies and statics |
 
 ## 3. Validation of the tests (before handoff)
+
+**Amendment A3** (`validation/a3/`, details in `M3-AMENDMENT-A3.md`): **242 / 242 passed** (M1 125, M2 66, M3 51) on a fresh clean run, and `check` succeeded; mutation: **37 / 37 detected**: X01 to X29 (production), T01 and T02 (revision 2 test-side, retargeted), and T03 to T08 (A3: each absolute term, plain-double tolerances, plain-double S). T03 and T06 are caught by the exact `BigDecimal` checks; upward rounding in the subnormal range quantizes tolerances to multiples of eta, so comparison with the reference alone would not catch them.
 
 **Revision 2** (`validation/r2/`, details in `M3-REVISION-2-CORRECTIONS.md` sections 5 to 7):
 - against the revision 2 throwaway reference: **235 / 235 passed** (M1 125, M2 66, M3 44), `check` successful;
@@ -88,8 +92,8 @@ third-party library and no tutorial or repository code.
 4. **Production scope.** Only `src/main/java/workshop/vfx/math/curve/`: the seven public types of contract section 2,
    plus optional non-public helpers. No dependencies; `verifyNoRuntimeDependencies` passes.
 5. **Java 25 run.**
-   `./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test` reports **235 tests,
-   235 passed, 0 failed, 0 skipped** (M1 125, M2 66, M3 44). `./gradlew check` succeeds, and there are no
+   `./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test` reports **242 tests,
+   242 passed, 0 failed, 0 skipped** (M1 125, M2 66, M3 51). `./gradlew check` succeeds, and there are no
    production compiler warnings.
 6. **Evidence** as for M1 and M2, then Claude Code's independent review.
 

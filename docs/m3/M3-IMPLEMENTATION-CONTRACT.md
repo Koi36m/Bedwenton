@@ -1,9 +1,10 @@
 # M3 Implementation Contract: `workshop.vfx.math.curve` (curves, spirals, easing)
 
 Audience: the engineer implementing the production source (Codex).
-Status: **PROPOSED, revision 2. Not authorized for implementation.** Revision 2 corrects review findings A1 (phase
-reduction with a large `startTurn`) and A2 (spiral bounds under extrapolation) and clarifies DM3-8; see
-`M3-REVISION-2-CORRECTIONS.md`. Two things must happen first:
+Status: **PROPOSED, revision 2 with amendment A3. Not authorized for implementation.** Revision 2 corrects review
+findings A1 (phase reduction with a large `startTurn`) and A2 (spiral bounds under extrapolation) and clarifies DM3-8;
+see `M3-REVISION-2-CORRECTIONS.md`. Amendment A3 adds absolute underflow terms to the section 7.2 bounds and the radius
+rule, and states that the exactness guarantees T3 to T5 assume no overflow; see `M3-AMENDMENT-A3.md`. Two things must happen first:
 1. The owner approves this contract together with DM3-1 to DM3-14 (`M3-DESIGN-DECISIONS.md`).
 2. M2 is formally accepted.
 
@@ -119,7 +120,10 @@ P''(t)    = (-2 dr w sin theta - w^2 r cos theta,  0,  -2 dr w cos theta + w^2 r
 `S(t) = abs(1 - t) startRadius + abs(t) endRadius` (the input scale of the radius; `S(t) = r(t)` on [0, 1]). The
 evaluated radius `r~` must satisfy:
 - `r~ = startRadius` exactly when the radii are equal, `r~(0) = startRadius` and `r~(1) = endRadius` exactly;
-- `abs(r~(t) - r(t)) <= 2^-51 S(t)` for every finite t.
+- `abs(r~(t) - r(t)) <= 2^-51 S(t) + 2 MIN_VALUE` for every finite t, where `MIN_VALUE = Double.MIN_VALUE = 2^-1074`
+  (amendment A3). The absolute term is needed: for `startRadius = MIN_VALUE`, `endRadius = 2 MIN_VALUE` and
+  `t = 1/2` the exact radius `1.5 MIN_VALUE` is not representable, so every evaluation errs by at least
+  `0.5 MIN_VALUE`, far above `2^-51 S`.
 
 The lerp `(1 - t) startRadius + t endRadius` meets both (proof in `M3-REVISION-2-CORRECTIONS.md`, section 2). The
 form `startRadius + t (endRadius - startRadius)` does not: it is not exact at t = 1, and near t = 1 with
@@ -154,13 +158,18 @@ reaches `(0, 0, r)`. Full Heal's ring `(r cos th, h, r sin th)` is `horizontalCl
   `abs(x) >= 2^51` is one), and the exact product `turns * t` is a multiple of 1/4 with `abs(turns * t) < 2^51` (it is
   then representable), the cosine and sine are exactly 0 or ±1. The point is then exactly `(r c, rise t, -(r s))`
   with c and s in {0, ±1} and `rise t` the rounded product.
-- T4. Exact seams. If `closed()` is true, then for every integer-valued double k for which `turns * k` is finite,
-  `point(k)` equals `point(0)` and `derivative(k)` equals `derivative(0)` (numerical `==` per component), for every
-  `startTurn`. (`turns * k` is exact below 2^53, and every double of magnitude at least 2^52 is an integer, so
-  `frac(turns * k) = 0`.)
+- T4. Exact seams. If `closed()` is true, then for every integer-valued double k for which the **floating-point
+  product** `turns * k` (as evaluated in Java) is finite, `point(k)` equals `point(0)` and `derivative(k)` equals
+  `derivative(0)` (numerical `==` per component), for every `startTurn`, provided `derivative(0)` is finite.
+  (`turns * k` is exact below 2^53, and every double of magnitude at least 2^52 is an integer, so
+  `frac(turns * k) = 0`.) If `turns * k` overflows, nothing is promised about the value (it may be infinite or NaN).
 - T5. Period invariance in `startTurn` (new in revision 2). For `startTurn` values x and y with `x >= 0`, `y >= 0`
   and `x - y` an integer, the spiral with x and the spiral with y return identical results (`==`) for every t.
   For negative values `frac` may round once, so congruent negative offsets agree within the section 7.2 bounds.
+- **No overflow (amendment A3).** T3 to T5 and every `==` guarantee hold only when the quantities they compare are
+  finite and no intermediate result of the evaluation overflows. Where `turns * t`, `w r`, `w^2 r` or another
+  intermediate overflows, the result follows IEEE-754 (infinities or NaN are possible, and NaN is not `==` to itself);
+  the only promise is that no exception is thrown for finite arguments (section 8).
 - `closed()` is true exactly when `startRadius == endRadius`, `rise == 0`, `turns != 0` and `turns` is an integer.
   A zero-radius spiral can be "closed"; it is a point.
 
@@ -214,13 +223,14 @@ with n = 2, 3, 4, 5 for QUAD, CUBIC, QUART, QUINT.
 
 ### 7.2 Error bounds (absolute, per component)
 
-Let `G = abs(1 - t) + abs(t)` (= 1 on [0, 1]) and `eps = 2^-53`. The Bezier and line bounds:
+Let `G = abs(1 - t) + abs(t)` (= 1 on [0, 1]), `eps = 2^-53` and `eta = Double.MIN_VALUE = 2^-1074`. Each bound
+has a relative part (revision 2, unchanged) and an absolute underflow part (amendment A3). The Bezier and line bounds:
 
 | Quantity | Bound |
 |---|---|
-| Bezier/line point | `2^-49 * G^n * max_j abs(P_j)` |
-| Bezier/line derivative | `2^-48 * n * G^(n-1) * max_i abs(P_{i+1} - P_i)` |
-| Bezier second derivative | `2^-46 * 4 n(n-1) * G^(n-2) * max_j abs(P_j)` |
+| Bezier/line point | `2^-49 * G^n * max_j abs(P_j) + 2 n G^n eta` |
+| Bezier/line derivative | `2^-48 * n * G^(n-1) * max_i abs(P_{i+1} - P_i) + 2 n^2 G^n eta` |
+| Bezier second derivative | `2^-46 * 4 n(n-1) * G^(n-2) * max_j abs(P_j) + 2 n^3 G^n eta` |
 
 For spirals (revision 2, finding A2), with the radius scale `S` of section 5 (`S = startRadius` if the radii are
 equal, otherwise `abs(1 - t) startRadius + abs(t) endRadius`), `dr = abs(endRadius - startRadius)`,
@@ -230,16 +240,26 @@ radians; there is no `startTurn` term because T2 reduces it exactly):
 
 | Quantity | Bound |
 |---|---|
-| Spiral point | `2^-49 (S + abs(rise t)) + S dphi` |
-| Spiral derivative | `2^-48 W + W dphi`, with `W = dr + w S + abs(rise)` |
-| Spiral second derivative | `2^-47 W2 + W2 dphi`, with `W2 = 2 dr w + w^2 S` |
-| Easing | `2^-50` |
+| Spiral point | `2^-49 (S + abs(rise t)) + S dphi + 4 eta` |
+| Spiral derivative | `2^-48 W + W dphi + 4 (1 + w + S) eta`, with `W = dr + w S + abs(rise)` |
+| Spiral second derivative | `2^-47 W2 + W2 dphi + 4 (1 + dr + S + w S + w^2) eta`, with `W2 = 2 dr w + w^2 S` |
+| Easing | `2^-50` (already absolute; unchanged) |
+
+- **Underflow (amendment A3).** A product whose result is subnormal or underflows to zero is not accurate to a
+  relative `eps`; its error is up to `eta / 2` absolute (`fl(x y) = x y (1 + d) + e`, `abs(d) <= eps`,
+  `abs(e) <= eta / 2`). Sums and differences stay exact when their result is subnormal. The absolute terms bound the
+  propagated `e`: the radius underflow (up to `2 eta`) times `w` and `w^2`, the underflow of `w = 2 pi turns` for a
+  subnormal `turns` (times S), and the final products. They are negligible unless an input or intermediate is below
+  about 2^-1000; for normal-range inputs they change nothing measurable. Derivation: `M3-AMENDMENT-A3.md`.
+- Test tolerances must be computed so that they are never below these bounds: computing `2^-49 S` in plain double
+  arithmetic underflows to 0 for subnormal S. The tests round every tolerance operation upward
+  (`CurveTestSupport`).
 
 - On [0, 1], `S = abs(r(t))`, so these bounds are the revision 1 bounds there. Only extrapolated t, where
   `(1 - t) startRadius + t endRadius` can cancel, gets the larger scale. Revision 1 used `R = abs(r(t))`, which is
   invalid there: the A2 counterexample has an error of 2^-52 against a revision 1 bound of about 1.0e-30.
-- Bounds and test tolerances are functions of the inputs only (S, `abs(turns t)`, `abs(rise)`), never of a rounded
-  intermediate of the evaluated formula.
+- Bounds and test tolerances are functions of the inputs only (S, `abs(turns t)`, `abs(rise)`, `eta`), never of a
+  rounded intermediate of the evaluated formula.
 - `PosedCurve` adds M1 `Pose` rounding (relative order `10 eps`); it is tested by metamorphic composition.
 - The bounds are rigorous by standard rounding analysis and leave headroom. The measured worst cases are recorded in
   the test specification.
@@ -256,7 +276,10 @@ radians; there is no `startTurn` term because T2 reduces it exactly):
 - [fact] Under extrapolation, the radius has an absolute error up to `2^-51 S`. Where `r(t)` cancels to a value
   of that order, its relative error is unbounded (A2). This is inherent in evaluating `(1 - t) r0 + t r1` in double
   precision without `fma` (forbidden by section 7.1) or extended-precision arithmetic.
-- Coordinates up to 1e100, and `abs(t) <= 1e3` for extrapolation, keep every intermediate finite.
+- [fact] (A3) With subnormal radii, `rise` or `turns`, results keep only absolute accuracy of a few `eta` (times the
+  amplifications above); relative accuracy is not guaranteed there. The relative parts of the bounds are unchanged.
+- Coordinates and radii up to 1e100, `abs(turns) <= 1e50` and `abs(t) <= 1e3` keep every intermediate finite. Outside,
+  overflow follows IEEE-754 (see T3 to T5).
 
 ### 7.3 Degeneracy
 

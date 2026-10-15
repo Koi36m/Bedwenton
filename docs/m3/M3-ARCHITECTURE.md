@@ -66,7 +66,8 @@ No spell-specific presets are part of M3.
 | numerical risk assessment | `docs/m3/M3-RISKS.md` |
 | test specification and acceptance criteria | `docs/m3/M3-TEST-SPECIFICATION.md` |
 | Codex instructions (for after approval) | `docs/m3/README-FOR-CODEX-M3.md` |
-| independent tests | `src/test/java/workshop/vfx/math/curve/` (44 tests in 7 classes, plus a helper) |
+| independent tests | `src/test/java/workshop/vfx/math/curve/` (51 tests in 8 classes, plus a helper) |
 | reference data and generator | `src/test/resources/m3/reference/` (2,759 rows), `tools/generate_m3_reference_vectors.py` |
 | validation evidence | `docs/m3/validation/` (revision 1) and `docs/m3/validation/r2/` (revision 2) |
 | revision 2 correction report | `docs/m3/M3-REVISION-2-CORRECTIONS.md` |
+| amendment A3 (underflow, overflow limits) | `docs/m3/M3-AMENDMENT-A3.md`, evidence in `docs/m3/validation/a3/` |

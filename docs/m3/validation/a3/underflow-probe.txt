@@ -1,0 +1,19 @@
+java 25.0.4.1; q = Double.MIN_VALUE = 2^-1074
+== A3 radius: r0 = q, r1 = 2q, t = 0.5, turns = 0, startTurn = 0, rise = 0
+  0.5 * q = 0 q (exact 0.5 q, a tie, rounded to even = 0); 0.5 * 2q = 1 q
+  exact radius 1.5 q; lerp = 1 q; Spiral.point(0.5).x = 1 q
+  S = 1.5 q; revision 2 radius bound 2^-51 S = 0.0000000000000006661338147750939 q; nearest doubles q and 2q are both 0.5 q away: no double meets it
+  revision 2 point bound 2^-49 S + S dphi = 0.000000000000006849977456710734 q
+  LineSegment((q,0,0), (2q,0,0)).point(0.5).x = 1 q; revision 2 Bezier bound 2^-49 G max|P| = 0.000000000000003552713678800501 q
+== radius error amplified by w and w^2: r0 = q, r1 = 2q, t = 0.5, turns = 1000 (phase 500 turns: cos 1, sin 0)
+  derivative z: exact -w 1.5q = -9424.77796076938 q; computed -6283 q
+  second x:     exact -w^2 1.5q = -59217626.40653615 q; computed -39478418 q
+== subnormal turns: turns = 7q, r = 1e100 (dr = 0), startTurn = 0.25, t = 1 (phase 0.25 + 7q: sin ~ 1)
+  w = 2 pi 7q = 43.98229715025711 q; fl(fl(2 pi) * 7q) = 44 q
+  derivative x: exact -2.173014204712339E-222; computed -2.173888841701485E-222; error 8.746369891454180E-226
+  revision 2 derivative bound 2^-48 W + W dphi (W = w S) = 1.378344752158248E-236
+== tolerance computation in doubles (revision 2 helper style) underflows too
+  2^-49 * q = 0.0;  (|1-t| r0 + |t| r1) for the A3 case = 1 q (exact 1.5 q)
+== overflow of turns * t (T4 clarification): turns = 2^600 (closed), k = 2^500
+  turns * k = Infinity; point(k) = Vec3[x=NaN, y=0.0, z=NaN]; point(0) = Vec3[x=1.0, y=0.0, z=-0.0]
+  closed, turns = 2^600, derivative(0) = Vec3[x=0.0, y=0.0, z=-2.6072175254305997E181]; second(0) = Vec3[x=-Infinity, y=0.0, z=NaN] (w^2 r overflows)

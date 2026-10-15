@@ -82,7 +82,7 @@ class M3ReferenceVectorTest {
             for (int i = 0; i < ctrl.length; i++) {
                 maxP = Math.max(maxP, maxAbs(ctrl[i]));
                 if (i > 0) {
-                    maxD = Math.max(maxD, maxAbs(ctrl[i].sub(ctrl[i - 1])) * (1 + 0x1p-52));
+                    maxD = Math.max(maxD, Math.nextUp(maxAbs(ctrl[i].sub(ctrl[i - 1])))); // upper bound of the exact difference (A3)
                 }
             }
             Vec3 ep = vec(r, 15), ed = vec(r, 18), es = vec(r, 21);
