@@ -1,0 +1,6 @@
+/workspace/work/r4-input/m1-review-r4/review-m1-claude.bundle is okay
+The bundle contains this ref:
+802d9e7f95ccf8fdfd3879d99313794faa2c08d1 refs/heads/review/m1-claude
+The bundle requires this ref:
+8397c04b55f7d506e8fec79fca120ce297e8ae22 
+The bundle uses this hash algorithm: sha1

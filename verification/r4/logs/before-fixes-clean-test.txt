@@ -1,0 +1,314 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.1.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :clean UP-TO-DATE
+> Task :compileJava
+> Task :processResources NO-SOURCE
+> Task :classes
+
+> Task :compileTestJava
+/workspace/work/gradle-home/caches/modules-2/files-2.1/org.joml/joml/1.10.9/438e036486bad66b189bff385dd07dea4f74a146/joml-1.10.9.jar(/org/joml/Quaterniond.class): warning: [classfile] RuntimeVisibleTypeAnnotations attribute introduced in version 52.0 class files is ignored in version 46.0 class files
+/workspace/work/gradle-home/caches/modules-2/files-2.1/org.joml/joml/1.10.9/438e036486bad66b189bff385dd07dea4f74a146/joml-1.10.9.jar(/org/joml/Vector3d.class): warning: [classfile] RuntimeVisibleTypeAnnotations attribute introduced in version 52.0 class files is ignored in version 46.0 class files
+/workspace/work/gradle-home/caches/modules-2/files-2.1/org.joml/joml/1.10.9/438e036486bad66b189bff385dd07dea4f74a146/joml-1.10.9.jar(/org/joml/Vector4f.class): warning: [classfile] RuntimeVisibleTypeAnnotations attribute introduced in version 52.0 class files is ignored in version 46.0 class files
+/workspace/work/gradle-home/caches/modules-2/files-2.1/org.joml/joml/1.10.9/438e036486bad66b189bff385dd07dea4f74a146/joml-1.10.9.jar(/org/joml/Vector3f.class): warning: [classfile] RuntimeVisibleTypeAnnotations attribute introduced in version 52.0 class files is ignored in version 46.0 class files
+/workspace/work/gradle-home/caches/modules-2/files-2.1/org.joml/joml/1.10.9/438e036486bad66b189bff385dd07dea4f74a146/joml-1.10.9.jar(/org/joml/Vector4d.class): warning: [classfile] RuntimeVisibleTypeAnnotations attribute introduced in version 52.0 class files is ignored in version 46.0 class files
+5 warnings
+
+> Task :processTestResources
+> Task :testClasses
+
+> Task :test
+
+Amendment3AcceptanceTest > D1: Pose.then names the scale when the scale product is not representable, even if the translation also overflows FAILED
+    org.opentest4j.AssertionFailedError at Amendment3AcceptanceTest.java:50
+
+Amendment3AcceptanceTest > A3: Tier 3 inputs reject null with IllegalArgumentException (axisAngle axis, Frame axes, Pose fields) FAILED
+    org.opentest4j.AssertionFailedError at Amendment3AcceptanceTest.java:118
+        Caused by: java.lang.NullPointerException at Amendment3AcceptanceTest.java:118
+
+Amendment3AcceptanceTest > A1: transportY's y is normalize(newY) to 1e-15 per component (not bitwise), including after antiparallel flips PASSED
+
+Amendment3AcceptanceTest > A4: a hint that is null, non-finite or below LENGTH_EPS is absent; exactly LENGTH_EPS is present PASSED
+
+Amendment3AcceptanceTest > D1: Pose.inverse names the scale when 1/s is not representable, whatever the translation FAILED
+    org.opentest4j.AssertionFailedError at Amendment3AcceptanceTest.java:39
+
+Amendment3AcceptanceTest > D1: a translation-only failure names the translation, not the scale; the set of throwing inputs is unchanged PASSED
+
+Amendment3AcceptanceTest > A2: the inverse of a degenerate quaternion is the identity rotation numerically; signed zeros are equivalent PASSED
+
+Amendment3AcceptanceTest > A5: fromHeading(f, u) depends only on the directions of f and u, and equals alignZ(-f, u) with an absent u read as +Y PASSED
+
+Amendment3AcceptanceTest > A6: rotate(v) is within (2|k^2 - 1| + 1e-13)|v| of the rotation by q/|q|, k = |q| within 1e-12 of 1, and finite for |v| <= 1e100 PASSED
+
+Amendment3AcceptanceTest > A5: fromHeading's parallel test uses the sine of the angle between the normalized vectors; worked examples PASSED
+
+BoundaryTest > Core classes never expose Paper, Bukkit, Minecraft or JOML types PASSED
+
+BoundaryTest > Paper and Bukkit are not on the test classpath either PASSED
+
+ConventionsTest > Frame reference examples from docs/REFERENCE-VECTORS.md PASSED
+
+ConventionsTest > +90 degrees about +Y sends +X to -Z (east to north) PASSED
+
+ConventionsTest > +90 degrees about +Y is counter-clockwise when viewed from above PASSED
+
+ConventionsTest > Axis rotations by +90 degrees, both directions PASSED
+
+ConventionsTest > Pose reference example: t=(10,0,0), +90 about +Y, scale 2 maps local (1,0,0) to (10,0,-2) PASSED
+
+ConventionsTest > Clockwise 90 degrees viewed from above sends +X to +Z (east to south) PASSED
+
+ConventionsTest > Minecraft world axes are a right-handed basis: east x up = south PASSED
+
+ConventionsTest > Positive rotation about +Y and clockwise-from-above are opposite senses PASSED
+
+ConventionsTest > Full Heal 0.2.0 ring formula (cos t, 0, sin t) is clockwise from above (audit item 1) PASSED
+
+ConventionsTest > a.mul(b) applies b first, then a PASSED
+
+FrameTest > Constructor accepts right-handed orthonormal triples and rejects everything else PASSED
+
+FrameTest > transportY follows a direction sweep without twist; naive alignY flips by about pi through the hint (negative control) STANDARD_OUT
+    [M1 transport report] worst per-step twist: transport = 1.1102230246251568E-16 rad, naive alignY = 3.141592653589793 rad
+
+FrameTest > transportY follows a direction sweep without twist; naive alignY flips by about pi through the hint (negative control) PASSED
+
+FrameTest > fromHeading degeneracy: vertical heading, zero heading, zero or parallel up hint PASSED
+
+FrameTest > toWorld / toLocal are inverse and use the frame axes as columns PASSED
+
+FrameTest > transportY: random walks stay valid; zero axis keeps the previous frame; antiparallel stays finite PASSED
+
+FrameTest > alignY/alignZ degeneracy: parallel, antiparallel, zero and non-finite hints or axes (M0: robustness) PASSED
+
+FrameTest > M0 audit item 2: Astral's (right, up, forward) basis is left-handed; fromHeading's (right, up, back) is right-handed PASSED
+
+FrameTest > fromHeading: facing each compass direction gives the correct right, up and back axes PASSED
+
+FrameTest > alignZ hand-derived reference frames PASSED
+
+FrameTest > alignY hand-derived reference frames PASSED
+
+FrameTest > alignY/alignZ: right-handed orthonormal, axis honoured, hint lies in the x-y plane (10,000 random) PASSED
+
+JomlOracleTest > Records which application order JOML's rotationXYZ uses; it must match one of the two candidates STANDARD_OUT
+    [M1 JOML report] rotationXYZ applies X first = false, applies Z first = true
+
+JomlOracleTest > Records which application order JOML's rotationXYZ uses; it must match one of the two candidates PASSED
+
+JomlOracleTest > Quat.rotate agrees with JOML Quaterniond on 10,000 seeded rotations PASSED
+
+JomlOracleTest > Quat.slerp agrees with JOML slerp (as rotations) away from the near-parallel regime PASSED
+
+JomlOracleTest > Quat.mul agrees with JOML's Hamilton product (same operand order) PASSED
+
+M0RegressionTest > Audit item 1: +90 about +Y reaches -Z, but Full Heal's ring parameterization reaches +Z (opposite senses) PASSED
+
+M0RegressionTest > Audit item 2: the (right, up, forward) mapping is a reflection; the engine frame is a proper rotation PASSED
+
+M0RegressionTest > Astral Spec pattern: non-finite or out-of-range configuration is rejected at construction PASSED
+
+M0RegressionTest > Audit (Euler order): Astral-style X-then-Y-then-Z rotation equals the engine's named Euler helper PASSED
+
+M0RegressionTest > Full Heal outward(): a zero offset must give a finite unit fallback, never NaN PASSED
+
+M0RegressionTest > Large-coordinate regression: a 0.3-block offset survives at the world edge in double, not in float PASSED
+
+MathUtilTest > LENGTH_EPS is the documented 1e-12 PASSED
+
+MathUtilTest > clamp: inside, outside, boundaries, infinities, NaN maps to the lower bound PASSED
+
+MathUtilTest > clamp rejects an inverted or NaN range PASSED
+
+MathUtilTest > approxEquals is inclusive at the tolerance and false for NaN PASSED
+
+NumericPolicyTest > Supported magnitude: Vec3, Quat.rotate and Frame stay finite and homogeneous up to 1e100 PASSED
+
+NumericPolicyTest > Tier 1: Pose.toWorld overflows to infinity (no exception, no clamping); Frame.toWorld likewise PASSED
+
+NumericPolicyTest > Tier 1: Vec3 and Quat overflow to infinity with no exception and no saturation PASSED
+
+NumericPolicyTest > Supported magnitude: Pose with scale and translation up to 1e100 is finite and accurate; compositions of two stay finite PASSED
+
+NumericPolicyTest > Tier 3: Pose.then throws ArithmeticException when scale overflows or underflows to zero; two valid poses never give an invalid one PASSED
+
+NumericPolicyTest > Tier 1: NaN and infinity propagate by IEEE rules (no sanitizing, no exceptions) PASSED
+
+NumericPolicyTest > Tier 3: Pose.inverse throws ArithmeticException when the reciprocal scale or inverse translation is not representable PASSED
+
+NumericPolicyTest > Tier 2: Quat.normalized and inverse are total: finite unit result for every double input, IDENTITY for zero or non-finite PASSED
+
+NumericPolicyTest > Tier 2: Frame factories always return a valid right-handed frame, WORLD for a degenerate axis, for every double input PASSED
+
+NumericPolicyTest > Tier 3: constructors keep throwing IllegalArgumentException for invalid inputs PASSED
+
+NumericPolicyTest > Tier 2: shortestArc is total: unit result for every pair; IDENTITY for degenerate input; correct mapping otherwise PASSED
+
+NumericPolicyTest > Tier 2: normalizedOr is total: fallback exactly for degenerate input, otherwise a finite unit vector PASSED
+
+NumericPolicyTest > Tier 3: Pose.then throws ArithmeticException when the composed translation overflows PASSED
+
+PolicyClarificationTest > A: clamp always returns a value inside its bounds (or the lower bound for NaN); infinite bounds are allowed PASSED
+
+PolicyClarificationTest > B: axisAngle accepts any finite angle and any finite axis whose largest component is at least 1e-12 (Tier 3 validation only) PASSED
+
+PolicyClarificationTest > B: Pose.toLocal with scale 1e-100 and world components at 1e100 is finite (domain edge) PASSED
+
+PolicyClarificationTest > B: slerp and nlerp are accurate for finite unit quaternions and |t| up to 1e3 (extrapolation included) PASSED
+
+PolicyClarificationTest > A: approxEquals is false when the difference is NaN (equal infinities) and never throws PASSED
+
+PolicyClarificationTest > B: Quat.mul and Quat.dot are finite for components up to 1e100 (not only unit quaternions) PASSED
+
+PolicyClarificationTest > B: Vec3.mul(s) and Vec3.lerp(to, t) are finite for components and scalars up to 1e100; outside that, IEEE PASSED
+
+PolicyClarificationTest > A: finiteness and unit length of the fallback path belong to the caller PASSED
+
+PolicyClarificationTest > A: normalizedOr returns the caller's fallback object unchanged, even when it is NaN, infinite, zero or not unit PASSED
+
+PoseTest > Five-deep chain equals nested sequential application; scale and rotation compose PASSED
+
+PoseTest > Constructor normalizes the rotation PASSED
+
+PoseTest > a.then(b) applied equals b first then a; associativity PASSED
+
+PoseTest > Round trip at the Minecraft world edge (29,999,984) stays within 1e-6 blocks PASSED
+
+PoseTest > Constructor validation: non-finite translation, bad scale, bad rotation PASSED
+
+PoseTest > Golden: parent.then(child).toWorld(p) equals the Python oracle (1,500 rows) PASSED
+
+PoseTest > toLocal(toWorld(p)) = p on 10,000 random poses PASSED
+
+PoseTest > Why local-space doubles matter: float spacing is 2 blocks near the world edge and 0.0625 blocks at 1e6 PASSED
+
+PoseTest > Golden: large coordinates near +/-3e7 blocks stay accurate to 1e-7 blocks PASSED
+
+PoseTest > directionToWorld rotates only: ignores translation and scale PASSED
+
+PoseTest > inverse: round trip, composition with the original is the identity PASSED
+
+PoseTest > Identity pose and pure translation PASSED
+
+QuatTest > Quaternion multiplication is associative (as rotations) and composes rotations PASSED
+
+QuatTest > Golden: slerp action matches the oracle, also with q1 negated (shortest path) PASSED
+
+QuatTest > slerp: endpoints and constant angular speed, with extrapolation PASSED
+
+QuatTest > slerp is continuous across the near-parallel (nlerp) threshold and never NaN PASSED
+
+QuatTest > axisAngle normalizes non-unit axes and rejects zero or non-finite input PASSED
+
+QuatTest > Golden: axisAngle(axis, angle).rotate(v) equals Rodrigues from the Python oracle (2,042 rows) PASSED
+
+QuatTest > angleTo recovers the rotation angle, including tiny angles and near pi PASSED
+
+QuatTest > Identity, conjugate, inverse and normalization PASSED
+
+QuatTest > Degenerate quaternions: zero and non-finite normalize to identity (M0: no NaN propagation) PASSED
+
+QuatTest > Golden: qa.mul(qb).rotate(v) equals Rodrigues(a, Rodrigues(b, v)) (1,500 rows) PASSED
+
+QuatTest > nlerp: unit norm, endpoints, shortest sign PASSED
+
+QuatTest > shortestArc maps from-direction onto to-direction for random pairs PASSED
+
+QuatTest > shortestArc: identical, antiparallel, near-antiparallel and zero inputs (M0: robustness) PASSED
+
+QuatTest > fromEulerApplyXThenYThenZ equals the explicit rotation sequence X, then Y, then Z about fixed axes PASSED
+
+QuatTest > 1,000,000 compositions: periodic renormalization keeps the norm within 1e-12; raw drift is reported STANDARD_OUT
+    [M1 drift report] raw |norm-1| after 1,000,000 compositions = 1.6544543512964083E-12
+    [M1 drift report] worst |norm-1| between renormalizations (every 1000) = 6.8833827526759706E-15
+
+QuatTest > 1,000,000 compositions: periodic renormalization keeps the norm within 1e-12; raw drift is reported PASSED
+
+QuatTest > toFrame / fromFrame round trip, including 180-degree rotations (all matrix-to-quaternion branches) PASSED
+
+QuatTest > slerp takes the shortest path: q1 and -q1 give the same result PASSED
+
+ReviewAdversarialTest > normalizedOr: 1e-12 of the exact unit vector for 200,000 extreme finite inputs; same fallback reference below LENGTH_EPS (section 2) STANDARD_OUT
+    [M1 review] normalizedOr worst component error vs exact: 2.220446049250313E-16
+
+ReviewAdversarialTest > normalizedOr: 1e-12 of the exact unit vector for 200,000 extreme finite inputs; same fallback reference below LENGTH_EPS (section 2) PASSED
+
+ReviewAdversarialTest > Tier 1 never throws and Tier 2 is total: NaN, infinities, -0.0, subnormals and MAX_VALUE in every operand (section 0A) PASSED
+
+ReviewAdversarialTest > Pose.then/inverse: inside the domain never throw; outside, only ArithmeticException, never IllegalArgumentException (section 5) PASSED
+
+ReviewAdversarialTest > slerp: constant angular speed; slerp(a, b, t) and slerp(a, -b, t) are the same rotation (section 3) PASSED
+
+ReviewAdversarialTest > Quat.normalized: 1e-12 of the exact unit quaternion for 100,000 extreme inputs; exact IDENTITY for zero (section 3) PASSED
+
+ReviewAdversarialTest > slerp: action equals the analytic great-circle position for |t| <= 1e3 to 1e-9, incl. phi near 1e-8 and near pi (section 3, R3 domain) STANDARD_OUT
+    [M1 review] slerp |t|<=1e3 worst action error vs analytic: 9.056739506726039E-13
+
+ReviewAdversarialTest > slerp: action equals the analytic great-circle position for |t| <= 1e3 to 1e-9, incl. phi near 1e-8 and near pi (section 3, R3 domain) PASSED
+
+ReviewAdversarialTest > Conventions: Euler helper equals Rodrigues X then Y then Z about fixed world axes for random angles (CONVENTIONS 3) PASSED
+
+ReviewAdversarialTest > Quat.rotate of exactly-normalized quaternions matches Rodrigues to 1e-13 * |v| for |v| up to 1e100 (sections 0A, 6) PASSED
+
+ReviewAdversarialTest > nlerp: shortest-sign (1-t)a + tb normalized, including extrapolation to |t| = 1e3 (section 3) PASSED
+
+ReviewAdversarialTest > shortestArc near antiparallel: contract accuracy table, minimal angle, unit norm, half-turn axis rule (section 3) STANDARD_OUT
+    [M1 review] shortestArc offset 0.1 worst error 8.065179992641965E-15 (allowed 1.0E-9)
+    [M1 review] shortestArc offset 0.001 worst error 7.980693752677138E-13 (allowed 1.0E-9)
+    [M1 review] shortestArc offset 1.0E-6 worst error 7.624904121111344E-10 (allowed 1.0E-9)
+    [M1 review] shortestArc offset 1.0E-7 worst error 7.937575590433542E-9 (allowed 1.0E-8)
+    [M1 review] shortestArc offset 1.0E-9 worst error 7.908609860608958E-7 (allowed 1.0E-6)
+
+ReviewAdversarialTest > shortestArc near antiparallel: contract accuracy table, minimal angle, unit norm, half-turn axis rule (section 3) PASSED
+
+ReviewAdversarialTest > Frame factories: valid at 1e-12 for extreme magnitudes and hints within a factor 2 of the 1e-8 threshold (section 4) PASSED
+
+ReviewAdversarialTest > angleTo: 1e-12 absolute from 1e-9 to pi - 1e-6, sign-insensitive, both argument orders (section 3) PASSED
+
+ReviewAdversarialTest > fromHeading equals the contract formula right = n(f x u), up = right x f, back = -f for well-conditioned input (section 4) PASSED
+
+ReviewAdversarialTest > Pose near Minecraft's world border (|x|,|z| <= 3e7): composition 1e-7, inverse and toLocal round trips 1e-6 (section 6) PASSED
+
+ReviewAdversarialTest > fromFrame(q.toFrame()) is q (as a rotation) for half turns about arbitrary and diagonal axes and near-half turns (section 3) PASSED
+
+ReviewAdversarialTest > alignY: x is the normalized perpendicular component of the hint, to within its conditioning (section 4) PASSED
+
+ReviewAdversarialTest > transportY: 200,000-step walk with an antiparallel flip every 1,000 steps stays valid; y within 1e-12 of normalize(newY) (section 4) PASSED
+
+ReviewAdversarialTest > Environment: the test JVM is Java 25 (contract header: Java 25) PASSED
+
+Vec3Test > normalizedOr returns unit vectors for ordinary input PASSED
+
+Vec3Test > normalizedOr is accurate at both ends of the finite range PASSED
+
+Vec3Test > Algebraic identities on 10,000 seeded random vectors PASSED
+
+Vec3Test > Constants and basic arithmetic PASSED
+
+Vec3Test > Full Heal outward-direction pattern: zero offset yields a finite unit fallback for any yaw PASSED
+
+Vec3Test > Cross product: hand-derived values and right-hand rule PASSED
+
+Vec3Test > normalizedOr returns the fallback for zero, tiny, NaN and infinite input (M0: Full Heal outward fallback) PASSED
+
+Vec3Test > lerp: endpoints, midpoint, extrapolation (no clamping) PASSED
+
+Vec3Test > isFinite detects NaN and infinities; Vec3 itself never validates PASSED
+
+125 tests completed, 3 failed
+
+> Task :test FAILED
+
+[Incubating] Problems report is available at: file:///workspace/work/m1-r4-final/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///workspace/work/m1-r4-final/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to generate a Build Scan (Powered by Develocity).
+
+BUILD FAILED in 24s
+5 actionable tasks: 4 executed, 1 up-to-date

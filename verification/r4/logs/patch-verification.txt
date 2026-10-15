@@ -1,0 +1,5 @@
+0001-Add-independent-M1-review-adversarial-tests-findings.patch: PASS — original SHA da95a353b68002fa8e81606967f5740d74253a9b, applied tree d17fbbf3d324b0a63fde6739537f5b84d7d981eb
+0002-Propose-Amendment-3-revision-4-and-acceptance-tests-.patch: PASS — original SHA 09866629c59e3b322a409c44f7513fde1b714a85, applied tree 7bde7d22965e666ef43b8b3dc290ff4bce8d8fd5
+0003-Approve-Amendment-3-with-clarified-hint-processing-o.patch: PASS — original SHA f9eefd69ae26652af90a96bf2bb8e73764933f2d, applied tree 6e6b9251e87904721f5e58deffe59bee5da13b0b
+0004-Apply-Revision-4-R4-text-to-the-implementation-contr.patch: PASS — original SHA 802d9e7f95ccf8fdfd3879d99313794faa2c08d1, applied tree 5b527026c5288a0ce8d2dfa74802a50f08bec8bc
+Standalone R3 and R4 contracts match original commit blobs.

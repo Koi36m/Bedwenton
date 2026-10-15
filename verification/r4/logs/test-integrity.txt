@@ -1,0 +1,26 @@
+0b621ed615ee389577d399e942ad7dc8a1b69ce5f15722b49130cf7b49a78e10  src/test/java/workshop/vfx/math/core/BoundaryTest.java  UNCHANGED_FROM_R3_ARCHIVE
+7f4b86a5f9d46576cee2dad987c7af0114adf050590fd1af510fbfe4d359030e  src/test/java/workshop/vfx/math/core/ConventionsTest.java  UNCHANGED_FROM_R3_ARCHIVE
+7035967c7980d9c7a98f8df58e95149ecb6dd2242e2eca11d4e7c622c420c500  src/test/java/workshop/vfx/math/core/FrameTest.java  UNCHANGED_FROM_R3_ARCHIVE
+f542b893db448815931c7216321c1430d23f20473eb6cf22d45fc7320429f4a6  src/test/java/workshop/vfx/math/core/JomlOracle.java  UNCHANGED_FROM_R3_ARCHIVE
+de45b8b82e2f5e32d941d0fde979c920e28b93aa3839a36e8c9358f2f9a8a149  src/test/java/workshop/vfx/math/core/JomlOracleTest.java  UNCHANGED_FROM_R3_ARCHIVE
+0ee3e6ebb117a404c349f3f5efdcd1008d66feaef964917bb4d28ade667442bf  src/test/java/workshop/vfx/math/core/M0RegressionTest.java  UNCHANGED_FROM_R3_ARCHIVE
+ad7e7ee1aa4317a1c97ee84d501f92902e45019c353a2317b7851a5438013ac1  src/test/java/workshop/vfx/math/core/MathUtilTest.java  UNCHANGED_FROM_R3_ARCHIVE
+b8b9165707573f9ddf6d37a4dd823206ae3b1493f2990a794921fa3894181f59  src/test/java/workshop/vfx/math/core/NumericPolicyTest.java  UNCHANGED_FROM_R3_ARCHIVE
+09335be6061dab7f85e41facdebb8c2e30fa52205ef4cefca017b5c32e59377c  src/test/java/workshop/vfx/math/core/PolicyClarificationTest.java  UNCHANGED_FROM_R3_ARCHIVE
+58062fdbdd22624512c0c04e961cece5c8dd3528f872b0d411118fa05787f42b  src/test/java/workshop/vfx/math/core/PoseTest.java  UNCHANGED_FROM_R3_ARCHIVE
+d823d53407e64956ffe4b692782d7262329fb288324191c54b76b86cdc200fe5  src/test/java/workshop/vfx/math/core/QuatTest.java  UNCHANGED_FROM_R3_ARCHIVE
+c0ec0b5e2885d666cf811384338d71066e541a861c5c27c938f9ce4298136f79  src/test/java/workshop/vfx/math/core/TestSupport.java  UNCHANGED_FROM_R3_ARCHIVE
+b0c7fadb3c1b84199e94211ddbd636d4a2f3a07dede63bdf1d4d9d575c403ba2  src/test/java/workshop/vfx/math/core/Vec3Test.java  UNCHANGED_FROM_R3_ARCHIVE
+6055149ffc538a504bbdd7a7ac24a26e2b36b7f70d91458a92c7db5f9bdecaf4  src/test/resources/golden/MANIFEST.sha256  UNCHANGED_FROM_R3_ARCHIVE
+25a7b60a6741948f51fc0a9782ec4801189fed75eaa753fcb0b74f06a1660968  src/test/resources/golden/compose_cases.csv  UNCHANGED_FROM_R3_ARCHIVE
+a6afd0965f28c8c0e57b96e4ce96831faf66238d22de5b3ba9027ce1118c4bc3  src/test/resources/golden/pose_cases.csv  UNCHANGED_FROM_R3_ARCHIVE
+ae10a0ef5079fa589938e475e5b39963426975a4ef4970dad2a4f01b7ddcd2be  src/test/resources/golden/pose_large_cases.csv  UNCHANGED_FROM_R3_ARCHIVE
+b35b814e83589f4a560c3a09513cacb69a70e6e51487691a6bca55533c5c12f2  src/test/resources/golden/rotation_cases.csv  UNCHANGED_FROM_R3_ARCHIVE
+5c5b744508ed6a8c90d0c6b7a681312cc80f25b5369f5b7c675f3f06797651c9  src/test/resources/golden/slerp_cases.csv  UNCHANGED_FROM_R3_ARCHIVE
+71eec8776d40aaf7c4ba8590ff3752db9aafb92316676a309b4243f1a9575f42  src/test/java/workshop/vfx/math/core/ReviewAdversarialTest.java  UNCHANGED_FROM_REVIEW_802d9e7f
+c2909a1e9ad73a803e988dc63376ed86dc9d5bfd7e7c9576ec4921eb7e9e67b3  src/test/java/workshop/vfx/math/core/Amendment3AcceptanceTest.java  UNCHANGED_FROM_REVIEW_802d9e7f
+docs/AMENDMENT-3-REVIEW-DECISIONS.md  EXACT_INPUT_MATCH
+review/M1-CLAUDE-REVIEW.md  EXACT_INPUT_MATCH
+docs/IMPLEMENTATION-CONTRACT.md  EXACT_INPUT_MATCH
+13 original Java files match baseline 77a1430. Golden resources and tools have an empty baseline diff.
+All tests and docs have an empty diff against recovered review head.

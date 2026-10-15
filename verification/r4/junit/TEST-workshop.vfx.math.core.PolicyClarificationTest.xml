@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.core.PolicyClarificationTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-15T08:21:05.148Z" hostname="1a7d890349f4" time="0.07">
+  <properties/>
+  <testcase name="A: clamp always returns a value inside its bounds (or the lower bound for NaN); infinite bounds are allowed" classname="workshop.vfx.math.core.PolicyClarificationTest" time="0.002"/>
+  <testcase name="B: axisAngle accepts any finite angle and any finite axis whose largest component is at least 1e-12 (Tier 3 validation only)" classname="workshop.vfx.math.core.PolicyClarificationTest" time="0.002"/>
+  <testcase name="B: Pose.toLocal with scale 1e-100 and world components at 1e100 is finite (domain edge)" classname="workshop.vfx.math.core.PolicyClarificationTest" time="0.001"/>
+  <testcase name="B: slerp and nlerp are accurate for finite unit quaternions and |t| up to 1e3 (extrapolation included)" classname="workshop.vfx.math.core.PolicyClarificationTest" time="0.045"/>
+  <testcase name="A: approxEquals is false when the difference is NaN (equal infinities) and never throws" classname="workshop.vfx.math.core.PolicyClarificationTest" time="0.0"/>
+  <testcase name="B: Quat.mul and Quat.dot are finite for components up to 1e100 (not only unit quaternions)" classname="workshop.vfx.math.core.PolicyClarificationTest" time="0.0"/>
+  <testcase name="B: Vec3.mul(s) and Vec3.lerp(to, t) are finite for components and scalars up to 1e100; outside that, IEEE" classname="workshop.vfx.math.core.PolicyClarificationTest" time="0.013"/>
+  <testcase name="A: finiteness and unit length of the fallback path belong to the caller" classname="workshop.vfx.math.core.PolicyClarificationTest" time="0.0"/>
+  <testcase name="A: normalizedOr returns the caller's fallback object unchanged, even when it is NaN, infinite, zero or not unit" classname="workshop.vfx.math.core.PolicyClarificationTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

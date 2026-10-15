@@ -1,0 +1,15 @@
+class,tests,passed,failures,errors,skipped
+workshop.vfx.math.core.Amendment3AcceptanceTest,10,10,0,0,0
+workshop.vfx.math.core.BoundaryTest,2,2,0,0,0
+workshop.vfx.math.core.ConventionsTest,10,10,0,0,0
+workshop.vfx.math.core.FrameTest,11,11,0,0,0
+workshop.vfx.math.core.JomlOracleTest,4,4,0,0,0
+workshop.vfx.math.core.M0RegressionTest,6,6,0,0,0
+workshop.vfx.math.core.MathUtilTest,4,4,0,0,0
+workshop.vfx.math.core.NumericPolicyTest,13,13,0,0,0
+workshop.vfx.math.core.PolicyClarificationTest,9,9,0,0,0
+workshop.vfx.math.core.PoseTest,12,12,0,0,0
+workshop.vfx.math.core.QuatTest,17,17,0,0,0
+workshop.vfx.math.core.ReviewAdversarialTest,18,18,0,0,0
+workshop.vfx.math.core.Vec3Test,9,9,0,0,0
+TOTAL,125,125,0,0,0

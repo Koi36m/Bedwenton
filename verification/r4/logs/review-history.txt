@@ -1,0 +1,4 @@
+da95a353b68002fa8e81606967f5740d74253a9b 8397c04b55f7d506e8fec79fca120ce297e8ae22 Add independent M1 review: adversarial tests, findings and evidence
+09866629c59e3b322a409c44f7513fde1b714a85 da95a353b68002fa8e81606967f5740d74253a9b Propose Amendment 3 (revision 4) and acceptance tests for M1 review decisions
+f9eefd69ae26652af90a96bf2bb8e73764933f2d 09866629c59e3b322a409c44f7513fde1b714a85 Approve Amendment 3 with clarified hint processing order
+802d9e7f95ccf8fdfd3879d99313794faa2c08d1 f9eefd69ae26652af90a96bf2bb8e73764933f2d Apply Revision 4 [R4] text to the implementation contract

@@ -1,0 +1,13 @@
+{
+  "tests": 125,
+  "passed": 122,
+  "failures": 3,
+  "errors": 0,
+  "skipped": 0,
+  "expected_failures": [
+    "D1: Pose.then names the scale when the scale product is not representable, even if the translation also overflows",
+    "A3: Tier 3 inputs reject null with IllegalArgumentException (axisAngle axis, Frame axes, Pose fields)",
+    "D1: Pose.inverse names the scale when 1/s is not representable, whatever the translation"
+  ],
+  "exit_code": 1
+}
