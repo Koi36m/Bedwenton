@@ -1,0 +1,7 @@
+{
+  "before_fix_clean_test": 1,
+  "after_fix_clean_test": 0,
+  "check": 0,
+  "golden_regeneration_and_diff": 0,
+  "boundary_regeneration_and_diff": 0
+}

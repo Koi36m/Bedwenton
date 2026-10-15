@@ -1,0 +1,6 @@
+remote: 
+remote: Create a pull request for 'm2-r2-amendment' on GitHub by visiting:        
+remote:      https://github.com/Koi36m/Bedwenton/pull/new/m2-r2-amendment        
+remote: 
+To https://github.com/Koi36m/Bedwenton.git
+ * [new branch]      m2-r2-amendment -> m2-r2-amendment

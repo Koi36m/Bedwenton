@@ -1,0 +1,6 @@
+/workspace/work/m2-r2-input/delivery/m2-r2-amendment.bundle is okay
+The bundle contains this ref:
+88702655a3f8c0428160a74f9193af7cc41b0b87 refs/heads/m2-r2-amendment
+The bundle requires this ref:
+80927177469d89b985d3b57a3219652a994d6d4b 
+The bundle uses this hash algorithm: sha1

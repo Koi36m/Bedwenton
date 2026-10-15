@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.core.M0RegressionTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-15T09:52:36.044Z" hostname="1a7d890349f4" time="0.011">
+  <properties/>
+  <testcase name="Audit item 1: +90 about +Y reaches -Z, but Full Heal's ring parameterization reaches +Z (opposite senses)" classname="workshop.vfx.math.core.M0RegressionTest" time="0.001"/>
+  <testcase name="Audit item 2: the (right, up, forward) mapping is a reflection; the engine frame is a proper rotation" classname="workshop.vfx.math.core.M0RegressionTest" time="0.001"/>
+  <testcase name="Astral Spec pattern: non-finite or out-of-range configuration is rejected at construction" classname="workshop.vfx.math.core.M0RegressionTest" time="0.001"/>
+  <testcase name="Audit (Euler order): Astral-style X-then-Y-then-Z rotation equals the engine's named Euler helper" classname="workshop.vfx.math.core.M0RegressionTest" time="0.005"/>
+  <testcase name="Full Heal outward(): a zero offset must give a finite unit fallback, never NaN" classname="workshop.vfx.math.core.M0RegressionTest" time="0.001"/>
+  <testcase name="Large-coordinate regression: a 0.3-block offset survives at the world edge in double, not in float" classname="workshop.vfx.math.core.M0RegressionTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,29 @@
+0001-Add-independent-M2-adversarial-review-report-tests-a.patch: PASS a9d86c3e52e091c08dc359233999d08efa1394f5 tree ddc3797bbe9f962ecb8dce39fa4f6ecd40e71c7d
+/workspace/work/m2-r2-input/extracted/minecraft-vfx-math-M2-r2-amendment/patches/0001-Add-independent-M2-adversarial-review-report-tests-a.patch:583: trailing whitespace.
+Daemon will be stopped at the end of the build 
+/workspace/work/m2-r2-input/extracted/minecraft-vfx-math-M2-r2-amendment/patches/0001-Add-independent-M2-adversarial-review-report-tests-a.patch:604: trailing whitespace.
+Daemon will be stopped at the end of the build 
+/workspace/work/m2-r2-input/extracted/minecraft-vfx-math-M2-r2-amendment/patches/0001-Add-independent-M2-adversarial-review-report-tests-a.patch:1952: trailing whitespace.
+Daemon will be stopped at the end of the build 
+/workspace/work/m2-r2-input/extracted/minecraft-vfx-math-M2-r2-amendment/patches/0001-Add-independent-M2-adversarial-review-report-tests-a.patch:1973: trailing whitespace.
+Daemon will be stopped at the end of the build 
+/workspace/work/m2-r2-input/extracted/minecraft-vfx-math-M2-r2-amendment/patches/0001-Add-independent-M2-adversarial-review-report-tests-a.patch:2397: trailing whitespace.
+Daemon will be stopped at the end of the build 
+warning: squelched 4 whitespace errors
+warning: 9 lines add whitespace errors.
+
+0002-Approve-M2-contract-revision-2-P-A1-P-A2-P-A3-wordin.patch: PASS 3cd62a65778ad26e5e417a7965db50900bf8192b tree 222a3403ce6649d6eb184b3308d246a43d45e054
+
+0003-Revise-M2-tests-for-revision-2-one-assertion-one-gol.patch: PASS 70cecac95c2b5c9494c7ae58c794d8c3e85c631f tree 04b3819bb6b320c9b6c4597c91a38c4ee3127803
+
+0004-Record-M2-revision-2-review-evidence-and-historical-.patch: PASS 88702655a3f8c0428160a74f9193af7cc41b0b87 tree f482c868971a35fe025b1f5f98d975ea04e66254
+/workspace/work/m2-r2-input/extracted/minecraft-vfx-math-M2-r2-amendment/patches/0004-Record-M2-revision-2-review-evidence-and-historical-.patch:720: trailing whitespace.
+Daemon will be stopped at the end of the build 
+/workspace/work/m2-r2-input/extracted/minecraft-vfx-math-M2-r2-amendment/patches/0004-Record-M2-revision-2-review-evidence-and-historical-.patch:1174: trailing whitespace.
+Daemon will be stopped at the end of the build 
+/workspace/work/m2-r2-input/extracted/minecraft-vfx-math-M2-r2-amendment/patches/0004-Record-M2-revision-2-review-evidence-and-historical-.patch:1195: trailing whitespace.
+Daemon will be stopped at the end of the build 
+/workspace/work/m2-r2-input/extracted/minecraft-vfx-math-M2-r2-amendment/patches/0004-Record-M2-revision-2-review-evidence-and-historical-.patch:1652: trailing whitespace.
+ 
+warning: 4 lines add whitespace errors.
+

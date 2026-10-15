@@ -1,0 +1,4 @@
+a9d86c3e52e091c08dc359233999d08efa1394f5 80927177469d89b985d3b57a3219652a994d6d4b Add independent M2 adversarial review: report, tests and evidence
+3cd62a65778ad26e5e417a7965db50900bf8192b a9d86c3e52e091c08dc359233999d08efa1394f5 Approve M2 contract revision 2: P-A1, P-A2, P-A3 wording and P-R1 COSMETIC wrap-around
+70cecac95c2b5c9494c7ae58c794d8c3e85c631f 3cd62a65778ad26e5e417a7965db50900bf8192b Revise M2 tests for revision 2: one assertion, one golden row, regression tests
+88702655a3f8c0428160a74f9193af7cc41b0b87 70cecac95c2b5c9494c7ae58c794d8c3e85c631f Record M2 revision 2 review evidence and historical findings
