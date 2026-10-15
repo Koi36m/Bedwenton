@@ -1,9 +1,16 @@
-# Amendment 3: decisions after the independent M1 review (contract revision 4, PROPOSED)
+# Amendment 3: decisions after the independent M1 review (contract revision 4, APPROVED)
 
-Status: **proposed, not yet approved.** Prepared by Claude Code from `review/M1-CLAUDE-REVIEW.md` and the project
-owner's preliminary preferences. It becomes binding only when the owner approves it. Until then the Revision 3
-documents remain the contract, and they are deliberately left byte-identical (their SHA-256 values in the Revision 3
-`SHA256SUMS.txt` still verify).
+Status: **approved by the project owner on 2026-10-15** (decisions D1 and A1 to A6), with one editorial
+clarification: section 3.7 now states the order of the hint checks explicitly. The order matches the existing
+behaviour and acceptance tests, so the clarification changes no mathematics. Prepared by Claude Code from
+`review/M1-CLAUDE-REVIEW.md` and the owner's decisions. The [R4] text of section 3 is applied to
+`docs/IMPLEMENTATION-CONTRACT.md` in its own commit.
+
+**Historical baseline.** Revision 3 stays the historical baseline. It is the approved archive
+`verification/input/minecraft-vfx-math-M1-handoff-rev3.zip` (SHA-256
+`0f79530734458da8a3fd0fc0ab49c836fed0dbb70d815b1813e3e7b56180ed61`), whose internal `SHA256SUMS.txt` still
+verifies, and it is in Git history at `8397c04` (`git show 8397c04:docs/IMPLEMENTATION-CONTRACT.md`). The 97
+Revision 3 tests and the golden vectors are not modified by Revision 4.
 
 Scope: one implementation error (D1), six clarifications (A1 to A6), no redesign. The 97 Revision 3 tests and the
 golden vectors are unchanged. I1 to I4 and N1 to N5 stay outside M1.
@@ -55,8 +62,10 @@ already cover the useful cases (A4). Other null operands stay unspecified, and c
 **A4. Agree, and state the boundary exactly.**
 A hint is *absent* when it is `null`, non-finite, or its largest absolute component is below `LENGTH_EPS`. This is
 the same predicate that `normalizedOr` and the axis arguments already use, so one rule covers every input
-direction. A hint whose largest component equals `LENGTH_EPS` is present. The 1e-8 threshold applies only to the
-perpendicular part of a present hint.
+direction. A hint whose largest component equals `LENGTH_EPS` is present. The absence test is applied to the hint
+as supplied, before normalization. The 1e-8 threshold applies afterwards, only to the perpendicular part of the
+normalized hint (a present hint, or the +Y that `fromHeading` substitutes for an absent `up`). See section 3.7 for
+the exact order.
 
 **A5. Agree. Choose the normalized (sine-of-angle) reading and define `fromHeading` through `alignZ`.**
 The literal raw-cross-product reading depends on the input lengths: `fromHeading(f, u)` and `fromHeading(1000 f, u)`
@@ -135,18 +144,27 @@ below `LENGTH_EPS`, or `radians` is not finite." with
 
 **3.7 Section 4, hints.** Insert before the `alignY` bullet:
 
-> - **[R4] Absent hints.** A hint argument (`xHint`, `yHint`, `up`) is *absent* when it is `null`, has a non-finite
->   component, or its largest absolute component is below `LENGTH_EPS` (the `normalizedOr` predicate). A hint with
->   largest component exactly `LENGTH_EPS` is present. The words "zero/non-finite" in the bullets below mean
->   "absent". Hints are always normalized before any threshold is applied, so only their direction matters.
+> - **[R4] Hint processing order.** A hint argument (`xHint`, `yHint`, `up`) is evaluated in exactly this order,
+>   after the axis itself has been normalized:
+>   1. **Absence, on the hint as supplied (unnormalized).** The hint is *absent* when it is `null`, has a
+>      non-finite component, or its largest absolute component is below `LENGTH_EPS` (the `normalizedOr` predicate).
+>      A hint whose largest component is exactly `LENGTH_EPS` is present. An absent `xHint` or `yHint` is replaced by
+>      the fallback hint (the world axis least aligned with the axis, ties X, Y, Z). An absent `up` in `fromHeading`
+>      is replaced by +Y. In the bullets below, "zero/non-finite" means "absent".
+>   2. **Normalization.** A present hint is normalized. After this step the hint's length plays no further part;
+>      step 1 is the only place where it matters.
+>   3. **Parallel test, on the normalized hint.** The component of the normalized hint perpendicular to the
+>      normalized axis is computed. If its length is below **1e-8**, the hint counts as parallel and is replaced by
+>      the fallback hint of step 1. This includes the +Y substituted for an absent `up`. The fallback hint itself
+>      is never parallel, because its perpendicular component is at least `sqrt(2/3)`.
 
 **3.8 Section 4, `fromHeading`.** Replace from "Defaults:" to the end of the bullet with
 
 > **[R4]** Defaults and degeneracy are defined by
 > `fromHeading(forward, up) = alignZ(-forward, up is absent ? +Y : up)`. That is: `forward` absent returns `WORLD`
 > ("facing -Z"). An absent `up` means +Y. `forward` and `up` count as parallel when the sine of the angle between
-> them, `abs(normalize(forward) x normalize(up))`, is below 1e-8. The input lengths never matter. Then the up hint
-> is the least-aligned world axis of `forward` (ties X, Y, Z). Handedness: `right x up = back`. Worked examples
+> them, `abs(normalize(forward) x normalize(up))`, is below 1e-8. The input lengths never matter. In that case the up
+> hint is the least-aligned world axis of `forward` (ties X, Y, Z). Handedness: `right x up = back`. Worked examples
 > (tolerance 1e-12):
 >
 > | `forward` | `up` | `x` (right) | `y` (up) | `z` (back) | Why |

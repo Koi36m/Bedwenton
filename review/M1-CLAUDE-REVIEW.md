@@ -311,7 +311,7 @@ formula, convention, tier rule and accuracy figure is met, mostly by orders of m
 ## 7. Addendum: decision round
 
 The owner's decisions on D1 and A1 to A6 are drafted in `docs/AMENDMENT-3-REVIEW-DECISIONS.md` (contract
-revision 4, **proposed**). That round changed the review's test files:
+revision 4, **approved 2026-10-15**, applied to `docs/IMPLEMENTATION-CONTRACT.md` as [R4]). That round changed the review's test files:
 
 - `ReviewFindingsTest` (7 disabled tests) is replaced by `Amendment3AcceptanceTest` (10 enabled tests). The
   amendment's section 4 maps each finding to its permanent test.

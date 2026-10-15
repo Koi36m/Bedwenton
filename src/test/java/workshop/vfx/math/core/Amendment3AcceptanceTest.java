@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
- * Executable acceptance criteria for docs/AMENDMENT-3-REVIEW-DECISIONS.md (contract revision 4, proposed).
+ * Executable acceptance criteria for docs/AMENDMENT-3-REVIEW-DECISIONS.md (contract revision 4, approved 2026-10-15).
  * Replaces the disabled ReviewFindingsTest. Each test names the decision it pins.
  *
  * <p>Against 8397c04, exactly three tests fail until Codex applies the approved code changes:
