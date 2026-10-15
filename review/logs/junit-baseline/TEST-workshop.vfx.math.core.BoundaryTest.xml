@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.core.BoundaryTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-15T07:14:13.531Z" hostname="vm" time="0.038">
+  <properties/>
+  <testcase name="Core classes never expose Paper, Bukkit, Minecraft or JOML types" classname="workshop.vfx.math.core.BoundaryTest" time="0.028"/>
+  <testcase name="Paper and Bukkit are not on the test classpath either" classname="workshop.vfx.math.core.BoundaryTest" time="0.006"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,62 @@
+java 25.0.4.1+1-LTS-5
+normalizedOr vs BigDecimal                       worst=2.220e-16  at Vec3[x=-6.341410771424959E-13, y=7.754678861858016E-12, z=4.9E-324]
+Quat.normalized vs BigDecimal                    worst=2.220e-16  at Quat[w=-0.00978691809463817, x=-0.0, y=0.013844122083686423, z=0.9998562679295165]
+Frame factories orthonormality (all)             worst=6.661e-16  at a=Vec3[x=-9.3067460429678E164, y=-2.668707616948372E164, z=-2.50249430507742E164] h=Vec3[x=-0.9306745710657779, y=-0.2668707947501852, z=-0.25024951884258495]
+alignY x direction error / conditioning          worst=2.216e+00  at eps=0.9978879932634545 (err in units of 1e-16/eps)
+shortestArc antiparallel offset 0.1              worst=8.238e-15  at off=0.1
+shortestArc antiparallel offset 0.001            worst=7.363e-13  at off=0.001
+shortestArc antiparallel offset 1.0E-6           worst=7.495e-10  at off=1.0E-6
+shortestArc antiparallel offset 2.0E-7           worst=3.907e-09  at off=2.0E-7
+shortestArc antiparallel offset 1.0E-7           worst=7.528e-09  at off=1.0E-7
+shortestArc antiparallel offset 3.0E-8           worst=2.743e-08  at off=3.0E-8
+shortestArc antiparallel offset 1.0E-8           worst=7.911e-08  at off=1.0E-8
+shortestArc antiparallel offset 3.0E-9           worst=2.765e-07  at off=3.0E-9
+shortestArc antiparallel offset 1.0E-9           worst=7.844e-07  at off=1.0E-9
+shortestArc antiparallel offset 5.0E-10          worst=1.572e-06  at off=5.0E-10
+shortestArc antiparallel offset 2.0E-10          worst=4.048e-06  at off=2.0E-10
+shortestArc antiparallel offset 1.01E-10         worst=7.954e-06  at off=1.01E-10
+shortestArc antiparallel offset 9.9E-11          worst=9.900e-11  at off=9.9E-11
+shortestArc antiparallel offset 1.0E-11          worst=1.000e-11  at off=1.0E-11
+shortestArc antiparallel offset 1.0E-12          worst=1.000e-12  at off=1.0E-12
+shortestArc antiparallel offset 0.0              worst=1.112e-15  at off=0.0
+angleTo angle 1.0E-12                            worst=4.022e-16  at ang=1.0E-12
+angleTo angle 1.0E-9                             worst=3.733e-16  at ang=1.0E-9
+angleTo angle 1.0E-6                             worst=4.175e-16  at ang=1.0E-6
+angleTo angle 0.001                              worst=4.061e-16  at ang=0.001
+angleTo angle 1.0                                worst=6.661e-16  at ang=1.0
+angleTo angle 3.0                                worst=4.441e-16  at ang=3.0
+angleTo angle 3.1405926535897932                 worst=4.441e-16  at ang=3.1405926535897932
+angleTo angle 3.141591653589793                  worst=4.441e-16  at ang=3.141591653589793
+angleTo angle 3.141592643589793                  worst=4.441e-16  at ang=3.141592643589793
+angleTo angle 3.141592653589793                  worst=4.441e-16  at ang=3.141592653589793
+slerp action phi=1.0E-8                          worst=4.765e-13  at phi=1.0E-8 t=1000.0
+slerp action phi=1.5000000000000002E-8           worst=4.771e-13  at phi=1.5000000000000002E-8 t=1000.0
+slerp action phi=1.0E-6                          worst=5.944e-13  at phi=1.0E-6 t=999.9
+slerp action phi=0.3                             worst=4.895e-13  at phi=0.3 t=999.9
+slerp action phi=2.0                             worst=9.088e-13  at phi=2.0 t=-1000.0
+slerp action phi=3.141591653589793               worst=4.552e-13  at phi=3.141591653589793 t=999.9
+slerp action phi=3.141592653588793               worst=9.077e-13  at phi=3.141592653588793 t=1000.0
+nlerp vs independent formula                     worst=3.331e-16  at t=-883.943229216513
+fromFrame(toFrame(q)) action                     worst=1.784e-15  at mode=1 q=Quat[w=0.004999979166692663, x=0.8615681031492891, y=-0.1344190108613732, z=0.48949661220801005]
+Pose at |t|<=3e7: then/inverse/toLocal (world units) worst=4.619e-08  at a=Pose[translation=Vec3[x=2.8772982909560442E7, y=82.25597916747009, z=2.577176708851941E7], rotation=Quat[w=-0.05917934254620805, x=-0.7012919238360047, y=-0.18892102852930898, z=0.6848330365553504], scale=0.028800847382557167]
+transportY 1e6-step walk (incl. 1000 antiparallel flips) worst=Infinity  at walk
+halfturnZ.rotate(MAX,0,0) = Vec3[x=-Infinity, y=2.201539143458306E292, z=0.0]   (exact: (-MAX,~0,0))
+Pose(t=(MAX,0,0), R=180degZ, s=1).inverse() threw Pose.inverse: translation is not representable
+rotate overflow threshold for half turn: |v| > 8.988465674311579E307  (MAX/2 = 8.988465674311579E307)
+rotate with |q|=1+1e-12 on (1e100,0,0) relative error vs exact rotation: 0.0
+rotate(Y) with 1 rad quat scaled by 1+1e-12: |result|-1 = 9.194867089945546E-13
+NaN.inverse() = Quat[w=1.0, x=-0.0, y=-0.0, z=-0.0] equals(IDENTITY)=false
+axisAngle(null,1) -> NullPointerException
+alignY(null,X) -> NullPointerException
+alignZ(null,X) -> NullPointerException
+fromHeading(null,Y) -> NullPointerException
+transportY(WORLD,null) -> NullPointerException
+shortestArc(null,X) -> NullPointerException
+fromFrame(null) -> NullPointerException
+(1,1,1).lerp((1,1,1), 1e100) = Vec3[x=0.0, y=0.0, z=0.0], t=1e16 -> Vec3[x=0.0, y=0.0, z=0.0]
+(1,1,1).lerp((1,1,1), 1e3) = Vec3[x=1.0, y=1.0, z=1.0]; (0.1,..).lerp(same, 0.7) == ? Vec3[x=0.1, y=0.1, z=0.1]
+raw |forward x up| = 1.0E-9, normalized = 9.999999999995E-7 -> fromHeading y = Vec3[x=-0.9999999999995, y=9.999999999995002E-7, z=0.0]
+Pose(scale=1/MAX).inverse() threw: Pose.inverse: translation is not representable
+transportY: y != normalize(newY) bitwise in 41342/1000000 cases, max 4 ulp, max |diff| 4.041e-16
+fromHeading: z != -normalize(forward) bitwise in 41342/1000000 cases, max 4 ulp, max |diff| 4.041e-16
+example newY=Vec3[x=0.1, y=0.2, z=0.3] normalize=Vec3[x=0.2672612419124244, y=0.5345224838248488, z=0.8017837257372731] transportY(WORLD,.).y=Vec3[x=0.2672612419124244, y=0.5345224838248488, z=0.8017837257372731]

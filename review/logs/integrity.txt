@@ -1,0 +1,99 @@
+# Integrity verification (Claude Code independent review), 2026-10-15T07:25:26Z
+
+## Remote refs (git ls-remote origin)
+870c9fd75bf9a7a9d619179993d37f2b6487b081	HEAD
+8397c04b55f7d506e8fec79fca120ce297e8ae22	refs/heads/m1-core-transforms
+0ec01087b9c9727f51274e4bbc66f00b2038c6f4	refs/heads/m1-review-handoff
+870c9fd75bf9a7a9d619179993d37f2b6487b081	refs/heads/main
+870c9fd75bf9a7a9d619179993d37f2b6487b081	refs/tags/baseline-scaffold
+
+## History
+0ec01087b9c9727f51274e4bbc66f00b2038c6f4 8397c04b55f7d506e8fec79fca120ce297e8ae22 | Codex <codex@local> | Publish unchanged M1 deliverables and independent review handoff
+8397c04b55f7d506e8fec79fca120ce297e8ae22 05c27067f3e9e2480228d0d34e5a2bd64558c889 | Codex <codex@local> | Record Java 25 verification, unchanged test integrity and handoff evidence
+05c27067f3e9e2480228d0d34e5a2bd64558c889 77a1430373d86c5025c7aecc49081b9e5f4f3b49 | Codex <codex@local> | Implement M1 core transforms against revision 3
+77a1430373d86c5025c7aecc49081b9e5f4f3b49 870c9fd75bf9a7a9d619179993d37f2b6487b081 | Codex <codex@local> | tests as delivered (unmodified)
+870c9fd75bf9a7a9d619179993d37f2b6487b081  | Codex <codex@local> | Scaffold standalone Java 25 M1 project
+
+## Files touched per commit
+-- 870c9fd: .gitignore/ ARCHITECTURE.md/ README.md/ build.gradle/ docs/AMENDMENT-1-NUMERIC-POLICY.md docs/AMENDMENT-2-CLARIFICATIONS.md docs/ARCHITECTURE.md docs/CONVENTIONS.md docs/IMPLEMENTATION-CONTRACT.md docs/REFERENCE-VECTORS.md docs/TEST-SPECIFICATION.md docs/VERIFICATION-REPORT-TEMPLATE.md gradle/wrapper gradlew.bat/ gradlew/ settings.gradle/ src/test tools/generate_golden_vectors.py 
+-- 77a1430: src/test 
+-- 05c2706: src/main 
+-- 8397c04: verification/REPRODUCE.md verification/VERIFICATION-REPORT.md verification/input verification/junit verification/logs verification/test-summary.csv verification/tests 
+-- 0ec0108: handoff/GIT-CHECKPOINT.txt handoff/RECOVERY-REPORT.md handoff/SHA256SUMS.txt handoff/VERIFICATION-REPORT.md handoff/minecraft-vfx-math-M1-rev3-source.zip handoff/minecraft-vfx-math-M1-rev3.git.bundle handoff/recovery-logs 
+
+## Approved ZIP (from 8397c04:verification/input/)
+expected 0f79530734458da8a3fd0fc0ab49c836fed0dbb70d815b1813e3e7b56180ed61
+0f79530734458da8a3fd0fc0ab49c836fed0dbb70d815b1813e3e7b56180ed61  rev3.zip
+
+## Internal SHA256SUMS.txt (run from the extracted archive root)
+./README-FOR-CODEX.md: OK
+./docs/AMENDMENT-1-NUMERIC-POLICY.md: OK
+./docs/AMENDMENT-2-CLARIFICATIONS.md: OK
+./docs/ARCHITECTURE.md: OK
+./docs/CONVENTIONS.md: OK
+./docs/IMPLEMENTATION-CONTRACT.md: OK
+./docs/REFERENCE-VECTORS.md: OK
+./docs/TEST-SPECIFICATION.md: OK
+./docs/VERIFICATION-REPORT-TEMPLATE.md: OK
+./src/test/java/workshop/vfx/math/core/BoundaryTest.java: OK
+./src/test/java/workshop/vfx/math/core/ConventionsTest.java: OK
+./src/test/java/workshop/vfx/math/core/FrameTest.java: OK
+./src/test/java/workshop/vfx/math/core/JomlOracle.java: OK
+./src/test/java/workshop/vfx/math/core/JomlOracleTest.java: OK
+./src/test/java/workshop/vfx/math/core/M0RegressionTest.java: OK
+./src/test/java/workshop/vfx/math/core/MathUtilTest.java: OK
+./src/test/java/workshop/vfx/math/core/NumericPolicyTest.java: OK
+./src/test/java/workshop/vfx/math/core/PolicyClarificationTest.java: OK
+./src/test/java/workshop/vfx/math/core/PoseTest.java: OK
+./src/test/java/workshop/vfx/math/core/QuatTest.java: OK
+./src/test/java/workshop/vfx/math/core/TestSupport.java: OK
+./src/test/java/workshop/vfx/math/core/Vec3Test.java: OK
+./src/test/resources/golden/MANIFEST.sha256: OK
+./src/test/resources/golden/compose_cases.csv: OK
+./src/test/resources/golden/pose_cases.csv: OK
+./src/test/resources/golden/pose_large_cases.csv: OK
+./src/test/resources/golden/rotation_cases.csv: OK
+./src/test/resources/golden/slerp_cases.csv: OK
+./tools/generate_golden_vectors.py: OK
+
+## Rev3 files vs repository at 8397c04 (byte compare)
+identical: 28 files
+
+## Golden MANIFEST.sha256
+compose_cases.csv: OK
+pose_cases.csv: OK
+pose_large_cases.csv: OK
+rotation_cases.csv: OK
+slerp_cases.csv: OK
+
+## Diff of tests/docs/tools/build files between baseline 77a1430 and 8397c04
+lines: 0
+
+## Handoff branch 0ec0108
+68c5e46f8243334a408f04cb61e98e300d02512085701b00e2674cbb138d5a10  GIT-CHECKPOINT.txt
+3f2d1d6abd4da53542c333044f73072c7c471b74361cdf2b3352a49993d1f18e  VERIFICATION-REPORT.md
+4f0b07ca823f8d958b0ea7cb9b0818e78f6da830f99583ed65ed3ac46cb52b50  minecraft-vfx-math-M1-rev3-source.zip
+2bd5ccb38cd921e8d16f5a75ac5b8a337bcfa57c3330ec3311801414cdd39fed  minecraft-vfx-math-M1-rev3.git.bundle
+4f0b07ca823f8d958b0ea7cb9b0818e78f6da830f99583ed65ed3ac46cb52b50  minecraft-vfx-math-M1-rev3-source.zip (recomputed)
+2bd5ccb38cd921e8d16f5a75ac5b8a337bcfa57c3330ec3311801414cdd39fed  minecraft-vfx-math-M1-rev3.git.bundle (recomputed)
+m1.bundle is okay
+The bundle contains these 4 refs:
+8397c04b55f7d506e8fec79fca120ce297e8ae22 refs/heads/m1-core-transforms
+870c9fd75bf9a7a9d619179993d37f2b6487b081 refs/heads/main
+870c9fd75bf9a7a9d619179993d37f2b6487b081 refs/tags/baseline-scaffold
+8397c04b55f7d506e8fec79fca120ce297e8ae22 HEAD
+The bundle records a complete history.
+The bundle uses this hash algorithm: sha1
+8397c04b55f7d506e8fec79fca120ce297e8ae22 refs/heads/m1-core-transforms
+870c9fd75bf9a7a9d619179993d37f2b6487b081 refs/heads/main
+870c9fd75bf9a7a9d619179993d37f2b6487b081 refs/tags/baseline-scaffold
+8397c04b55f7d506e8fec79fca120ce297e8ae22 HEAD
+
+## Gradle wrapper
+76805e32c009c0cf0dd5d206bddc9fb22ea42e84db904b764f3047de095493f3  gradle/wrapper/gradle-wrapper.jar
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionSha256Sum=a17ddd85a26b6a7f5ddb71ff8b05fc5104c0202c6e64782429790c933686c806
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.1.0-bin.zip
+(the wrapper verified the downloaded gradle-9.1.0-bin.zip against distributionSha256Sum; a mismatch aborts the build)
+README-FOR-CODEX.md identical to verification/input copy

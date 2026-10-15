@@ -1,0 +1,46 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.1.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :compileJava UP-TO-DATE
+> Task :processResources NO-SOURCE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources UP-TO-DATE
+> Task :testClasses UP-TO-DATE
+
+> Task :test FAILED
+
+ReviewFindingsTest > A3: axisAngle(null, angle) throws IllegalArgumentException like the Frame and Pose constructors (section 0A Tier 3) FAILED
+    org.opentest4j.AssertionFailedError at ReviewFindingsTest.java:46
+        Caused by: java.lang.NullPointerException at ReviewFindingsTest.java:46
+
+ReviewFindingsTest > A4: a non-zero xHint below LENGTH_EPS is honoured (section 4 says only 'zero/non-finite' hints fall back) FAILED
+    org.opentest4j.AssertionFailedError at ReviewFindingsTest.java:53
+
+ReviewFindingsTest > D1 (defect, diagnostic): Pose.inverse names the scale, not the translation, when 1/s overflows (section 0A Tier 3, message 'should name the reason') FAILED
+    org.opentest4j.AssertionFailedError at ReviewFindingsTest.java:27
+
+ReviewFindingsTest > A2: Quat.inverse of a degenerate quaternion is the IDENTITY constant (section 0A 'own fallbacks exactly as specified') FAILED
+    org.opentest4j.AssertionFailedError at ReviewFindingsTest.java:40
+
+ReviewFindingsTest > A6: rotate meets the 1e-13 Tier 1 accuracy row for any quaternion inside its domain (norm within 1e-12 of 1) FAILED
+    org.opentest4j.AssertionFailedError at ReviewFindingsTest.java:70
+
+ReviewFindingsTest > A5: fromHeading uses the raw |forward x up| < 1e-8 test (literal section 4 text) FAILED
+    org.opentest4j.AssertionFailedError at ReviewFindingsTest.java:61
+
+ReviewFindingsTest > A1: transportY's new y is bitwise normalize(newY) (section 4: 'new y exactly normalize(newY)') FAILED
+    org.opentest4j.AssertionFailedError at ReviewFindingsTest.java:34
+
+7 tests completed, 7 failed
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///home/user/bedwenton/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to generate a Build Scan (Powered by Develocity).
+
+BUILD FAILED in 8s
+4 actionable tasks: 1 executed, 3 up-to-date

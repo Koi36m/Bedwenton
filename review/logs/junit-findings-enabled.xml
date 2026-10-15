@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.core.ReviewFindingsTest" tests="7" skipped="0" failures="7" errors="0" timestamp="2026-10-15T07:25:04.048Z" hostname="vm" time="0.084">
+  <properties/>
+  <testcase name="A3: axisAngle(null, angle) throws IllegalArgumentException like the Frame and Pose constructors (section 0A Tier 3)" classname="workshop.vfx.math.core.ReviewFindingsTest" time="0.043">
+    <failure message="org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: &lt;java.lang.IllegalArgumentException&gt; but was: &lt;java.lang.NullPointerException&gt;" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: &lt;java.lang.IllegalArgumentException&gt; but was: &lt;java.lang.NullPointerException&gt;
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at app//org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+	at app//org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at app//org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3128)
+	at app//workshop.vfx.math.core.ReviewFindingsTest.a3AxisAngleNullAxis(ReviewFindingsTest.java:46)
+	at java.base@25.0.4.1/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.lang.NullPointerException: Cannot invoke &quot;workshop.vfx.math.core.Vec3.normalizedOr(workshop.vfx.math.core.Vec3)&quot; because &quot;axis&quot; is null
+	at workshop.vfx.math.core.Quat.axisAngle(Quat.java:8)
+	at workshop.vfx.math.core.ReviewFindingsTest.lambda$a3AxisAngleNullAxis$0(ReviewFindingsTest.java:46)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53)
+	... 6 more
+</failure>
+  </testcase>
+  <testcase name="A4: a non-zero xHint below LENGTH_EPS is honoured (section 4 says only 'zero/non-finite' hints fall back)" classname="workshop.vfx.math.core.ReviewFindingsTest" time="0.01">
+    <failure message="org.opentest4j.AssertionFailedError: x should follow the hint direction +Y, was Vec3[x=1.0, y=0.0, z=0.0] ==&gt; expected: &lt;1.0&gt; but was: &lt;0.0&gt;" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: x should follow the hint direction +Y, was Vec3[x=1.0, y=0.0, z=0.0] ==&gt; expected: &lt;1.0&gt; but was: &lt;0.0&gt;
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:86)
+	at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1024)
+	at app//workshop.vfx.math.core.ReviewFindingsTest.a4TinyNonZeroHintIsHonoured(ReviewFindingsTest.java:53)
+	at java.base@25.0.4.1/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <testcase name="D1 (defect, diagnostic): Pose.inverse names the scale, not the translation, when 1/s overflows (section 0A Tier 3, message 'should name the reason')" classname="workshop.vfx.math.core.ReviewFindingsTest" time="0.003">
+    <failure message="org.opentest4j.AssertionFailedError: message was: Pose.inverse: translation is not representable ==&gt; expected: &lt;true&gt; but was: &lt;false&gt;" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: message was: Pose.inverse: translation is not representable ==&gt; expected: &lt;true&gt; but was: &lt;false&gt;
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at app//org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at app//workshop.vfx.math.core.ReviewFindingsTest.d1InverseMessageNamesScale(ReviewFindingsTest.java:27)
+	at java.base@25.0.4.1/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <testcase name="A2: Quat.inverse of a degenerate quaternion is the IDENTITY constant (section 0A 'own fallbacks exactly as specified')" classname="workshop.vfx.math.core.ReviewFindingsTest" time="0.018">
+    <failure message="org.opentest4j.AssertionFailedError: expected: &lt;Quat[w=1.0, x=0.0, y=0.0, z=0.0]&gt; but was: &lt;Quat[w=1.0, x=-0.0, y=-0.0, z=-0.0]&gt;" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: expected: &lt;Quat[w=1.0, x=0.0, y=0.0, z=0.0]&gt; but was: &lt;Quat[w=1.0, x=-0.0, y=-0.0, z=-0.0]&gt;
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at app//workshop.vfx.math.core.ReviewFindingsTest.a2InverseFallbackIsIdentity(ReviewFindingsTest.java:40)
+	at java.base@25.0.4.1/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <testcase name="A6: rotate meets the 1e-13 Tier 1 accuracy row for any quaternion inside its domain (norm within 1e-12 of 1)" classname="workshop.vfx.math.core.ReviewFindingsTest" time="0.003">
+    <failure message="org.opentest4j.AssertionFailedError: rotate result Vec3[x=-1.0000000000040004, y=0.0, z=0.0] ==&gt; expected: &lt;-1.0&gt; but was: &lt;-1.0000000000040004&gt;" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: rotate result Vec3[x=-1.0000000000040004, y=0.0, z=0.0] ==&gt; expected: &lt;-1.0&gt; but was: &lt;-1.0000000000040004&gt;
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:86)
+	at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1024)
+	at app//workshop.vfx.math.core.ReviewFindingsTest.a6RotateAccuracyForNearUnitQuaternion(ReviewFindingsTest.java:70)
+	at java.base@25.0.4.1/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <testcase name="A5: fromHeading uses the raw |forward x up| &lt; 1e-8 test (literal section 4 text)" classname="workshop.vfx.math.core.ReviewFindingsTest" time="0.003">
+    <failure message="org.opentest4j.AssertionFailedError: y was Vec3[x=-0.9999999999995, y=9.999999999995002E-7, z=0.0] ==&gt; expected: &lt;1.0&gt; but was: &lt;0.0&gt;" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: y was Vec3[x=-0.9999999999995, y=9.999999999995002E-7, z=0.0] ==&gt; expected: &lt;1.0&gt; but was: &lt;0.0&gt;
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:86)
+	at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1024)
+	at app//workshop.vfx.math.core.ReviewFindingsTest.a5FromHeadingRawCrossThreshold(ReviewFindingsTest.java:61)
+	at java.base@25.0.4.1/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <testcase name="A1: transportY's new y is bitwise normalize(newY) (section 4: 'new y exactly normalize(newY)')" classname="workshop.vfx.math.core.ReviewFindingsTest" time="0.002">
+    <failure message="org.opentest4j.AssertionFailedError: expected: &lt;Vec3[x=0.25400025400038095, y=0.38100038100057143, z=0.8890008890013334]&gt; but was: &lt;Vec3[x=0.254000254000381, y=0.38100038100057143, z=0.8890008890013336]&gt;" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: expected: &lt;Vec3[x=0.25400025400038095, y=0.38100038100057143, z=0.8890008890013334]&gt; but was: &lt;Vec3[x=0.254000254000381, y=0.38100038100057143, z=0.8890008890013336]&gt;
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at app//workshop.vfx.math.core.ReviewFindingsTest.a1TransportYIsExactlyNormalizeNewY(ReviewFindingsTest.java:34)
+	at java.base@25.0.4.1/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base@25.0.4.1/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
