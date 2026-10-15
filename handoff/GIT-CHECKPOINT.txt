@@ -1,0 +1,7 @@
+Branch: m1-core-transforms
+HEAD: 8397c04b55f7d506e8fec79fca120ce297e8ae22
+
+8397c04 (HEAD -> m1-core-transforms) Record Java 25 verification, unchanged test integrity and handoff evidence
+05c2706 Implement M1 core transforms against revision 3
+870c9fd (tag: baseline-scaffold, main) Scaffold standalone Java 25 M1 project
+77a1430 tests as delivered (unmodified)
