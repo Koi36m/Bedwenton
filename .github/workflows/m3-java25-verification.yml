@@ -1,0 +1,105 @@
+name: M3 Java 25 Verification
+
+on:
+  push:
+    branches:
+      - m3-actions-verification
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-m3:
+    name: Java 25 — 254 tests and reference regeneration
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact verification branch
+        uses: actions/checkout@v4
+
+      - name: Install Java 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Record toolchain
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/m3-evidence"
+          {
+            java -version
+            javac -version
+            ./gradlew --version
+          } > "$RUNNER_TEMP/m3-evidence/toolchain.txt" 2>&1
+          cat "$RUNNER_TEMP/m3-evidence/toolchain.txt"
+
+      - name: Fresh clean test
+        shell: bash
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test 2>&1 | tee "$RUNNER_TEMP/m3-evidence/clean-test.txt"
+
+      - name: Gradle check and production dependency guard
+        shell: bash
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false check 2>&1 | tee "$RUNNER_TEMP/m3-evidence/check.txt"
+
+      - name: Verify exact JUnit counts
+        shell: bash
+        run: |
+          python3 - <<'PY' | tee "$RUNNER_TEMP/m3-evidence/test-summary.txt"
+          import glob
+          import xml.etree.ElementTree as ET
+          reports = glob.glob('build/test-results/test/TEST-*.xml')
+          assert len(reports) == 30, f'Expected 30 JUnit reports, got {len(reports)}'
+          counts = {'core': 0, 'time': 0, 'curve': 0}
+          totals = {'tests': 0, 'failures': 0, 'errors': 0, 'skipped': 0}
+          for path in reports:
+              suite = ET.parse(path).getroot()
+              name = suite.attrib['name']
+              group = name.split('.')[3]
+              assert group in counts, (path, group)
+              num = int(suite.attrib['tests'])
+              counts[group] += num
+              for key in totals:
+                  totals[key] += int(suite.attrib.get(key, '0'))
+          print('JUnit XML reports:', len(reports))
+          print('Milestone test counts:', counts)
+          print('Test totals:', totals)
+          assert counts == {'core': 125, 'time': 66, 'curve': 63}, counts
+          assert totals == {'tests': 254, 'failures': 0, 'errors': 0, 'skipped': 0}, totals
+          PY
+
+      - name: Regenerate M3 independent reference data
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p "$RUNNER_TEMP/m3-regenerated"
+          python3 tools/generate_m3_reference_vectors.py "$RUNNER_TEMP/m3-regenerated" 2>&1 | tee "$RUNNER_TEMP/m3-evidence/reference-generator.txt"
+          diff -r src/test/resources/m3/reference "$RUNNER_TEMP/m3-regenerated" 2>&1 | tee "$RUNNER_TEMP/m3-evidence/reference-diff.txt"
+          python3 - <<'PY' | tee "$RUNNER_TEMP/m3-evidence/reference-counts.txt"
+          import csv
+          from pathlib import Path
+          root = Path('src/test/resources/m3/reference')
+          counts = {}
+          for name in ('easing.csv', 'bezier.csv', 'spiral.csv'):
+              with (root / name).open(newline='') as f:
+                  counts[name] = sum(1 for _ in csv.DictReader(f))
+          print(counts, 'total =', sum(counts.values()))
+          assert counts == {'easing.csv': 1155, 'bezier.csv': 645, 'spiral.csv': 959}, counts
+          PY
+
+      - name: Preserve build evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m3-java25-verification-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 30
+          path: |
+            ${{ runner.temp }}/m3-evidence/
+            build/test-results/test/
+            build/reports/tests/test/
