@@ -54,7 +54,7 @@ jobs:
           import glob
           import xml.etree.ElementTree as ET
           reports = glob.glob('build/test-results/test/TEST-*.xml')
-          assert len(reports) == 30, f'Expected 30 JUnit reports, got {len(reports)}'
+          assert len(reports) == 31, f'Expected 31 JUnit reports, got {len(reports)}'
           counts = {'core': 0, 'time': 0, 'curve': 0}
           totals = {'tests': 0, 'failures': 0, 'errors': 0, 'skipped': 0}
           for path in reports:
