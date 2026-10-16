@@ -87,6 +87,8 @@ jobs:
           counts = {}
           for name in ('easing.csv', 'bezier.csv', 'spiral.csv'):
               with (root / name).open(newline='') as f:
+                  comment = next(f)
+                  assert comment.startswith('#'), (name, comment)
                   counts[name] = sum(1 for _ in csv.DictReader(f))
           print(counts, 'total =', sum(counts.values()))
           assert counts == {'easing.csv': 1155, 'bezier.csv': 645, 'spiral.csv': 959}, counts
