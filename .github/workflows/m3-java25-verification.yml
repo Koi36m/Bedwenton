@@ -16,10 +16,10 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout exact verification branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Java 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '25'
@@ -96,7 +96,7 @@ jobs:
 
       - name: Preserve build evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: m3-java25-verification-${{ github.run_id }}
           if-no-files-found: warn
