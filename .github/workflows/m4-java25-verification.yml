@@ -1,0 +1,126 @@
+name: M4 Java 25 Verification
+
+on:
+  push:
+    branches: [m4-implementation, m4-actions-verification]
+  workflow_dispatch:
+    inputs:
+      full_reference_regeneration:
+        description: Independently regenerate all M3 and M4 reference rows
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify-m4:
+    name: Java 25 — 313 tests and M4 release verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Record toolchain and exact source identity
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/m4-evidence"
+          {
+            git rev-parse HEAD
+            java -version
+            javac -version
+            ./gradlew --version
+          } > "$RUNNER_TEMP/m4-evidence/toolchain.txt" 2>&1
+          cat "$RUNNER_TEMP/m4-evidence/toolchain.txt"
+
+      - name: Verify frozen baseline, specification and implementation hashes
+        shell: bash
+        run: |
+          set -o pipefail
+          {
+            sha256sum -c verification/m4/FROZEN-M1-M3-SHA256SUMS.txt
+            sha256sum -c verification/m4/APPROVED-M4-SHA256SUMS.txt
+            sha256sum -c verification/m4/IMPLEMENTATION-SOURCE-SHA256SUMS.txt
+            (cd src/test/resources/m3/reference && sha256sum -c MANIFEST.sha256)
+            (cd src/test/resources/m4/reference && sha256sum -c MANIFEST.sha256)
+          } 2>&1 | tee "$RUNNER_TEMP/m4-evidence/source-integrity.txt"
+
+      - name: Fresh clean test
+        shell: bash
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test 2>&1 | tee "$RUNNER_TEMP/m4-evidence/clean-test.txt"
+
+      - name: Gradle check and dependency guard
+        shell: bash
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false check 2>&1 | tee "$RUNNER_TEMP/m4-evidence/check.txt"
+          ./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false dependencies --configuration runtimeClasspath 2>&1 | tee "$RUNNER_TEMP/m4-evidence/runtime-dependencies.txt"
+
+      - name: Verify exact JUnit counts and production compiler warnings
+        shell: bash
+        run: |
+          python3 - <<'PY' | tee "$RUNNER_TEMP/m4-evidence/test-summary.txt"
+          import os
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          reports = sorted(Path('build/test-results/test').glob('TEST-*.xml'))
+          counts = dict(core=0, time=0, curve=0, sample=0)
+          totals = dict(tests=0, failures=0, errors=0, skipped=0)
+          for path in reports:
+              suite = ET.parse(path).getroot()
+              counts[suite.attrib['name'].split('.')[3]] += int(suite.attrib['tests'])
+              for key in totals:
+                  totals[key] += int(suite.attrib.get(key, '0'))
+          print('JUnit XML reports:', len(reports))
+          print('Milestone counts:', counts)
+          print('Totals:', totals)
+          assert len(reports) == 41, len(reports)
+          assert counts == dict(core=125, time=66, curve=63, sample=59), counts
+          assert totals == dict(tests=313, failures=0, errors=0, skipped=0), totals
+          log = (Path(os.environ['RUNNER_TEMP'])/'m4-evidence/clean-test.txt').read_text()
+          production = log.split('> Task :compileJava', 1)[1].split('> Task :', 1)[0]
+          assert 'warning:' not in production, production
+          print('Production compiler warnings: 0')
+          PY
+
+      # Per-push checks above are bounded. Release verification additionally
+      # regenerates references; checked-in manifests alone do not prove this.
+      - name: Independently regenerate M3 and M4 reference data
+        if: (github.event_name == 'workflow_dispatch' && inputs.full_reference_regeneration) || contains(github.event.head_commit.message, '[m4-release-verification]')
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 tools/generate_m3_reference_vectors.py "$RUNNER_TEMP/m4-m3-reference" 2>&1 | tee "$RUNNER_TEMP/m4-evidence/m3-reference-generator.txt"
+          diff -r src/test/resources/m3/reference "$RUNNER_TEMP/m4-m3-reference" 2>&1 | tee "$RUNNER_TEMP/m4-evidence/m3-reference-diff.txt"
+          python3 tools/generate_m4_reference_vectors.py "$RUNNER_TEMP/m4-reference" 2>&1 | tee "$RUNNER_TEMP/m4-evidence/m4-reference-generator.txt"
+          diff -r src/test/resources/m4/reference "$RUNNER_TEMP/m4-reference" 2>&1 | tee "$RUNNER_TEMP/m4-evidence/m4-reference-diff.txt"
+          python3 - <<'PY' | tee "$RUNNER_TEMP/m4-evidence/reference-summary.txt"
+          import csv
+          from pathlib import Path
+          for milestone, expected in [('m3', 2759), ('m4', 3064)]:
+              counts = {}
+              for path in sorted(Path(f'src/test/resources/{milestone}/reference').glob('*.csv')):
+                  lines = [line for line in path.read_text().splitlines() if not line.startswith('#')]
+                  counts[path.name] = len(list(csv.DictReader(lines)))
+              print(milestone, counts, 'total:', sum(counts.values()))
+              assert sum(counts.values()) == expected, counts
+          print('Independent M3/M4 regeneration and byte comparisons: PASS')
+          PY
+
+      - name: Preserve verification evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: m4-java25-verification-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            ${{ runner.temp }}/m4-evidence/
+            build/test-results/test/
+            build/reports/tests/test/

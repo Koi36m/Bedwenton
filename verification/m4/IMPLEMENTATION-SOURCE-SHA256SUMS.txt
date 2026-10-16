@@ -1,0 +1,7 @@
+65581586cd1eff62756250af2a759ec37e14116cf540740a46b81cdfb9e2f830  src/main/java/workshop/vfx/math/sample/ArcLengthTable.java
+12bdc9d21b88d0c2338b39de4ab44dbc690e7e8792fb14593c5e807b5f0ad910  src/main/java/workshop/vfx/math/sample/ArcLengthTolerance.java
+23755a9fa241313cd9bafbf8a1b6e1d34e4deb18963631d2d54541fa58fe681d  src/main/java/workshop/vfx/math/sample/Endpoints.java
+9708a163f785f0a700b8f57ce5948f0e04b27eef89f4a8f6b0b941f3a46118a7  src/main/java/workshop/vfx/math/sample/SampleChecks.java
+7a5aab58e7bfff0e51c5b2badfbbcf2da7156c09bf1ff5b3deefa1de082915b1  src/main/java/workshop/vfx/math/sample/SampleLimits.java
+e9b137447c73a7adb0b8849d5ce6f924d8ab60c36df54d111d11c9bd0d94eefd  src/main/java/workshop/vfx/math/sample/SampleSet.java
+ee5744e9278952f470c1ca2ed679f46f24876920f5c9b65feae7c7fa33939f2a  src/main/java/workshop/vfx/math/sample/Sampler.java

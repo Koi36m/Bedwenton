@@ -1,0 +1,25 @@
+The 59 M4 tests of revision 2.1 against the three THROWAWAY reference implementations (not delivered); Java 25.0.4.1, Gradle 9.1.0.
+
+== R1 reference implementation (contract revision 1): 59 tests, 48 passed, 11 failed
+  FAILED M4R21RegressionTest :: F4: subnormal speeds over long ranges lose at most MIN_VALUE/2 per half-panel rule (no MIN :: org.opentest4j.AssertionFailedError: line to Vec3[x=4.9E-324, y=4.9E-324, z=0.0] on [0.0, 1000.0] (exact 6.986E-321): length ==> expected: <6.986E-321> but was:
+  FAILED M4R21RegressionTest :: F4: M3 lines on ranges of a few MIN_VALUE (half-width rounds to 0): length within the cont :: org.opentest4j.AssertionFailedError: line to Vec3[x=1.0, y=0.0, z=0.0] on [0.0, 4.9E-324] (exact 4.9E-324): length ==> expected: <4.9E-324> but was: <0.0>
+  FAILED M4R21RegressionTest :: F5: a finite table whose partial integral overflowed (speed 1e308, or components at MAX_VA :: org.opentest4j.AssertionFailedError: big 1.0E308: lengthAt(4.9E-324) = NaN ==> expected: <true> but was: <false>
+  FAILED M4R21RegressionTest :: F5: finite smooth curves whose weighted node sum overflows (speeds 1e308 to 2.5e308, compo :: java.lang.ArithmeticException: ArcLengthTable: length is not finite
+  FAILED M4R21RegressionTest :: F4/F5: no spurious overflow or underflow in the panel rule: 3,000 random lines (speeds 1e- :: org.opentest4j.AssertionFailedError: line to Vec3[x=1.95530343039928E92, y=6.5779677804509205E94, z=0.0] on [0.0, 6.08482575065932E-76] (exact 4.002596456661013
+  FAILED M4R2RegressionTest :: F3: iteration cap: a target inside a jump of F (unreachable tolerance) near t = 2^-40, whe :: org.opentest4j.AssertionFailedError: the cap is reached: 384 evaluations ==> expected: <true> but was: <false>
+  FAILED M4R2RegressionTest :: F2: pathological panels (I2/I1 overflowing, I1 = 0, I2 = 1000 I1, I1 = 1000 I2, I2/I1 unde :: org.opentest4j.AssertionFailedError: whole 1.0E-300, half 1.0E300 lengthAt(9.765625E-4) = NaN ==> expected: <true> but was: <false>
+  FAILED M4R2RegressionTest :: F3: a speed discontinuous at a 2^-41 scale (F has jumps, the tolerance is unreachable; in  :: org.opentest4j.AssertionFailedError: s = 0.01188329460802757: t = 0.012785606934079924 is not the better end of an adjacent-double bracket (-0.00196615579597971
+  FAILED M4R2RegressionTest :: F3: Newton creep (a speed spike at the root, invisible to the quadrature, makes Newton ste :: org.opentest4j.AssertionFailedError: evaluations 384 ==> expected: <true> but was: <false>
+  FAILED M4R2RegressionTest :: F1: nonzero subnormal-speed lines and constant-speed spirals converge with 16 panels; tau  :: org.opentest4j.AssertionFailedError: line to Vec3[x=3.5E-323, y=0.0, z=0.0] on 0.0..1.0 tau is the floor ==> expected: <5.06E-321> but was: <0.0>
+  FAILED M4R2RegressionTest :: F3: ties go to the upper end: (a) a target exactly halfway across a panel shorter than 2 t :: org.opentest4j.AssertionFailedError: tie: the upper end ==> expected: <0.0625> but was: <0.03125>
+
+== R2 reference implementation (contract revision 2): 59 tests, 54 passed, 5 failed
+  FAILED M4R21RegressionTest :: F4: subnormal speeds over long ranges lose at most MIN_VALUE/2 per half-panel rule (no MIN :: org.opentest4j.AssertionFailedError: line to Vec3[x=4.9E-324, y=4.9E-324, z=0.0] on [0.0, 1000.0] (exact 6.986E-321): length ==> expected: <6.986E-321> but was:
+  FAILED M4R21RegressionTest :: F4: M3 lines on ranges of a few MIN_VALUE (half-width rounds to 0): length within the cont :: org.opentest4j.AssertionFailedError: line to Vec3[x=1.0, y=0.0, z=0.0] on [0.0, 4.9E-324] (exact 4.9E-324): length ==> expected: <4.9E-324> but was: <0.0>
+  FAILED M4R21RegressionTest :: F5: a finite table whose partial integral overflowed (speed 1e308, or components at MAX_VA :: org.opentest4j.AssertionFailedError: big 1.0E308: lengthAt(4.9E-324) = NaN ==> expected: <true> but was: <false>
+  FAILED M4R21RegressionTest :: F5: finite smooth curves whose weighted node sum overflows (speeds 1e308 to 2.5e308, compo :: java.lang.ArithmeticException: ArcLengthTable: length is not finite
+  FAILED M4R21RegressionTest :: F4/F5: no spurious overflow or underflow in the panel rule: 3,000 random lines (speeds 1e- :: org.opentest4j.AssertionFailedError: line to Vec3[x=1.95530343039928E92, y=6.5779677804509205E94, z=0.0] on [0.0, 6.08482575065932E-76] (exact 4.002596456661013
+
+== R2.1 reference implementation (contract revision 2.1): 59 tests, 59 passed, 0 failed
+
+R2 fails exactly the five R2.1 regression tests (F4 and F5). R1 fails those five and its six known R2 regression failures.

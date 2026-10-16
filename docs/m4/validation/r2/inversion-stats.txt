@@ -1,0 +1,48 @@
+Inversion statistics (InvStats.java) against the THROWAWAY R2 reference implementation, instrumented with exit counters
+(exact = f == 0, tolerance = abs(f) <= tau 2^-10, cap = 64 iterations, collapse = no midpoint strictly inside). Java 25.0.4.1.
+Evaluations are derivative calls per parameterAt; contract limit 336.
+Creep: t* is the exact inverse of the curve without the spike. For eps >= 3e-5 the spike is wide enough to be seen by the
+table's quadrature nodes, so the table (and t) legitimately differ from t*; eps = 1e-7 is the invisible-spike case of the test.
+The rejected draft run also contains R2's other rules (ratio/linear modes, end acceptance); only the Newton rule differs.
+
+#### R2 (Newton phase of 16 iterations, then bisection; contract 5.6)
+== smooth curves (the newtonEfficiency curves plus a cusp), relative tolerances 2^-20, 2^-30, 2^-40; 998 equally spaced interior targets each
+rel 1e-06 Spiral                                           calls=  998 mean evals=  16.86 max evals= 23 max iterations= 4 exits: exact=2 tolerance=996 cap=0 collapse=0
+rel 1e-06 CubicBezier                                      calls=  998 mean evals=  16.89 max evals= 17 max iterations= 3 exits: exact=0 tolerance=998 cap=0 collapse=0
+rel 1e-06 QuadraticBezier                                  calls=  998 mean evals=  16.81 max evals= 17 max iterations= 3 exits: exact=2 tolerance=996 cap=0 collapse=0
+rel 1e-06 CubicBezier(cusp)                                calls=  998 mean evals=  17.48 max evals= 35 max iterations= 6 exits: exact=1 tolerance=997 cap=0 collapse=0
+rel 9e-10 Spiral                                           calls=  998 mean evals=  17.65 max evals= 23 max iterations= 4 exits: exact=18 tolerance=980 cap=0 collapse=0
+rel 9e-10 CubicBezier                                      calls=  998 mean evals=  21.39 max evals= 23 max iterations= 4 exits: exact=105 tolerance=893 cap=0 collapse=0
+rel 9e-10 QuadraticBezier                                  calls=  998 mean evals=  17.85 max evals= 23 max iterations= 4 exits: exact=19 tolerance=979 cap=0 collapse=0
+rel 9e-10 CubicBezier(cusp)                                calls=  998 mean evals=  22.16 max evals= 41 max iterations= 7 exits: exact=109 tolerance=889 cap=0 collapse=0
+rel 9e-13 Spiral                                           calls=  998 mean evals=  21.80 max evals= 23 max iterations= 4 exits: exact=50 tolerance=948 cap=0 collapse=0
+rel 9e-13 CubicBezier                                      calls=  998 mean evals=  22.59 max evals= 23 max iterations= 4 exits: exact=122 tolerance=876 cap=0 collapse=0
+rel 9e-13 QuadraticBezier                                  calls=  998 mean evals=  22.06 max evals= 23 max iterations= 4 exits: exact=123 tolerance=875 cap=0 collapse=0
+rel 9e-13 CubicBezier(cusp)                                calls=  998 mean evals=  23.11 max evals= 41 max iterations= 7 exits: exact=125 tolerance=873 cap=0 collapse=0
+== Newton creep: x = t + t^2/2 with a 1e6 speed spike within +-eps of the exact root; tolerance (0, 2^-40), budget 256
+creep eps=1e-07 (max |t - t*| = 6.66e-16)                  calls=    8 mean evals= 282.88 max evals=286 max iterations=54 exits: exact=0 tolerance=8 cap=0 collapse=0
+creep eps=3e-05 (max |t - t*| = 4.68e-02)                  calls=    8 mean evals= 247.75 max evals=286 max iterations=54 exits: exact=0 tolerance=8 cap=0 collapse=0
+creep eps=1e-03 (max |t - t*| = 5.58e-02)                  calls=    8 mean evals= 206.00 max evals=336 max iterations=64 exits: exact=0 tolerance=6 cap=2 collapse=0
+== noisy speed (bit 11 of t selects 0.25 or 1.75); tolerance (0, 2^-40), budget 256
+noisy, 998 targets                                         calls=  998 mean evals= 216.63 max evals=336 max iterations=64 exits: exact=18 tolerance=149 cap=1 collapse=830
+
+#### Rejected R2 draft (Newton allowed only if the previous step at least halved the bracket), same probe
+== smooth curves (the newtonEfficiency curves plus a cusp), relative tolerances 2^-20, 2^-30, 2^-40; 998 equally spaced interior targets each
+rel 1e-06 Spiral                                           calls=  998 mean evals=  35.14 max evals=107 max iterations=20 exits: exact=2 tolerance=996 cap=0 collapse=0
+rel 1e-06 CubicBezier                                      calls=  998 mean evals=  40.28 max evals=123 max iterations=23 exits: exact=0 tolerance=998 cap=0 collapse=0
+rel 1e-06 QuadraticBezier                                  calls=  998 mean evals=  35.38 max evals=103 max iterations=19 exits: exact=1 tolerance=997 cap=0 collapse=0
+rel 1e-06 CubicBezier(cusp)                                calls=  998 mean evals=  45.90 max evals=126 max iterations=24 exits: exact=1 tolerance=997 cap=0 collapse=0
+rel 9e-10 Spiral                                           calls=  998 mean evals=  56.61 max evals=160 max iterations=30 exits: exact=2 tolerance=996 cap=0 collapse=0
+rel 9e-10 CubicBezier                                      calls=  998 mean evals=  96.67 max evals=162 max iterations=30 exits: exact=2 tolerance=996 cap=0 collapse=0
+rel 9e-10 QuadraticBezier                                  calls=  998 mean evals=  58.32 max evals=182 max iterations=34 exits: exact=1 tolerance=997 cap=0 collapse=0
+rel 9e-10 CubicBezier(cusp)                                calls=  998 mean evals= 104.83 max evals=174 max iterations=32 exits: exact=1 tolerance=997 cap=0 collapse=0
+rel 9e-13 Spiral                                           calls=  998 mean evals= 120.40 max evals=208 max iterations=39 exits: exact=5 tolerance=993 cap=0 collapse=0
+rel 9e-13 CubicBezier                                      calls=  998 mean evals= 146.40 max evals=222 max iterations=41 exits: exact=11 tolerance=987 cap=0 collapse=0
+rel 9e-13 QuadraticBezier                                  calls=  998 mean evals= 127.21 max evals=219 max iterations=41 exits: exact=13 tolerance=985 cap=0 collapse=0
+rel 9e-13 CubicBezier(cusp)                                calls=  998 mean evals= 154.48 max evals=222 max iterations=41 exits: exact=12 tolerance=986 cap=0 collapse=0
+== Newton creep: x = t + t^2/2 with a 1e6 speed spike within +-eps of the exact root; tolerance (0, 2^-40), budget 256
+creep eps=1e-07 (max |t - t*| = 4.44e-16)                  calls=    8 mean evals= 310.38 max evals=353 max iterations=64 exits: exact=0 tolerance=8 cap=0 collapse=0
+creep eps=3e-05 (max |t - t*| = 4.68e-02)                  calls=    8 mean evals= 264.00 max evals=329 max iterations=60 exits: exact=0 tolerance=8 cap=0 collapse=0
+creep eps=1e-03 (max |t - t*| = 5.58e-02)                  calls=    8 mean evals= 237.88 max evals=343 max iterations=62 exits: exact=0 tolerance=5 cap=0 collapse=3
+== noisy speed (bit 11 of t selects 0.25 or 1.75); tolerance (0, 2^-40), budget 256
+noisy, 998 targets                                         calls=  998 mean evals= 236.97 max evals=339 max iterations=59 exits: exact=18 tolerance=146 cap=0 collapse=834

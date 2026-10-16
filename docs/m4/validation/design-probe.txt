@@ -1,0 +1,28 @@
+M4 design probe (DesignProbe.java) against the throwaway reference implementation, globally adaptive refinement (the recommended algorithm).
+Timings are indicative only (shared container, JIT warm-up; a mutation run was active).
+
+circle r=5                         rel=1e-04  GL5: evals=   240 panels=   16 conv=true  relErr=1.13e-16 est/L=4.24e-17 | chords(240 pts): relErr=2.86e-05
+helix r=2 rise=10 turns=8          rel=1e-04  GL5: evals=   240 panels=   16 conv=true  relErr=0.00e+00 est/L=8.79e-18 | chords(240 pts): relErr=1.81e-03
+conical r1..6 rise4 turns10        rel=1e-04  GL5: evals=   240 panels=   16 conv=true  relErr=1.29e-16 est/L=3.31e-16 | chords(240 pts): relErr=2.86e-03
+stationary pt v=3(1-2t)^2             rel=1e-04  GL5: evals=   240 panels=   16 conv=true  relErr=0.00e+00 est/L=7.08e-17 | chords(240 pts): relErr=0.00e+00
+circle r=5                         rel=1e-08  GL5: evals=   240 panels=   16 conv=true  relErr=1.13e-16 est/L=4.24e-17 | chords(240 pts): relErr=2.86e-05
+helix r=2 rise=10 turns=8          rel=1e-08  GL5: evals=   240 panels=   16 conv=true  relErr=0.00e+00 est/L=8.79e-18 | chords(240 pts): relErr=1.81e-03
+conical r1..6 rise4 turns10        rel=1e-08  GL5: evals=   240 panels=   16 conv=true  relErr=1.29e-16 est/L=3.31e-16 | chords(240 pts): relErr=2.86e-03
+stationary pt v=3(1-2t)^2             rel=1e-08  GL5: evals=   240 panels=   16 conv=true  relErr=0.00e+00 est/L=7.08e-17 | chords(240 pts): relErr=0.00e+00
+circle r=5                         rel=1e-12  GL5: evals=   240 panels=   16 conv=true  relErr=1.13e-16 est/L=4.24e-17 | chords(240 pts): relErr=2.86e-05
+helix r=2 rise=10 turns=8          rel=1e-12  GL5: evals=   240 panels=   16 conv=true  relErr=0.00e+00 est/L=8.79e-18 | chords(240 pts): relErr=1.81e-03
+conical r1..6 rise4 turns10        rel=1e-12  GL5: evals=   240 panels=   16 conv=true  relErr=1.29e-16 est/L=3.31e-16 | chords(240 pts): relErr=2.86e-03
+stationary pt v=3(1-2t)^2             rel=1e-12  GL5: evals=   240 panels=   16 conv=true  relErr=0.00e+00 est/L=7.08e-17 | chords(240 pts): relErr=0.00e+00
+wiggle budget=   256: evals=   240 panels=   16 converged=false L=8.314000105996852 est=9.43e-01
+wiggle budget=  4096: evals=  4080 panels=  208 converged=false L=8.069419970394225 est=2.96e-01
+wiggle budget= 65536: evals= 65520 panels= 3280 converged=false L=8.111828619064610 est=7.03e-08
+indicative: build 65.4 us (240 evals), 256 equal-distance samples 639.6 us
+indicative: build 24.1 us (240 evals), 256 equal-distance samples 415.4 us
+indicative: build 18.1 us (240 evals), 256 equal-distance samples 361.7 us
+
+Earlier scratch variant (depth-first, left-to-right refinement with tolerance per panel tau * 2^-(depth+4)), recorded output of the same probe before it was replaced:
+wiggle budget=   256: evals=   240 panels=   16 converged=false L=8.314000105996852 est=9.43e-01
+wiggle budget=  4096: evals=  4080 panels=  208 converged=false L=8.280227130334604 est=9.21e-01
+wiggle budget= 65536: evals= 65520 panels= 3280 converged=false L=8.187642926499267 est=3.54e-01
+(globally adaptive at 65,536 evaluations: estimate 7.03e-08; the converged length is 8.1118286189 at 2^20 budget, see evidence.txt)
+Note: in the first run of this probe the conical spiral's exact value was a placeholder; it is now the 60-digit closed form 220.028322236818885190...

@@ -1,0 +1,19 @@
+M4 evidence (ProbeM4Evidence.java) against the THROWAWAY reference implementation of contract REVISION 2.1 (not delivered); Java 25.0.4.1.
+Timings are indicative only (one container, warm JIT); they are not acceptance criteria.
+All printed values are identical to R2 (only timings differ); R1: parameterAt mean 14.0, max 29 (contract limit then 400).
+
+== arclength.csv: achieved error / tau, by tolerance
+rel 1.0e-04: rows 336, converged 336, rows with error > tau 0, worst error/tau 2.447e-01 (CUBIC cusp at 13/64), evaluations mean 240 max 260
+rel 1.0e-07: rows 336, converged 336, rows with error > tau 0, worst error/tau 2.006e-01 (QUAD collinear reversal at t=2/3), evaluations mean 241 max 340
+   at equal cost (chords with as many points as GL5 evaluations): worst relative error GL5 2.01e-08, chords 6.45e-02
+rel 9.3e-10: rows 336, converged 336, rows with error > tau 0, worst error/tau 8.413e-02 (QUAD collinear reversal at t=2/3), evaluations mean 243 max 420
+rel 1.0e-12: rows 336, converged 336, rows with error > tau 0, worst error/tau 3.060e-01 (QUAD collinear reversal at t=2/3), evaluations mean 259 max 540
+== equal-distance sampling work (rel 2^-30): derivative evaluations per parameterAt call
+parameterAt: 20979 calls, mean 13.8 derivative evaluations, max 29 (contract limit 336)
+== budget behaviour: oscillating user curve x = t, y = 0.01 sin(400 pi t) (200 periods), rel 1e-9
+budget      256: evaluations      240 panels     16 converged false length 8.314000105996852 estimate 9.43e-01
+budget     4096: evaluations     4080 panels    208 converged false length 8.069419970394225 estimate 2.96e-01
+budget    65536: evaluations    65520 panels   3280 converged false length 8.111828619064610 estimate 7.03e-08
+budget  1048576: evaluations    81120 panels   4060 converged true  length 8.111828618895730 estimate 8.30e-09
+== indicative timing on this machine (not a target): conical spiral, rel 1e-8, warm JIT
+build 25.5 us; 128 equal-distance samples 288.2 us; 128 uniform-parameter samples 6.9 us

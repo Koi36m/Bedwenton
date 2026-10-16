@@ -1,0 +1,14 @@
+The 54 M4 tests of revision 2 against the two THROWAWAY reference implementations (not delivered); Java 25.0.4.1, Gradle 9.1.0.
+
+== R1 reference implementation (contract revision 1): 54 tests, 48 passed, 6 failed
+  FAILED M4R2RegressionTest :: F3: iteration cap: a target inside a jump of F (unreachable tolerance) near t = 2^-40, whe :: org.opentest4j.AssertionFailedError: the cap is reached: 384 evaluations ==> expected: <true> but was: <false>
+  FAILED M4R2RegressionTest :: F2: pathological panels (I2/I1 overflowing, I1 = 0, I2 = 1000 I1, I1 = 1000 I2, I2/I1 unde :: org.opentest4j.AssertionFailedError: whole 1.0E-300, half 1.0E300 lengthAt(9.765625E-4) = NaN ==> expected: <true> but was: <false>
+  FAILED M4R2RegressionTest :: F3: a speed discontinuous at a 2^-41 scale (F has jumps, the tolerance is unreachable; in  :: org.opentest4j.AssertionFailedError: s = 0.01188329460802757: t = 0.012785606934079924 is not the better end of an adjacent-double bracket (-0.00196615579597971
+  FAILED M4R2RegressionTest :: F3: Newton creep (a speed spike at the root, invisible to the quadrature, makes Newton ste :: org.opentest4j.AssertionFailedError: evaluations 384 ==> expected: <true> but was: <false>
+  FAILED M4R2RegressionTest :: F1: nonzero subnormal-speed lines and constant-speed spirals converge with 16 panels; tau  :: org.opentest4j.AssertionFailedError: line to Vec3[x=3.5E-323, y=0.0, z=0.0] on 0.0..1.0 tau is the floor ==> expected: <5.06E-321> but was: <0.0>
+  FAILED M4R2RegressionTest :: F3: ties go to the upper end: (a) a target exactly halfway across a panel shorter than 2 t :: org.opentest4j.AssertionFailedError: tie: the upper end ==> expected: <0.0625> but was: <0.03125>
+
+== R2 reference implementation (contract revision 2): 54 tests, 54 passed, 0 failed
+
+On R1, the failures are the regression tests for findings 1 to 3 and the tie rule, which R1 did not have. The other R2 tests
+(panel-end targets, the clamp to I2, stationary intervals, a non-finite derivative after build) guard rules that R1 also satisfies.

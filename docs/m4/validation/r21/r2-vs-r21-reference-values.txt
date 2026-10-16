@@ -1,0 +1,4 @@
+LenDump.java: arclength.csv (336 rows) at relative tolerances 1e-4, 1e-7, 2^-30, 1e-12: length, panel count, error estimate,
+7 lengthAt and 7 parameterAt values per table, compared bit for bit between the THROWAWAY R2 and R2.1 reference implementations.
+tables 1344; tables with any bit difference 1212; values differing 6104 of 22764; lengths differing 336; largest relative length change 7.85e-16; panel-count changes 0
+All differences are rounding-level (the R2.1 panel rule orders the same products differently); the 3,064 reference rows and all tolerances are unchanged.

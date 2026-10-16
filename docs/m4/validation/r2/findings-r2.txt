@@ -1,0 +1,57 @@
+Finding probes (Findings.java, Exhaust3.java) against the THROWAWAY R2 reference implementation; Java 25.0.4.1
+== F1: nonzero subnormal-speed lines, tolerance (0, 2^-40), budget 4096
+  end=Vec3[x=3.5E-323, y=0.0, z=0.0]: length=0.0 (0.0 q) tau=5.06E-321 converged=true panels=16 evals=240 estimate=0.0
+  end=Vec3[x=1.5E-323, y=2.5E-323, z=5.4E-323]: length=0.0 (0.0 q) tau=5.06E-321 converged=true panels=16 evals=240 estimate=7.9E-323
+  end=Vec3[x=4.9E-324, y=0.0, z=0.0]: length=0.0 (0.0 q) tau=5.06E-321 converged=true panels=16 evals=240 estimate=0.0
+  end=Vec3[x=6.09954E-319, y=0.0, z=0.0]: length=6.09954E-319 (123456.0 q) tau=5.06E-321 converged=true panels=16 evals=240 estimate=0.0
+  end=Vec3[x=1.0E-310, y=0.0, z=0.0]: length=9.9999999999945E-311 (20240225330720.0 q) tau=5.06E-321 converged=true panels=16 evals=240 estimate=7.9E-323
+== F2: pathological panel, I1 tiny and I2 huge (ratio overflows); speed 0 elsewhere; budget 256 (no refinement)
+  length=6.25E298 converged=false panels=16
+  lengthAt(0.001) = 1.0E297
+  lengthAt(0.01) = 1.0000000000000001E298
+  lengthAt(0.03) = 3.0E298
+  lengthAt(0.05) = 5.0E298
+  parameterAt(0.25 L) = 0.015625
+  parameterAt(0.5 L) = 0.03125
+  parameterAt(0.75 L) = 0.046875
+== F3: inversion on a speed discontinuous at a 2^-40 scale (F has jumps); 16 panels, tolerance (0, 2^-40)
+  length=0.7922196405351714 converged=false panels=16
+  s=0.079222 -> t=0.093647021421626330, lengthAt(t) - s = 0.000e+00
+  s=0.237666 -> t=0.28487794649549864, lengthAt(t) - s = 6.872e-03
+  s=0.396110 -> t=0.49531810873236270, lengthAt(t) - s = -9.066e-04
+  s=0.554554 -> t=0.69719619387751640, lengthAt(t) - s = -5.398e-04
+  s=0.712998 -> t=0.89266113422081600, lengthAt(t) - s = 2.317e-03
+== F3 creep (Exhaust3): x = t + t^2/2 with a 1e6 speed spike on [t* - eps, t* + eps]
+f=0.11 eps=3e-05: same length true, evals 281, t - t* = -5.551e-16, lengthAt(t) - s = -6.384e-16
+f=0.11 eps=1e-04: same length true, evals 281, t - t* = -5.551e-16, lengthAt(t) - s = -6.384e-16
+f=0.11 eps=3e-04: same length true, evals 281, t - t* = -5.551e-16, lengthAt(t) - s = -6.384e-16
+f=0.11 eps=1e-03: same length true, evals 316, t - t* = 8.327e-16, lengthAt(t) - s = 9.714e-16
+f=0.23 eps=3e-05: same length true, evals 281, t - t* = 5.551e-17, lengthAt(t) - s = 3.331e-16
+f=0.23 eps=1e-04: same length true, evals 281, t - t* = 5.551e-17, lengthAt(t) - s = 3.331e-16
+f=0.23 eps=3e-04: same length true, evals 316, t - t* = -2.776e-16, lengthAt(t) - s = -1.110e-16
+f=0.23 eps=1e-03: same length true, evals 316, t - t* = -2.776e-16, lengthAt(t) - s = -1.110e-16
+f=0.37 eps=3e-05: same length true, evals 286, t - t* = -7.216e-16, lengthAt(t) - s = -8.882e-16
+f=0.37 eps=1e-04: same length true, evals 286, t - t* = -7.216e-16, lengthAt(t) - s = -8.882e-16
+f=0.37 eps=3e-04: same length true, evals 321, t - t* = -8.327e-16, lengthAt(t) - s = -9.992e-16
+f=0.37 eps=1e-03: same length false, evals 23, t - t* = 1.021e-02, lengthAt(t) - s = 1.110e-16
+f=0.41 eps=3e-05: same length true, evals 281, t - t* = 5.551e-17, lengthAt(t) - s = 1.110e-16
+f=0.41 eps=1e-04: same length true, evals 281, t - t* = 5.551e-17, lengthAt(t) - s = 1.110e-16
+f=0.41 eps=3e-04: same length true, evals 301, t - t* = 1.665e-16, lengthAt(t) - s = 2.220e-16
+f=0.41 eps=1e-03: same length false, evals 0, t - t* = -5.582e-02, lengthAt(t) - s = -4.186e-14
+f=0.53 eps=3e-05: same length false, evals 0, t - t* = -4.685e-02, lengthAt(t) - s = 5.244e-12
+f=0.53 eps=1e-04: same length false, evals 0, t - t* = -4.685e-02, lengthAt(t) - s = 5.244e-12
+f=0.53 eps=3e-04: same length false, evals 0, t - t* = -4.685e-02, lengthAt(t) - s = 5.244e-12
+f=0.53 eps=1e-03: same length false, evals 0, t - t* = -4.685e-02, lengthAt(t) - s = 5.244e-12
+f=0.67 eps=3e-05: same length true, evals 281, t - t* = -3.331e-16, lengthAt(t) - s = -4.441e-16
+f=0.67 eps=1e-04: same length true, evals 281, t - t* = -3.331e-16, lengthAt(t) - s = -4.441e-16
+f=0.67 eps=3e-04: same length true, evals 306, t - t* = 4.441e-16, lengthAt(t) - s = 8.882e-16
+f=0.67 eps=1e-03: same length false, evals 336, t - t* = 1.293e-02, lengthAt(t) - s = -1.955e-02
+f=0.71 eps=3e-05: same length true, evals 286, t - t* = 2.220e-16, lengthAt(t) - s = 6.661e-16
+f=0.71 eps=1e-04: same length true, evals 286, t - t* = 2.220e-16, lengthAt(t) - s = 6.661e-16
+f=0.71 eps=3e-04: same length true, evals 316, t - t* = -3.331e-16, lengthAt(t) - s = -4.441e-16
+f=0.71 eps=1e-03: same length true, evals 336, t - t* = -1.052e-04, lengthAt(t) - s = -1.861e-04
+f=0.89 eps=3e-05: same length true, evals 286, t - t* = 1.110e-16, lengthAt(t) - s = 4.441e-16
+f=0.89 eps=1e-04: same length true, evals 286, t - t* = 1.110e-16, lengthAt(t) - s = 4.441e-16
+f=0.89 eps=3e-04: same length true, evals 321, t - t* = -1.110e-16, lengthAt(t) - s = 0.000e+00
+f=0.89 eps=1e-03: same length true, evals 321, t - t* = -1.110e-16, lengthAt(t) - s = 0.000e+00
+runs: 32 (R1 makes 6 derivative calls per iteration, R2 5 plus 1 in the 16 Newton iterations; 384 = R1 cap)

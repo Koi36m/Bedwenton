@@ -1,0 +1,23 @@
+F45.java against the THROWAWAY R2 reference implementation; Java 25.0.4.1
+== F4: M3 LineSegment on [0, k MIN_VALUE] (exact length = speed * k MIN_VALUE)
+  speed 1e+00 on [0, 1 q] (exact 4.9E-324)                   length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
+  speed 1e+00 on [0, 2 q] (exact 9.9E-324)                   length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
+  speed 1e+00 on [0, 3 q] (exact 1.5E-323)                   length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
+  speed 3e+00 on [0, 1 q] (exact 1.5E-323)                   length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
+  speed 3e+00 on [0, 2 q] (exact 3.0E-323)                   length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
+  speed 3e+00 on [0, 3 q] (exact 4.4E-323)                   length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
+  speed 1e+10 on [0, 1 q] (exact 4.9406564584E-314)          length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
+  speed 1e+10 on [0, 2 q] (exact 9.881312917E-314)           length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
+  speed 1e+10 on [0, 3 q] (exact 1.4821969375E-313)          length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
+  speed 1e+300 on [0, 1 q] (exact 4.940656458412466E-24)     length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
+  speed 1e+300 on [0, 2 q] (exact 9.881312916824931E-24)     length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
+  speed 1e+300 on [0, 3 q] (exact 1.4821969375237397E-23)    length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
+== F5: smooth finite curves whose weighted node sum overflows (true lengths finite)
+  line speed 1e308 on [0, q] (exact 4.94e-16)                build throws ArithmeticException: ArcLengthTable: length is not finite
+  line speed 1e308 on [0, 1e-300] (exact 1e8)                build throws ArithmeticException: ArcLengthTable: length is not finite
+  line speed 1e308 on [0, 1e-10] (exact 1e298)               build throws ArithmeticException: ArcLengthTable: length is not finite
+  line (MAX/2)(1,1,1), speed 1.56e308, on [0, 1e-300]        build throws ArithmeticException: ArcLengthTable: length is not finite
+  line (MAX, MAX, 0), speed 2.5e308 (overflows), on [0, 1e-300] build throws ArithmeticException: ArcLengthTable: length is not finite
+  circle radius 1e306 (speed 6.3e306) on [0, 1e-300]         length=6283185.307179587        converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=5.0E-301
+== F5: finite table (speed 1e308 on [0, 2^-20]); lengthAt one ulp above a panel start (half-width 0)
+  java.lang.ArithmeticException: ArcLengthTable: length is not finite
