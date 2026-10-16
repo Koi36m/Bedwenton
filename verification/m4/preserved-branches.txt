@@ -1,0 +1,15 @@
+8397c04b55f7d506e8fec79fca120ce297e8ae22 refs/heads/m1-core-transforms
+88702655a3f8c0428160a74f9193af7cc41b0b87 refs/heads/m2-r2-amendment
+fe1f5a64759e0bafc2fcdea2a49387350a21caf6 refs/heads/m2-spec
+a6726c42a20940a6a6d2dd24477e6a642f6b8cbc refs/heads/m3-actions-verification
+e38b841ae1d473c855b69315a3774212ea61235c refs/heads/m3-curves-paths
+7d0ee2b97f246ba27b19111fa3b585febf0ee0c6 refs/heads/m3-spec
+37152118093df38c95bc392e966bb23b4a435dd9 refs/heads/m3-spec-r2
+fe5c9fdd3e8da44517573332b163ca9af9a58d1b refs/heads/m3-spec-r2-a3
+9ce7906f3840988840f880b7f52d33a6b5052b75 refs/heads/m4-implementation
+3750b3491f1f4e579e0e1588a89bb051e62fd62a refs/heads/m4-spec
+268b6aa51a9b6591f147ce983f2ef70e95d02fde refs/heads/m4-spec-r2
+6ad7232cf030df649c70920893adb1f8a424a7cf refs/heads/m4-spec-r21
+802d9e7f95ccf8fdfd3879d99313794faa2c08d1 refs/heads/review/m1-claude
+a9d86c3e52e091c08dc359233999d08efa1394f5 refs/heads/review/m2-claude
+ecc847088f58726a6188c1c885f9a3356dc1569e refs/heads/review/m3-claude

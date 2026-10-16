@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.core.JomlOracleTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-16T22:12:57.996Z" hostname="runnervm8k3b6" time="0.047">
+  <properties/>
+  <testcase name="Records which application order JOML's rotationXYZ uses; it must match one of the two candidates" classname="workshop.vfx.math.core.JomlOracleTest" time="0.011"/>
+  <testcase name="Quat.rotate agrees with JOML Quaterniond on 10,000 seeded rotations" classname="workshop.vfx.math.core.JomlOracleTest" time="0.013"/>
+  <testcase name="Quat.slerp agrees with JOML slerp (as rotations) away from the near-parallel regime" classname="workshop.vfx.math.core.JomlOracleTest" time="0.011"/>
+  <testcase name="Quat.mul agrees with JOML's Hamilton product (same operand order)" classname="workshop.vfx.math.core.JomlOracleTest" time="0.011"/>
+  <system-out><![CDATA[[M1 JOML report] rotationXYZ applies X first = false, applies Z first = true
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

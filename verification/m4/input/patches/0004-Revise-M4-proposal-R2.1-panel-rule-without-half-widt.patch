@@ -1,0 +1,1156 @@
+From 5eab460162bb6746f3664f04e93730a7314a2266 Mon Sep 17 00:00:00 2001
+From: "Claude Code (independent review)" <noreply@anthropic.com>
+Date: Fri, 16 Oct 2026 19:22:19 +0000
+Subject: [PATCH 4/5] Revise M4 proposal (R2.1): panel rule without half-width
+ underflow or sum overflow
+
+Address the two findings of the independent R2 review:
+- F4: the panel rule multiplies by the width d (never 0 for a < b) with exact
+  half weights; h only positions the nodes. Allowance term R_w MIN_VALUE / 2
+  (tighter than R2's 8 K MIN_VALUE); node-position term includes underflow.
+- F5: speeds as (mu, nu) pairs, ratios to the largest component, and a fixed
+  product order chosen on d * S; G is never NaN and overflows only when the
+  exact rule value does.
+
+Adds M4R21RegressionTest (4 tests); the 54 existing M4 tests are unchanged.
+Reference data unchanged. No production code; M1, M2 and M3 untouched.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_017wk67VdfTJWcfKRwchBikr
+---
+ docs/m4/M4-ARCHITECTURE.md                    |   8 +-
+ docs/m4/M4-CONVENTIONS.md                     |   5 +-
+ docs/m4/M4-DESIGN-DECISIONS.md                |  12 +-
+ docs/m4/M4-ERROR-ANALYSIS.md                  | 122 +++++++++----
+ docs/m4/M4-IMPLEMENTATION-CONTRACT.md         |  96 +++++++---
+ docs/m4/M4-R21-CORRECTIONS.md                 | 130 ++++++++++++++
+ docs/m4/M4-RISKS.md                           |   2 +-
+ docs/m4/M4-TEST-SPECIFICATION.md              |  22 ++-
+ docs/m4/README-FOR-CODEX-M4.md                |   5 +-
+ docs/m4/validation/evidence.txt               |   6 +-
+ docs/m4/validation/r21/F45.java               |  42 +++++
+ docs/m4/validation/r21/LenDump.java           |  23 +++
+ docs/m4/validation/r21/before-after-tests.txt |  23 +++
+ docs/m4/validation/r21/findings-r2.txt        |  23 +++
+ docs/m4/validation/r21/findings-r21.txt       |  23 +++
+ .../r21/r2-vs-r21-reference-values.txt        |   4 +
+ docs/m4/validation/reference-run-summary.txt  |  95 +++++-----
+ .../vfx/math/sample/M4R21RegressionTest.java  | 166 ++++++++++++++++++
+ 18 files changed, 676 insertions(+), 131 deletions(-)
+ create mode 100644 docs/m4/M4-R21-CORRECTIONS.md
+ create mode 100644 docs/m4/validation/r21/F45.java
+ create mode 100644 docs/m4/validation/r21/LenDump.java
+ create mode 100644 docs/m4/validation/r21/before-after-tests.txt
+ create mode 100644 docs/m4/validation/r21/findings-r2.txt
+ create mode 100644 docs/m4/validation/r21/findings-r21.txt
+ create mode 100644 docs/m4/validation/r21/r2-vs-r21-reference-values.txt
+ create mode 100644 src/test/java/workshop/vfx/math/sample/M4R21RegressionTest.java
+
+diff --git a/docs/m4/M4-ARCHITECTURE.md b/docs/m4/M4-ARCHITECTURE.md
+index 94a063b..d9baaf9 100644
+--- a/docs/m4/M4-ARCHITECTURE.md
++++ b/docs/m4/M4-ARCHITECTURE.md
+@@ -1,6 +1,7 @@
+ # M4 architecture proposal: particle sampling and distribution
+ 
+-Status: **PROPOSED (revision 2), not approved** (see `M4-DESIGN-DECISIONS.md`; R2 changes in `M4-R2-CORRECTIONS.md`).
++Status: **PROPOSED (revision 2.1), not approved** (see `M4-DESIGN-DECISIONS.md`; changes in `M4-R2-CORRECTIONS.md` and
++`M4-R21-CORRECTIONS.md`).
+ - Baseline: verified M3 `a6726c42a20940a6a6d2dd24477e6a642f6b8cbc`.
+ - GitHub Actions run 38875973066 passed 254/254 tests (M1 125, M2 66, M3 51, M3 review 12) on Java 25 and Gradle 9.1.0,
+   with no production dependencies.
+@@ -106,7 +107,8 @@ tick -> M2 TimingSample.progress -> M3 Easing / curve parameters -> M3 Curve
+ | performance and resource risks | `docs/m4/M4-RISKS.md` |
+ | test specification and acceptance criteria | `docs/m4/M4-TEST-SPECIFICATION.md` |
+ | Codex handoff guide (for after approval) | `docs/m4/README-FOR-CODEX-M4.md` |
+-| independent tests | `src/test/java/workshop/vfx/math/sample/` (54 tests in 9 classes, plus a helper) |
++| independent tests | `src/test/java/workshop/vfx/math/sample/` (58 tests in 10 classes, plus a helper) |
+ | R2 corrections after the R1 review | `docs/m4/M4-R2-CORRECTIONS.md` |
++| R2.1 corrections after the R2 review | `docs/m4/M4-R21-CORRECTIONS.md` |
+ | reference data and generator | `src/test/resources/m4/reference/` (3,064 rows), `tools/generate_m4_reference_vectors.py` |
+-| validation evidence | `docs/m4/validation/` (R2 probes and before/after evidence in `validation/r2/`) |
++| validation evidence | `docs/m4/validation/` (R2 and R2.1 probes and before/after evidence in `validation/r2/` and `validation/r21/`) |
+diff --git a/docs/m4/M4-CONVENTIONS.md b/docs/m4/M4-CONVENTIONS.md
+index 33e87a5..d72c320 100644
+--- a/docs/m4/M4-CONVENTIONS.md
++++ b/docs/m4/M4-CONVENTIONS.md
+@@ -1,6 +1,6 @@
+ # M4 numerical conventions and supported domains
+ 
+-Status: PROPOSED, with the contract (revision 2). The M1 conventions (`docs/CONVENTIONS.md`), M2 conventions and M3 conventions
++Status: PROPOSED, with the contract (revision 2.1). The M1 conventions (`docs/CONVENTIONS.md`), M2 conventions and M3 conventions
+ (`docs/m3/M3-CONVENTIONS.md`) remain in force unchanged.
+ 
+ ## 1. Coordinates and orientation (inherited)
+@@ -36,7 +36,7 @@ Status: PROPOSED, with the contract (revision 2). The M1 conventions (`docs/CONV
+ 
+ | Item | Guaranteed | Note |
+ |---|---|---|
+-| curve coordinates | finite, magnitudes from subnormal to 1e100 | M3 domain; scaled speed norm (no squares overflow or underflow) |
++| curve coordinates | finite, magnitudes from subnormal to 1e100 | M3 domain; scaled speed norm (no squares overflow or underflow). User curves may have derivative components up to `MAX_VALUE`: the panel rule overflows only if the length does (R2.1) |
+ | speeds | finite | a non-finite derivative component gives `ArithmeticException` |
+ | parameter range | finite `t0 <= t1`, finite width; `abs(t) <= 1e3` recommended | larger ranges follow M3 extrapolation (spiral phase precision degrades with `abs(turns t)`) |
+ | length | finite and `>= 0` | non-finite gives `ArithmeticException` |
+@@ -71,3 +71,4 @@ Status: PROPOSED, with the contract (revision 2). The M1 conventions (`docs/CONV
+ | F7 | Inversion needs 13.8 derivative evaluations on average and at most 29 on the reference curves (R2; R1: 14.0 and 29) | `evidence.txt` |
+ | F8 | An exact-quarter circle sampled with 2,000 equal-distance samples on t in [-1000, 1000] lands on integer parameters within 1e-6 | `M4AdversarialTest.magnitudes` |
+ | F9 | R1 had `tau = 0` for subnormal lengths, so rounding decided convergence (32 panels for some subnormal circles). It produced NaN in `lengthAt` for panels with `I2/I1` overflowing, or with `I1 = 0` and a large `I2`. It crept through all 64 Newton iterations (384 evaluations) on a speed spike. R2 fixes all three: 16 panels and `tau = 1024 MIN_VALUE`; finite linear-mode values; tolerance exits within 286 evaluations | `validation/r2/findings-r1.txt`, `findings-r2.txt`; `M4R2RegressionTest` |
++| F10 | R2 lost every panel of width `MIN_VALUE` (half-width 0: an M3 line on `[0, MIN_VALUE]` had length 0, even at speed 1e300). It threw `ArithmeticException` for finite lengths with speeds near 1e308, and returned NaN from `lengthAt(MIN_VALUE)` on a finite table. R2.1 measures all of these within the allowance; unit speed on `[0, k MIN_VALUE]` is exact | `validation/r21/findings-r2.txt`, `findings-r21.txt`; `M4R21RegressionTest` |
+diff --git a/docs/m4/M4-DESIGN-DECISIONS.md b/docs/m4/M4-DESIGN-DECISIONS.md
+index d67f3ee..6c72771 100644
+--- a/docs/m4/M4-DESIGN-DECISIONS.md
++++ b/docs/m4/M4-DESIGN-DECISIONS.md
+@@ -1,8 +1,9 @@
+ # M4 design decisions: particle sampling and distribution
+ 
+-Status: **PROPOSED (revision 2), not approved.** The contract and tests implement the **recommended** option of each
++Status: **PROPOSED (revision 2.1), not approved.** The contract and tests implement the **recommended** option of each
+ decision. Owner approval follows ChatGPT's independent review. Revision 2 changes DM4-5, DM4-6 and DM4-17 only, as
+-required by the R1 review's findings (`M4-R2-CORRECTIONS.md`). No decision was replaced.
++required by the R1 review's findings (`M4-R2-CORRECTIONS.md`). Revision 2.1 changes only the arithmetic of the panel
++rule (DM4-17; `M4-R21-CORRECTIONS.md`). No decision was replaced.
+ 
+ Baseline: verified M3 `a6726c42a20940a6a6d2dd24477e6a642f6b8cbc` (254/254 tests; M3 production `d76258f`).
+ 
+@@ -301,8 +302,11 @@ spacing.
+   parameters follow IEEE arithmetic.
+ - **Subnormal values:**
+   - geometry down to subnormal coordinates has accurate lengths (scaled norm);
+-  - subnormal speeds contribute absolute errors of a few `MIN_VALUE` (M3 A3): at most `8 K MIN_VALUE` in the length
+-    (contract 10.2, R2);
++  - subnormal speeds contribute absolute errors of a few `MIN_VALUE` (M3 A3): at most `MIN_VALUE / 2` per half-panel
++    rule of nonzero width (contract 10.2, R2.1; R2 stated `8 K MIN_VALUE`);
++  - R2.1: the panel rule multiplies by the width itself, never by a half-width that can underflow to 0. It scales
++    the speeds by their largest component, so no intermediate overflows unless the length does (contract 5.2,
++    findings F4 and F5);
+   - the effective tolerance never underflows below `1024 MIN_VALUE` (DM4-5, R2).
+ - **Overflow:**
+   - a non-finite derivative or length gives `ArithmeticException`;
+diff --git a/docs/m4/M4-ERROR-ANALYSIS.md b/docs/m4/M4-ERROR-ANALYSIS.md
+index 533512e..fe1d6e3 100644
+--- a/docs/m4/M4-ERROR-ANALYSIS.md
++++ b/docs/m4/M4-ERROR-ANALYSIS.md
+@@ -1,6 +1,7 @@
+ # M4 error analysis: derivations and evidence
+ 
+-Status: PROPOSED, with the contract (revision 2: sections 4, 6 and 7 corrected after the R1 review; see
++Status: PROPOSED, with the contract. Revision 2.1 rewrote sections 2 and 3 and updated section 4 after the R2 review
++(`M4-R21-CORRECTIONS.md`). Revision 2 corrected sections 4, 6 and 7 after the R1 review (see
+ `M4-R2-CORRECTIONS.md`).
+ 
+ Notation:
+@@ -27,69 +28,114 @@ separate. No quadrature rule bounds the error of an arbitrary black-box integran
+ 
+ ## 2. Speed
+ 
+-- The scaled norm `v~ = m sqrt((x/m)^2 + (y/m)^2 + (z/m)^2)`:
++- **Speed pair (R2.1):** `mu = max abs component` (exact), and `nu~ = sqrt((x/mu)^2 + (y/mu)^2 + (z/mu)^2)`.
+   - quotients: relative error u each;
+   - squares: 3u;
+   - two additions of non-negative terms: 2u more;
+-  - square root: halves the relative error and adds u;
+-  - final product: u more.
++  - square root: halves the relative error and adds u.
+ 
+-  Total: at most `4.5u (1 + O(u))` relative, which the contract states as 5 eps. If x/m underflows, the
+-  contribution is below `eta^2`-scale and negligible. A subnormal result adds `eta/2`.
+-- **No overflow or underflow of squares:** each `(x/m)^2 <= 1`.
++  Total: `nu~ = nu (1 + d_nu)` with `abs(d_nu) <= 3.5u (1 + O(u))`. A quotient that underflows contributes below
++  `eta^2`, which is negligible. `nu` lies in `[1, sqrt(3)]`, because the largest component's ratio is exactly 1.
++- **Speed for the Newton slope:** `v~ = fl(mu nu~)`, with relative error at most 4.5u, which the contract states as
++  5 eps. It is formed only in 5.6 (it may be `+infinity` there). The panel rule never forms it.
++- **No overflow or underflow of squares:** each `(x/mu)^2 <= 1`.
+ - **Propagation of the curve's own error:** the computed derivative differs from the true one by at most `delta_c`
+   per component (M3 contract 7.2 with A3). By the triangle inequality,
+   `abs(abs(C'~) - abs(C')) <= sqrt(3) delta_c`.
+-- **Total speed error:** `dv = sqrt(3) delta_c + 5u v`.
+-
+-## 3. Gauss-Legendre panels: rounding
+-
+-For the panel `G(a, b) = h (W0 v(c) + W1 (v(c - hX1) + v(c + hX1)) + W2 (v(c - hX2) + v(c + hX2)))`:
+-- **Constants:** each X and W is correctly rounded (relative error u). `W0 + 2W1 + 2W2 = 2` holds to 2u
+-  (generator self-check at 60 digits).
+-- **Positive terms:** the weighted sum of non-negative speeds has relative error at most `(5 + 2)u`, and `h` at most
+-  2u (from `b - a` and halving), so `G~ = G(v~)(1 + theta)` with `abs(theta) <= 10u`.
+-- **Speed errors:** they enter linearly, `abs(G(v~) - G(v)) <= (b - a) dv`.
+-- **Node positions:** `c +- hX` is computed with error at most `3u T` (`T = max(abs(t0), abs(t1))`). The speed is
+-  sampled off-node by that much, which costs at most `(b - a) 3u T max abs(v')`. Since `abs(v') <= abs(C'')`, the
+-  contract states `4u T max abs(C'')`.
++- **Total speed error:** `dv = sqrt(3) delta_c + 5u v + eta`. The eta covers a subnormal derivative component, for
++  which M3 A3 admits an absolute error.
++
++## 3. Gauss-Legendre panels: rounding (R2.1 evaluation order, contract 5.2)
++
++Write `v_i = mu_i nu~_i` (exact products) for the computed speeds, and `G* = d (H0 v_0 + H1 (v_1 + v_2) + H2 (v_3 +
++v_4))` for the exact rule on them, with `d = b - a` exact.
++
++- **Constants:** each X and W is correctly rounded (relative error u). `H_i = W_i / 2` exactly.
++  `H0 + 2 H1 + 2 H2 = 1` holds to 2u (generator self-check at 60 digits).
++- **Width:** `fl(b - a) = d (1 + d_0)` with `abs(d_0) <= u`. It is exact when a and b are within a factor 2
++  (Sterbenz) or both subnormal, and never 0 for `a < b` (gradual underflow).
++- **Ratios:** `r_i = fl(fl(mu_i / M) nu~_i) = (v_i / M)(1 + 2u') + e_i`. Here `e_i` is nonzero only when
++  `mu_i / M < 2^-1021`, with `abs(e_i) <= 1.5 eta`.
++- **Weighted sum:** `S~ = (sum H_i r_i)(1 + t_S)` with `abs(t_S) <= 4u`. The terms are non-negative, three
++  products, two inner sums and two outer sums; products by `H >= 0.118` of `r >= 2^-1019` do not underflow. The
++  index of M has `r = nu~ >= 1`, so `S >= H2 > 0.118`. The absolute terms `e_i` and the possible underflows
++  (`<= 3.5 eta` in total) are therefore relative errors below `30 eta`, which is negligible against u.
++- **Products (one of three orders):**
++  - `fl(fl(d S~) M)` when `fl(d S~) >= 2^-1022`;
++  - `fl(d fl(M S~))` when `M S~ <= MAX_VALUE`;
++  - `fl(fl(M d) S~)` otherwise.
++
++  Each multiplication adds a relative error u, except an underflow of the final product, which adds an absolute
++  error of at most `eta / 2`.
++  - In the second order, `fl(M S~)` can underflow (M tiny). But then the exact `G* = d M S < 2^-1018 2^-1022` lies
++    far below `eta / 2`, the computed result is 0, and the error is `G* < eta / 2`.
++  - In the third order, `S > 1` and `d < 2^-1022`, so `M d` lies in `[4.4e-16, 4)`: normal, with no underflow.
++- **Total:** `G~ = G* (1 + theta) + delta`, with `abs(theta) <= u + 2u + 4u + 2u + 30 eta <= 10u` and
++  `abs(delta) <= eta / 2`. The delta is nonzero only when `G~` is subnormal or 0.
++- **Overflow:** the first two orders overflow only if `G* (1 + theta) > MAX_VALUE`. The third cannot overflow in
++  `M d`. `P = fl(d S~)` cannot overflow, since `d <= MAX_VALUE / 16` and `S~ <= 2`. So `G~ = +infinity` only if
++  `G* > MAX_VALUE / (1 + 10u)`.
++- **NaN:** impossible. Every operand is finite and non-negative, and the only possible infinities are products of
++  positive finite numbers. No `0 * infinity` arises: M and S are positive, and `d = 0` occurs only in the second
++  order, where `Q` is finite (or in the third order, `(M 0) S = 0`).
++- **Speed errors:** they enter linearly, `abs(G* - G(v)) <= (b - a) dv`.
++- **Node positions:** `c +- h X` is computed with error at most `3u T + 2 eta` (`T = max(abs(t0), abs(t1))`; `2 eta`
++  for an underflowing h and `h X`). The speed is sampled off-node by that much, which costs at most
++  `(b - a)(3u T + 2 eta) max abs(v')`. Since `abs(v') <= abs(C'')`, the contract states
++  `(4u T + 2 eta) max abs(C'')`.
++- **R2 (for the record, findings F4 and F5).** R2 computed `h (W0 v_0 + ...)`.
++  - **F4:** `h = 0.5 d` rounds to 0 for `d = eta`, and loses relative precision for `d < 2^-1021`. So a panel's value
++    could be 0, or wrong by 100%, at any speed: an M3 line on `[0, eta]` at speed 1e300 had length 0 instead of
++    4.9e-24 (`validation/r21/findings-r2.txt`).
++  - **F5:** the sum `W1 (v_1 + v_2)` overflows for speeds above about `MAX_VALUE / 2`, even when `h * sum` is finite.
++    With `h = 0` it gave NaN. Examples:
++    - `ArithmeticException` for a speed-1e308 line on `[0, 1e-300]`, whose length is 1e8;
++    - NaN from `lengthAt(MIN_VALUE)` for a finite table whose speed is 1e308 near `t = 0`.
+ 
+ ## 4. Length summation
+ 
+ - `L^` is the left-to-right sum of K non-negative panel values. Each rounding is relative to the partial sum, so the
+   summation error is at most `(K - 1) u L^`.
+ - With the panel errors of section 3, the **rounding part** of the length error is
+-  `abs(L^ - Q) <= (t1 - t0)(dv + 4u T max abs(C'')) + (K + 64) u L`, where Q is the exact sum of the exact panel
+-  rules. This is contract 10.2.
+-- **Underflow (R2).** Every product in the rule (`W v`, three per rule, and `h * sum`) may underflow, with an
+-  absolute error of at most `eta/2` each. Sums of subnormals are exact. So each rule has an absolute error of at most
+-  `2 eta` beyond its relative error, and a panel record (four rules) at most `8 eta`. Hence the `8 K eta` term of
+-  contract 10.2.
++  `abs(L^ - Q) <= (t1 - t0)(dv + (4u T + 2 eta) max abs(C'')) + (K + 64) u L + R_w eta / 2`, where Q is the exact
++  sum of the exact panel rules. This is contract 10.2.
++- **Underflow (R2.1).** The length is the sum of the final panels' `I2 = L + R`. Each rule has an absolute error of
++  at most `eta / 2` beyond its relative error (section 3). A zero-width rule is exactly 0. Sums of subnormals are
++  exact. Hence the term `R_w eta / 2`, with `R_w <= 2K` the number of nonzero-width half-panel rules among the final
++  panels. The `I1` values do not enter the length.
++  - R2 stated `8 K eta`, from the old order's four underflowing products per rule. That bound was not the problem in
++    F4: the old order lost the whole value (`h = 0`), at any speed.
+ - **Constant speed (lines, circles, arcs, helices):**
+-  - The 5-point rule integrates a constant exactly: `G = h * 2 v`.
++  - The 5-point rule integrates a constant exactly: `G = d v (H0 + 2 H1 + 2 H2) = d v`.
+   - Therefore `Q = L` and `I2 = I1` up to rounding.
+   - **Error estimate (B5 proof).** For one panel of exact value `I`, `I1` and `I2` are computed from the same
+-    constant. Their relative errors are at most 10u (one rule) and 11u (two rules and a sum), and their absolute
+-    underflow errors at most `2 eta + 0.5 eta` (rule, speed) and `4 eta + 1 eta`. So
+-    `e_k = abs(I2 - I1) <= 21u I + 9 eta`, plus `2 (b_k - a_k) dsv` when the computed speed varies by up to `dsv`
+-    between nodes. Over the 16 initial panels,
+-    `sum e <= 24u L + 144 eta + 2 (t1 - t0) dsv` (24u bounds 21u with the rounding of `L0` against L).
++    constant. Their relative errors are at most 10u (one rule) and 11u (two rules and a sum).
++    - Their absolute underflow errors are at most `eta / 2` and `eta`. The speed pair itself does not underflow:
++      `mu` is exact.
++    - So `e_k = abs(I2 - I1) <= 21u I + 1.5 eta`, plus `2 (b_k - a_k) dsv` when the computed speed varies by up to
++      `dsv` between nodes.
++    - Over the 16 initial panels, `sum e <= 24u L + 24 eta + 2 (t1 - t0) dsv`. Here 24u bounds 21u with the rounding
++      of `L0` against L. R2's bound under the old order was `144 eta`.
+   - **Comparison with tau.** `tau = max(abs, rel L0, 1024 eta) >= max(2^-40 L0, 1024 eta)`, and
+     `24u L <= 2^-48.4 L`. When `dsv = 0` (lines):
+-    - if `2^-40 L0 >= 1024 eta`: `sum e <= (2^-8.4 + 144/1024) tau < tau`;
+-    - otherwise: `24u L + 144 eta <= (2^-8.4 + 144/1024) 1024 eta < tau`.
++    - if `2^-40 L0 >= 1024 eta`: `sum e <= (2^-8.4 + 24/1024) tau < tau`;
++    - otherwise: `24u L + 24 eta <= (2^-8.4 + 24/1024) 1024 eta < tau`.
+ 
+     So the 16 initial panels satisfy `E <= tau`. No refinement happens: `converged()` holds and
+     `panelCount() == 16`, at every magnitude. This is the unconditional part of B5.
+   - With `dsv > 0` (circles and helices: the M3 trigonometry rounds differently at each node), the same holds
+-    whenever `2 (t1 - t0) dsv + 24u L + 144 eta <= tau`. This is the conditional part of B5.
++    whenever `2 (t1 - t0) dsv + 24u L + 24 eta <= tau`. This is the conditional part of B5. R2 required `144 eta`
++    in place of `24 eta`, so the condition is now weaker and the guarantee broader.
+   - **R1 gap (finding 1).** Without the floor, `tau = rel * L0` underflows to 0 for subnormal lengths (`2^-40 * 7 eta
+     = 0`). Then convergence needs `sum e == 0` exactly, which rounding decides. R1 needed 32 panels for some
+     subnormal circles. R1 also computed `L^ = 0` for a `7 eta` line (`h * sum` underflows), which is outside R1's
+     allowance `(t1 - t0) dv + 80u L`. R1's B5 argument (`tau >= 2^-40 L` exceeds the panel rounding) ignored both
+-    the absolute underflow terms and `tau = 0`. R2 still computes `L^ = 0` for that line; this is now within the
+-    allowance (`7 eta <= 128 eta`), and the tests check it.
+-  - **Length error:** `abs(L^ - L) <= (t1 - t0) dv + 80u L + 128 eta` with `K = 16` (contract 10.2).
++    the absolute underflow terms and `tau = 0`. R2 and R2.1 still compute `L^ = 0` for that line on [0, 1]:
++    each of the 32 half-panel rules has the exact value `7 eta / 32`, which rounds to 0. This is within the allowance
++    (`7 eta <= R_w eta / 2 = 16 eta`), and the tests check it. On `[0, eta]` the same line has `R_w = 1`, and R2.1
++    computes `7 eta` exactly (F4).
++  - **Length error:** `abs(L^ - L) <= (t1 - t0) dv + 80u L + R_w eta / 2`, with `K = 16` and `R_w <= 32`
++    (contract 10.2).
+   - Measured: the lines and circles of `ArcLengthTableTest`, within 64 eps plus the M3 derivative error. The
+     subnormal lines, circles and helices of `M4R2RegressionTest.subnormalConstantSpeed` (lengths from 1 eta to
+     `2^40 eta`, and radii from 3 eta to 1e-310) are within the allowance, converged with 16 panels and
+diff --git a/docs/m4/M4-IMPLEMENTATION-CONTRACT.md b/docs/m4/M4-IMPLEMENTATION-CONTRACT.md
+index 4a60cd8..2faecfe 100644
+--- a/docs/m4/M4-IMPLEMENTATION-CONTRACT.md
++++ b/docs/m4/M4-IMPLEMENTATION-CONTRACT.md
+@@ -2,13 +2,17 @@
+ 
+ Audience: the engineer implementing the production source (Codex).
+ 
+-Status: **PROPOSED, revision 2. Not authorized for implementation.** The owner approves this contract with DM4-1 to
++Status: **PROPOSED, revision 2.1. Not authorized for implementation.** The owner approves this contract with DM4-1 to
+ DM4-17 (`M4-DESIGN-DECISIONS.md`) after ChatGPT's independent review. Until then nothing in
+ `src/main/java/workshop/vfx/math/sample` may be written.
+ 
+ Revision 2 corrects the three blocking findings of the R1 review (tolerance floor, 5.3 and B5; finite partial
+ integrals, 5.5; inversion progress, exits and work, 5.6 and 8). Every change is listed in `M4-R2-CORRECTIONS.md`.
+ 
++Revision 2.1 corrects the two findings of the R2 review: the half-width underflow (F4) and the weighted-sum overflow
++(F5). It does so by a new normative evaluation order for the panel rule (5.1 speed pairs, 5.2), with the guarantees of
++5.5 and 10.2 restated to match. See `M4-R21-CORRECTIONS.md`.
++
+ Baseline: the verified M3 baseline `a6726c42a20940a6a6d2dd24477e6a642f6b8cbc` (M3 production
+ `d76258f343e28a8acb43f3ad8ba776adcabdd575`, 254/254 tests). **Nothing in M1, M2 or M3 changes**: no production class,
+ test, reference data, contract or verification record. M4 adds a package, its tests and its reference data.
+@@ -141,14 +145,18 @@ up to rounding (DM4-3); they need no `ArcLengthTable`.
+ `build(curve, t0, t1, tolerance, limits)` validates its arguments (section 3), then measures the length of `curve` on
+ `[t0, t1]`.
+ 
+-**Speed.** `v(t) = abs(curve.derivative(t))`:
+-- If any component of the derivative is NaN or infinite, `ArithmeticException`.
+-- `v` is evaluated as a scaled norm: `m = max(abs(x), abs(y), abs(z))`; if `m == 0`, `v = 0`; otherwise
+-  `v = m * Math.sqrt((x/m)^2 + (y/m)^2 + (z/m)^2)`, with the squares summed in the order x, y, z.
+-
+-  This cannot overflow or underflow in the squares. Its relative error is at most 5 eps, plus `MIN_VALUE` when `v` is
+-  subnormal. (For finite components above `MAX_VALUE / sqrt(3)`, outside the domain of 10.4, `v` may round to
+-  infinity; then the length is not finite, and 5.5 and 5.6 still never produce NaN.)
++**Speed pair (R2.1).** For a derivative `(x, y, z) = curve.derivative(t)`:
++- If any component is NaN or infinite, `ArithmeticException`.
++- `mu = max(abs(x), abs(y), abs(z))`. If `mu == 0`, then `nu = 0`. Otherwise
++  `nu = Math.sqrt((x/mu)^2 + (y/mu)^2 + (z/mu)^2)`, with the quotients and squares formed first and the squares
++  summed in the order x, y, z.
++- The speed is `v(t) = mu * nu`, with `1 <= nu <= sqrt(3)` up to rounding when `mu > 0`.
++  - The panel rule (5.2) uses the pair and **never forms the product**, so speeds above `MAX_VALUE` (components above
++    `MAX_VALUE / sqrt(3)`) are handled exactly like others.
++  - The product `mu * nu` is formed only for the Newton slope of 5.6. It may round to `+infinity` there, which the
++    safeguard handles: the candidate `t - f / infinity = t` is not strictly inside the bracket, so the midpoint is
++    used.
++  - The relative error of `nu` is at most 3.5 eps, and that of `mu * nu` at most 4.5 eps. `mu` is exact.
+ 
+ **Failures:**
+ - If the length is not finite, `ArithmeticException`.
+@@ -157,10 +165,44 @@ up to rounding (DM4-3); they need no `ArcLengthTable`.
+ 
+ ### 5.2 Panel rule (5-point Gauss-Legendre)
+ 
+-For a panel [a, b]:
+-- `h = 0.5 * (b - a)`, `c = a + h`;
+-- `G(a, b) = h * (W0 * v(c) + W1 * (v(c - h*X1) + v(c + h*X1)) + W2 * (v(c - h*X2) + v(c + h*X2)))`;
+-- five derivative evaluations, in the order c, c - h X1, c + h X1, c - h X2, c + h X2.
++For `a <= b`, `G(a, b)` is computed in exactly this order (R2.1):
++1. `d = b - a`, `h = 0.5 * d`, `c = a + h`.
++2. Five derivative evaluations, in the order `c`, `c - h*X1`, `c + h*X1`, `c - h*X2`, `c + h*X2`, giving the speed
++   pairs `(mu_0, nu_0)` to `(mu_4, nu_4)` of 5.1. The node positions use h; **the value of G does not**.
++3. `M = max(mu_0, ..., mu_4)`. If `M == 0`, `G = 0`.
++4. `r_i = (mu_i / M) * nu_i` for i = 0 to 4.
++5. `S = H0 * r_0 + H1 * (r_1 + r_2) + H2 * (r_3 + r_4)`, with the half weights `H_i = W_i / 2` (exact: the literals
++   below with the exponent reduced by one).
++6. `P = d * S`.
++   - If `P >= Double.MIN_NORMAL` (`2^-1022`), then `G = P * M`.
++   - Otherwise, with `Q = M * S`: `G = d * Q` if `Q <= MAX_VALUE`, else `G = (M * d) * S`.
++
++Why this order (F4, F5):
++- **F4.** R2 computed `G = h * (W0 v_0 + ...)`. For a width `d = MIN_VALUE`, `h = 0.5 * d` rounds to 0. Below
++  `2^-1021`, h is subnormal and loses relative precision. On `[0, k MIN_VALUE]` every nonzero-width panel has width
++  `MIN_VALUE`, so an M3 line there had length 0, even at speed 1e300 (true length 4.9e-24). R2.1 multiplies by the
++  width d itself, which is never 0 for `a < b`, and halves the weights instead, which is exact.
++- **F5.** R2's weighted sum overflowed for speeds near `MAX_VALUE`, even when `G` is finite (speed 1e308 on a width
++  of 1e-300 gives 1e8). With `h == 0` the overflow became `0 * infinity = NaN`. R2.1 scales every speed by the largest
++  component M, so `r_i` lies in `[0, sqrt(3)]` and `S` in `[H2, sqrt(3)]` up to rounding.
++- **Choice of product order.**
++  - `P * M` is used when `d * S` is a normal number. It can overflow only if G does (up to rounding).
++  - Otherwise d is tiny: `d < 2^-1022 / S <= 2^-1022 / H2 < 2^-1018`.
++    - If `Q = M * S` is finite, `d * Q` cannot overflow. When Q itself underflows, the exact G is far below
++      `MIN_VALUE / 2`, so the result 0 is within the error bound below.
++    - If `M * S` overflows, then `S > 1`, so `d < 2^-1022`. Also `M > MAX_VALUE / 2`. So `M * d` lies in
++      `[4.4e-16, 4)`, a normal number, and `(M * d) * S` is accurate.
++  - `P` itself never overflows, because every width passed to G is at most `(t1 - t0) / 16 <= MAX_VALUE / 16` and
++    `S <= 2`.
++
++**Guarantees of G (normative).** For `a <= b` finite with `b - a <= MAX_VALUE / 16` and finite derivatives:
++- `G` is never NaN, and `G >= 0`. No `0 * infinity` can arise: in every product, `d > 0` when `a < b`, `S >= H2 > 0`
++  and `M > 0`. With `d == 0`, every branch gives 0.
++- **No spurious overflow or underflow:** `G = +infinity` only if the exact rule value (on the computed pairs) exceeds
++  `MAX_VALUE / (1 + 10 eps)`.
++- **Error:** `G = G*(1 + theta) + delta`, where `G*` is the exact rule applied to the exact speeds `mu_i * nu_i`,
++  `abs(theta) <= 10 eps`, and `abs(delta) <= MIN_VALUE / 2` (only when G is subnormal). Proof:
++  `M4-ERROR-ANALYSIS.md` 3. In particular, a nonzero exact value of at least `MIN_VALUE` never becomes 0.
+ 
+ The constants are the correctly rounded values of the closed forms, computed at 60 digits in the generator's self
+ check:
+@@ -172,6 +214,7 @@ check:
+ | W0 | `128/225` | `0x1.23456789abcdfp-1` |
+ | W1 | `(322 + 13 sqrt(70))/900` | `0x1.ea1da25ae415bp-2` |
+ | W2 | `(322 - 13 sqrt(70))/900` | `0x1.e539ec36e038cp-3` |
++| H0, H1, H2 | `W0/2`, `W1/2`, `W2/2` | `0x1.23456789abcdfp-2`, `0x1.ea1da25ae415bp-3`, `0x1.e539ec36e038cp-4` |
+ 
+ The rule is exact for polynomial speeds up to degree 9, and for constant speeds up to rounding.
+ 
+@@ -222,7 +265,7 @@ Creating a panel record from a known `I1` costs 10 evaluations.
+ | B2 | panels: `16 <= panelCount() <= 16 + (maxEvaluations - 240) / 20`. Memory is O(maxEvaluations) | normative |
+ | B3 | `converged()` holds exactly when `errorEstimate() <= effectiveTolerance()` | normative |
+ | B4 | `length() >= 0` and finite; `length() == 0` when every speed evaluated is 0 | normative |
+-| B5 | constant speed: `converged()`, `panelCount() == 16`, and the error is rounding only (10.2). **Unconditional** when the computed speed is the same at every node (lines: a constant derivative), at every magnitude, including subnormal speeds. For curves whose computed speed varies only by rounding (circles, arcs, helices), it holds whenever `2 (t1 - t0) dsv + 24 eps L + 144 MIN_VALUE <= tau`, with `dsv` the largest difference between two computed speeds on the range (`M4-ERROR-ANALYSIS.md` 4). The tests check it for circles and helices with radii up to 1e3, up to 64 turns and ranges within [-2, 3] (`ArcLengthTableTest.constantSpeedSpirals`), and with radii from `3 MIN_VALUE` to 1e-310 (`M4R2RegressionTest.subnormalConstantSpeed`) | normative (proof in `M4-ERROR-ANALYSIS.md` 4) |
++| B5 | constant speed: `converged()`, `panelCount() == 16`, and the error is rounding only (10.2). **Unconditional** when the computed speed is the same at every node (lines: a constant derivative), at every magnitude, including subnormal speeds. For curves whose computed speed varies only by rounding (circles, arcs, helices), it holds whenever `2 (t1 - t0) dsv + 24 eps L + 24 MIN_VALUE <= tau` (R2: `144 MIN_VALUE`), with `dsv` the largest difference between two computed speeds on the range (`M4-ERROR-ANALYSIS.md` 4). The tests check it for circles and helices with radii up to 1e3, up to 64 turns and ranges within [-2, 3] (`ArcLengthTableTest.constantSpeedSpirals`), and with radii from `3 MIN_VALUE` to 1e-310 (`M4R2RegressionTest.subnormalConstantSpeed`) | normative (proof in `M4-ERROR-ANALYSIS.md` 4) |
+ | B6 | for curves whose speed is smooth on `[t0, t1]` (the reference families): `abs(length() - L) <= effectiveTolerance()` plus the rounding allowance of 10.2 | **validated** (10.3) |
+ 
+ ### 5.5 `lengthAt(t)`
+@@ -239,7 +282,8 @@ Creating a panel record from a known `I1` costs 10 evaluations.
+   5. otherwise, **linear mode**: `I2_k * ((t - a_k) / (b_k - a_k))`.
+ - **Guarantees (normative):** `F_k(t)` is never NaN and lies in `[0, I2_k]`, for every finite table.
+   - Ratio mode: `rho_k` lies in `[1/2, 2]`, so it is finite and positive. `G(a_k, t)` is non-negative, possibly
+-    `+infinity`, never NaN (a sum of non-negative terms times `h > 0`). The product is therefore non-negative or
++    `+infinity`, never NaN (5.2, R2.1). R2 argued "a sum of non-negative terms times `h > 0`", but h is 0 when
++    `t - a_k < 2 MIN_VALUE`, and the sum could overflow: finding 5. The product is therefore non-negative or
+     `+infinity`, and the `min` makes it at most `I2_k`. The R1 formula `G * (I2 / I1)` could overflow
+     (`I2 / I1 = infinity`) or form `0 * infinity = NaN` (finding 2).
+   - Linear mode: `0 < t - a_k <= b_k - a_k` after rounding (rounding is monotone), so the fraction lies in `(0, 1]`.
+@@ -400,16 +444,22 @@ is driven by a floating-point accumulation.
+ Let:
+ - `dv` bound the absolute error of the computed speed on the range: `sqrt(3)` times the M3 per-component derivative
+   bound (M3 contract 7.2 with A3), plus 5 eps of the speed, plus `MIN_VALUE` (a subnormal speed);
+-- `T = max(abs(t0), abs(t1))` and `K = panelCount()`.
++- `T = max(abs(t0), abs(t1))` and `K = panelCount()`;
++- `R_w` = the number of half-panel rules of nonzero width among the final panels (`G(a, m)` with `m > a`, and
++  `G(m, b)` with `b > m`), so `R_w <= 2K`.
+ 
+ Then:
+-- **Constant-speed curves:** `abs(length() - L) <= (t1 - t0) * dv + (K + 64) eps L + 8 K MIN_VALUE`.
++- **Constant-speed curves:** `abs(length() - L) <= (t1 - t0) * dv + (K + 64) eps L + R_w MIN_VALUE / 2`.
+ - **In general:** the rounding part of the error is at most
+-  `(t1 - t0) * (dv + 4 eps T max abs(C''))` (the last term: rounded node positions) `+ (K + 64) eps L + 8 K MIN_VALUE`.
+-  It adds to the quadrature part of 10.3.
+-- The `8 K MIN_VALUE` term (R2) bounds the absolute underflow of the products in the panel rule (at most
+-  `2 MIN_VALUE` per rule, four rules per panel record). It matters only for subnormal or near-subnormal lengths; R1
+-  omitted it, so the R1 allowance was too small for a subnormal-speed line (finding 1).
++  `(t1 - t0) * (dv + (4 eps T + 2 MIN_VALUE) max abs(C''))` (the last term: rounded node positions, including the
++  underflow of h) `+ (K + 64) eps L + R_w MIN_VALUE / 2`. It adds to the quadrature part of 10.3.
++- The `R_w MIN_VALUE / 2` term (R2.1) is the absolute underflow of the final product of each rule that enters the
++  length. Zero-width rules are exact (0). History:
++  - R1 had no such term (finding 1).
++  - R2 had `8 K MIN_VALUE`, which still admitted F4, because the arithmetic lost far more than that when the
++    speed was large.
++  - R2.1's term is smaller (at most `K MIN_VALUE`), and the arithmetic now meets it. For example, a unit-speed line
++    on `[0, MIN_VALUE]` has `R_w = 1`, so its length must be exactly `MIN_VALUE`.
+ - The `K eps L` term comes from the plain left-to-right summation. It stays below `2^-40 L` only up to about 8,000
+   panels. Very tight relative tolerances with huge budgets are therefore limited by summation, as documented in
+   `M4-ERROR-ANALYSIS.md`.
+@@ -431,7 +481,7 @@ error 0.31 tau over 336 lengths at four tolerances (`validation/evidence.txt`).
+ 
+ | Item | Supported | Note |
+ |---|---|---|
+-| curve coordinates | up to 1e100; subnormal allowed | the scaled norm avoids squares overflowing or underflowing |
++| curve coordinates | up to 1e100; subnormal allowed | the scaled norm avoids squares overflowing or underflowing. Derivatives are accepted up to `MAX_VALUE` per component: the panel rule never overflows unless the length does (5.2, R2.1) |
+ | parameter range | finite, `t0 <= t1`, `abs(t) <= 1e3` recommended | extrapolation follows the curve |
+ | lengths | finite | a non-finite length gives `ArithmeticException` |
+ | counts | up to `maxSamples <= 2^20` | |
+diff --git a/docs/m4/M4-R21-CORRECTIONS.md b/docs/m4/M4-R21-CORRECTIONS.md
+new file mode 100644
+index 0000000..40eb8be
+--- /dev/null
++++ b/docs/m4/M4-R21-CORRECTIONS.md
+@@ -0,0 +1,130 @@
++# M4 revision 2.1: corrections after the R2 independent review
++
++Status: PROPOSED, revision 2.1. **Not authorized for implementation.** This revision answers ChatGPT's review of M4 R2
++(decision: REVISION REQUIRED). It stops for ChatGPT's final acceptance review.
++
++**What stays the same:**
++- the architecture, scope, and the six public types and their signatures;
++- M1, M2 and M3, which are untouched;
++- the reference data and generator, which are byte-identical to R1 and R2;
++- the three R1 fixes (tolerance floor, ratio and linear modes, inversion phases and exits), which are preserved
++  unchanged;
++- all 54 R2 tests, which are unchanged.
++
++**Review document.** `M4-R2-Independent-Review.md` was **not available** in this session. It was not attached, not on
++disk, and not on any branch of the repository.
++- F4 and F5 are corrected as the revision request describes them.
++- The review's **five minor documentation issues could not be read**. Section 3 lists the documentation corrections I
++  found myself while revising the affected sections. **Whichever of the reviewer's five items is not among them
++  remains open.** I did not guess at their content.
++
++## 1. F4: half-width underflow
++
++**Problem (reproduced on R2, `validation/r21/findings-r2.txt`):**
++- R2 computed the panel rule as `G = h * (W0 v_0 + ...)`, with `h = 0.5 * (b - a)`.
++- For a panel of width `MIN_VALUE`, h rounds to 0. Below `2^-1021`, h is subnormal and loses relative precision.
++- On `[0, k MIN_VALUE]` every nonzero-width panel has width `MIN_VALUE`. So an ordinary M3 line there had length 0:
++  at speed 1, where the true length `MIN_VALUE` is representable, and equally at speed 1e300, where the true length
++  4.9e-24 is a normal number.
++- `lengthAt(nextUp(t0))` was 0 for the same reason.
++
++**Correction:**
++- **Contract 5.2:** the rule multiplies by the width `d = b - a` itself, which is never 0 for `a < b`, with the
++  exact half weights `H_i = W_i / 2`. h is used only for the node positions.
++- **Contract 10.2:** the absolute underflow term is now `R_w MIN_VALUE / 2`, with `R_w <= 2K` the number of
++  nonzero-width half-panel rules in the final panels. It replaces R2's `8 K MIN_VALUE`.
++  - The new term is smaller, and the arithmetic now meets it.
++  - It is sharp enough to force the exact result where one exists: unit speed on `[0, MIN_VALUE]` has `R_w = 1`, so
++    the length must be `MIN_VALUE`.
++  - The node-position term gains `2 MIN_VALUE`, for the underflow of h in the positions.
++- **Error analysis 3 and 4** prove the per-rule bound `G = G*(1 + theta) + delta`, with `abs(theta) <= 10 eps` and
++  `abs(delta) <= MIN_VALUE / 2`. They also re-derive B5 with the new constants: the absolute term drops from
++  `144 MIN_VALUE` to `24 MIN_VALUE`, which broadens the conditional part of B5.
++
++**Regression test:** `M4R21RegressionTest.halfWidthUnderflow`.
++- Inputs:
++  - M3 lines at speeds 1, 3, 2, 3 (a 3D direction), 1e10, 5e299 and 1e300;
++  - on `[0, k MIN_VALUE]` for k = 1, 2, 3 and 7, on `[-MIN_VALUE, MIN_VALUE]` and `[-3 MIN_VALUE, 0]`, and on
++    `[0, 1e-320]`, `[0, 2^-1060]` and `[0, 1e-310]`.
++- Each case is checked against an exact `BigDecimal` length, with the R2.1 allowance. The test derives `R_w` from the
++  normative initial partition.
++- It also checks `lengthAt(nextUp(t0))`, and that unit speed on `[0, k MIN_VALUE]` gives exactly `k MIN_VALUE`.
++
++## 2. F5: weighted-sum overflow
++
++**Problem (R2):**
++- `W1 (v_1 + v_2)` overflows for speeds above about `MAX_VALUE / 2`, even when G is finite. For example, speed 1e308
++  on a width of 1e-300 gives `G = 1e8`.
++- `build` then threw `ArithmeticException` ("length is not finite") for finite lengths.
++- With `h = 0`, the overflow became `0 * infinity = NaN`. On a **finite** table whose speed is 1e308 near `t = 0`,
++  `lengthAt(MIN_VALUE)` returned NaN.
++- R2's contract 5.5 justified "G never NaN" by "a sum of non-negative terms times `h > 0`", which was false on both
++  counts.
++
++**Correction:**
++- **Contract 5.1, speed pairs.** The speed is carried as `(mu, nu)`: the largest absolute component, and
++  `sqrt(sum of squared ratios)`, which lies in `[1, sqrt(3)]`. The panel rule never forms the product `mu nu`, so even
++  speeds above `MAX_VALUE` (components up to `MAX_VALUE`) are handled. Only the Newton slope of 5.6 forms it; there,
++  `+infinity` is rejected by the existing safeguard.
++- **Contract 5.2, panel rule.**
++  - The ratios `r_i = (mu_i / M) nu_i`, with M the largest `mu_i`, lie in `[0, sqrt(3)]`.
++  - `S = H0 r_0 + H1 (r_1 + r_2) + H2 (r_3 + r_4)` lies in `[H2, sqrt(3)]`.
++  - G is then `(d S) M` when `d S` is normal. Otherwise it is `d (M S)`, or `(M d) S` when `M S` overflows.
++- **Proven:**
++  - G is never NaN.
++  - G overflows only when the exact rule value exceeds `MAX_VALUE / (1 + 10 eps)`.
++  - No intermediate underflow loses more than `MIN_VALUE / 2`.
++  - `d S` itself cannot overflow, because every width is at most `MAX_VALUE / 16`.
++
++  Proofs: contract 5.2 and error analysis 3. The guarantee of contract 5.5 (`F_k` never NaN) now rests on 5.2 and
++  holds.
++
++**Regression tests (`M4R21RegressionTest`):**
++
++| Test | What it checks |
++|---|---|
++| `weightedSumOverflow` | Lines with speeds 1e308, `sqrt(2)` 1e308, `sqrt(3) MAX/2`, `sqrt(2) MAX` and `sqrt(3) MAX` (above `MAX_VALUE`), on ranges from `[0, MIN_VALUE]` to `[0, 1e-10]` and `[1, nextUp(1)]`. The length is finite, converged, and within the allowance against BigDecimal. A circle of radius 1e306 on `[0, 1e-300]` matches `2 pi r d` to 1e-12 |
++| `finiteTableNoNaN` | A finite table (length about 1) whose speed is `sqrt(2)` 1e308 or `sqrt(2) MAX` only for `t <= 1e-300`. `lengthAt` at `MIN_VALUE`, 2 `MIN_VALUE`, 1e-320 and up to 0.01 is finite and within `[0, length()]`, and `lengthAt(MIN_VALUE)` is within the ratio-mode range of `MIN_VALUE` times the speed. `parameterAt` is finite on a grid. R2 returned NaN |
++| `panelRuleRange` | 3,000 random lines (fixed seed) with components from `2^-1000` to `MAX_VALUE`, widths from `MIN_VALUE` to about 2e3 and offsets over the whole exponent range, with exact lengths below `MAX_VALUE / 4`. All are finite, converged and within the allowance. This exercises all three product orders |
++
++## 3. Documentation corrections (self-identified; the review's five minor items were not available)
++
++| # | Where | Correction |
++|---|---|---|
++| D1 | contract 5.1 | R2's note claimed that an infinite speed (components above `MAX_VALUE / sqrt(3)`) makes "the length not finite". That was false for short ranges. Replaced by the speed-pair definition, and by where the product is formed (5.6 only) |
++| D2 | contract 5.5 | The "G never NaN" justification (`h > 0`) was false; it now cites 5.2 |
++| D3 | contract 10.2, error analysis 3 | The node-position term ignored the underflow of h and `h X`. It is now `(4 eps T + 2 MIN_VALUE) max abs(C'')` |
++| D4 | error analysis 2 | The speed error is split into `nu` (3.5 eps) and the product (4.5 eps, Newton only). `dv` includes `MIN_VALUE` explicitly |
++| D5 | contract B5, error analysis 4 | The absolute constant of the conditional B5 condition is now `24 MIN_VALUE` (R2: `144 MIN_VALUE`), derived for the R2.1 order |
++| D6 | test specification, README, architecture, conventions (F10), design decisions (DM4-17) | Counts (58 M4 tests in 10 classes, 312 in total), the evaluation order note for Codex, and the R2.1 facts |
++
++## 4. Validation
++
++- **Tests:** M4 has 58 test methods in 10 classes. R2.1 added `M4R21RegressionTest`, with 4 tests. All 54 R2 tests
++  are unchanged; no test was removed or edited.
++- **Full suite on Java 25.0.4.1, against the temporary R2.1 reference implementation (not delivered):** 312 tests,
++  312 passed (M1 125, M2 66, M3 51, M3 review 12, M4 58). `check` succeeds (`validation/reference-run-summary.txt`).
++- **Before and after** (`validation/r21/before-after-tests.txt`):
++  - against the R2 reference: 54/58, failing exactly the 4 R2.1 tests;
++  - against R1: 48/58;
++  - against R2.1: 58/58.
++- **Reference data:** unchanged. Regeneration is byte-identical, and `MANIFEST.sha256` verifies.
++  - Over 1,344 reference tables (336 rows at four tolerances), R2.1 changes lengths by at most 7.9e-16 relative, and
++    no panel count (`validation/r21/r2-vs-r21-reference-values.txt`).
++  - Every evidence figure is unchanged: worst achieved error 0.31 tau; inversion mean 13.8 and max 29 evaluations
++    (`validation/evidence.txt`).
++- **Error bounds revalidated:**
++  - per rule: contract 5.2 and error analysis 3;
++  - length: contract 10.2 and error analysis 4, with the B5 proof redone;
++  - inversion (error analysis 7): unaffected, since it uses only `F_k` and its range.
++- **Mutation analysis:** see `validation/mutation-results.txt` and the test specification, section 5.
++
++## 5. Remaining limitations (unchanged in kind)
++
++- Quadrature accuracy for arbitrary curves is validated, not proven (contract 10.3).
++- Lengths of the order of `R_w MIN_VALUE` or below can lose up to `MIN_VALUE / 2` per rule. A length spread over many
++  panels can therefore round to 0 (for example, a `7 MIN_VALUE` line on [0, 1]). This is within the allowance.
++- Speeds whose length overflows still give `ArithmeticException`. This happens only when the exact rule value exceeds
++  `MAX_VALUE / (1 + 10 eps)`.
++- The tolerance-equivalent mutant M13 (the partial integral not scaled by `rho`) remains an item for the
++  implementation review.
+diff --git a/docs/m4/M4-RISKS.md b/docs/m4/M4-RISKS.md
+index 2b805f1..61ad92b 100644
+--- a/docs/m4/M4-RISKS.md
++++ b/docs/m4/M4-RISKS.md
+@@ -1,6 +1,6 @@
+ # M4 performance and resource-limit risks
+ 
+-Status: PROPOSED, with the contract (revision 2).
++Status: PROPOSED, with the contract (revision 2.1).
+ 
+ No universal performance target is asserted. Timings depend on hardware, JIT state and server load. The guarantees
+ are **work bounds in curve evaluations** (contract section 8): deterministic, input-independent and testable.
+diff --git a/docs/m4/M4-TEST-SPECIFICATION.md b/docs/m4/M4-TEST-SPECIFICATION.md
+index 10ec637..58374c7 100644
+--- a/docs/m4/M4-TEST-SPECIFICATION.md
++++ b/docs/m4/M4-TEST-SPECIFICATION.md
+@@ -1,8 +1,8 @@
+ # M4 test specification and acceptance criteria
+ 
+-Status: PROPOSED, with the contract (revision 2).
+-- **Tests:** `src/test/java/workshop/vfx/math/sample/`, 54 test methods in 9 classes plus the helper
+-  `SampleTestSupport`. R2 added `M4R2RegressionTest` (10 tests), removed no test, and tightened one bound
++Status: PROPOSED, with the contract (revision 2.1).
++- **Tests:** `src/test/java/workshop/vfx/math/sample/`, 58 test methods in 10 classes plus the helper
++  `SampleTestSupport`. R2.1 added `M4R21RegressionTest` (4 tests) and changed no existing test. R2 added `M4R2RegressionTest` (10 tests), removed no test, and tightened one bound
+   (`samplingWork`: from 400 to 336 evaluations).
+ - **Reference data:** unchanged in R2.
+ - **Reference data:** `src/test/resources/m4/reference/`: 4 CSV files with 3,064 rows, and `MANIFEST.sha256`.
+@@ -38,6 +38,7 @@ Provenance: written for this project; Python standard library only. No third-par
+ | `SampleSetTest` | 3 | 7, 8 | immutability; `transformed` bit for bit equal to `PosedCurve`; limits and tolerance validation |
+ | `M4AdversarialTest` | 8 | 6.3, 8, 9 | budget never exceeded and `evaluations()` exact for six budgets and four curve kinds; oscillating curve (unconverged under a small budget, converged with a large one); per-call work bounds (336 per sample); Newton efficiency (mean below 40 evaluations per sample); failures (NaN, infinity, user exceptions, overflowing length); magnitudes from subnormal to 1e200; signed zero and one-ulp ranges; explosion guard with server-style limits |
+ | `M4R2RegressionTest` | 10 | 5.3 to 5.6, 9, 10.2 | R1 review findings and R2 rules. F1: nonzero subnormal-speed lines and subnormal circles and helices: converged, 16 panels, `tau = 1024 MIN_VALUE`, within the 10.2 allowance (BigDecimal). F2: pathological panels (`I2/I1` overflowing or underflowing, `I1 = 0`, `I2 = 1000 I1`, `I1 = 1000 I2`): finite linear-mode `lengthAt` and `parameterAt`; ratio mode clamped to `I2`. F3: Newton creep (a speed spike at the root), non-converged exits (the better end of the bracket), an exit at the iteration cap (332 to 336 evaluations, the better end within the P3 width), panel-end targets (exact, no evaluation), ties to the upper end (early and after a collapse). Stationary intervals: `parameterAt(length()) == t1` with a stationary tail, and the smallest panel at the start of a stationary interval. A non-finite derivative after build gives `ArithmeticException` from `lengthAt` and `parameterAt` |
++| `M4R21RegressionTest` | 4 | 5.1, 5.2, 5.5, 10.2 | R2 review findings. F4: M3 lines (speeds 1 to 1e300, 3D directions) on ranges of 1 to 7 `MIN_VALUE`, and down to 1e-320, `2^-1060`, 1e-310, against BigDecimal lengths with the R2.1 allowance; unit speed on `[0, k MIN_VALUE]` exact. F5: lines with speeds 1e308 to `sqrt(3) MAX_VALUE` (components up to `MAX_VALUE`), a circle of radius 1e306: finite, converged, within the allowance; a finite table whose partial integral overflowed in R2: `lengthAt` and `parameterAt` finite, never NaN. 3,000 random lines over the whole exponent range: no spurious overflow or underflow |
+ | `M4ReferenceVectorTest` | 5 | 4 to 6 | manifest; 336 lengths; 216 inversions; 2,310 uniform parameters bit for bit; 202 spacing counts |
+ | `M4DeterminismTest` | 2 | 10.1 | bit-identical repetition (20 rounds, JIT); 8 threads, including a shared table |
+ | `M4BoundaryTest` | 3 | 1, 2, 10 | imports (core and curve only; never time); no trigonometry, pow, exp, log, fma, random, clocks, threads, synchronization or I/O; no mutable statics; exact API shape |
+@@ -51,11 +52,14 @@ Reference data:
+ 
+ ## 3. Validation of the tests (before handoff)
+ 
+-- **Throwaway reference implementation:** the tests were run against an implementation of contract revision 2,
+-  kept outside the repository and not delivered. Result: **54/54 passed**. With the 254 baseline tests: **308/308**
++- **Throwaway reference implementation:** the tests were run against an implementation of contract revision 2.1,
++  kept outside the repository and not delivered. Result: **58/58 passed**. With the 254 baseline tests: **312/312**
+   on Java 25.0.4.1 (`validation/reference-run-summary.txt`).
+-- **Before and after:** the same tests against the R1 reference implementation: 48/54. The 6 failures are exactly
+-  the R2 regression tests for findings 1 to 3 and for the tie rule (`validation/r2/r1-vs-r2-tests.txt`).
++- **Before and after** (`validation/r21/before-after-tests.txt`):
++  - against the R2 reference implementation: 54/58. The 4 failures are exactly the R2.1 regression tests (F4, F5).
++  - against R1: 48/58. The failures are those 4 plus the 6 R2 regression failures (`validation/r2/r1-vs-r2-tests.txt`).
++- **Reference values:** unchanged files. Over the 1,344 reference tables, R2.1 and R2 differ only at rounding level:
++  at most 7.9e-16 relative in a length, with no change of panel count (`validation/r21/r2-vs-r21-reference-values.txt`).
+ - **Measured accuracy and work** (`validation/evidence.txt`): all reference lengths converge with achieved error at
+   most 0.31 tau; inversion costs 13.8 derivative evaluations on average and 29 at most (R1: 14.0 and 29).
+ - **Mutation analysis** (`validation/mutation-results.txt`): 33 plausible defects were injected one at a time.
+@@ -75,8 +79,8 @@ Reference data:
+ 4. **Production scope.** Only the six public types of contract section 2, plus optional package-private helpers. No
+    dependencies.
+ 5. **Java 25 run.**
+-   `./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test` reports **308 tests,
+-   308 passed** (M1 125, M2 66, M3 51, M3 review 12, M4 54). `check` succeeds.
++   `./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test` reports **312 tests,
++   312 passed** (M1 125, M2 66, M3 51, M3 review 12, M4 58). `check` succeeds.
+ 6. **Evidence** as for M1 to M3, then Claude Code's independent review.
+ 
+ Before the implementation exists, the M4 tests do not compile; this is expected (as for M1 to M3). The M3 GitHub
+diff --git a/docs/m4/README-FOR-CODEX-M4.md b/docs/m4/README-FOR-CODEX-M4.md
+index d499f41..dc21bac 100644
+--- a/docs/m4/README-FOR-CODEX-M4.md
++++ b/docs/m4/README-FOR-CODEX-M4.md
+@@ -30,6 +30,9 @@ Read in this order:
+ - Every loop must have a fixed bound. No loop advances a double until a floating-point condition holds.
+ - Contract revision 2 (`M4-R2-CORRECTIONS.md`) changed 5.3 (tolerance floor), 5.5 (ratio and linear modes) and 5.6
+   (inversion: Newton phase, exits and the better bracket end). Implement 5.6 step by step, in the stated order.
++- Contract revision 2.1 (`M4-R21-CORRECTIONS.md`) changed 5.1 (speed pairs) and 5.2 (panel rule arithmetic). Do
++  not compute the rule as `h * (W0 v0 + ...)`. Use the stated order: width d, half weights, ratios to the largest
++  component, then the branch on `d * S`.
+ - Do not modify M1, M2, M3, any existing test, reference data, generator, contract or verification record. If a test
+   seems wrong, stop and report it.
+ - Do not modify Full Heal, Astral Prism, Cloudstep, ParticleEmitter or other plugins. Do not add Paper or Bukkit code.
+@@ -39,7 +42,7 @@ Read in this order:
+ ```sh
+ sha256sum -c SHA256SUMS.txt     # from the handoff package root
+ export JAVA_HOME=/path/to/jdk-25 PATH="$JAVA_HOME/bin:$PATH"
+-./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test   # 308 tests, 308 passed
++./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test   # 312 tests, 312 passed
+ ./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false check
+ python3 tools/generate_m4_reference_vectors.py /tmp/m4-ref && diff -r /tmp/m4-ref src/test/resources/m4/reference   # about 1 minute
+ python3 tools/generate_m3_reference_vectors.py /tmp/m3-ref && diff -r /tmp/m3-ref src/test/resources/m3/reference
+diff --git a/docs/m4/validation/evidence.txt b/docs/m4/validation/evidence.txt
+index 935cff9..d50f576 100644
+--- a/docs/m4/validation/evidence.txt
++++ b/docs/m4/validation/evidence.txt
+@@ -1,6 +1,6 @@
+-M4 evidence (ProbeM4Evidence.java) against the THROWAWAY reference implementation of contract REVISION 2 (not delivered); Java 25.0.4.1.
++M4 evidence (ProbeM4Evidence.java) against the THROWAWAY reference implementation of contract REVISION 2.1 (not delivered); Java 25.0.4.1.
+ Timings are indicative only (one container, warm JIT); they are not acceptance criteria.
+-R1 values for comparison: parameterAt mean 14.0, max 29 (contract limit then 400); all length rows identical to R1.
++All printed values are identical to R2 (only timings differ); R1: parameterAt mean 14.0, max 29 (contract limit then 400).
+ 
+ == arclength.csv: achieved error / tau, by tolerance
+ rel 1.0e-04: rows 336, converged 336, rows with error > tau 0, worst error/tau 2.447e-01 (CUBIC cusp at 13/64), evaluations mean 240 max 260
+@@ -16,4 +16,4 @@ budget     4096: evaluations     4080 panels    208 converged false length 8.069
+ budget    65536: evaluations    65520 panels   3280 converged false length 8.111828619064610 estimate 7.03e-08
+ budget  1048576: evaluations    81120 panels   4060 converged true  length 8.111828618895730 estimate 8.30e-09
+ == indicative timing on this machine (not a target): conical spiral, rel 1e-8, warm JIT
+-build 15.5 us; 128 equal-distance samples 160.7 us; 128 uniform-parameter samples 5.7 us
++build 25.5 us; 128 equal-distance samples 288.2 us; 128 uniform-parameter samples 6.9 us
+diff --git a/docs/m4/validation/r21/F45.java b/docs/m4/validation/r21/F45.java
+new file mode 100644
+index 0000000..19af958
+--- /dev/null
++++ b/docs/m4/validation/r21/F45.java
+@@ -0,0 +1,42 @@
++import workshop.vfx.math.core.Vec3;
++import workshop.vfx.math.curve.*;
++import workshop.vfx.math.sample.*;
++
++/** M4 R2.1 probe (review scratch): F4 half-width underflow and F5 weighted-sum overflow, on a given reference implementation. */
++public class F45 {
++    static final double Q = Double.MIN_VALUE, MAX = Double.MAX_VALUE;
++    static void table(String label, Curve c, double t0, double t1) {
++        try {
++            ArcLengthTable t = ArcLengthTable.build(c, t0, t1, new ArcLengthTolerance(0, 0x1p-40), new SampleLimits(64, 4096));
++            String la, pa;
++            try { la = String.valueOf(t.lengthAt(Math.nextUp(t0))); } catch (RuntimeException e) { la = e.getClass().getSimpleName(); }
++            try { pa = t.length() > 0 ? String.valueOf(t.parameterAt(0.5 * t.length())) : "-"; } catch (RuntimeException e) { pa = e.getClass().getSimpleName(); }
++            System.out.printf("  %-58s length=%-24s converged=%-5s panels=%-3d lengthAt(nextUp(t0))=%s parameterAt(L/2)=%s%n", label, t.length(), t.converged(), t.panelCount(), la, pa);
++        } catch (RuntimeException e) {
++            System.out.printf("  %-58s build throws %s: %s%n", label, e.getClass().getSimpleName(), e.getMessage());
++        }
++    }
++    public static void main(String[] a) {
++        System.out.println("== F4: M3 LineSegment on [0, k MIN_VALUE] (exact length = speed * k MIN_VALUE)");
++        for (double speed : new double[] {1, 3, 1e10, 1e300}) {
++            LineSegment line = new LineSegment(Vec3.ZERO, new Vec3(speed, 0, 0));
++            for (double k : new double[] {1, 2, 3}) table(String.format("speed %.0e on [0, %.0f q] (exact %s)", speed, k, speed * (k * Q)), line, 0, k * Q);
++        }
++        System.out.println("== F5: smooth finite curves whose weighted node sum overflows (true lengths finite)");
++        LineSegment big = new LineSegment(Vec3.ZERO, new Vec3(1e308, 0, 0));
++        table("line speed 1e308 on [0, q] (exact 4.94e-16)", big, 0, Q);
++        table("line speed 1e308 on [0, 1e-300] (exact 1e8)", big, 0, 1e-300);
++        table("line speed 1e308 on [0, 1e-10] (exact 1e298)", big, 0, 1e-10);
++        LineSegment huge = new LineSegment(Vec3.ZERO, new Vec3(MAX / 2, MAX / 2, MAX / 2));
++        table("line (MAX/2)(1,1,1), speed 1.56e308, on [0, 1e-300]", huge, 0, 1e-300);
++        LineSegment top = new LineSegment(Vec3.ZERO, new Vec3(MAX, MAX, 0));
++        table("line (MAX, MAX, 0), speed 2.5e308 (overflows), on [0, 1e-300]", top, 0, 1e-300);
++        Spiral ring = Spiral.circle(1e306);
++        table("circle radius 1e306 (speed 6.3e306) on [0, 1e-300]", ring, 0, 1e-300);
++        System.out.println("== F5: finite table (speed 1e308 on [0, 2^-20]); lengthAt one ulp above a panel start (half-width 0)");
++        try {
++            ArcLengthTable t = ArcLengthTable.build(big, 0, 0x1p-20, new ArcLengthTolerance(0, 0x1p-40), new SampleLimits(64, 4096));
++            System.out.println("  length=" + t.length() + " lengthAt(MIN_VALUE)=" + t.lengthAt(Q) + " lengthAt(nextUp(2^-24))=" + t.lengthAt(Math.nextUp(0x1p-24)));
++        } catch (RuntimeException e) { System.out.println("  " + e); }
++    }
++}
+diff --git a/docs/m4/validation/r21/LenDump.java b/docs/m4/validation/r21/LenDump.java
+new file mode 100644
+index 0000000..2e64577
+--- /dev/null
++++ b/docs/m4/validation/r21/LenDump.java
+@@ -0,0 +1,23 @@
++import java.nio.file.*; import java.util.*;
++import workshop.vfx.math.core.Vec3; import workshop.vfx.math.curve.*; import workshop.vfx.math.sample.*;
++/** M4 R2.1 probe (review scratch): prints length, estimate, panels and 7 parameterAt/lengthAt values per arclength.csv row and tolerance, as raw bits, to compare two reference implementations. */
++public class LenDump {
++    static Vec3 v(double[] p, int i) { return new Vec3(p[i], p[i + 1], p[i + 2]); }
++    public static void main(String[] a) throws Exception {
++        List<String> lines = Files.readAllLines(Path.of(a[0]));
++        for (double rel : new double[] {1e-4, 1e-7, 0x1p-30, 1e-12}) { boolean header = false;
++            for (String l : lines) {
++                if (l.isBlank() || l.startsWith("#")) continue; if (!header) { header = true; continue; }
++                String[] r = l.split(","); double[] p = new double[12]; for (int i = 0; i < 12; i++) p[i] = Double.parseDouble(r[1 + i]);
++                Curve c = switch (r[0]) { case "LINE" -> new LineSegment(v(p, 0), v(p, 3)); case "QUAD" -> new QuadraticBezier(v(p, 0), v(p, 3), v(p, 6));
++                    case "CUBIC" -> new CubicBezier(v(p, 0), v(p, 3), v(p, 6), v(p, 9)); default -> new Spiral(p[0], p[1], p[2], p[3], p[4]); };
++                double t0 = Double.parseDouble(r[13]), t1 = Double.parseDouble(r[14]);
++                ArcLengthTable t = ArcLengthTable.build(c, t0, t1, new ArcLengthTolerance(0, rel), new SampleLimits(1 << 20, 1 << 22));
++                StringBuilder sb = new StringBuilder(Long.toHexString(Double.doubleToRawLongBits(t.length())) + " " + t.panelCount() + " " + Long.toHexString(Double.doubleToRawLongBits(t.errorEstimate())));
++                for (int k = 1; k < 8; k++) { sb.append(' ').append(Long.toHexString(Double.doubleToRawLongBits(t.lengthAt(t0 + (t1 - t0) * (k / 8.0)))));
++                    if (t.length() > 0) sb.append(' ').append(Long.toHexString(Double.doubleToRawLongBits(t.parameterAt(t.length() * (k / 8.0))))); }
++                System.out.println(sb);
++            }
++        }
++    }
++}
+diff --git a/docs/m4/validation/r21/before-after-tests.txt b/docs/m4/validation/r21/before-after-tests.txt
+new file mode 100644
+index 0000000..a5bc86d
+--- /dev/null
++++ b/docs/m4/validation/r21/before-after-tests.txt
+@@ -0,0 +1,23 @@
++The 58 M4 tests of revision 2.1 against the three THROWAWAY reference implementations (not delivered); Java 25.0.4.1, Gradle 9.1.0.
++
++== R1 reference implementation (contract revision 1): 58 tests, 48 passed, 10 failed
++  FAILED M4R21RegressionTest :: F4: M3 lines on ranges of a few MIN_VALUE (half-width rounds to 0): length within the cont :: org.opentest4j.AssertionFailedError: line to Vec3[x=1.0, y=0.0, z=0.0] on [0.0, 4.9E-324] (exact 4.9E-324): length ==> expected: <4.9E-324> but was: <0.0>
++  FAILED M4R21RegressionTest :: F5: a finite table whose partial integral overflowed (speed 1e308, or components at MAX_VA :: org.opentest4j.AssertionFailedError: big 1.0E308: lengthAt(4.9E-324) = NaN ==> expected: <true> but was: <false>
++  FAILED M4R21RegressionTest :: F5: finite smooth curves whose weighted node sum overflows (speeds 1e308 to 2.5e308, compo :: java.lang.ArithmeticException: ArcLengthTable: length is not finite
++  FAILED M4R21RegressionTest :: F4/F5: no spurious overflow or underflow in the panel rule: 3,000 random lines (speeds 1e- :: org.opentest4j.AssertionFailedError: line to Vec3[x=1.95530343039928E92, y=6.5779677804509205E94, z=0.0] on [0.0, 6.08482575065932E-76] (exact 4.002596456661013
++  FAILED M4R2RegressionTest :: F3: iteration cap: a target inside a jump of F (unreachable tolerance) near t = 2^-40, whe :: org.opentest4j.AssertionFailedError: the cap is reached: 384 evaluations ==> expected: <true> but was: <false>
++  FAILED M4R2RegressionTest :: F2: pathological panels (I2/I1 overflowing, I1 = 0, I2 = 1000 I1, I1 = 1000 I2, I2/I1 unde :: org.opentest4j.AssertionFailedError: whole 1.0E-300, half 1.0E300 lengthAt(9.765625E-4) = NaN ==> expected: <true> but was: <false>
++  FAILED M4R2RegressionTest :: F3: a speed discontinuous at a 2^-41 scale (F has jumps, the tolerance is unreachable; in  :: org.opentest4j.AssertionFailedError: s = 0.01188329460802757: t = 0.012785606934079924 is not the better end of an adjacent-double bracket (-0.00196615579597971
++  FAILED M4R2RegressionTest :: F3: Newton creep (a speed spike at the root, invisible to the quadrature, makes Newton ste :: org.opentest4j.AssertionFailedError: evaluations 384 ==> expected: <true> but was: <false>
++  FAILED M4R2RegressionTest :: F1: nonzero subnormal-speed lines and constant-speed spirals converge with 16 panels; tau  :: org.opentest4j.AssertionFailedError: line to Vec3[x=3.5E-323, y=0.0, z=0.0] on 0.0..1.0 tau is the floor ==> expected: <5.06E-321> but was: <0.0>
++  FAILED M4R2RegressionTest :: F3: ties go to the upper end: (a) a target exactly halfway across a panel shorter than 2 t :: org.opentest4j.AssertionFailedError: tie: the upper end ==> expected: <0.0625> but was: <0.03125>
++
++== R2 reference implementation (contract revision 2): 58 tests, 54 passed, 4 failed
++  FAILED M4R21RegressionTest :: F4: M3 lines on ranges of a few MIN_VALUE (half-width rounds to 0): length within the cont :: org.opentest4j.AssertionFailedError: line to Vec3[x=1.0, y=0.0, z=0.0] on [0.0, 4.9E-324] (exact 4.9E-324): length ==> expected: <4.9E-324> but was: <0.0>
++  FAILED M4R21RegressionTest :: F5: a finite table whose partial integral overflowed (speed 1e308, or components at MAX_VA :: org.opentest4j.AssertionFailedError: big 1.0E308: lengthAt(4.9E-324) = NaN ==> expected: <true> but was: <false>
++  FAILED M4R21RegressionTest :: F5: finite smooth curves whose weighted node sum overflows (speeds 1e308 to 2.5e308, compo :: java.lang.ArithmeticException: ArcLengthTable: length is not finite
++  FAILED M4R21RegressionTest :: F4/F5: no spurious overflow or underflow in the panel rule: 3,000 random lines (speeds 1e- :: org.opentest4j.AssertionFailedError: line to Vec3[x=1.95530343039928E92, y=6.5779677804509205E94, z=0.0] on [0.0, 6.08482575065932E-76] (exact 4.002596456661013
++
++== R2.1 reference implementation (contract revision 2.1): 58 tests, 58 passed, 0 failed
++
++R2 fails exactly the four R2.1 regression tests (F4 and F5). R1 fails those four and its six known R2 regression failures.
+diff --git a/docs/m4/validation/r21/findings-r2.txt b/docs/m4/validation/r21/findings-r2.txt
+new file mode 100644
+index 0000000..df7d116
+--- /dev/null
++++ b/docs/m4/validation/r21/findings-r2.txt
+@@ -0,0 +1,23 @@
++F45.java against the THROWAWAY R2 reference implementation; Java 25.0.4.1
++== F4: M3 LineSegment on [0, k MIN_VALUE] (exact length = speed * k MIN_VALUE)
++  speed 1e+00 on [0, 1 q] (exact 4.9E-324)                   length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
++  speed 1e+00 on [0, 2 q] (exact 9.9E-324)                   length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
++  speed 1e+00 on [0, 3 q] (exact 1.5E-323)                   length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
++  speed 3e+00 on [0, 1 q] (exact 1.5E-323)                   length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
++  speed 3e+00 on [0, 2 q] (exact 3.0E-323)                   length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
++  speed 3e+00 on [0, 3 q] (exact 4.4E-323)                   length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
++  speed 1e+10 on [0, 1 q] (exact 4.9406564584E-314)          length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
++  speed 1e+10 on [0, 2 q] (exact 9.881312917E-314)           length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
++  speed 1e+10 on [0, 3 q] (exact 1.4821969375E-313)          length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
++  speed 1e+300 on [0, 1 q] (exact 4.940656458412466E-24)     length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
++  speed 1e+300 on [0, 2 q] (exact 9.881312916824931E-24)     length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
++  speed 1e+300 on [0, 3 q] (exact 1.4821969375237397E-23)    length=0.0                      converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=-
++== F5: smooth finite curves whose weighted node sum overflows (true lengths finite)
++  line speed 1e308 on [0, q] (exact 4.94e-16)                build throws ArithmeticException: ArcLengthTable: length is not finite
++  line speed 1e308 on [0, 1e-300] (exact 1e8)                build throws ArithmeticException: ArcLengthTable: length is not finite
++  line speed 1e308 on [0, 1e-10] (exact 1e298)               build throws ArithmeticException: ArcLengthTable: length is not finite
++  line (MAX/2)(1,1,1), speed 1.56e308, on [0, 1e-300]        build throws ArithmeticException: ArcLengthTable: length is not finite
++  line (MAX, MAX, 0), speed 2.5e308 (overflows), on [0, 1e-300] build throws ArithmeticException: ArcLengthTable: length is not finite
++  circle radius 1e306 (speed 6.3e306) on [0, 1e-300]         length=6283185.307179587        converged=true  panels=16  lengthAt(nextUp(t0))=0.0 parameterAt(L/2)=5.0E-301
++== F5: finite table (speed 1e308 on [0, 2^-20]); lengthAt one ulp above a panel start (half-width 0)
++  java.lang.ArithmeticException: ArcLengthTable: length is not finite
+diff --git a/docs/m4/validation/r21/findings-r21.txt b/docs/m4/validation/r21/findings-r21.txt
+new file mode 100644
+index 0000000..26d1d0c
+--- /dev/null
++++ b/docs/m4/validation/r21/findings-r21.txt
+@@ -0,0 +1,23 @@
++F45.java against the THROWAWAY R2.1 reference implementation; Java 25.0.4.1
++== F4: M3 LineSegment on [0, k MIN_VALUE] (exact length = speed * k MIN_VALUE)
++  speed 1e+00 on [0, 1 q] (exact 4.9E-324)                   length=4.9E-324                 converged=true  panels=16  lengthAt(nextUp(t0))=4.9E-324 parameterAt(L/2)=0.0
++  speed 1e+00 on [0, 2 q] (exact 9.9E-324)                   length=9.9E-324                 converged=true  panels=16  lengthAt(nextUp(t0))=4.9E-324 parameterAt(L/2)=4.9E-324
++  speed 1e+00 on [0, 3 q] (exact 1.5E-323)                   length=1.5E-323                 converged=true  panels=16  lengthAt(nextUp(t0))=4.9E-324 parameterAt(L/2)=9.9E-324
++  speed 3e+00 on [0, 1 q] (exact 1.5E-323)                   length=1.5E-323                 converged=true  panels=16  lengthAt(nextUp(t0))=1.5E-323 parameterAt(L/2)=4.9E-324
++  speed 3e+00 on [0, 2 q] (exact 3.0E-323)                   length=3.0E-323                 converged=true  panels=16  lengthAt(nextUp(t0))=1.5E-323 parameterAt(L/2)=4.9E-324
++  speed 3e+00 on [0, 3 q] (exact 4.4E-323)                   length=4.4E-323                 converged=true  panels=16  lengthAt(nextUp(t0))=1.5E-323 parameterAt(L/2)=4.9E-324
++  speed 1e+10 on [0, 1 q] (exact 4.9406564584E-314)          length=4.9406564584E-314        converged=true  panels=16  lengthAt(nextUp(t0))=4.9406564584E-314 parameterAt(L/2)=4.9E-324
++  speed 1e+10 on [0, 2 q] (exact 9.881312917E-314)           length=9.881312917E-314         converged=true  panels=16  lengthAt(nextUp(t0))=4.9406564584E-314 parameterAt(L/2)=4.9E-324
++  speed 1e+10 on [0, 3 q] (exact 1.4821969375E-313)          length=1.4821969375E-313        converged=true  panels=16  lengthAt(nextUp(t0))=4.9406564584E-314 parameterAt(L/2)=9.9E-324
++  speed 1e+300 on [0, 1 q] (exact 4.940656458412466E-24)     length=4.940656458412466E-24    converged=true  panels=16  lengthAt(nextUp(t0))=4.940656458412466E-24 parameterAt(L/2)=4.9E-324
++  speed 1e+300 on [0, 2 q] (exact 9.881312916824931E-24)     length=9.881312916824931E-24    converged=true  panels=16  lengthAt(nextUp(t0))=4.940656458412466E-24 parameterAt(L/2)=4.9E-324
++  speed 1e+300 on [0, 3 q] (exact 1.4821969375237397E-23)    length=1.4821969375237397E-23   converged=true  panels=16  lengthAt(nextUp(t0))=4.940656458412466E-24 parameterAt(L/2)=9.9E-324
++== F5: smooth finite curves whose weighted node sum overflows (true lengths finite)
++  line speed 1e308 on [0, q] (exact 4.94e-16)                length=4.9406564584124655E-16   converged=true  panels=16  lengthAt(nextUp(t0))=4.9406564584124655E-16 parameterAt(L/2)=4.9E-324
++  line speed 1e308 on [0, 1e-300] (exact 1e8)                length=1.0E8                    converged=true  panels=16  lengthAt(nextUp(t0))=4.9406564584124655E-16 parameterAt(L/2)=5.0E-301
++  line speed 1e308 on [0, 1e-10] (exact 1e298)               length=1.0E298                  converged=true  panels=16  lengthAt(nextUp(t0))=4.9406564584124655E-16 parameterAt(L/2)=5.0E-11
++  line (MAX/2)(1,1,1), speed 1.56e308, on [0, 1e-300]        length=1.5568479229996502E8     converged=true  panels=16  lengthAt(nextUp(t0))=7.691850745534254E-16 parameterAt(L/2)=5.0E-301
++  line (MAX, MAX, 0), speed 2.5e308 (overflows), on [0, 1e-300] length=2.542322012307292E8      converged=true  panels=16  lengthAt(nextUp(t0))=1.25607396694702E-15 parameterAt(L/2)=5.0E-301
++  circle radius 1e306 (speed 6.3e306) on [0, 1e-300]         length=6283185.307179587        converged=true  panels=16  lengthAt(nextUp(t0))=3.104306006731913E-17 parameterAt(L/2)=5.0E-301
++== F5: finite table (speed 1e308 on [0, 2^-20]); lengthAt one ulp above a panel start (half-width 0)
++  length=9.5367431640625E301 lengthAt(MIN_VALUE)=4.9406564584124655E-16 lengthAt(nextUp(2^-24))=5.960464477539064E300
+diff --git a/docs/m4/validation/r21/r2-vs-r21-reference-values.txt b/docs/m4/validation/r21/r2-vs-r21-reference-values.txt
+new file mode 100644
+index 0000000..ba2961d
+--- /dev/null
++++ b/docs/m4/validation/r21/r2-vs-r21-reference-values.txt
+@@ -0,0 +1,4 @@
++LenDump.java: arclength.csv (336 rows) at relative tolerances 1e-4, 1e-7, 2^-30, 1e-12: length, panel count, error estimate,
++7 lengthAt and 7 parameterAt values per table, compared bit for bit between the THROWAWAY R2 and R2.1 reference implementations.
++tables 1344; tables with any bit difference 1212; values differing 6104 of 22764; lengths differing 336; largest relative length change 7.85e-16; panel-count changes 0
++All differences are rounding-level (the R2.1 panel rule orders the same products differently); the 3,064 reference rows and all tolerances are unchanged.
+diff --git a/docs/m4/validation/reference-run-summary.txt b/docs/m4/validation/reference-run-summary.txt
+index a9b6824..4286b16 100644
+--- a/docs/m4/validation/reference-run-summary.txt
++++ b/docs/m4/validation/reference-run-summary.txt
+@@ -1,52 +1,53 @@
+-M4 tests against a THROWAWAY reference implementation of the M4 contract, REVISION 2 (kept outside the repository, not delivered, not committed).
+-Base: a6726c42a20940a6a6d2dd24477e6a642f6b8cbc (verified M3 baseline, 254 tests) plus the M4 R2 tests and reference data of this proposal.
++M4 tests against a THROWAWAY reference implementation of the M4 contract, REVISION 2.1 (kept outside the repository, not delivered, not committed).
++Base: a6726c42a20940a6a6d2dd24477e6a642f6b8cbc (verified M3 baseline, 254 tests) plus the M4 R2.1 tests and reference data of this proposal.
+ java version "25.0.4.1" 2026-08-18 LTS
+ Gradle 9.1.0 (project wrapper); fresh copy, clean run: ./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test, then check
+-test: BUILD SUCCESSFUL in 1m 1s
+-check: BUILD SUCCESSFUL in 6s
++test: BUILD SUCCESSFUL in 1m 18s
++check: BUILD SUCCESSFUL in 8s
+ 
+-workshop.vfx.math.core.Amendment3AcceptanceTest         tests= 10 not-passed=0 time=0.444
+-workshop.vfx.math.core.BoundaryTest                     tests=  2 not-passed=0 time=0.003
++workshop.vfx.math.core.Amendment3AcceptanceTest         tests= 10 not-passed=0 time=0.62
++workshop.vfx.math.core.BoundaryTest                     tests=  2 not-passed=0 time=0.004
+ workshop.vfx.math.core.ConventionsTest                  tests= 10 not-passed=0 time=0.007
+-workshop.vfx.math.core.FrameTest                        tests= 11 not-passed=0 time=0.07
+-workshop.vfx.math.core.JomlOracleTest                   tests=  4 not-passed=0 time=0.046
+-workshop.vfx.math.core.M0RegressionTest                 tests=  6 not-passed=0 time=0.01
+-workshop.vfx.math.core.MathUtilTest                     tests=  4 not-passed=0 time=0.004
+-workshop.vfx.math.core.NumericPolicyTest                tests= 13 not-passed=0 time=0.221
+-workshop.vfx.math.core.PolicyClarificationTest          tests=  9 not-passed=0 time=0.049
+-workshop.vfx.math.core.PoseTest                         tests= 12 not-passed=0 time=0.146
+-workshop.vfx.math.core.QuatTest                         tests= 17 not-passed=0 time=0.228
+-workshop.vfx.math.core.ReviewAdversarialTest            tests= 18 not-passed=0 time=14.883
+-workshop.vfx.math.core.Vec3Test                         tests=  9 not-passed=0 time=0.016
+-workshop.vfx.math.curve.BezierTest                      tests=  7 not-passed=0 time=0.104
+-workshop.vfx.math.curve.EasingTest                      tests=  8 not-passed=0 time=1.999
+-workshop.vfx.math.curve.M3BoundaryTest                  tests=  3 not-passed=0 time=0.014
+-workshop.vfx.math.curve.M3DeterminismTest               tests=  2 not-passed=0 time=0.162
+-workshop.vfx.math.curve.M3ReferenceVectorTest           tests=  4 not-passed=0 time=0.068
+-workshop.vfx.math.curve.M3ReviewAdversarialTest         tests= 12 not-passed=0 time=19.058
+-workshop.vfx.math.curve.M3UnderflowTest                 tests=  7 not-passed=0 time=3.69
+-workshop.vfx.math.curve.PosedCurveTest                  tests=  5 not-passed=0 time=0.036
+-workshop.vfx.math.curve.SpiralTest                      tests= 15 not-passed=0 time=0.45
+-workshop.vfx.math.sample.ArcLengthTableTest             tests=  9 not-passed=0 time=0.267
+-workshop.vfx.math.sample.EqualDistanceTest              tests=  8 not-passed=0 time=1.316
+-workshop.vfx.math.sample.M4AdversarialTest              tests=  8 not-passed=0 time=0.239
+-workshop.vfx.math.sample.M4BoundaryTest                 tests=  3 not-passed=0 time=0.03
+-workshop.vfx.math.sample.M4DeterminismTest              tests=  2 not-passed=0 time=0.411
+-workshop.vfx.math.sample.M4R2RegressionTest             tests= 10 not-passed=0 time=0.022
+-workshop.vfx.math.sample.M4ReferenceVectorTest          tests=  5 not-passed=0 time=2.795
+-workshop.vfx.math.sample.SampleSetTest                  tests=  3 not-passed=0 time=0.734
+-workshop.vfx.math.sample.UniformParameterTest           tests=  6 not-passed=0 time=0.142
+-workshop.vfx.math.time.M2BoundaryTest                   tests=  3 not-passed=0 time=0.007
+-workshop.vfx.math.time.M2DeterminismTest                tests=  8 not-passed=0 time=0.155
+-workshop.vfx.math.time.M2GoldenVectorTest               tests=  5 not-passed=0 time=0.024
+-workshop.vfx.math.time.M2ReviewAdversarialTest          tests= 13 not-passed=0 time=1.266
+-workshop.vfx.math.time.M2Revision2Test                  tests=  9 not-passed=0 time=0.032
+-workshop.vfx.math.time.PlaybackTest                     tests=  9 not-passed=0 time=0.121
+-workshop.vfx.math.time.TickTimeTest                     tests=  4 not-passed=0 time=0.048
+-workshop.vfx.math.time.TimePointTest                    tests=  4 not-passed=0 time=0.098
+-workshop.vfx.math.time.TimingTest                       tests= 11 not-passed=0 time=0.334
+-TOTAL 308 not passed 0
++workshop.vfx.math.core.FrameTest                        tests= 11 not-passed=0 time=0.087
++workshop.vfx.math.core.JomlOracleTest                   tests=  4 not-passed=0 time=0.073
++workshop.vfx.math.core.M0RegressionTest                 tests=  6 not-passed=0 time=0.015
++workshop.vfx.math.core.MathUtilTest                     tests=  4 not-passed=0 time=0.005
++workshop.vfx.math.core.NumericPolicyTest                tests= 13 not-passed=0 time=0.263
++workshop.vfx.math.core.PolicyClarificationTest          tests=  9 not-passed=0 time=0.06
++workshop.vfx.math.core.PoseTest                         tests= 12 not-passed=0 time=0.238
++workshop.vfx.math.core.QuatTest                         tests= 17 not-passed=0 time=0.258
++workshop.vfx.math.core.ReviewAdversarialTest            tests= 18 not-passed=0 time=18.056
++workshop.vfx.math.core.Vec3Test                         tests=  9 not-passed=0 time=0.026
++workshop.vfx.math.curve.BezierTest                      tests=  7 not-passed=0 time=0.141
++workshop.vfx.math.curve.EasingTest                      tests=  8 not-passed=0 time=2.397
++workshop.vfx.math.curve.M3BoundaryTest                  tests=  3 not-passed=0 time=0.015
++workshop.vfx.math.curve.M3DeterminismTest               tests=  2 not-passed=0 time=0.266
++workshop.vfx.math.curve.M3ReferenceVectorTest           tests=  4 not-passed=0 time=0.1
++workshop.vfx.math.curve.M3ReviewAdversarialTest         tests= 12 not-passed=0 time=22.059
++workshop.vfx.math.curve.M3UnderflowTest                 tests=  7 not-passed=0 time=4.082
++workshop.vfx.math.curve.PosedCurveTest                  tests=  5 not-passed=0 time=0.037
++workshop.vfx.math.curve.SpiralTest                      tests= 15 not-passed=0 time=0.474
++workshop.vfx.math.sample.ArcLengthTableTest             tests=  9 not-passed=0 time=0.741
++workshop.vfx.math.sample.EqualDistanceTest              tests=  8 not-passed=0 time=2.399
++workshop.vfx.math.sample.M4AdversarialTest              tests=  8 not-passed=0 time=0.254
++workshop.vfx.math.sample.M4BoundaryTest                 tests=  3 not-passed=0 time=0.044
++workshop.vfx.math.sample.M4DeterminismTest              tests=  2 not-passed=0 time=0.522
++workshop.vfx.math.sample.M4R21RegressionTest            tests=  4 not-passed=0 time=0.233
++workshop.vfx.math.sample.M4R2RegressionTest             tests= 10 not-passed=0 time=0.025
++workshop.vfx.math.sample.M4ReferenceVectorTest          tests=  5 not-passed=0 time=5.322
++workshop.vfx.math.sample.SampleSetTest                  tests=  3 not-passed=0 time=1.325
++workshop.vfx.math.sample.UniformParameterTest           tests=  6 not-passed=0 time=0.214
++workshop.vfx.math.time.M2BoundaryTest                   tests=  3 not-passed=0 time=0.035
++workshop.vfx.math.time.M2DeterminismTest                tests=  8 not-passed=0 time=0.232
++workshop.vfx.math.time.M2GoldenVectorTest               tests=  5 not-passed=0 time=0.032
++workshop.vfx.math.time.M2ReviewAdversarialTest          tests= 13 not-passed=0 time=2.051
++workshop.vfx.math.time.M2Revision2Test                  tests=  9 not-passed=0 time=0.034
++workshop.vfx.math.time.PlaybackTest                     tests=  9 not-passed=0 time=0.11
++workshop.vfx.math.time.TickTimeTest                     tests=  4 not-passed=0 time=0.049
++workshop.vfx.math.time.TimePointTest                    tests=  4 not-passed=0 time=0.172
++workshop.vfx.math.time.TimingTest                       tests= 11 not-passed=0 time=0.409
++TOTAL 312 not passed 0
+ 
+-JUnit XML totals: tests 308, failures 0, errors 0, skipped 0.
+-By package: M1 core 125, M2 time 66, M3 curve 51 + M3 review 12 = 63, M4 sample 54. Total 308, passed 308.
+-(R1: 298/298 with 44 M4 tests. R2 adds M4R2RegressionTest, 10 tests; no test removed.)
++JUnit XML totals: tests 312, failures 0, errors 0, skipped 0.
++By package: M1 core 125, M2 time 66, M3 curve 51 + M3 review 12 = 63, M4 sample 58. Total 312, passed 312.
++(R1: 298 with 44 M4 tests; R2: 308 with 54; R2.1 adds M4R21RegressionTest, 4 tests; no test removed or changed.)
+diff --git a/src/test/java/workshop/vfx/math/sample/M4R21RegressionTest.java b/src/test/java/workshop/vfx/math/sample/M4R21RegressionTest.java
+new file mode 100644
+index 0000000..50e1258
+--- /dev/null
++++ b/src/test/java/workshop/vfx/math/sample/M4R21RegressionTest.java
+@@ -0,0 +1,166 @@
++package workshop.vfx.math.sample;
++
++import static org.junit.jupiter.api.Assertions.assertEquals;
++import static org.junit.jupiter.api.Assertions.assertTrue;
++
++import java.math.BigDecimal;
++import java.math.MathContext;
++import java.util.SplittableRandom;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import workshop.vfx.math.core.Vec3;
++import workshop.vfx.math.curve.Curve;
++import workshop.vfx.math.curve.LineSegment;
++import workshop.vfx.math.curve.Spiral;
++
++/**
++ * Regression tests for the two findings of ChatGPT's independent review of M4 R2 (contract revision 2.1):
++ * F4 half-width underflow (a panel narrower than 2 MIN_VALUE had a computed half-width of 0, so its rule value was 0)
++ * and F5 weighted-sum overflow (a finite length gave ArithmeticException, and 0 * infinity gave NaN in lengthAt).
++ * Oracles: exact BigDecimal lengths of lines and circles, and the allowance of contract 10.2 (R2.1), whose absolute
++ * underflow term counts the half-panel rules of nonzero width, derived here from the normative initial partition.
++ */
++class M4R21RegressionTest {
++    private static final double Q = Double.MIN_VALUE;
++    private static final double EPS = 0x1p-53;
++    private static final double MAX = Double.MAX_VALUE;
++    private static final MathContext MC = new MathContext(40);
++    private static final BigDecimal PI = new BigDecimal("3.14159265358979323846264338327950288419716939937510582097494459");
++
++    /** Contract 10.2 (R2.1) for a 16-panel table: the number of half-panel rules of nonzero width (contract 5.3 nodes). */
++    private static int nonzeroHalves(double t0, double t1) {
++        double[] n = new double[17];
++        for (int k = 0; k < 16; k++) {
++            n[k] = Math.min(t1, t0 + (t1 - t0) * (k / 16.0));
++        }
++        n[16] = t1;
++        int count = 0;
++        for (int k = 0; k < 16; k++) {
++            double a = n[k], b = n[k + 1], m = a + 0.5 * (b - a);
++            count += (m > a ? 1 : 0) + (b > m ? 1 : 0);
++        }
++        return count;
++    }
++
++    /** Exact length of a line from 0 to {@code end} on [t0, t1]. */
++    private static double exactLine(Vec3 end, double t0, double t1) {
++        BigDecimal x = new BigDecimal(end.x()), y = new BigDecimal(end.y()), z = new BigDecimal(end.z());
++        return x.multiply(x).add(y.multiply(y)).add(z.multiply(z)).sqrt(MC).multiply(new BigDecimal(t1).subtract(new BigDecimal(t0))).doubleValue();
++    }
++
++    /**
++     * Contract 10.2 for a line (exact derivative): (t1 - t0) dv + (K + 64) eps L + R_w MIN_VALUE / 2, with
++     * dv = 5 eps v + MIN_VALUE and (t1 - t0) v = L (the speed itself may exceed MAX_VALUE).
++     */
++    private static double lineAllowance(double t0, double t1, double exact) {
++        return 5 * EPS * exact + (t1 - t0) * Q + 80 * EPS * exact + (0.5 * nonzeroHalves(t0, t1)) * Q;
++    }
++
++    private static void checkLine(Vec3 end, double t0, double t1) {
++        LineSegment line = new LineSegment(Vec3.ZERO, end);
++        double exact = exactLine(end, t0, t1);
++        String label = "line to " + end + " on [" + t0 + ", " + t1 + "] (exact " + exact + ")";
++        ArcLengthTable t = ArcLengthTable.build(line, t0, t1, new ArcLengthTolerance(0, 0x1p-40), new SampleLimits(64, 4096));
++        assertTrue(Double.isFinite(t.length()), label + ": finite length");
++        assertTrue(t.converged(), label + ": converged");
++        assertEquals(16, t.panelCount(), label + ": panels");
++        assertEquals(exact, t.length(), lineAllowance(t0, t1, exact), label + ": length");
++        if (exact > lineAllowance(t0, t1, exact)) {
++            assertTrue(t.length() > 0, label + ": a length above the allowance is not lost");
++        }
++        double first = t.lengthAt(Math.nextUp(t0)), firstExact = exactLine(end, t0, Math.nextUp(t0));
++        assertTrue(Double.isFinite(first) && first >= 0 && first <= t.length(), label + ": lengthAt(nextUp(t0)) = " + first);
++        assertEquals(firstExact, first, 5 * (5 * EPS + 80 * EPS) * firstExact + 2 * Q, label + ": lengthAt(nextUp(t0))");
++        if (t.length() > 0) {
++            double p = t.parameterAt(0.5 * t.length());
++            assertTrue(p >= t0 && p <= t1, label + ": parameterAt(L/2) = " + p);
++        }
++    }
++
++    // ------------------------------------------------------------------ F4
++
++    @Test
++    @DisplayName("F4: M3 lines on ranges of a few MIN_VALUE (half-width rounds to 0): length within the contract 10.2 allowance (R2.1), whose underflow term is MIN_VALUE/2 per half-panel rule of nonzero width (1 to 7 rules on [0, k MIN_VALUE]); unit speed on [0, k MIN_VALUE] is exact (a consequence of the normative operation order); lengthAt one ulp above t0 accurate")
++    void halfWidthUnderflow() {
++        Vec3[] ends = {new Vec3(1, 0, 0), new Vec3(3, 0, 0), new Vec3(0, -2, 0), new Vec3(1, 2, 2), new Vec3(1e10, 0, 0), new Vec3(3e299, 4e299, 0), new Vec3(1e300, 0, 0)};
++        double[][] ranges = {{0, Q}, {0, 2 * Q}, {0, 3 * Q}, {0, 7 * Q}, {-Q, Q}, {-3 * Q, 0}, {0, 1e-320}, {0, 0x1p-1060}, {0, 1e-310}};
++        for (Vec3 end : ends) {
++            for (double[] r : ranges) {
++                checkLine(end, r[0], r[1]);
++            }
++        }
++        // the representable cases are exact: unit speed on [0, k MIN_VALUE] has length k MIN_VALUE
++        for (int k = 1; k <= 7; k++) {
++            ArcLengthTable t = ArcLengthTable.build(new LineSegment(Vec3.ZERO, Vec3.X), 0, k * Q, new ArcLengthTolerance(0, 0x1p-40), new SampleLimits(64, 4096));
++            assertEquals(k * Q, t.length(), "unit speed on [0, " + k + " MIN_VALUE]");
++        }
++    }
++
++    // ------------------------------------------------------------------ F5
++
++    @Test
++    @DisplayName("F5: finite smooth curves whose weighted node sum overflows (speeds 1e308 to 2.5e308, components up to MAX_VALUE): build returns the finite length, converged, within the allowance; lengthAt and parameterAt finite")
++    void weightedSumOverflow() {
++        Vec3[] ends = {new Vec3(1e308, 0, 0), new Vec3(-1e308, 1e308, 0), new Vec3(MAX / 2, MAX / 2, MAX / 2), new Vec3(MAX, MAX, 0), new Vec3(MAX, MAX, MAX)};
++        double[][] ranges = {{0, Q}, {0, 3 * Q}, {0, 1e-300}, {-1e-300, 1e-300}, {0, 1e-10}, {1, Math.nextUp(1.0)}};
++        for (Vec3 end : ends) {
++            for (double[] r : ranges) {
++                checkLine(end, r[0], r[1]);
++            }
++        }
++        // a circle of radius 1e306 (speed 2 pi 1e306, M3 trigonometry) on [0, 1e-300]: 2 pi 1e306 1e-300
++        ArcLengthTable ring = ArcLengthTable.build(Spiral.circle(1e306), 0, 1e-300, new ArcLengthTolerance(0, 0x1p-40), new SampleLimits(64, 4096));
++        double exact = PI.multiply(new BigDecimal(2)).multiply(new BigDecimal(1e306)).multiply(new BigDecimal(1e-300)).doubleValue();
++        assertTrue(ring.converged());
++        assertEquals(exact, ring.length(), 1e-12 * exact, "circle radius 1e306 on [0, 1e-300]");
++    }
++
++    @Test
++    @DisplayName("F5: a finite table whose partial integral overflowed (speed 1e308, or components at MAX_VALUE, only for t <= 1e-300; 1 elsewhere): lengthAt and parameterAt near t0 are finite, never NaN, and within [0, length()] (F_k need not be monotone for such a curve)")
++    void finiteTableNoNaN() {
++        for (double big : new double[] {1e308, MAX}) {
++            Curve spikeAtStart = new Curve() {
++                @Override public Vec3 point(double t) { return new Vec3(t, 0, 0); } // positions are not used by the table
++                @Override public Vec3 derivative(double t) { return t <= 1e-300 ? new Vec3(big, big, 0) : Vec3.X; }
++                @Override public Vec3 secondDerivative(double t) { return Vec3.ZERO; }
++            };
++            ArcLengthTable t = ArcLengthTable.build(spikeAtStart, new ArcLengthTolerance(0, 0x1p-30), new SampleLimits(64, 256));
++            assertTrue(Double.isFinite(t.length()) && t.length() > 0.99 && t.length() < 1.01, "the table does not see the spike: " + t.length());
++            for (double u : new double[] {Q, 2 * Q, 1e-320, 1e-310, 1e-301, 1e-300, 1e-200, 1e-100, 1e-10, 0.01}) {
++                double l = t.lengthAt(u);
++                assertTrue(Double.isFinite(l) && l >= 0 && l <= t.length(), "big " + big + ": lengthAt(" + u + ") = " + l);
++            }
++            // one ulp above t0 the half-width is 0: G(0, MIN_VALUE) = MIN_VALUE * speed, scaled by I2 / I1 (within [1/2, 2])
++            double g = (Q * big) * Math.sqrt(2); // MIN_VALUE times the speed sqrt(2) big (which may exceed MAX_VALUE): 6.99e-16 or 1.26e-15
++            double l = t.lengthAt(Q);
++            assertTrue(l >= 0.5 * g * (1 - 1e-12) && l <= Math.min(t.length(), 2 * g * (1 + 1e-12)), "big " + big + ": lengthAt(MIN_VALUE) = " + l + " for G = " + g);
++            for (int k = 1; k < 64; k++) {
++                double p = t.parameterAt(t.length() * (k / 64.0));
++                assertTrue(p >= 0 && p <= 1, "big " + big + ": parameterAt");
++            }
++        }
++    }
++
++    @Test
++    @DisplayName("F4/F5: no spurious overflow or underflow in the panel rule: 3,000 random lines (speeds 1e-300 to 2.9e308 with components up to MAX_VALUE, range widths 1 MIN_VALUE to 1e3, exact lengths below MAX_VALUE/4) all give finite, converged lengths within the allowance")
++    void panelRuleRange() {
++        SplittableRandom r = new SplittableRandom(4245);
++        int done = 0;
++        while (done < 3_000) {
++            double scale = Math.scalb(1.0, r.nextInt(-1000, 1024));
++            Vec3 end = new Vec3(r.nextDouble(-1, 1) * scale, r.nextBoolean() ? 0 : r.nextDouble(-1, 1) * scale, r.nextBoolean() ? 0 : r.nextDouble(-1, 1) * scale);
++            double t0 = r.nextBoolean() ? 0 : r.nextDouble(-1, 1) * Math.scalb(1.0, r.nextInt(-1074, 10));
++            double width = r.nextInt(4) == 0 ? r.nextInt(1, 9) * Q : Math.scalb(r.nextDouble(1, 2), r.nextInt(-1074, 10));
++            double t1 = t0 + width;
++            if (!(t1 > t0) || !Double.isFinite(t1)) {
++                continue;
++            }
++            double exact = exactLine(end, t0, t1);
++            if (!(exact < MAX / 4) || exactLine(end, 0, 1) == 0) {
++                continue;
++            }
++            checkLine(end, t0, t1);
++            done++;
++        }
++    }
++}
+-- 
+2.43.0
+

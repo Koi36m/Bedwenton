@@ -1,0 +1,526 @@
+From 6ad7232cf030df649c70920893adb1f8a424a7cf Mon Sep 17 00:00:00 2001
+From: "Claude Code (independent review)" <noreply@anthropic.com>
+Date: Fri, 16 Oct 2026 19:51:12 +0000
+Subject: [PATCH 5/5] M4 R2.1: survivor test, tighter allowance, mutation
+ analysis and evidence
+
+- M4R21RegressionTest.subnormalSpeedLongRange (5 tests in the class): kills
+  mutant M50; dv no longer carries MIN_VALUE (the R2.1 rule never rounds a
+  subnormal speed product), a tighter allowance.
+- Mutation analysis of the R2.1 reference: 55 mutants, 50 killed,
+  4 equivalent, 1 tolerance-equivalent.
+- Full suite against the R2.1 reference on Java 25: 313/313; before/after
+  against R1 and R2; reference values compared bit for bit with R2.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_017wk67VdfTJWcfKRwchBikr
+---
+ docs/m4/M4-ARCHITECTURE.md                    |  2 +-
+ docs/m4/M4-ERROR-ANALYSIS.md                  |  5 +-
+ docs/m4/M4-IMPLEMENTATION-CONTRACT.md         |  4 +-
+ docs/m4/M4-R21-CORRECTIONS.md                 | 27 ++++--
+ docs/m4/M4-TEST-SPECIFICATION.md              | 38 +++++---
+ docs/m4/README-FOR-CODEX-M4.md                |  2 +-
+ docs/m4/validation/mutation-results.txt       | 57 +++++++-----
+ docs/m4/validation/r21/README.md              | 15 ++++
+ docs/m4/validation/r21/before-after-tests.txt | 12 +--
+ docs/m4/validation/reference-run-summary.txt  | 88 +++++++++----------
+ .../vfx/math/sample/M4R21RegressionTest.java  | 17 +++-
+ 11 files changed, 167 insertions(+), 100 deletions(-)
+ create mode 100644 docs/m4/validation/r21/README.md
+
+diff --git a/docs/m4/M4-ARCHITECTURE.md b/docs/m4/M4-ARCHITECTURE.md
+index d9baaf9..22104e6 100644
+--- a/docs/m4/M4-ARCHITECTURE.md
++++ b/docs/m4/M4-ARCHITECTURE.md
+@@ -107,7 +107,7 @@ tick -> M2 TimingSample.progress -> M3 Easing / curve parameters -> M3 Curve
+ | performance and resource risks | `docs/m4/M4-RISKS.md` |
+ | test specification and acceptance criteria | `docs/m4/M4-TEST-SPECIFICATION.md` |
+ | Codex handoff guide (for after approval) | `docs/m4/README-FOR-CODEX-M4.md` |
+-| independent tests | `src/test/java/workshop/vfx/math/sample/` (58 tests in 10 classes, plus a helper) |
++| independent tests | `src/test/java/workshop/vfx/math/sample/` (59 tests in 10 classes, plus a helper) |
+ | R2 corrections after the R1 review | `docs/m4/M4-R2-CORRECTIONS.md` |
+ | R2.1 corrections after the R2 review | `docs/m4/M4-R21-CORRECTIONS.md` |
+ | reference data and generator | `src/test/resources/m4/reference/` (3,064 rows), `tools/generate_m4_reference_vectors.py` |
+diff --git a/docs/m4/M4-ERROR-ANALYSIS.md b/docs/m4/M4-ERROR-ANALYSIS.md
+index fe1d6e3..93c67e2 100644
+--- a/docs/m4/M4-ERROR-ANALYSIS.md
++++ b/docs/m4/M4-ERROR-ANALYSIS.md
+@@ -42,8 +42,9 @@ separate. No quadrature rule bounds the error of an arbitrary black-box integran
+ - **Propagation of the curve's own error:** the computed derivative differs from the true one by at most `delta_c`
+   per component (M3 contract 7.2 with A3). By the triangle inequality,
+   `abs(abs(C'~) - abs(C')) <= sqrt(3) delta_c`.
+-- **Total speed error:** `dv = sqrt(3) delta_c + 5u v + eta`. The eta covers a subnormal derivative component, for
+-  which M3 A3 admits an absolute error.
++- **Total speed error:** `dv = sqrt(3) delta_c + 5u v`. A subnormal derivative component's own absolute error is part
++  of `delta_c` (M3 A3). R2's extra `eta` was for rounding a subnormal speed product; the R2.1 rule never forms that
++  product, since `mu` is exact and the ratios are relative.
+ 
+ ## 3. Gauss-Legendre panels: rounding (R2.1 evaluation order, contract 5.2)
+ 
+diff --git a/docs/m4/M4-IMPLEMENTATION-CONTRACT.md b/docs/m4/M4-IMPLEMENTATION-CONTRACT.md
+index 2faecfe..0d3f42c 100644
+--- a/docs/m4/M4-IMPLEMENTATION-CONTRACT.md
++++ b/docs/m4/M4-IMPLEMENTATION-CONTRACT.md
+@@ -443,7 +443,9 @@ is driven by a floating-point accumulation.
+ 
+ Let:
+ - `dv` bound the absolute error of the computed speed on the range: `sqrt(3)` times the M3 per-component derivative
+-  bound (M3 contract 7.2 with A3), plus 5 eps of the speed, plus `MIN_VALUE` (a subnormal speed);
++  bound (M3 contract 7.2 with A3, which already includes subnormal components), plus 5 eps of the speed. R2 added
++  `MIN_VALUE` here for a rounded subnormal speed. R2.1 never rounds the product `mu * nu` in the rule, so that term is
++  gone: a tighter allowance, which M4R21RegressionTest checks;
+ - `T = max(abs(t0), abs(t1))` and `K = panelCount()`;
+ - `R_w` = the number of half-panel rules of nonzero width among the final panels (`G(a, m)` with `m > a`, and
+   `G(m, b)` with `b > m`), so `R_w <= 2K`.
+diff --git a/docs/m4/M4-R21-CORRECTIONS.md b/docs/m4/M4-R21-CORRECTIONS.md
+index 40eb8be..723b345 100644
+--- a/docs/m4/M4-R21-CORRECTIONS.md
++++ b/docs/m4/M4-R21-CORRECTIONS.md
+@@ -50,6 +50,14 @@ disk, and not on any branch of the repository.
+   normative initial partition.
+ - It also checks `lengthAt(nextUp(t0))`, and that unit speed on `[0, k MIN_VALUE]` gives exactly `k MIN_VALUE`.
+ 
++**Second test:** `M4R21RegressionTest.subnormalSpeedLongRange`, added for mutation survivor M50 (always the fallback
++product order). Lines with subnormal components such as `(q, q, 0)` on [0, 1000] and [-7, 9] must stay within the
++allowance without a per-parameter `MIN_VALUE` term.
++- R2.1 drops that term from `dv` (contract 10.2). It covered rounding of a subnormal speed product, which the R2.1
++  rule never forms.
++- The allowance is therefore tighter than R2's.
++- The fallback order rounds `M S` while it is subnormal, and that rounding error is then multiplied by the width.
++
+ ## 2. F5: weighted-sum overflow
+ 
+ **Problem (R2):**
+@@ -96,18 +104,19 @@ disk, and not on any branch of the repository.
+ | D3 | contract 10.2, error analysis 3 | The node-position term ignored the underflow of h and `h X`. It is now `(4 eps T + 2 MIN_VALUE) max abs(C'')` |
+ | D4 | error analysis 2 | The speed error is split into `nu` (3.5 eps) and the product (4.5 eps, Newton only). `dv` includes `MIN_VALUE` explicitly |
+ | D5 | contract B5, error analysis 4 | The absolute constant of the conditional B5 condition is now `24 MIN_VALUE` (R2: `144 MIN_VALUE`), derived for the R2.1 order |
+-| D6 | test specification, README, architecture, conventions (F10), design decisions (DM4-17) | Counts (58 M4 tests in 10 classes, 312 in total), the evaluation order note for Codex, and the R2.1 facts |
++| D6 | contract 10.2, error analysis 2 | `dv` no longer contains `MIN_VALUE`: R2.1 never rounds a subnormal speed product. A subnormal derivative component's own error stays in the M3 `delta_c` |
++| D7 | test specification, README, architecture, conventions (F10), design decisions (DM4-17) | Counts (59 M4 tests in 10 classes, 313 in total), the evaluation order note for Codex, and the R2.1 facts |
+ 
+ ## 4. Validation
+ 
+-- **Tests:** M4 has 58 test methods in 10 classes. R2.1 added `M4R21RegressionTest`, with 4 tests. All 54 R2 tests
++- **Tests:** M4 has 59 test methods in 10 classes. R2.1 added `M4R21RegressionTest`, with 4 tests. All 54 R2 tests
+   are unchanged; no test was removed or edited.
+-- **Full suite on Java 25.0.4.1, against the temporary R2.1 reference implementation (not delivered):** 312 tests,
+-  312 passed (M1 125, M2 66, M3 51, M3 review 12, M4 58). `check` succeeds (`validation/reference-run-summary.txt`).
++- **Full suite on Java 25.0.4.1, against the temporary R2.1 reference implementation (not delivered):** 313 tests,
++  313 passed (M1 125, M2 66, M3 51, M3 review 12, M4 59). `check` succeeds (`validation/reference-run-summary.txt`).
+ - **Before and after** (`validation/r21/before-after-tests.txt`):
+-  - against the R2 reference: 54/58, failing exactly the 4 R2.1 tests;
+-  - against R1: 48/58;
+-  - against R2.1: 58/58.
++  - against the R2 reference: 54/59, failing exactly the 5 R2.1 tests;
++  - against R1: 48/59;
++  - against R2.1: 59/59.
+ - **Reference data:** unchanged. Regeneration is byte-identical, and `MANIFEST.sha256` verifies.
+   - Over 1,344 reference tables (336 rows at four tolerances), R2.1 changes lengths by at most 7.9e-16 relative, and
+     no panel count (`validation/r21/r2-vs-r21-reference-values.txt`).
+@@ -117,7 +126,9 @@ disk, and not on any branch of the repository.
+   - per rule: contract 5.2 and error analysis 3;
+   - length: contract 10.2 and error analysis 4, with the B5 proof redone;
+   - inversion (error analysis 7): unaffected, since it uses only `F_k` and its range.
+-- **Mutation analysis:** see `validation/mutation-results.txt` and the test specification, section 5.
++- **Mutation analysis** (`validation/mutation-results.txt`): 55 mutants (8 of them new in R2.1), with 50 killed,
++  4 equivalent (M20, M33, M38, M45) and 1 tolerance-equivalent (M13). Every R2.1 mutant is killed. The survivor of
++  the first run (M50) is killed by `subnormalSpeedLongRange`.
+ 
+ ## 5. Remaining limitations (unchanged in kind)
+ 
+diff --git a/docs/m4/M4-TEST-SPECIFICATION.md b/docs/m4/M4-TEST-SPECIFICATION.md
+index 58374c7..78dbb33 100644
+--- a/docs/m4/M4-TEST-SPECIFICATION.md
++++ b/docs/m4/M4-TEST-SPECIFICATION.md
+@@ -1,8 +1,8 @@
+ # M4 test specification and acceptance criteria
+ 
+ Status: PROPOSED, with the contract (revision 2.1).
+-- **Tests:** `src/test/java/workshop/vfx/math/sample/`, 58 test methods in 10 classes plus the helper
+-  `SampleTestSupport`. R2.1 added `M4R21RegressionTest` (4 tests) and changed no existing test. R2 added `M4R2RegressionTest` (10 tests), removed no test, and tightened one bound
++- **Tests:** `src/test/java/workshop/vfx/math/sample/`, 59 test methods in 10 classes plus the helper
++  `SampleTestSupport`. R2.1 added `M4R21RegressionTest` (5 tests) and changed no existing test. R2 added `M4R2RegressionTest` (10 tests), removed no test, and tightened one bound
+   (`samplingWork`: from 400 to 336 evaluations).
+ - **Reference data:** unchanged in R2.
+ - **Reference data:** `src/test/resources/m4/reference/`: 4 CSV files with 3,064 rows, and `MANIFEST.sha256`.
+@@ -38,7 +38,7 @@ Provenance: written for this project; Python standard library only. No third-par
+ | `SampleSetTest` | 3 | 7, 8 | immutability; `transformed` bit for bit equal to `PosedCurve`; limits and tolerance validation |
+ | `M4AdversarialTest` | 8 | 6.3, 8, 9 | budget never exceeded and `evaluations()` exact for six budgets and four curve kinds; oscillating curve (unconverged under a small budget, converged with a large one); per-call work bounds (336 per sample); Newton efficiency (mean below 40 evaluations per sample); failures (NaN, infinity, user exceptions, overflowing length); magnitudes from subnormal to 1e200; signed zero and one-ulp ranges; explosion guard with server-style limits |
+ | `M4R2RegressionTest` | 10 | 5.3 to 5.6, 9, 10.2 | R1 review findings and R2 rules. F1: nonzero subnormal-speed lines and subnormal circles and helices: converged, 16 panels, `tau = 1024 MIN_VALUE`, within the 10.2 allowance (BigDecimal). F2: pathological panels (`I2/I1` overflowing or underflowing, `I1 = 0`, `I2 = 1000 I1`, `I1 = 1000 I2`): finite linear-mode `lengthAt` and `parameterAt`; ratio mode clamped to `I2`. F3: Newton creep (a speed spike at the root), non-converged exits (the better end of the bracket), an exit at the iteration cap (332 to 336 evaluations, the better end within the P3 width), panel-end targets (exact, no evaluation), ties to the upper end (early and after a collapse). Stationary intervals: `parameterAt(length()) == t1` with a stationary tail, and the smallest panel at the start of a stationary interval. A non-finite derivative after build gives `ArithmeticException` from `lengthAt` and `parameterAt` |
+-| `M4R21RegressionTest` | 4 | 5.1, 5.2, 5.5, 10.2 | R2 review findings. F4: M3 lines (speeds 1 to 1e300, 3D directions) on ranges of 1 to 7 `MIN_VALUE`, and down to 1e-320, `2^-1060`, 1e-310, against BigDecimal lengths with the R2.1 allowance; unit speed on `[0, k MIN_VALUE]` exact. F5: lines with speeds 1e308 to `sqrt(3) MAX_VALUE` (components up to `MAX_VALUE`), a circle of radius 1e306: finite, converged, within the allowance; a finite table whose partial integral overflowed in R2: `lengthAt` and `parameterAt` finite, never NaN. 3,000 random lines over the whole exponent range: no spurious overflow or underflow |
++| `M4R21RegressionTest` | 5 | 5.1, 5.2, 5.5, 10.2 | R2 review findings. F4: M3 lines (speeds 1 to 1e300, 3D directions) on ranges of 1 to 7 `MIN_VALUE`, and down to 1e-320, `2^-1060`, 1e-310, against BigDecimal lengths with the R2.1 allowance; unit speed on `[0, k MIN_VALUE]` exact. F5: lines with speeds 1e308 to `sqrt(3) MAX_VALUE` (components up to `MAX_VALUE`), a circle of radius 1e306: finite, converged, within the allowance; a finite table whose partial integral overflowed in R2: `lengthAt` and `parameterAt` finite, never NaN. 3,000 random lines over the whole exponent range: no spurious overflow or underflow |
+ | `M4ReferenceVectorTest` | 5 | 4 to 6 | manifest; 336 lengths; 216 inversions; 2,310 uniform parameters bit for bit; 202 spacing counts |
+ | `M4DeterminismTest` | 2 | 10.1 | bit-identical repetition (20 rounds, JIT); 8 threads, including a shared table |
+ | `M4BoundaryTest` | 3 | 1, 2, 10 | imports (core and curve only; never time); no trigonometry, pow, exp, log, fma, random, clocks, threads, synchronization or I/O; no mutable statics; exact API shape |
+@@ -53,17 +53,17 @@ Reference data:
+ ## 3. Validation of the tests (before handoff)
+ 
+ - **Throwaway reference implementation:** the tests were run against an implementation of contract revision 2.1,
+-  kept outside the repository and not delivered. Result: **58/58 passed**. With the 254 baseline tests: **312/312**
++  kept outside the repository and not delivered. Result: **59/59 passed**. With the 254 baseline tests: **313/313**
+   on Java 25.0.4.1 (`validation/reference-run-summary.txt`).
+ - **Before and after** (`validation/r21/before-after-tests.txt`):
+-  - against the R2 reference implementation: 54/58. The 4 failures are exactly the R2.1 regression tests (F4, F5).
+-  - against R1: 48/58. The failures are those 4 plus the 6 R2 regression failures (`validation/r2/r1-vs-r2-tests.txt`).
++  - against the R2 reference implementation: 54/59. The 5 failures are exactly the R2.1 regression tests (F4, F5).
++  - against R1: 48/59. The failures are those 5 plus the 6 R2 regression failures (`validation/r2/r1-vs-r2-tests.txt`).
+ - **Reference values:** unchanged files. Over the 1,344 reference tables, R2.1 and R2 differ only at rounding level:
+   at most 7.9e-16 relative in a length, with no change of panel count (`validation/r21/r2-vs-r21-reference-values.txt`).
+ - **Measured accuracy and work** (`validation/evidence.txt`): all reference lengths converge with achieved error at
+   most 0.31 tau; inversion costs 13.8 derivative evaluations on average and 29 at most (R1: 14.0 and 29).
+-- **Mutation analysis** (`validation/mutation-results.txt`): 33 plausible defects were injected one at a time.
+-  Results are in that file and summarised in section 5.
++- **Mutation analysis** (`validation/mutation-results.txt`): 55 plausible defects (revision 2.1) were injected one
++  at a time. Results are in that file and summarised in section 5.
+ - The generator is deterministic, and regenerating gives byte-identical files.
+ - **Note:** the reference implementation was used to validate the tests and to measure evidence. It was **not** used
+   to produce any expected value.
+@@ -79,8 +79,8 @@ Reference data:
+ 4. **Production scope.** Only the six public types of contract section 2, plus optional package-private helpers. No
+    dependencies.
+ 5. **Java 25 run.**
+-   `./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test` reports **312 tests,
+-   312 passed** (M1 125, M2 66, M3 51, M3 review 12, M4 58). `check` succeeds.
++   `./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test` reports **313 tests,
++   313 passed** (M1 125, M2 66, M3 51, M3 review 12, M4 59). `check` succeeds.
+ 6. **Evidence** as for M1 to M3, then Claude Code's independent review.
+ 
+ Before the implementation exists, the M4 tests do not compile; this is expected (as for M1 to M3). The M3 GitHub
+@@ -88,7 +88,23 @@ Actions workflow runs only on `m3-actions-verification` and is not affected by t
+ 
+ ## 5. Mutation results
+ 
+-**Revision 2.** 47 plausible defects were injected one at a time into the throwaway R2 reference implementation:
++**Revision 2.1.** 55 plausible defects were injected one at a time into the throwaway R2.1 reference implementation:
++- the 47 R2 mutants, with the panel-rule mutants M01, M02 and M11 adapted to the new order;
++- 8 R2.1 mutants:
++  - M48: the R2 arithmetic `h * sum`;
++  - M49 to M52 and M55: each product order forced or swapped;
++  - M53: `nu` dropped from the ratios;
++  - M54: no zero-speed shortcut.
++
++**Result:** 50 killed, 4 equivalent (M20, M33, M38, M45), 1 tolerance-equivalent (M13). Per-mutant failing tests and
++the reasons are in `validation/mutation-results.txt`.
++- Every R2.1 mutant is killed by `M4R21RegressionTest`.
++- M50 (always the fallback product order) survived the first run. Its error is rounding of `M * S` while subnormal,
++  times the width. It was killed after `dv` lost its `MIN_VALUE` term (contract 10.2) and
++  `subnormalSpeedLongRange` was added.
++- M12 and M15, which needed new tests in R2, stay killed.
++
++**Revision 2** (for reference). 47 plausible defects were injected one at a time into the throwaway R2 reference implementation:
+ - the 33 R1 mutants, adapted to the R2 code;
+ - 14 new R2 mutants: no tolerance floor; ratio mode as in R1, or one-sided; no clamp to `I2`; `r` not clamped; the
+   last iterate returned; ties to `lo`; Newton in every iteration; pure bisection; no tolerance exit; `lo` always
+diff --git a/docs/m4/README-FOR-CODEX-M4.md b/docs/m4/README-FOR-CODEX-M4.md
+index dc21bac..5c04414 100644
+--- a/docs/m4/README-FOR-CODEX-M4.md
++++ b/docs/m4/README-FOR-CODEX-M4.md
+@@ -42,7 +42,7 @@ Read in this order:
+ ```sh
+ sha256sum -c SHA256SUMS.txt     # from the handoff package root
+ export JAVA_HOME=/path/to/jdk-25 PATH="$JAVA_HOME/bin:$PATH"
+-./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test   # 312 tests, 312 passed
++./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test   # 313 tests, 313 passed
+ ./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false check
+ python3 tools/generate_m4_reference_vectors.py /tmp/m4-ref && diff -r /tmp/m4-ref src/test/resources/m4/reference   # about 1 minute
+ python3 tools/generate_m3_reference_vectors.py /tmp/m3-ref && diff -r /tmp/m3-ref src/test/resources/m3/reference
+diff --git a/docs/m4/validation/mutation-results.txt b/docs/m4/validation/mutation-results.txt
+index 6bad299..5c372d7 100644
+--- a/docs/m4/validation/mutation-results.txt
++++ b/docs/m4/validation/mutation-results.txt
+@@ -1,38 +1,40 @@
+-M4 R2 mutation analysis against the THROWAWAY reference implementation of contract revision 2 (not delivered); Java 25.0.4.1.
+-Each mutant is one textual change (patterns in the review scratch harness), run against all M4 tests (54 methods).
+-Procedure: a full run of all 47 mutants with the test set that already included 9 of M4R2RegressionTest's 10 tests (53 M4 tests)
+-(after the first R2 run's survivors M26, M36, M37 and M40 had been given tests); then tests for M12 and M15 were added,
+-and every survivor of the full run was rerun against the final tests. Tests were only added between the runs, so a
+-mutant killed in the full run stays killed.
++M4 R2.1 mutation analysis against the THROWAWAY reference implementation of contract revision 2.1 (not delivered); Java 25.0.4.1.
++Each mutant is one textual change (patterns in the review scratch harness), run against all M4 tests.
++Procedure: a full run of all 55 mutants (the 47 R2 mutants, adapted where the panel rule changed, plus 8 R2.1 mutants)
++with 58 M4 tests; then M4R21RegressionTest.subnormalSpeedLongRange was added for the survivor M50, and every survivor
++was rerun against the final 59 tests. Tests were only added between the runs, so a mutant killed in the full run stays
++killed.
+ 
+-Result: 47 mutants; 42 killed; 4 equivalent (M20, M33, M38, M45); 1 tolerance-equivalent (M13).
++Result: 55 mutants; 50 killed; 4 equivalent (M20, M33, M38, M45); 1 tolerance-equivalent (M13).
+ 
+-Survivors explained:
++Survivors explained (unchanged from R2):
+   M13 (partial integral not normalised by rho): changes results only inside the panel error estimate (rho = I2/I1 is
+-      within e_k/I1 of 1); detectable only by copying the algorithm. Item for the implementation review (as in R1).
++      within e_k/I1 of 1); detectable only by copying the algorithm. Item for the implementation review.
+   M20 (Math.round instead of round half up): Java's Math.round is round half up for 0 <= q < 2^62 (contract 6.2).
+   M33 (lengthAt(t0) special case removed): with k = 0, F_0(t0) = 0 and S_0 = 0, so the result is 0.0 anyway.
+   M38 (r not clamped to I2): when distance - S_k exceeds I2_k, f_hi < 0 <= tolInv, and step 4 returns hi, exactly as
+-      with the clamp (f_hi = 0). The clamp keeps the invariant f_lo < 0 < f_hi readable; it changes no result.
++      with the clamp (f_hi = 0).
+   M45 (no break at i = 63): the extra step forms only a midpoint (no Newton, no evaluation) and then the loop ends;
+       the better end of the same bracket is returned.
++R2.1 mutants: M48 (R2 arithmetic), M49 (always (d S) M), M50 (always d (M S) or (M d) S), M51 (no (M d) S branch),
++M52 (branch on d S > 0), M53 (nu dropped), M54 (no zero-speed shortcut), M55 ((d S) M in place of (M d) S): all killed.
+ 
+-== Full run (all 47 mutants)
++== Full run (all 55 mutants, 58 M4 tests)
+ M01 (Gauss weights swapped) failing=5 ArcLengthTableTest.Convergence: for a cubic, the length err; ArcLengthTableTest.Effective tolerance: tau = max(absolute,; ArcLengthTableTest.Quadratic Beziers and conical spirals ag; M4AdversarialTest.Fast oscillation (200 periods): a small ; M4R2RegressionTest.F3: iteration cap: a target inside a jum
+ M02 (wrong node in the rule) failing=11 ArcLengthTableTest.Collapsed and stationary geometry: zero ; ArcLengthTableTest.Convergence: for a cubic, the length err; ArcLengthTableTest.Effective tolerance: tau = max(absolute,; ArcLengthTableTest.Quadratic Beziers and conical spirals ag; ArcLengthTableTest.Rigid motion and uniform scale: the pose; EqualDistanceTest.Conical and planar spirals (radius chang; EqualDistanceTest.Quadratic Beziers: equal arc-length spac; M4AdversarialTest.Fast oscillation (200 periods): a small ; M4R2RegressionTest.F3: Newton creep (a speed spike at the r; M4ReferenceVectorTest.arclength.csv: 336 lengths (lines, circl; M4ReferenceVectorTest.inverse.csv: 216 inversions (quadratic a
+-M03 (initial partition of 4 panels) failing=10 ArcLengthTableTest.Circles and helices: length |t1 - t0| sq; ArcLengthTableTest.Convergence: for a cubic, the length err; ArcLengthTableTest.Quadratic Beziers and conical spirals ag; EqualDistanceTest.Quadratic Beziers: equal arc-length spac; M4R2RegressionTest.F1: nonzero subnormal-speed lines and co; M4R2RegressionTest.F2: pathological panels (I2/I1 overflowi; M4R2RegressionTest.F2: ratio mode is clamped to the panel v; M4R2RegressionTest.F3: a target equal to the length at a pa; M4R2RegressionTest.F3: iteration cap: a target inside a jum; M4R2RegressionTest.F3: ties go to the upper end: (a) a targ
+-M04 (relative tolerance ignored) failing=10 ArcLengthTableTest.Circles and helices: length |t1 - t0| sq; ArcLengthTableTest.Collapsed and stationary geometry: zero ; ArcLengthTableTest.Effective tolerance: tau = max(absolute,; ArcLengthTableTest.Quadratic Beziers and conical spirals ag; ArcLengthTableTest.Rigid motion and uniform scale: the pose; M4AdversarialTest.Fast oscillation (200 periods): a small ; M4AdversarialTest.Inversion cost on smooth curves (validat; M4R2RegressionTest.F3: a target equal to the length at a pa; M4R2RegressionTest.F3: ties go to the upper end: (a) a targ; M4ReferenceVectorTest.arclength.csv: 336 lengths (lines, circl
+-M05 (min instead of max) failing=11 ArcLengthTableTest.Circles and helices: length |t1 - t0| sq; ArcLengthTableTest.Collapsed and stationary geometry: zero ; ArcLengthTableTest.Effective tolerance: tau = max(absolute,; ArcLengthTableTest.Quadratic Beziers and conical spirals ag; ArcLengthTableTest.Rigid motion and uniform scale: the pose; M4AdversarialTest.Fast oscillation (200 periods): a small ; M4AdversarialTest.Inversion cost on smooth curves (validat; M4R2RegressionTest.F1: nonzero subnormal-speed lines and co; M4R2RegressionTest.F3: a target equal to the length at a pa; M4R2RegressionTest.F3: ties go to the upper end: (a) a targ; M4ReferenceVectorTest.arclength.csv: 336 lengths (lines, circl
++M03 (initial partition of 4 panels) failing=15 ArcLengthTableTest.Circles and helices: length |t1 - t0| sq; ArcLengthTableTest.Convergence: for a cubic, the length err; ArcLengthTableTest.Quadratic Beziers and conical spirals ag; EqualDistanceTest.Quadratic Beziers: equal arc-length spac; M4R21RegressionTest.F4/F5: no spurious overflow or underflow; M4R21RegressionTest.F4: M3 lines on ranges of a few MIN_VALU; M4R21RegressionTest.F5: finite smooth curves whose weighted ; M4R2RegressionTest.F1: nonzero subnormal-speed lines and co; M4R2RegressionTest.F2: pathological panels (I2/I1 overflowi; M4R2RegressionTest.F2: ratio mode is clamped to the panel v; M4R2RegressionTest.F3: a target equal to the length at a pa; M4R2RegressionTest.F3: iteration cap: a target inside a jum; M4R2RegressionTest.F3: ties go to the upper end: (a) a targ; M4R2RegressionTest.Non-finite derivative after build (contr; M4R2RegressionTest.Stationary intervals (R2 mutation surviv
++M04 (relative tolerance ignored) failing=16 ArcLengthTableTest.Circles and helices: length |t1 - t0| sq; ArcLengthTableTest.Collapsed and stationary geometry: zero ; ArcLengthTableTest.Convergence: for a cubic, the length err; ArcLengthTableTest.Effective tolerance: tau = max(absolute,; ArcLengthTableTest.Quadratic Beziers and conical spirals ag; ArcLengthTableTest.Rigid motion and uniform scale: the pose; EqualDistanceTest.Constant-speed curves: equal-distance pa; M4AdversarialTest.Fast oscillation (200 periods): a small ; M4AdversarialTest.Inversion cost on smooth curves (validat; M4R21RegressionTest.F4/F5: no spurious overflow or underflow; M4R21RegressionTest.F4: M3 lines on ranges of a few MIN_VALU; M4R21RegressionTest.F5: finite smooth curves whose weighted ; M4R2RegressionTest.F3: a target equal to the length at a pa; M4R2RegressionTest.F3: ties go to the upper end: (a) a targ; M4ReferenceVectorTest.arclength.csv: 336 lengths (lines, circl; M4ReferenceVectorTest.inverse.csv: 216 inversions (quadratic a
++M05 (min instead of max) failing=17 ArcLengthTableTest.Circles and helices: length |t1 - t0| sq; ArcLengthTableTest.Collapsed and stationary geometry: zero ; ArcLengthTableTest.Convergence: for a cubic, the length err; ArcLengthTableTest.Effective tolerance: tau = max(absolute,; ArcLengthTableTest.Quadratic Beziers and conical spirals ag; ArcLengthTableTest.Rigid motion and uniform scale: the pose; EqualDistanceTest.Constant-speed curves: equal-distance pa; M4AdversarialTest.Fast oscillation (200 periods): a small ; M4AdversarialTest.Inversion cost on smooth curves (validat; M4R21RegressionTest.F4/F5: no spurious overflow or underflow; M4R21RegressionTest.F4: M3 lines on ranges of a few MIN_VALU; M4R21RegressionTest.F5: finite smooth curves whose weighted ; M4R2RegressionTest.F1: nonzero subnormal-speed lines and co; M4R2RegressionTest.F3: a target equal to the length at a pa; M4R2RegressionTest.F3: ties go to the upper end: (a) a targ; M4ReferenceVectorTest.arclength.csv: 336 lengths (lines, circl; M4ReferenceVectorTest.inverse.csv: 216 inversions (quadratic a
+ M06 (no refinement) failing=6 ArcLengthTableTest.Convergence: for a cubic, the length err; ArcLengthTableTest.Quadratic Beziers and conical spirals ag; ArcLengthTableTest.Rigid motion and uniform scale: the pose; EqualDistanceTest.Quadratic Beziers: equal arc-length spac; M4AdversarialTest.Fast oscillation (200 periods): a small ; M4ReferenceVectorTest.arclength.csv: 336 lengths (lines, circl
+ M07 (budget check off by one split) failing=2 M4AdversarialTest.Budget: build() never calls derivative(); M4R2RegressionTest.F2: pathological panels (I2/I1 overflowi
+ M08 (evaluations() not the exact count) failing=1 M4AdversarialTest.Budget: build() never calls derivative()
+ M09 (always converged) failing=2 M4AdversarialTest.Fast oscillation (200 periods): a small ; M4R2RegressionTest.F2: pathological panels (I2/I1 overflowi
+ M10 (coarse panel value accepted) failing=3 ArcLengthTableTest.Quadratic Beziers and conical spirals ag; M4R2RegressionTest.F2: pathological panels (I2/I1 overflowi; M4R2RegressionTest.F3: a speed discontinuous at a 2^-41 sca
+-M11 (unscaled speed norm) failing=4 ArcLengthTableTest.Lines: length |t1 - t0| |P1 - P0| (BigDe; M4AdversarialTest.Extreme magnitudes: subnormal and 1e100-; M4R2RegressionTest.F1: nonzero subnormal-speed lines and co; M4R2RegressionTest.F2: pathological panels (I2/I1 overflowi
+-M12 (non-finite derivative not checked) failing=0 
++M11 (unscaled speed norm) failing=8 ArcLengthTableTest.Lines: length |t1 - t0| |P1 - P0| (BigDe; M4AdversarialTest.Extreme magnitudes: subnormal and 1e100-; M4R21RegressionTest.F4/F5: no spurious overflow or underflow; M4R21RegressionTest.F4: M3 lines on ranges of a few MIN_VALU; M4R21RegressionTest.F5: a finite table whose partial integra; M4R21RegressionTest.F5: finite smooth curves whose weighted ; M4R2RegressionTest.F1: nonzero subnormal-speed lines and co; M4R2RegressionTest.F2: pathological panels (I2/I1 overflowi
++M12 (non-finite derivative not checked) failing=1 M4R2RegressionTest.Non-finite derivative after build (contr
+ M13 (partial integral not normalised to the panel value) failing=0 
+-M14 (no inversion iterations (linear guess)) failing=11 EqualDistanceTest.Conical and planar spirals (radius chang; EqualDistanceTest.Constant-speed curves: equal-distance pa; EqualDistanceTest.Quadratic Beziers: equal arc-length spac; EqualDistanceTest.Spacing: count = round-half-up(L / d) in; M4AdversarialTest.Extreme magnitudes: subnormal and 1e100-; M4R2RegressionTest.F2: pathological panels (I2/I1 overflowi; M4R2RegressionTest.F3: Newton creep (a speed spike at the r; M4R2RegressionTest.F3: a speed discontinuous at a 2^-41 sca; M4R2RegressionTest.F3: iteration cap: a target inside a jum; M4R2RegressionTest.F3: ties go to the upper end: (a) a targ; M4ReferenceVectorTest.inverse.csv: 216 inversions (quadratic a
+-M15 (panel search strict) failing=0 
++M14 (no inversion iterations (linear guess)) failing=12 EqualDistanceTest.Conical and planar spirals (radius chang; EqualDistanceTest.Constant-speed curves: equal-distance pa; EqualDistanceTest.Quadratic Beziers: equal arc-length spac; EqualDistanceTest.Spacing: count = round-half-up(L / d) in; M4AdversarialTest.Extreme magnitudes: subnormal and 1e100-; M4R2RegressionTest.F2: pathological panels (I2/I1 overflowi; M4R2RegressionTest.F3: Newton creep (a speed spike at the r; M4R2RegressionTest.F3: a speed discontinuous at a 2^-41 sca; M4R2RegressionTest.F3: iteration cap: a target inside a jum; M4R2RegressionTest.F3: ties go to the upper end: (a) a targ; M4R2RegressionTest.Non-finite derivative after build (contr; M4ReferenceVectorTest.inverse.csv: 216 inversions (quadratic a
++M15 (panel search strict) failing=1 M4R2RegressionTest.Stationary intervals (R2 mutation surviv
+ M16 (no monotone clamp) failing=1 EqualDistanceTest.Monotone parameters under a loose tolera
+ M17 (EXCLUDE_END repeats the seam) failing=8 EqualDistanceTest.Conical and planar spirals (radius chang; EqualDistanceTest.Constant-speed curves: equal-distance pa; M4AdversarialTest.Extreme magnitudes: subnormal and 1e100-; M4ReferenceVectorTest.uniform.csv: 2,310 normative uniform par; SampleSetTest.Immutability: parameters() returns a cop; UniformParameterTest.Counts 0, 1 and 2: empty set; one sample; UniformParameterTest.On [0, 1] the parameters are exactly the; UniformParameterTest.Uniform parameter samples of constant-sp
+ M18 (last uniform parameter not forced to t1) failing=1 M4ReferenceVectorTest.uniform.csv: 2,310 normative uniform par
+@@ -43,7 +45,7 @@ M22 (maxSamples not enforced) failing=3 EqualDistanceTest.Spacing validation and
+ M23 (parameters() exposes internal array) failing=1 SampleSetTest.Immutability: parameters() returns a cop
+ M24 (transformed() drops translation) failing=1 SampleSetTest.transformed(pose): the same parameters, 
+ M25 (no zero-length fallback) failing=1 EqualDistanceTest.Zero-length curves: equal-distance sampl
+-M26 (parameterAt(length) not exact) failing=1 M4R2RegressionTest.Endpoint exactness with a stationary tai
++M26 (parameterAt(length) not exact) failing=1 M4R2RegressionTest.Stationary intervals (R2 mutation surviv
+ M27 (2 inversion iterations) failing=7 EqualDistanceTest.Conical and planar spirals (radius chang; EqualDistanceTest.Quadratic Beziers: equal arc-length spac; M4R2RegressionTest.F3: Newton creep (a speed spike at the r; M4R2RegressionTest.F3: a speed discontinuous at a 2^-41 sca; M4R2RegressionTest.F3: iteration cap: a target inside a jum; M4R2RegressionTest.F3: ties go to the upper end: (a) a targ; M4ReferenceVectorTest.inverse.csv: 216 inversions (quadratic a
+ M28 (Newton step sign (bisection fallback remains)) failing=1 M4AdversarialTest.Inversion cost on smooth curves (validat
+ M29 (refine the smallest error first) failing=6 ArcLengthTableTest.Convergence: for a cubic, the length err; ArcLengthTableTest.Quadratic Beziers and conical spirals ag; ArcLengthTableTest.Rigid motion and uniform scale: the pose; EqualDistanceTest.Quadratic Beziers: equal arc-length spac; M4AdversarialTest.Fast oscillation (200 periods): a small ; M4ReferenceVectorTest.arclength.csv: 336 lengths (lines, circl
+@@ -51,7 +53,7 @@ M30 (relative upper bound not checked) failing=1 SampleSetTest.SampleLimits: max
+ M31 (minimum budget not enforced) failing=1 SampleSetTest.SampleLimits: maxSamples in [1, 2^20], m
+ M32 (no saturation of huge counts) failing=2 EqualDistanceTest.Spacing validation and explosion guard: ; M4ReferenceVectorTest.counts.csv: 202 normative spacing counts
+ M33 (lengthAt(t0) not exact) failing=0 
+-M34 (R2: no tolerance floor (R1 behaviour)) failing=1 M4R2RegressionTest.F1: nonzero subnormal-speed lines and co
++M34 (R2: no tolerance floor (R1 behaviour)) failing=2 M4R21RegressionTest.F4/F5: no spurious overflow or underflow; M4R2RegressionTest.F1: nonzero subnormal-speed lines and co
+ M35 (R2: ratio mode whenever I1 > 0 (R1 behaviour)) failing=1 M4R2RegressionTest.F2: pathological panels (I2/I1 overflowi
+ M36 (R2: ratio-mode test one-sided (I1 <= 2 I2 missing)) failing=1 M4R2RegressionTest.F2: pathological panels (I2/I1 overflowi
+ M37 (R2: partial integral not clamped to I2) failing=1 M4R2RegressionTest.F2: ratio mode is clamped to the panel v
+@@ -64,12 +66,19 @@ M43 (R2: no tolerance exit (runs to collapse or the cap)) failing=1 M4Adversaria
+ M44 (R2: lower end always returned) failing=3 M4R2RegressionTest.F3: a speed discontinuous at a 2^-41 sca; M4R2RegressionTest.F3: iteration cap: a target inside a jum; M4R2RegressionTest.F3: ties go to the upper end: (a) a targ
+ M45 (R2: no early break in the last iteration) failing=0 
+ M46 (R2: inversion tolerance tau instead of tau 2^-10) failing=3 M4R2RegressionTest.F3: Newton creep (a speed spike at the r; M4R2RegressionTest.F3: iteration cap: a target inside a jum; M4R2RegressionTest.F3: ties go to the upper end: (a) a targ
+-M47 (R2: bracket ends not accepted before iterating) failing=2 M4R2RegressionTest.F3: a target equal to the length at a pa; M4R2RegressionTest.F3: ties go to the upper end: (a) a targ
++M47 (R2: bracket ends not accepted before iterating) failing=3 M4R2RegressionTest.F3: a target equal to the length at a pa; M4R2RegressionTest.F3: ties go to the upper end: (a) a targ; M4R2RegressionTest.Stationary intervals (R2 mutation surviv
++M48 (R2.1: R2 arithmetic (half-width times the weighted sum)) failing=4 M4R21RegressionTest.F4/F5: no spurious overflow or underflow; M4R21RegressionTest.F4: M3 lines on ranges of a few MIN_VALU; M4R21RegressionTest.F5: a finite table whose partial integra; M4R21RegressionTest.F5: finite smooth curves whose weighted 
++M49 (R2.1: always (d S) M) failing=3 M4R21RegressionTest.F4/F5: no spurious overflow or underflow; M4R21RegressionTest.F4: M3 lines on ranges of a few MIN_VALU; M4R21RegressionTest.F5: finite smooth curves whose weighted 
++M50 (R2.1: always d (M S) or (M d) S) failing=0 
++M51 (R2.1: no (M d) S branch) failing=2 M4R21RegressionTest.F5: a finite table whose partial integra; M4R21RegressionTest.F5: finite smooth curves whose weighted 
++M52 (R2.1: branch on p > 0 instead of p normal) failing=3 M4R21RegressionTest.F4/F5: no spurious overflow or underflow; M4R21RegressionTest.F4: M3 lines on ranges of a few MIN_VALU; M4R21RegressionTest.F5: finite smooth curves whose weighted 
++M53 (R2.1: nu dropped from the ratios) failing=17 ArcLengthTableTest.Circles and helices: length |t1 - t0| sq; ArcLengthTableTest.Convergence: for a cubic, the length err; ArcLengthTableTest.Effective tolerance: tau = max(absolute,; ArcLengthTableTest.Lines: length |t1 - t0| |P1 - P0| (BigDe; ArcLengthTableTest.Quadratic Beziers and conical spirals ag; ArcLengthTableTest.Rigid motion and uniform scale: the pose; EqualDistanceTest.Conical and planar spirals (radius chang; EqualDistanceTest.Constant-speed curves: equal-distance pa; EqualDistanceTest.Quadratic Beziers: equal arc-length spac; M4AdversarialTest.Extreme magnitudes: subnormal and 1e100-; M4AdversarialTest.Inversion cost on smooth curves (validat; M4R21RegressionTest.F4/F5: no spurious overflow or underflow; M4R21RegressionTest.F4: M3 lines on ranges of a few MIN_VALU; M4R21RegressionTest.F5: finite smooth curves whose weighted ; M4R2RegressionTest.F1: nonzero subnormal-speed lines and co; M4ReferenceVectorTest.arclength.csv: 336 lengths (lines, circl; M4ReferenceVectorTest.inverse.csv: 216 inversions (quadratic a
++M54 (R2.1: no zero-speed shortcut (0/0)) failing=6 ArcLengthTableTest.Circles and helices: length |t1 - t0| sq; ArcLengthTableTest.Collapsed and stationary geometry: zero ; EqualDistanceTest.Zero-length curves: equal-distance sampl; M4R2RegressionTest.F2: pathological panels (I2/I1 overflowi; M4R2RegressionTest.Stationary intervals (R2 mutation surviv; M4ReferenceVectorTest.arclength.csv: 336 lengths (lines, circl
++M55 (R2.1: (d S) M in place of (M d) S) failing=1 M4R21RegressionTest.F5: finite smooth curves whose weighted 
+ 
+-== Rerun of the full run's survivors against the final tests (54 M4 tests)
+-M12 (non-finite derivative not checked) failing=1 M4R2RegressionTest.Non-finite derivative after build (contr
++== Rerun of the full run's survivors against the final tests (59 M4 tests)
++M50 (R2.1: always d (M S) or (M d) S) failing=1 M4R21RegressionTest.F4: subnormal speeds over long ranges lo
+ M13 (partial integral not normalised to the panel value) failing=0 
+-M15 (panel search strict) failing=1 M4R2RegressionTest.Stationary intervals (R2 mutation surviv
+ M20 (Math.round instead of the half-up rule) failing=0 
+ M33 (lengthAt(t0) not exact) failing=0 
+ M38 (R2: target residual not clamped to I2) failing=0 
+diff --git a/docs/m4/validation/r21/README.md b/docs/m4/validation/r21/README.md
+new file mode 100644
+index 0000000..38b0883
+--- /dev/null
++++ b/docs/m4/validation/r21/README.md
+@@ -0,0 +1,15 @@
++# M4 R2.1 validation evidence
++
++These files are review scratch, kept as evidence. All runs used Java 25.0.4.1 against the **throwaway** R1, R2 and R2.1
++reference implementations of the contract. Those implementations are kept outside the repository and are not
++delivered.
++
++| File | Content |
++|---|---|
++| `findings-r2.txt` | `F45.java` against R2, which reproduces the findings. F4: M3 lines on `[0, k MIN_VALUE]` have length 0 at every speed, up to 1e300. F5: `ArithmeticException` ("length is not finite") for lines with speeds 1e308 to `sqrt(2) MAX_VALUE` on short ranges, whose lengths are finite |
++| `findings-r21.txt` | the same probe against R2.1: all of these lengths are finite and accurate, and `lengthAt` one ulp above t0 is correct |
++| `r2-vs-r21-reference-values.txt` | `LenDump.java`: lengths, estimates, panel counts, `lengthAt` and `parameterAt` over the 1,344 reference tables, compared bit for bit between R2 and R2.1. Differences are rounding-level only: at most 7.9e-16 relative in a length, and no panel-count change |
++| `before-after-tests.txt` | the 59 R2.1 M4 tests against R1 (48 pass), R2 (54 pass; the 5 failures are the R2.1 regression tests) and R2.1 (59 pass) |
++
++Running the probes: compile them against the main classes of a build that contains a reference implementation, for
++example `javac -d out -cp build/classes/java/main docs/m4/validation/r21/F45.java`.
+diff --git a/docs/m4/validation/r21/before-after-tests.txt b/docs/m4/validation/r21/before-after-tests.txt
+index a5bc86d..a2235b7 100644
+--- a/docs/m4/validation/r21/before-after-tests.txt
++++ b/docs/m4/validation/r21/before-after-tests.txt
+@@ -1,6 +1,7 @@
+-The 58 M4 tests of revision 2.1 against the three THROWAWAY reference implementations (not delivered); Java 25.0.4.1, Gradle 9.1.0.
++The 59 M4 tests of revision 2.1 against the three THROWAWAY reference implementations (not delivered); Java 25.0.4.1, Gradle 9.1.0.
+ 
+-== R1 reference implementation (contract revision 1): 58 tests, 48 passed, 10 failed
++== R1 reference implementation (contract revision 1): 59 tests, 48 passed, 11 failed
++  FAILED M4R21RegressionTest :: F4: subnormal speeds over long ranges lose at most MIN_VALUE/2 per half-panel rule (no MIN :: org.opentest4j.AssertionFailedError: line to Vec3[x=4.9E-324, y=4.9E-324, z=0.0] on [0.0, 1000.0] (exact 6.986E-321): length ==> expected: <6.986E-321> but was:
+   FAILED M4R21RegressionTest :: F4: M3 lines on ranges of a few MIN_VALUE (half-width rounds to 0): length within the cont :: org.opentest4j.AssertionFailedError: line to Vec3[x=1.0, y=0.0, z=0.0] on [0.0, 4.9E-324] (exact 4.9E-324): length ==> expected: <4.9E-324> but was: <0.0>
+   FAILED M4R21RegressionTest :: F5: a finite table whose partial integral overflowed (speed 1e308, or components at MAX_VA :: org.opentest4j.AssertionFailedError: big 1.0E308: lengthAt(4.9E-324) = NaN ==> expected: <true> but was: <false>
+   FAILED M4R21RegressionTest :: F5: finite smooth curves whose weighted node sum overflows (speeds 1e308 to 2.5e308, compo :: java.lang.ArithmeticException: ArcLengthTable: length is not finite
+@@ -12,12 +13,13 @@ The 58 M4 tests of revision 2.1 against the three THROWAWAY reference implementa
+   FAILED M4R2RegressionTest :: F1: nonzero subnormal-speed lines and constant-speed spirals converge with 16 panels; tau  :: org.opentest4j.AssertionFailedError: line to Vec3[x=3.5E-323, y=0.0, z=0.0] on 0.0..1.0 tau is the floor ==> expected: <5.06E-321> but was: <0.0>
+   FAILED M4R2RegressionTest :: F3: ties go to the upper end: (a) a target exactly halfway across a panel shorter than 2 t :: org.opentest4j.AssertionFailedError: tie: the upper end ==> expected: <0.0625> but was: <0.03125>
+ 
+-== R2 reference implementation (contract revision 2): 58 tests, 54 passed, 4 failed
++== R2 reference implementation (contract revision 2): 59 tests, 54 passed, 5 failed
++  FAILED M4R21RegressionTest :: F4: subnormal speeds over long ranges lose at most MIN_VALUE/2 per half-panel rule (no MIN :: org.opentest4j.AssertionFailedError: line to Vec3[x=4.9E-324, y=4.9E-324, z=0.0] on [0.0, 1000.0] (exact 6.986E-321): length ==> expected: <6.986E-321> but was:
+   FAILED M4R21RegressionTest :: F4: M3 lines on ranges of a few MIN_VALUE (half-width rounds to 0): length within the cont :: org.opentest4j.AssertionFailedError: line to Vec3[x=1.0, y=0.0, z=0.0] on [0.0, 4.9E-324] (exact 4.9E-324): length ==> expected: <4.9E-324> but was: <0.0>
+   FAILED M4R21RegressionTest :: F5: a finite table whose partial integral overflowed (speed 1e308, or components at MAX_VA :: org.opentest4j.AssertionFailedError: big 1.0E308: lengthAt(4.9E-324) = NaN ==> expected: <true> but was: <false>
+   FAILED M4R21RegressionTest :: F5: finite smooth curves whose weighted node sum overflows (speeds 1e308 to 2.5e308, compo :: java.lang.ArithmeticException: ArcLengthTable: length is not finite
+   FAILED M4R21RegressionTest :: F4/F5: no spurious overflow or underflow in the panel rule: 3,000 random lines (speeds 1e- :: org.opentest4j.AssertionFailedError: line to Vec3[x=1.95530343039928E92, y=6.5779677804509205E94, z=0.0] on [0.0, 6.08482575065932E-76] (exact 4.002596456661013
+ 
+-== R2.1 reference implementation (contract revision 2.1): 58 tests, 58 passed, 0 failed
++== R2.1 reference implementation (contract revision 2.1): 59 tests, 59 passed, 0 failed
+ 
+-R2 fails exactly the four R2.1 regression tests (F4 and F5). R1 fails those four and its six known R2 regression failures.
++R2 fails exactly the five R2.1 regression tests (F4 and F5). R1 fails those five and its six known R2 regression failures.
+diff --git a/docs/m4/validation/reference-run-summary.txt b/docs/m4/validation/reference-run-summary.txt
+index 4286b16..2544420 100644
+--- a/docs/m4/validation/reference-run-summary.txt
++++ b/docs/m4/validation/reference-run-summary.txt
+@@ -2,52 +2,52 @@ M4 tests against a THROWAWAY reference implementation of the M4 contract, REVISI
+ Base: a6726c42a20940a6a6d2dd24477e6a642f6b8cbc (verified M3 baseline, 254 tests) plus the M4 R2.1 tests and reference data of this proposal.
+ java version "25.0.4.1" 2026-08-18 LTS
+ Gradle 9.1.0 (project wrapper); fresh copy, clean run: ./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test, then check
+-test: BUILD SUCCESSFUL in 1m 18s
++test: BUILD SUCCESSFUL in 1m 17s
+ check: BUILD SUCCESSFUL in 8s
+ 
+-workshop.vfx.math.core.Amendment3AcceptanceTest         tests= 10 not-passed=0 time=0.62
++workshop.vfx.math.core.Amendment3AcceptanceTest         tests= 10 not-passed=0 time=0.688
+ workshop.vfx.math.core.BoundaryTest                     tests=  2 not-passed=0 time=0.004
+-workshop.vfx.math.core.ConventionsTest                  tests= 10 not-passed=0 time=0.007
+-workshop.vfx.math.core.FrameTest                        tests= 11 not-passed=0 time=0.087
+-workshop.vfx.math.core.JomlOracleTest                   tests=  4 not-passed=0 time=0.073
+-workshop.vfx.math.core.M0RegressionTest                 tests=  6 not-passed=0 time=0.015
++workshop.vfx.math.core.ConventionsTest                  tests= 10 not-passed=0 time=0.009
++workshop.vfx.math.core.FrameTest                        tests= 11 not-passed=0 time=0.076
++workshop.vfx.math.core.JomlOracleTest                   tests=  4 not-passed=0 time=0.051
++workshop.vfx.math.core.M0RegressionTest                 tests=  6 not-passed=0 time=0.016
+ workshop.vfx.math.core.MathUtilTest                     tests=  4 not-passed=0 time=0.005
+-workshop.vfx.math.core.NumericPolicyTest                tests= 13 not-passed=0 time=0.263
+-workshop.vfx.math.core.PolicyClarificationTest          tests=  9 not-passed=0 time=0.06
+-workshop.vfx.math.core.PoseTest                         tests= 12 not-passed=0 time=0.238
+-workshop.vfx.math.core.QuatTest                         tests= 17 not-passed=0 time=0.258
+-workshop.vfx.math.core.ReviewAdversarialTest            tests= 18 not-passed=0 time=18.056
+-workshop.vfx.math.core.Vec3Test                         tests=  9 not-passed=0 time=0.026
+-workshop.vfx.math.curve.BezierTest                      tests=  7 not-passed=0 time=0.141
+-workshop.vfx.math.curve.EasingTest                      tests=  8 not-passed=0 time=2.397
+-workshop.vfx.math.curve.M3BoundaryTest                  tests=  3 not-passed=0 time=0.015
+-workshop.vfx.math.curve.M3DeterminismTest               tests=  2 not-passed=0 time=0.266
+-workshop.vfx.math.curve.M3ReferenceVectorTest           tests=  4 not-passed=0 time=0.1
+-workshop.vfx.math.curve.M3ReviewAdversarialTest         tests= 12 not-passed=0 time=22.059
+-workshop.vfx.math.curve.M3UnderflowTest                 tests=  7 not-passed=0 time=4.082
+-workshop.vfx.math.curve.PosedCurveTest                  tests=  5 not-passed=0 time=0.037
+-workshop.vfx.math.curve.SpiralTest                      tests= 15 not-passed=0 time=0.474
+-workshop.vfx.math.sample.ArcLengthTableTest             tests=  9 not-passed=0 time=0.741
+-workshop.vfx.math.sample.EqualDistanceTest              tests=  8 not-passed=0 time=2.399
+-workshop.vfx.math.sample.M4AdversarialTest              tests=  8 not-passed=0 time=0.254
+-workshop.vfx.math.sample.M4BoundaryTest                 tests=  3 not-passed=0 time=0.044
+-workshop.vfx.math.sample.M4DeterminismTest              tests=  2 not-passed=0 time=0.522
+-workshop.vfx.math.sample.M4R21RegressionTest            tests=  4 not-passed=0 time=0.233
+-workshop.vfx.math.sample.M4R2RegressionTest             tests= 10 not-passed=0 time=0.025
+-workshop.vfx.math.sample.M4ReferenceVectorTest          tests=  5 not-passed=0 time=5.322
+-workshop.vfx.math.sample.SampleSetTest                  tests=  3 not-passed=0 time=1.325
+-workshop.vfx.math.sample.UniformParameterTest           tests=  6 not-passed=0 time=0.214
+-workshop.vfx.math.time.M2BoundaryTest                   tests=  3 not-passed=0 time=0.035
+-workshop.vfx.math.time.M2DeterminismTest                tests=  8 not-passed=0 time=0.232
+-workshop.vfx.math.time.M2GoldenVectorTest               tests=  5 not-passed=0 time=0.032
+-workshop.vfx.math.time.M2ReviewAdversarialTest          tests= 13 not-passed=0 time=2.051
+-workshop.vfx.math.time.M2Revision2Test                  tests=  9 not-passed=0 time=0.034
+-workshop.vfx.math.time.PlaybackTest                     tests=  9 not-passed=0 time=0.11
+-workshop.vfx.math.time.TickTimeTest                     tests=  4 not-passed=0 time=0.049
+-workshop.vfx.math.time.TimePointTest                    tests=  4 not-passed=0 time=0.172
+-workshop.vfx.math.time.TimingTest                       tests= 11 not-passed=0 time=0.409
+-TOTAL 312 not passed 0
++workshop.vfx.math.core.NumericPolicyTest                tests= 13 not-passed=0 time=0.21
++workshop.vfx.math.core.PolicyClarificationTest          tests=  9 not-passed=0 time=0.077
++workshop.vfx.math.core.PoseTest                         tests= 12 not-passed=0 time=0.211
++workshop.vfx.math.core.QuatTest                         tests= 17 not-passed=0 time=0.245
++workshop.vfx.math.core.ReviewAdversarialTest            tests= 18 not-passed=0 time=18.622
++workshop.vfx.math.core.Vec3Test                         tests=  9 not-passed=0 time=0.021
++workshop.vfx.math.curve.BezierTest                      tests=  7 not-passed=0 time=0.139
++workshop.vfx.math.curve.EasingTest                      tests=  8 not-passed=0 time=2.489
++workshop.vfx.math.curve.M3BoundaryTest                  tests=  3 not-passed=0 time=0.012
++workshop.vfx.math.curve.M3DeterminismTest               tests=  2 not-passed=0 time=0.328
++workshop.vfx.math.curve.M3ReferenceVectorTest           tests=  4 not-passed=0 time=0.122
++workshop.vfx.math.curve.M3ReviewAdversarialTest         tests= 12 not-passed=0 time=22.284
++workshop.vfx.math.curve.M3UnderflowTest                 tests=  7 not-passed=0 time=4.452
++workshop.vfx.math.curve.PosedCurveTest                  tests=  5 not-passed=0 time=0.06
++workshop.vfx.math.curve.SpiralTest                      tests= 15 not-passed=0 time=0.561
++workshop.vfx.math.sample.ArcLengthTableTest             tests=  9 not-passed=0 time=0.407
++workshop.vfx.math.sample.EqualDistanceTest              tests=  8 not-passed=0 time=1.664
++workshop.vfx.math.sample.M4AdversarialTest              tests=  8 not-passed=0 time=0.629
++workshop.vfx.math.sample.M4BoundaryTest                 tests=  3 not-passed=0 time=0.036
++workshop.vfx.math.sample.M4DeterminismTest              tests=  2 not-passed=0 time=1.635
++workshop.vfx.math.sample.M4R21RegressionTest            tests=  5 not-passed=0 time=0.22
++workshop.vfx.math.sample.M4R2RegressionTest             tests= 10 not-passed=0 time=0.028
++workshop.vfx.math.sample.M4ReferenceVectorTest          tests=  5 not-passed=0 time=3.702
++workshop.vfx.math.sample.SampleSetTest                  tests=  3 not-passed=0 time=1.511
++workshop.vfx.math.sample.UniformParameterTest           tests=  6 not-passed=0 time=0.199
++workshop.vfx.math.time.M2BoundaryTest                   tests=  3 not-passed=0 time=0.007
++workshop.vfx.math.time.M2DeterminismTest                tests=  8 not-passed=0 time=0.291
++workshop.vfx.math.time.M2GoldenVectorTest               tests=  5 not-passed=0 time=0.031
++workshop.vfx.math.time.M2ReviewAdversarialTest          tests= 13 not-passed=0 time=2.17
++workshop.vfx.math.time.M2Revision2Test                  tests=  9 not-passed=0 time=0.04
++workshop.vfx.math.time.PlaybackTest                     tests=  9 not-passed=0 time=0.14
++workshop.vfx.math.time.TickTimeTest                     tests=  4 not-passed=0 time=0.07
++workshop.vfx.math.time.TimePointTest                    tests=  4 not-passed=0 time=0.147
++workshop.vfx.math.time.TimingTest                       tests= 11 not-passed=0 time=0.459
++TOTAL 313 not passed 0
+ 
+-JUnit XML totals: tests 312, failures 0, errors 0, skipped 0.
+-By package: M1 core 125, M2 time 66, M3 curve 51 + M3 review 12 = 63, M4 sample 58. Total 312, passed 312.
+-(R1: 298 with 44 M4 tests; R2: 308 with 54; R2.1 adds M4R21RegressionTest, 4 tests; no test removed or changed.)
++JUnit XML totals: tests 313, failures 0, errors 0, skipped 0.
++By package: M1 core 125, M2 time 66, M3 curve 51 + M3 review 12 = 63, M4 sample 59. Total 313, passed 313.
++(R1: 298 with 44 M4 tests; R2: 308 with 54; R2.1 adds M4R21RegressionTest, 5 tests; no existing test removed or changed.)
+diff --git a/src/test/java/workshop/vfx/math/sample/M4R21RegressionTest.java b/src/test/java/workshop/vfx/math/sample/M4R21RegressionTest.java
+index 50e1258..15a7327 100644
+--- a/src/test/java/workshop/vfx/math/sample/M4R21RegressionTest.java
++++ b/src/test/java/workshop/vfx/math/sample/M4R21RegressionTest.java
+@@ -49,11 +49,11 @@ class M4R21RegressionTest {
+     }
+ 
+     /**
+-     * Contract 10.2 for a line (exact derivative): (t1 - t0) dv + (K + 64) eps L + R_w MIN_VALUE / 2, with
+-     * dv = 5 eps v + MIN_VALUE and (t1 - t0) v = L (the speed itself may exceed MAX_VALUE).
++     * Contract 10.2 (R2.1) for a line, whose derivative is exact (delta_c = 0): (t1 - t0) dv + (K + 64) eps L +
++     * R_w MIN_VALUE / 2, with dv = 5 eps v and (t1 - t0) v = L (the speed itself may exceed MAX_VALUE).
+      */
+     private static double lineAllowance(double t0, double t1, double exact) {
+-        return 5 * EPS * exact + (t1 - t0) * Q + 80 * EPS * exact + (0.5 * nonzeroHalves(t0, t1)) * Q;
++        return 5 * EPS * exact + 80 * EPS * exact + (0.5 * nonzeroHalves(t0, t1)) * Q;
+     }
+ 
+     private static void checkLine(Vec3 end, double t0, double t1) {
+@@ -141,6 +141,17 @@ class M4R21RegressionTest {
+         }
+     }
+ 
++    @Test
++    @DisplayName("F4: subnormal speeds over long ranges lose at most MIN_VALUE/2 per half-panel rule (no MIN_VALUE per unit of parameter): lines with components (q, q, 0), (q, 2q, 2q), (3q, q, 0) and (q, 0, 0) on [0, 1000] and [-7, 9]")
++    void subnormalSpeedLongRange() {
++        Vec3[] ends = {new Vec3(Q, Q, 0), new Vec3(Q, 2 * Q, 2 * Q), new Vec3(3 * Q, Q, 0), new Vec3(Q, 0, 0)};
++        for (Vec3 end : ends) {
++            for (double[] r : new double[][] {{0, 1000}, {-7, 9}}) {
++                checkLine(end, r[0], r[1]);
++            }
++        }
++    }
++
+     @Test
+     @DisplayName("F4/F5: no spurious overflow or underflow in the panel rule: 3,000 random lines (speeds 1e-300 to 2.9e308 with components up to MAX_VALUE, range widths 1 MIN_VALUE to 1e3, exact lengths below MAX_VALUE/4) all give finite, converged lengths within the allowance")
+     void panelRuleRange() {
+-- 
+2.43.0
+

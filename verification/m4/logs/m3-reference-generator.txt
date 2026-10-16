@@ -1,0 +1,1 @@
+{'easing.csv': 1155, 'bezier.csv': 645, 'spiral.csv': 959}

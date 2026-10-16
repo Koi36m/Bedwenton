@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.curve.PosedCurveTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-16T22:13:30.030Z" hostname="runnervm8k3b6" time="0.027">
+  <properties/>
+  <testcase name="Composition: c.transformed(a).transformed(b) equals c.transformed(b.then(a)) (M1 Pose.then) (section 3)" classname="workshop.vfx.math.curve.PosedCurveTest" time="0.01"/>
+  <testcase name="A placed circle lies in the plane normal to the rotated +Y, at distance scale * r from the translation, and runs counter-clockwise about that normal (sections 3, 5)" classname="workshop.vfx.math.curve.PosedCurveTest" time="0.007"/>
+  <testcase name="Orientation by Frame: Quat.fromFrame(Frame.fromHeading(...)) places a circle facing a heading, without new orientation types (sections 3, 9)" classname="workshop.vfx.math.curve.PosedCurveTest" time="0.001"/>
+  <testcase name="Validation: curve and pose are required; transformed(pose) is a PosedCurve (section 3)" classname="workshop.vfx.math.curve.PosedCurveTest" time="0.001"/>
+  <testcase name="Derivatives transform as directions scaled by the pose scale: they match finite differences of the placed points (section 3)" classname="workshop.vfx.math.curve.PosedCurveTest" time="0.006"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

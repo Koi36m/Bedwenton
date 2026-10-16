@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.sample.M4AdversarialTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-16T22:13:33.376Z" hostname="runnervm8k3b6" time="0.395">
+  <properties/>
+  <testcase name="Signed zero and tiny ranges: t0 = -0.0 is kept; a range of one ulp works; t0 == t1 gives length 0 and one repeated point" classname="workshop.vfx.math.sample.M4AdversarialTest" time="0.001"/>
+  <testcase name="Particle-count explosion: the largest permitted request is bounded by SampleLimits; limit violations are reported before any allocation-sized work" classname="workshop.vfx.math.sample.M4AdversarialTest" time="0.002"/>
+  <testcase name="Sampling work: each equal-distance sample calls point() exactly once and derivative() at most 336 times; parameterAt and lengthAt are bounded too" classname="workshop.vfx.math.sample.M4AdversarialTest" time="0.005"/>
+  <testcase name="Failures: a non-finite derivative gives ArithmeticException; exceptions thrown by a user curve propagate unchanged; overflow of the length gives ArithmeticException" classname="workshop.vfx.math.sample.M4AdversarialTest" time="0.002"/>
+  <testcase name="Fast oscillation (200 periods): a small budget terminates unconverged with an honest estimate; a large budget converges; more budget never increases the error estimate much" classname="workshop.vfx.math.sample.M4AdversarialTest" time="0.028"/>
+  <testcase name="Budget: build() never calls derivative() more than maxEvaluations times, evaluations() reports the exact count, and point()/secondDerivative() are never called" classname="workshop.vfx.math.sample.M4AdversarialTest" time="0.349"/>
+  <testcase name="Extreme magnitudes: subnormal and 1e100-scale curves give accurate lengths (scaled speed norm: no overflow or underflow of squares); ranges up to +-1e3" classname="workshop.vfx.math.sample.M4AdversarialTest" time="0.003"/>
+  <testcase name="Inversion cost on smooth curves (validated, contract 6.3): Newton steps keep the mean below 40 derivative evaluations per equal-distance sample (pure bisection would need about 6 x 30)" classname="workshop.vfx.math.sample.M4AdversarialTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,1 @@
+{'arclength.csv': 336, 'inverse.csv': 216, 'uniform.csv': 2310, 'counts.csv': 202}

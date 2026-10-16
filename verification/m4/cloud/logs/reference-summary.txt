@@ -1,0 +1,3 @@
+m3 {'bezier.csv': 645, 'easing.csv': 1155, 'spiral.csv': 959} total: 2759
+m4 {'arclength.csv': 336, 'counts.csv': 202, 'inverse.csv': 216, 'uniform.csv': 2310} total: 3064
+Independent M3/M4 regeneration and byte comparisons: PASS

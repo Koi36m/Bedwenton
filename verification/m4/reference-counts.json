@@ -1,0 +1,13 @@
+{
+  "m3": {
+    "bezier.csv": 645,
+    "easing.csv": 1155,
+    "spiral.csv": 959
+  },
+  "m4": {
+    "arclength.csv": 336,
+    "counts.csv": 202,
+    "inverse.csv": 216,
+    "uniform.csv": 2310
+  }
+}

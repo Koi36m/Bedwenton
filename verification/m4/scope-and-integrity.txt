@@ -1,0 +1,6 @@
+Frozen accepted M1/M2/M3 source, tests, resources and M3 generator/workflow: empty Git diff.
+Approved M4 tests, reference data, generator and normative contract: empty Git diff.
+All 672 baseline tracked files verified byte-identical using FROZEN-M1-M3-SHA256SUMS.txt.
+All 50 M4 specification tracked files verified byte-identical using APPROVED-M4-SHA256SUMS.txt.
+Production changes: seven added files under workshop.vfx.math.sample only; six public types, one package-private validation helper.
+No build.gradle changes and no dependencies added.

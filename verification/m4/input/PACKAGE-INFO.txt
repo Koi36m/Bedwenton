@@ -1,0 +1,17 @@
+M4 particle sampling and distribution: PROPOSAL, revision 2.1 (Claude Code). NOT APPROVED; not authorized for implementation.
+Answers ChatGPT's R2 review (REVISION REQUIRED: F4 half-width underflow, F5 weighted-sum overflow).
+Start with docs/m4/M4-R21-CORRECTIONS.md, then docs/m4/M4-IMPLEMENTATION-CONTRACT.md sections 5.1, 5.2, 5.5 and 10.2.
+The review file M4-R2-Independent-Review.md was NOT available in this session; its five minor documentation items could
+not be read and remain open unless covered by the self-identified corrections D1 to D7 (see the corrections file).
+Baseline: verified M3 a6726c42a20940a6a6d2dd24477e6a642f6b8cbc (m3-actions-verification; 254/254 tests).
+Branch m4-spec-r21 = 6ad7232cf030df649c70920893adb1f8a424a7cf
+  (on m4-spec-r2 = 268b6aa, the R2 proposal, on m4-spec = 3750b34, the R1 proposal, on a6726c4).
+NOT PUSHED: GitHub refused the push with HTTP 403 (no GitHub access for this repository); attempted once, not retried.
+Bundle m4-spec-r21.bundle is complete (no prerequisites) and contains every local branch unchanged, including m4-spec, m4-spec-r2, m4-spec-r21:
+  git clone m4-spec-r21.bundle repo && cd repo && git checkout m4-spec-r21
+Patches: patches/0001 (R1), 0002-0003 (R2), 0004-0005 (R2.1); git am on a6726c4 reproduces the tree of the branch head.
+No production M4 code; M1, M2 and M3 unchanged; reference data unchanged since R1; nothing merged.
+Validation: full suite against a throwaway R2.1 reference implementation (not delivered), Java 25.0.4.1, Gradle 9.1.0:
+  313 tests, 313 passed (M1 125, M2 66, M3 51, M3 review 12, M4 59); check succeeds.
+  Mutation analysis: 55 mutants, 50 killed, 4 equivalent, 1 tolerance-equivalent.
+Verify: sha256sum -c SHA256SUMS.txt

@@ -1,0 +1,1771 @@
+﻿2026-10-16T22:12:31.0535230Z Current runner version: '2.337.0'
+2026-10-16T22:12:31.0573019Z ##[group]Runner Image Provisioner
+2026-10-16T22:12:31.0574619Z Hosted Compute Agent
+2026-10-16T22:12:31.0575711Z Version: 20261012.601
+2026-10-16T22:12:31.0576862Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-16T22:12:31.0578319Z Build Date: 2026-10-12T17:48:21Z
+2026-10-16T22:12:31.0579667Z Worker ID: {4886813c-4be7-4a19-b813-a6c4877d7fc9}
+2026-10-16T22:12:31.0580944Z Region: eastus2
+2026-10-16T22:12:31.0582543Z Cloud: Azure
+2026-10-16T22:12:31.0583459Z ##[endgroup]
+2026-10-16T22:12:31.0585952Z ##[group]Operating System
+2026-10-16T22:12:31.0587067Z Ubuntu
+2026-10-16T22:12:31.0588012Z 24.04.5
+2026-10-16T22:12:31.0589728Z LTS
+2026-10-16T22:12:31.0590703Z ##[endgroup]
+2026-10-16T22:12:31.0591841Z ##[group]Runner Image
+2026-10-16T22:12:31.0593288Z Image: ubuntu-24.04
+2026-10-16T22:12:31.0594301Z Version: 20261012.334.1
+2026-10-16T22:12:31.0596694Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-16T22:12:31.0599667Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-16T22:12:31.0601551Z ##[endgroup]
+2026-10-16T22:12:31.0604044Z ##[group]GITHUB_TOKEN Permissions
+2026-10-16T22:12:31.0607168Z Contents: read
+2026-10-16T22:12:31.0608234Z Metadata: read
+2026-10-16T22:12:31.0609380Z ##[endgroup]
+2026-10-16T22:12:31.0612692Z Secret source: Actions
+2026-10-16T22:12:31.0614473Z Cache mode: write
+2026-10-16T22:12:31.0616138Z Prepare workflow directory
+2026-10-16T22:12:31.1114462Z Prepare all required actions
+2026-10-16T22:12:31.1188194Z Getting action download info
+2026-10-16T22:12:31.3350821Z Download action repository 'actions/checkout@v5' (SHA:fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09)
+2026-10-16T22:12:31.4439233Z Download action repository 'actions/setup-java@v5' (SHA:b6effb05e454b25005698d916606bdc6ffcbf961)
+2026-10-16T22:12:31.7241798Z Download action repository 'actions/upload-artifact@v6' (SHA:b7c566a772e6b6bfb58ed0dc250532a479d7789f)
+2026-10-16T22:12:31.9368782Z Complete job name: Java 25 — 313 tests and M4 release verification
+2026-10-16T22:12:32.0193222Z ##[group]Run actions/checkout@v5
+2026-10-16T22:12:32.0194167Z with:
+2026-10-16T22:12:32.0194606Z   repository: Koi36m/Bedwenton
+2026-10-16T22:12:32.0198557Z   token: ***
+2026-10-16T22:12:32.0199004Z   ssh-strict: true
+2026-10-16T22:12:32.0199464Z   ssh-user: git
+2026-10-16T22:12:32.0199913Z   persist-credentials: true
+2026-10-16T22:12:32.0200404Z   clean: true
+2026-10-16T22:12:32.0200847Z   sparse-checkout-cone-mode: true
+2026-10-16T22:12:32.0201359Z   fetch-depth: 1
+2026-10-16T22:12:32.0201790Z   fetch-tags: false
+2026-10-16T22:12:32.0202234Z   show-progress: true
+2026-10-16T22:12:32.0202910Z   lfs: false
+2026-10-16T22:12:32.0203323Z   submodules: false
+2026-10-16T22:12:32.0203790Z   set-safe-directory: true
+2026-10-16T22:12:32.0204299Z   allow-unsafe-pr-checkout: false
+2026-10-16T22:12:32.0205106Z ##[endgroup]
+2026-10-16T22:12:32.1429850Z Syncing repository: Koi36m/Bedwenton
+2026-10-16T22:12:32.1433384Z ##[group]Getting Git version info
+2026-10-16T22:12:32.1434817Z Working directory is '/home/runner/work/Bedwenton/Bedwenton'
+2026-10-16T22:12:32.1436731Z [command]/usr/bin/git version
+2026-10-16T22:12:32.1589407Z git version 2.55.0
+2026-10-16T22:12:32.1619220Z ##[endgroup]
+2026-10-16T22:12:32.1636843Z Temporarily overriding HOME='/home/runner/work/_temp/5c2a4b4d-8fae-4518-b897-c260cf3ac774' before making global git config changes
+2026-10-16T22:12:32.1638619Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-16T22:12:32.1644216Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Bedwenton/Bedwenton
+2026-10-16T22:12:32.1709401Z Deleting the contents of '/home/runner/work/Bedwenton/Bedwenton'
+2026-10-16T22:12:32.1717179Z ##[group]Initializing the repository
+2026-10-16T22:12:32.1725133Z [command]/usr/bin/git init /home/runner/work/Bedwenton/Bedwenton
+2026-10-16T22:12:32.1891719Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-16T22:12:32.1894023Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-16T22:12:32.1895565Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-16T22:12:32.1896862Z hint: call:
+2026-10-16T22:12:32.1897558Z hint:
+2026-10-16T22:12:32.1898421Z hint: 	git config --global init.defaultBranch <name>
+2026-10-16T22:12:32.1899394Z hint:
+2026-10-16T22:12:32.1900343Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-16T22:12:32.1901873Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-16T22:12:32.1903392Z hint:
+2026-10-16T22:12:32.1904061Z hint: 	git branch -m <name>
+2026-10-16T22:12:32.1904841Z hint:
+2026-10-16T22:12:32.1905831Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-16T22:12:32.1907549Z Initialized empty Git repository in /home/runner/work/Bedwenton/Bedwenton/.git/
+2026-10-16T22:12:32.1912270Z [command]/usr/bin/git remote add origin https://github.com/Koi36m/Bedwenton
+2026-10-16T22:12:32.1971791Z ##[endgroup]
+2026-10-16T22:12:32.1973273Z ##[group]Disabling automatic garbage collection
+2026-10-16T22:12:32.1977184Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-16T22:12:32.2026945Z ##[endgroup]
+2026-10-16T22:12:32.2028207Z ##[group]Setting up auth
+2026-10-16T22:12:32.2035764Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-16T22:12:32.2075497Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-16T22:12:32.2480911Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-16T22:12:32.2524212Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-16T22:12:32.2769003Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-16T22:12:32.2810240Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-16T22:12:32.3050702Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-16T22:12:32.3094501Z ##[endgroup]
+2026-10-16T22:12:32.3095482Z ##[group]Fetching the repository
+2026-10-16T22:12:32.3106225Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +e3bf5578c126a7d3498be0b30fb431d9ec9a3099:refs/remotes/origin/m4-actions-verification
+2026-10-16T22:12:32.9923040Z From https://github.com/Koi36m/Bedwenton
+2026-10-16T22:12:32.9925738Z  * [new ref]         e3bf5578c126a7d3498be0b30fb431d9ec9a3099 -> origin/m4-actions-verification
+2026-10-16T22:12:32.9954578Z ##[endgroup]
+2026-10-16T22:12:32.9956211Z ##[group]Determining the checkout info
+2026-10-16T22:12:32.9958269Z ##[endgroup]
+2026-10-16T22:12:32.9959456Z [command]/usr/bin/git sparse-checkout disable
+2026-10-16T22:12:33.0002985Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-16T22:12:33.0044736Z ##[group]Checking out the ref
+2026-10-16T22:12:33.0052948Z [command]/usr/bin/git checkout --progress --force -B m4-actions-verification refs/remotes/origin/m4-actions-verification
+2026-10-16T22:12:33.0754980Z Switched to a new branch 'm4-actions-verification'
+2026-10-16T22:12:33.0765664Z branch 'm4-actions-verification' set up to track 'origin/m4-actions-verification'.
+2026-10-16T22:12:33.0770328Z ##[endgroup]
+2026-10-16T22:12:33.0820211Z [command]/usr/bin/git log -1 --format=%H
+2026-10-16T22:12:33.0850052Z e3bf5578c126a7d3498be0b30fb431d9ec9a3099
+2026-10-16T22:12:33.1383495Z ##[group]Run actions/setup-java@v5
+2026-10-16T22:12:33.1384682Z with:
+2026-10-16T22:12:33.1385533Z   distribution: temurin
+2026-10-16T22:12:33.1386727Z   java-version: 25
+2026-10-16T22:12:33.1387656Z   java-package: jdk
+2026-10-16T22:12:33.1388591Z   check-latest: false
+2026-10-16T22:12:33.1389541Z   set-default: true
+2026-10-16T22:12:33.1390481Z   verify-signature: false
+2026-10-16T22:12:33.1391485Z   server-id: github
+2026-10-16T22:12:33.1393151Z   server-username: GITHUB_ACTOR
+2026-10-16T22:12:33.1394374Z   server-password: GITHUB_TOKEN
+2026-10-16T22:12:33.1395626Z   overwrite-settings: true
+2026-10-16T22:12:33.1396658Z   job-status: success
+2026-10-16T22:12:33.1405733Z   token: ***
+2026-10-16T22:12:33.1406698Z   show-download-progress: false
+2026-10-16T22:12:33.1407790Z ##[endgroup]
+2026-10-16T22:12:33.2975801Z ##[group]Installed distributions
+2026-10-16T22:12:33.3046983Z Resolved Java 25.0.4+1 from tool-cache
+2026-10-16T22:12:33.3048301Z Setting Java 25.0.4+1 as the default
+2026-10-16T22:12:33.3058951Z Creating toolchains.xml for JDK version 25 from temurin
+2026-10-16T22:12:33.3138103Z Writing to /home/runner/.m2/toolchains.xml
+2026-10-16T22:12:33.3139660Z 
+2026-10-16T22:12:33.3140377Z Java configuration:
+2026-10-16T22:12:33.3142628Z   Distribution: temurin
+2026-10-16T22:12:33.3144365Z   Version: 25.0.4+1
+2026-10-16T22:12:33.3146505Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/25.0.4-1/x64
+2026-10-16T22:12:33.3148088Z 
+2026-10-16T22:12:33.3149305Z ##[endgroup]
+2026-10-16T22:12:33.3182997Z Creating settings.xml with server-id: github
+2026-10-16T22:12:33.3187064Z Writing to /home/runner/.m2/settings.xml
+2026-10-16T22:12:33.3191447Z Configured MAVEN_ARGS to include -ntp to suppress Maven transfer progress logs. Set 'show-download-progress: true' to keep the download progress output.
+2026-10-16T22:12:33.3374410Z ##[group]Run mkdir -p "$RUNNER_TEMP/m4-evidence"
+2026-10-16T22:12:33.3376481Z [36;1mmkdir -p "$RUNNER_TEMP/m4-evidence"[0m
+2026-10-16T22:12:33.3377702Z [36;1m{[0m
+2026-10-16T22:12:33.3378922Z [36;1m  git rev-parse HEAD[0m
+2026-10-16T22:12:33.3380257Z [36;1m  java -version[0m
+2026-10-16T22:12:33.3381412Z [36;1m  javac -version[0m
+2026-10-16T22:12:33.3382715Z [36;1m  ./gradlew --version[0m
+2026-10-16T22:12:33.3384006Z [36;1m} > "$RUNNER_TEMP/m4-evidence/toolchain.txt" 2>&1[0m
+2026-10-16T22:12:33.3385466Z [36;1mcat "$RUNNER_TEMP/m4-evidence/toolchain.txt"[0m
+2026-10-16T22:12:33.3694147Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-16T22:12:33.3695550Z env:
+2026-10-16T22:12:33.3696779Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/25.0.4-1/x64
+2026-10-16T22:12:33.3698640Z   JAVA_HOME_25_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/25.0.4-1/x64
+2026-10-16T22:12:33.3700201Z   MAVEN_ARGS: -ntp
+2026-10-16T22:12:33.3701193Z ##[endgroup]
+2026-10-16T22:12:39.7569612Z e3bf5578c126a7d3498be0b30fb431d9ec9a3099
+2026-10-16T22:12:39.7570154Z openjdk version "25.0.4.1" 2026-08-18 LTS
+2026-10-16T22:12:39.7570629Z OpenJDK Runtime Environment Temurin-25.0.4.1+1 (build 25.0.4.1+1-LTS)
+2026-10-16T22:12:39.7571447Z OpenJDK 64-Bit Server VM Temurin-25.0.4.1+1 (build 25.0.4.1+1-LTS, mixed mode, sharing)
+2026-10-16T22:12:39.7572553Z javac 25.0.4.1
+2026-10-16T22:12:39.7573313Z Downloading https://services.gradle.org/distributions/gradle-9.1.0-bin.zip
+2026-10-16T22:12:39.7574217Z ............10%.............20%.............30%.............40%.............50%............60%.............70%.............80%.............90%.............100%
+2026-10-16T22:12:39.7574737Z 
+2026-10-16T22:12:39.7574914Z Welcome to Gradle 9.1.0!
+2026-10-16T22:12:39.7575117Z 
+2026-10-16T22:12:39.7575300Z Here are the highlights of this release:
+2026-10-16T22:12:39.7575667Z  - Full Java 25 support
+2026-10-16T22:12:39.7576001Z  - Native task graph visualization
+2026-10-16T22:12:39.7576361Z  - Enhanced console output
+2026-10-16T22:12:39.7576563Z 
+2026-10-16T22:12:39.7576808Z For more details see https://docs.gradle.org/9.1.0/release-notes.html
+2026-10-16T22:12:39.7577181Z 
+2026-10-16T22:12:39.7577198Z 
+2026-10-16T22:12:39.7577372Z ------------------------------------------------------------
+2026-10-16T22:12:39.7577733Z Gradle 9.1.0
+2026-10-16T22:12:39.7578584Z ------------------------------------------------------------
+2026-10-16T22:12:39.7579028Z 
+2026-10-16T22:12:39.7579251Z Build time:    2025-09-18 13:05:56 UTC
+2026-10-16T22:12:39.7579850Z Revision:      e45a8dbf2470c2e2474ccc25be9f49331406a07e
+2026-10-16T22:12:39.7580138Z 
+2026-10-16T22:12:39.7580255Z Kotlin:        2.2.0
+2026-10-16T22:12:39.7580523Z Groovy:        4.0.28
+2026-10-16T22:12:39.7580908Z Ant:           Apache Ant(TM) version 1.10.15 compiled on August 25 2024
+2026-10-16T22:12:39.7581376Z Launcher JVM:  25.0.4.1 (Eclipse Adoptium 25.0.4.1+1-LTS)
+2026-10-16T22:12:39.7582010Z Daemon JVM:    /usr/lib/jvm/temurin-25-jdk-amd64 (no JDK specified, using current Java home)
+2026-10-16T22:12:39.7582837Z OS:            Linux 6.17.0-1022-azure amd64
+2026-10-16T22:12:39.7583073Z 
+2026-10-16T22:12:39.7628458Z ##[group]Run set -o pipefail
+2026-10-16T22:12:39.7628858Z [36;1mset -o pipefail[0m
+2026-10-16T22:12:39.7629151Z [36;1m{[0m
+2026-10-16T22:12:39.7629500Z [36;1m  sha256sum -c verification/m4/FROZEN-M1-M3-SHA256SUMS.txt[0m
+2026-10-16T22:12:39.7630024Z [36;1m  sha256sum -c verification/m4/APPROVED-M4-SHA256SUMS.txt[0m
+2026-10-16T22:12:39.7630553Z [36;1m  sha256sum -c verification/m4/IMPLEMENTATION-SOURCE-SHA256SUMS.txt[0m
+2026-10-16T22:12:39.7631152Z [36;1m  (cd src/test/resources/m3/reference && sha256sum -c MANIFEST.sha256)[0m
+2026-10-16T22:12:39.7631718Z [36;1m  (cd src/test/resources/m4/reference && sha256sum -c MANIFEST.sha256)[0m
+2026-10-16T22:12:39.7632230Z [36;1m} 2>&1 | tee "$RUNNER_TEMP/m4-evidence/source-integrity.txt"[0m
+2026-10-16T22:12:39.7700165Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-16T22:12:39.7700569Z env:
+2026-10-16T22:12:39.7700924Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/25.0.4-1/x64
+2026-10-16T22:12:39.7701510Z   JAVA_HOME_25_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/25.0.4-1/x64
+2026-10-16T22:12:39.7701960Z   MAVEN_ARGS: -ntp
+2026-10-16T22:12:39.7702219Z ##[endgroup]
+2026-10-16T22:12:39.7816369Z .github/workflows/m3-java25-verification.yml: OK
+2026-10-16T22:12:39.7817104Z .gitignore: OK
+2026-10-16T22:12:39.7817569Z ARCHITECTURE.md: OK
+2026-10-16T22:12:39.7818064Z README-FOR-CODEX-M2.md: OK
+2026-10-16T22:12:39.7818564Z README.md: OK
+2026-10-16T22:12:39.7819005Z SHA256SUMS.txt: OK
+2026-10-16T22:12:39.7833401Z build.gradle: OK
+2026-10-16T22:12:39.7834050Z docs/AMENDMENT-1-NUMERIC-POLICY.md: OK
+2026-10-16T22:12:39.7834703Z docs/AMENDMENT-2-CLARIFICATIONS.md: OK
+2026-10-16T22:12:39.7835349Z docs/AMENDMENT-3-REVIEW-DECISIONS.md: OK
+2026-10-16T22:12:39.7835969Z docs/ARCHITECTURE.md: OK
+2026-10-16T22:12:39.7836459Z docs/CONVENTIONS.md: OK
+2026-10-16T22:12:39.7836937Z docs/IMPLEMENTATION-CONTRACT.md: OK
+2026-10-16T22:12:39.7837510Z docs/REFERENCE-VECTORS.md: OK
+2026-10-16T22:12:39.7838153Z docs/TEST-SPECIFICATION.md: OK
+2026-10-16T22:12:39.7838726Z docs/VERIFICATION-REPORT-TEMPLATE.md: OK
+2026-10-16T22:12:39.7839319Z docs/m2/M2-AMENDMENT-R2.md: OK
+2026-10-16T22:12:39.7839961Z docs/m2/M2-CONVENTIONS.md: OK
+2026-10-16T22:12:39.7840501Z docs/m2/M2-DESIGN-DECISIONS.md: OK
+2026-10-16T22:12:39.7841152Z docs/m2/M2-IMPLEMENTATION-CONTRACT.md: OK
+2026-10-16T22:12:39.7841746Z docs/m2/M2-RISKS-AND-DEFERRED.md: OK
+2026-10-16T22:12:39.7842507Z docs/m2/M2-TEST-SPECIFICATION.md: OK
+2026-10-16T22:12:39.7843052Z docs/m2/README-FOR-CODEX-M2-R2.md: OK
+2026-10-16T22:12:39.7843631Z docs/m2/README-FOR-CODEX-M2.md: OK
+2026-10-16T22:12:39.7844196Z docs/m3/M3-AMENDMENT-A3.md: OK
+2026-10-16T22:12:39.7844711Z docs/m3/M3-ARCHITECTURE.md: OK
+2026-10-16T22:12:39.7845239Z docs/m3/M3-CONVENTIONS.md: OK
+2026-10-16T22:12:39.7845790Z docs/m3/M3-DESIGN-DECISIONS.md: OK
+2026-10-16T22:12:39.7846347Z docs/m3/M3-IMPLEMENTATION-CONTRACT.md: OK
+2026-10-16T22:12:39.7846925Z docs/m3/M3-REVISION-2-CORRECTIONS.md: OK
+2026-10-16T22:12:39.7847517Z docs/m3/M3-RISKS.md: OK
+2026-10-16T22:12:39.7847975Z docs/m3/M3-TEST-SPECIFICATION.md: OK
+2026-10-16T22:12:39.7848590Z docs/m3/README-FOR-CODEX-M3.md: OK
+2026-10-16T22:12:39.7849185Z docs/m3/validation/ProbeBoundRatios.java: OK
+2026-10-16T22:12:39.7850157Z docs/m3/validation/ProbeTrig.java: OK
+2026-10-16T22:12:39.7850660Z docs/m3/validation/a3/UnderflowProbe.java: OK
+2026-10-16T22:12:39.7851282Z docs/m3/validation/a3/mutation-results.txt: OK
+2026-10-16T22:12:39.7851903Z docs/m3/validation/a3/reference-run-summary.txt: OK
+2026-10-16T22:12:39.7852862Z docs/m3/validation/a3/underflow-probe.txt: OK
+2026-10-16T22:12:39.7853625Z docs/m3/validation/bound-ratios.txt: OK
+2026-10-16T22:12:39.7854386Z docs/m3/validation/mutation-results.txt: OK
+2026-10-16T22:12:39.7855121Z docs/m3/validation/numerical-probes.txt: OK
+2026-10-16T22:12:39.7855930Z docs/m3/validation/probe_easing_accuracy.py: OK
+2026-10-16T22:12:39.7856749Z docs/m3/validation/probe_easing_monotonicity.py: OK
+2026-10-16T22:12:39.7857888Z docs/m3/validation/r2/Counterexamples.java: OK
+2026-10-16T22:12:39.7858766Z docs/m3/validation/r2/ProbeBoundRatiosR2.java: OK
+2026-10-16T22:12:39.7859543Z docs/m3/validation/r2/before-after.txt: OK
+2026-10-16T22:12:39.7860303Z docs/m3/validation/r2/bound-ratios.txt: OK
+2026-10-16T22:12:39.7861090Z docs/m3/validation/r2/counterexamples.txt: OK
+2026-10-16T22:12:39.7861785Z docs/m3/validation/r2/dm3-8-variants.txt: OK
+2026-10-16T22:12:39.7862873Z docs/m3/validation/r2/mutation-results.txt: OK
+2026-10-16T22:12:39.7863756Z docs/m3/validation/r2/reference-run-summary.txt: OK
+2026-10-16T22:12:39.7864497Z docs/m3/validation/reference-run-summary.txt: OK
+2026-10-16T22:12:39.7865224Z gradle/wrapper/gradle-wrapper.jar: OK
+2026-10-16T22:12:39.7865791Z gradle/wrapper/gradle-wrapper.properties: OK
+2026-10-16T22:12:39.7866468Z gradlew: OK
+2026-10-16T22:12:39.7866970Z gradlew.bat: OK
+2026-10-16T22:12:39.7867502Z review/M1-CLAUDE-REVIEW.md: OK
+2026-10-16T22:12:39.7868173Z review/REPRODUCE-REVIEW.md: OK
+2026-10-16T22:12:39.7868797Z review/logs/baseline-check.txt: OK
+2026-10-16T22:12:39.7869379Z review/logs/baseline-clean-test-attempt1-maven429.txt: OK
+2026-10-16T22:12:39.7870132Z review/logs/baseline-clean-test.txt: OK
+2026-10-16T22:12:39.7870906Z review/logs/decision-round-clean-test.txt: OK
+2026-10-16T22:12:39.7871582Z review/logs/decision-round-trial-fix.diff: OK
+2026-10-16T22:12:39.7872534Z review/logs/decision-round-trial-fix.txt: OK
+2026-10-16T22:12:39.7873145Z review/logs/integrity.txt: OK
+2026-10-16T22:12:39.7874001Z review/logs/junit-baseline/TEST-workshop.vfx.math.core.BoundaryTest.xml: OK
+2026-10-16T22:12:39.7874829Z review/logs/junit-baseline/TEST-workshop.vfx.math.core.ConventionsTest.xml: OK
+2026-10-16T22:12:39.7875453Z review/logs/junit-baseline/TEST-workshop.vfx.math.core.FrameTest.xml: OK
+2026-10-16T22:12:39.7876059Z review/logs/junit-baseline/TEST-workshop.vfx.math.core.JomlOracleTest.xml: OK
+2026-10-16T22:12:39.7876699Z review/logs/junit-baseline/TEST-workshop.vfx.math.core.M0RegressionTest.xml: OK
+2026-10-16T22:12:39.7877404Z review/logs/junit-baseline/TEST-workshop.vfx.math.core.MathUtilTest.xml: OK
+2026-10-16T22:12:39.7878169Z review/logs/junit-baseline/TEST-workshop.vfx.math.core.NumericPolicyTest.xml: OK
+2026-10-16T22:12:39.7878863Z review/logs/junit-baseline/TEST-workshop.vfx.math.core.PolicyClarificationTest.xml: OK
+2026-10-16T22:12:39.7879540Z review/logs/junit-baseline/TEST-workshop.vfx.math.core.PoseTest.xml: OK
+2026-10-16T22:12:39.7880101Z review/logs/junit-baseline/TEST-workshop.vfx.math.core.QuatTest.xml: OK
+2026-10-16T22:12:39.7880652Z review/logs/junit-baseline/TEST-workshop.vfx.math.core.Vec3Test.xml: OK
+2026-10-16T22:12:39.7881310Z review/logs/junit-decision-round/TEST-workshop.vfx.math.core.Amendment3AcceptanceTest.xml: OK
+2026-10-16T22:12:39.7882019Z review/logs/junit-decision-round/TEST-workshop.vfx.math.core.BoundaryTest.xml: OK
+2026-10-16T22:12:39.7883226Z review/logs/junit-decision-round/TEST-workshop.vfx.math.core.ConventionsTest.xml: OK
+2026-10-16T22:12:39.7883917Z review/logs/junit-decision-round/TEST-workshop.vfx.math.core.FrameTest.xml: OK
+2026-10-16T22:12:39.7884759Z review/logs/junit-decision-round/TEST-workshop.vfx.math.core.JomlOracleTest.xml: OK
+2026-10-16T22:12:39.7885444Z review/logs/junit-decision-round/TEST-workshop.vfx.math.core.M0RegressionTest.xml: OK
+2026-10-16T22:12:39.7886343Z review/logs/junit-decision-round/TEST-workshop.vfx.math.core.MathUtilTest.xml: OK
+2026-10-16T22:12:39.7887015Z review/logs/junit-decision-round/TEST-workshop.vfx.math.core.NumericPolicyTest.xml: OK
+2026-10-16T22:12:39.7887955Z review/logs/junit-decision-round/TEST-workshop.vfx.math.core.PolicyClarificationTest.xml: OK
+2026-10-16T22:12:39.7888655Z review/logs/junit-decision-round/TEST-workshop.vfx.math.core.PoseTest.xml: OK
+2026-10-16T22:12:39.7889623Z review/logs/junit-decision-round/TEST-workshop.vfx.math.core.QuatTest.xml: OK
+2026-10-16T22:12:39.7890334Z review/logs/junit-decision-round/TEST-workshop.vfx.math.core.ReviewAdversarialTest.xml: OK
+2026-10-16T22:12:39.7891533Z review/logs/junit-decision-round/TEST-workshop.vfx.math.core.Vec3Test.xml: OK
+2026-10-16T22:12:39.7892520Z review/logs/junit-findings-enabled.xml: OK
+2026-10-16T22:12:39.7893359Z review/logs/junit-review/TEST-workshop.vfx.math.core.BoundaryTest.xml: OK
+2026-10-16T22:12:39.7894093Z review/logs/junit-review/TEST-workshop.vfx.math.core.ConventionsTest.xml: OK
+2026-10-16T22:12:39.7894684Z review/logs/junit-review/TEST-workshop.vfx.math.core.FrameTest.xml: OK
+2026-10-16T22:12:39.7895596Z review/logs/junit-review/TEST-workshop.vfx.math.core.JomlOracleTest.xml: OK
+2026-10-16T22:12:39.7896215Z review/logs/junit-review/TEST-workshop.vfx.math.core.M0RegressionTest.xml: OK
+2026-10-16T22:12:39.7896816Z review/logs/junit-review/TEST-workshop.vfx.math.core.MathUtilTest.xml: OK
+2026-10-16T22:12:39.7897771Z review/logs/junit-review/TEST-workshop.vfx.math.core.NumericPolicyTest.xml: OK
+2026-10-16T22:12:39.7898479Z review/logs/junit-review/TEST-workshop.vfx.math.core.PolicyClarificationTest.xml: OK
+2026-10-16T22:12:39.7899119Z review/logs/junit-review/TEST-workshop.vfx.math.core.PoseTest.xml: OK
+2026-10-16T22:12:39.7899670Z review/logs/junit-review/TEST-workshop.vfx.math.core.QuatTest.xml: OK
+2026-10-16T22:12:39.7900476Z review/logs/junit-review/TEST-workshop.vfx.math.core.ReviewAdversarialTest.xml: OK
+2026-10-16T22:12:39.7901404Z review/logs/junit-review/TEST-workshop.vfx.math.core.ReviewFindingsTest.xml: OK
+2026-10-16T22:12:39.7902022Z review/logs/junit-review/TEST-workshop.vfx.math.core.Vec3Test.xml: OK
+2026-10-16T22:12:39.7902779Z review/logs/probe.txt: OK
+2026-10-16T22:12:39.7903113Z review/logs/review-check.txt: OK
+2026-10-16T22:12:39.7903533Z review/logs/review-clean-test.txt: OK
+2026-10-16T22:12:39.7904200Z review/logs/review-findings-enabled.txt: OK
+2026-10-16T22:12:39.7904889Z review/logs/versions.txt: OK
+2026-10-16T22:12:39.7905542Z review/logs/wrapper-attempt.txt: OK
+2026-10-16T22:12:39.7906122Z review/m2/HISTORICAL-FINDINGS.md: OK
+2026-10-16T22:12:39.7906776Z review/m2/M2-CLAUDE-REVIEW.md: OK
+2026-10-16T22:12:39.7907428Z review/m2/REPRODUCE.md: OK
+2026-10-16T22:12:39.7907874Z review/m2/generate_boundary_vectors.py: OK
+2026-10-16T22:12:39.7908282Z review/m2/historical/M2ReviewFindingsTest.java.txt: OK
+2026-10-16T22:12:39.7908685Z review/m2/logs/codex-80927177-check.txt: OK
+2026-10-16T22:12:39.7909070Z review/m2/logs/codex-80927177-clean-test.txt: OK
+2026-10-16T22:12:39.7909646Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.core.Amendment3AcceptanceTest.xml: OK
+2026-10-16T22:12:39.7910360Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.core.BoundaryTest.xml: OK
+2026-10-16T22:12:39.7911029Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.core.ConventionsTest.xml: OK
+2026-10-16T22:12:39.7911705Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.core.FrameTest.xml: OK
+2026-10-16T22:12:39.7912532Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.core.JomlOracleTest.xml: OK
+2026-10-16T22:12:39.7913231Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.core.M0RegressionTest.xml: OK
+2026-10-16T22:12:39.7913919Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.core.MathUtilTest.xml: OK
+2026-10-16T22:12:39.7914589Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.core.NumericPolicyTest.xml: OK
+2026-10-16T22:12:39.7915528Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.core.PolicyClarificationTest.xml: OK
+2026-10-16T22:12:39.7916842Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.core.PoseTest.xml: OK
+2026-10-16T22:12:39.7917918Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.core.QuatTest.xml: OK
+2026-10-16T22:12:39.7919084Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.core.ReviewAdversarialTest.xml: OK
+2026-10-16T22:12:39.7920283Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.core.Vec3Test.xml: OK
+2026-10-16T22:12:39.7921430Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.time.M2BoundaryTest.xml: OK
+2026-10-16T22:12:39.7922845Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.time.M2DeterminismTest.xml: OK
+2026-10-16T22:12:39.7924323Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.time.M2GoldenVectorTest.xml: OK
+2026-10-16T22:12:39.7925542Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.time.PlaybackTest.xml: OK
+2026-10-16T22:12:39.7926699Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.time.TickTimeTest.xml: OK
+2026-10-16T22:12:39.7927843Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.time.TimePointTest.xml: OK
+2026-10-16T22:12:39.7928987Z review/m2/logs/junit-codex-80927177/TEST-workshop.vfx.math.time.TimingTest.xml: OK
+2026-10-16T22:12:39.7929880Z review/m2/logs/junit-findings-enabled.xml: OK
+2026-10-16T22:12:39.7930856Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.core.Amendment3AcceptanceTest.xml: OK
+2026-10-16T22:12:39.7931593Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.core.BoundaryTest.xml: OK
+2026-10-16T22:12:39.7932249Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.core.ConventionsTest.xml: OK
+2026-10-16T22:12:39.7933250Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.core.FrameTest.xml: OK
+2026-10-16T22:12:39.7933897Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.core.JomlOracleTest.xml: OK
+2026-10-16T22:12:39.7934586Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.core.M0RegressionTest.xml: OK
+2026-10-16T22:12:39.7935272Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.core.MathUtilTest.xml: OK
+2026-10-16T22:12:39.7935943Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.core.NumericPolicyTest.xml: OK
+2026-10-16T22:12:39.7936663Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.core.PolicyClarificationTest.xml: OK
+2026-10-16T22:12:39.7937342Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.core.PoseTest.xml: OK
+2026-10-16T22:12:39.7938046Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.core.QuatTest.xml: OK
+2026-10-16T22:12:39.7938716Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.core.ReviewAdversarialTest.xml: OK
+2026-10-16T22:12:39.7939396Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.core.Vec3Test.xml: OK
+2026-10-16T22:12:39.7940022Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.time.M2BoundaryTest.xml: OK
+2026-10-16T22:12:39.7940698Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.time.M2DeterminismTest.xml: OK
+2026-10-16T22:12:39.7941413Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.time.M2GoldenVectorTest.xml: OK
+2026-10-16T22:12:39.7942178Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.time.M2ReviewAdversarialTest.xml: OK
+2026-10-16T22:12:39.7943514Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.time.M2Revision2Test.xml: OK
+2026-10-16T22:12:39.7944747Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.time.PlaybackTest.xml: OK
+2026-10-16T22:12:39.7945888Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.time.TickTimeTest.xml: OK
+2026-10-16T22:12:39.7947027Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.time.TimePointTest.xml: OK
+2026-10-16T22:12:39.7948182Z review/m2/logs/junit-r2-before-fix/TEST-workshop.vfx.math.time.TimingTest.xml: OK
+2026-10-16T22:12:39.7949373Z review/m2/logs/junit-review/TEST-workshop.vfx.math.core.Amendment3AcceptanceTest.xml: OK
+2026-10-16T22:12:39.7950656Z review/m2/logs/junit-review/TEST-workshop.vfx.math.core.BoundaryTest.xml: OK
+2026-10-16T22:12:39.7951287Z review/m2/logs/junit-review/TEST-workshop.vfx.math.core.ConventionsTest.xml: OK
+2026-10-16T22:12:39.7951892Z review/m2/logs/junit-review/TEST-workshop.vfx.math.core.FrameTest.xml: OK
+2026-10-16T22:12:39.7952705Z review/m2/logs/junit-review/TEST-workshop.vfx.math.core.JomlOracleTest.xml: OK
+2026-10-16T22:12:39.7953346Z review/m2/logs/junit-review/TEST-workshop.vfx.math.core.M0RegressionTest.xml: OK
+2026-10-16T22:12:39.7953961Z review/m2/logs/junit-review/TEST-workshop.vfx.math.core.MathUtilTest.xml: OK
+2026-10-16T22:12:39.7954581Z review/m2/logs/junit-review/TEST-workshop.vfx.math.core.NumericPolicyTest.xml: OK
+2026-10-16T22:12:39.7955414Z review/m2/logs/junit-review/TEST-workshop.vfx.math.core.PolicyClarificationTest.xml: OK
+2026-10-16T22:12:39.7956078Z review/m2/logs/junit-review/TEST-workshop.vfx.math.core.PoseTest.xml: OK
+2026-10-16T22:12:39.7956671Z review/m2/logs/junit-review/TEST-workshop.vfx.math.core.QuatTest.xml: OK
+2026-10-16T22:12:39.7957312Z review/m2/logs/junit-review/TEST-workshop.vfx.math.core.ReviewAdversarialTest.xml: OK
+2026-10-16T22:12:39.7957935Z review/m2/logs/junit-review/TEST-workshop.vfx.math.core.Vec3Test.xml: OK
+2026-10-16T22:12:39.7958524Z review/m2/logs/junit-review/TEST-workshop.vfx.math.time.M2BoundaryTest.xml: OK
+2026-10-16T22:12:39.7959157Z review/m2/logs/junit-review/TEST-workshop.vfx.math.time.M2DeterminismTest.xml: OK
+2026-10-16T22:12:39.7959805Z review/m2/logs/junit-review/TEST-workshop.vfx.math.time.M2GoldenVectorTest.xml: OK
+2026-10-16T22:12:39.7960483Z review/m2/logs/junit-review/TEST-workshop.vfx.math.time.M2ReviewAdversarialTest.xml: OK
+2026-10-16T22:12:39.7961172Z review/m2/logs/junit-review/TEST-workshop.vfx.math.time.M2ReviewFindingsTest.xml: OK
+2026-10-16T22:12:39.7961816Z review/m2/logs/junit-review/TEST-workshop.vfx.math.time.PlaybackTest.xml: OK
+2026-10-16T22:12:39.7962580Z review/m2/logs/junit-review/TEST-workshop.vfx.math.time.TickTimeTest.xml: OK
+2026-10-16T22:12:39.7963460Z review/m2/logs/junit-review/TEST-workshop.vfx.math.time.TimePointTest.xml: OK
+2026-10-16T22:12:39.7964549Z review/m2/logs/junit-review/TEST-workshop.vfx.math.time.TimingTest.xml: OK
+2026-10-16T22:12:39.7965405Z review/m2/logs/original-suite-vs-C09-C01.txt: OK
+2026-10-16T22:12:39.7966040Z review/m2/logs/probe-results.txt: OK
+2026-10-16T22:12:39.7966649Z review/m2/logs/r2-before-fix-clean-test.txt: OK
+2026-10-16T22:12:39.7967300Z review/m2/logs/r2-trial-fix-check.txt: OK
+2026-10-16T22:12:39.7967719Z review/m2/logs/r2-trial-fix-clean-test.txt: OK
+2026-10-16T22:12:39.7968082Z review/m2/logs/r2-trial-fix.diff: OK
+2026-10-16T22:12:39.7968425Z review/m2/logs/r2-wrong-fix-variants.txt: OK
+2026-10-16T22:12:39.7968777Z review/m2/logs/review-check.txt: OK
+2026-10-16T22:12:39.7969122Z review/m2/logs/review-clean-test.txt: OK
+2026-10-16T22:12:39.7969486Z review/m2/logs/review-findings-enabled.txt: OK
+2026-10-16T22:12:39.7969868Z review/m2/logs/review-mutation-results.txt: OK
+2026-10-16T22:12:39.7970232Z review/m2/logs/versions.txt: OK
+2026-10-16T22:12:39.7970545Z review/m2/probe_bounds.py: OK
+2026-10-16T22:12:39.7970867Z review/probe/InverseMessage.java: OK
+2026-10-16T22:12:39.7971194Z review/probe/Probe.java: OK
+2026-10-16T22:12:39.7971502Z review/probe/TransportYUlps.java: OK
+2026-10-16T22:12:39.7971818Z settings.gradle: OK
+2026-10-16T22:12:39.7972126Z src/main/java/workshop/vfx/math/core/Frame.java: OK
+2026-10-16T22:12:39.7972710Z src/main/java/workshop/vfx/math/core/MathUtil.java: OK
+2026-10-16T22:12:39.7973121Z src/main/java/workshop/vfx/math/core/Pose.java: OK
+2026-10-16T22:12:39.7973513Z src/main/java/workshop/vfx/math/core/Quat.java: OK
+2026-10-16T22:12:39.7973897Z src/main/java/workshop/vfx/math/core/Vec3.java: OK
+2026-10-16T22:12:39.7974326Z src/main/java/workshop/vfx/math/curve/CubicBezier.java: OK
+2026-10-16T22:12:39.7974760Z src/main/java/workshop/vfx/math/curve/Curve.java: OK
+2026-10-16T22:12:39.7975192Z src/main/java/workshop/vfx/math/curve/CurveChecks.java: OK
+2026-10-16T22:12:39.7975818Z src/main/java/workshop/vfx/math/curve/Easing.java: OK
+2026-10-16T22:12:39.7976249Z src/main/java/workshop/vfx/math/curve/LineSegment.java: OK
+2026-10-16T22:12:39.7976691Z src/main/java/workshop/vfx/math/curve/PosedCurve.java: OK
+2026-10-16T22:12:39.7977156Z src/main/java/workshop/vfx/math/curve/QuadraticBezier.java: OK
+2026-10-16T22:12:39.7977603Z src/main/java/workshop/vfx/math/curve/Spiral.java: OK
+2026-10-16T22:12:39.7978021Z src/main/java/workshop/vfx/math/time/Playback.java: OK
+2026-10-16T22:12:39.7978444Z src/main/java/workshop/vfx/math/time/RepeatMode.java: OK
+2026-10-16T22:12:39.7978862Z src/main/java/workshop/vfx/math/time/TickTime.java: OK
+2026-10-16T22:12:39.7979327Z src/main/java/workshop/vfx/math/time/TimeDomain.java: OK
+2026-10-16T22:12:39.7979896Z src/main/java/workshop/vfx/math/time/TimePoint.java: OK
+2026-10-16T22:12:39.7980319Z src/main/java/workshop/vfx/math/time/Timing.java: OK
+2026-10-16T22:12:39.7980746Z src/main/java/workshop/vfx/math/time/TimingSample.java: OK
+2026-10-16T22:12:39.7981244Z src/test/java/workshop/vfx/math/core/Amendment3AcceptanceTest.java: OK
+2026-10-16T22:12:39.7981755Z src/test/java/workshop/vfx/math/core/BoundaryTest.java: OK
+2026-10-16T22:12:39.7982219Z src/test/java/workshop/vfx/math/core/ConventionsTest.java: OK
+2026-10-16T22:12:39.7982830Z src/test/java/workshop/vfx/math/core/FrameTest.java: OK
+2026-10-16T22:12:39.7983250Z src/test/java/workshop/vfx/math/core/JomlOracle.java: OK
+2026-10-16T22:12:39.7983697Z src/test/java/workshop/vfx/math/core/JomlOracleTest.java: OK
+2026-10-16T22:12:39.7984170Z src/test/java/workshop/vfx/math/core/M0RegressionTest.java: OK
+2026-10-16T22:12:39.7984630Z src/test/java/workshop/vfx/math/core/MathUtilTest.java: OK
+2026-10-16T22:12:39.7985100Z src/test/java/workshop/vfx/math/core/NumericPolicyTest.java: OK
+2026-10-16T22:12:39.7985614Z src/test/java/workshop/vfx/math/core/PolicyClarificationTest.java: OK
+2026-10-16T22:12:39.7986110Z src/test/java/workshop/vfx/math/core/PoseTest.java: OK
+2026-10-16T22:12:39.7986538Z src/test/java/workshop/vfx/math/core/QuatTest.java: OK
+2026-10-16T22:12:39.7987004Z src/test/java/workshop/vfx/math/core/ReviewAdversarialTest.java: OK
+2026-10-16T22:12:39.7987656Z src/test/java/workshop/vfx/math/core/TestSupport.java: OK
+2026-10-16T22:12:39.7988424Z src/test/java/workshop/vfx/math/core/Vec3Test.java: OK
+2026-10-16T22:12:39.7989161Z src/test/java/workshop/vfx/math/curve/BezierTest.java: OK
+2026-10-16T22:12:39.7989967Z src/test/java/workshop/vfx/math/curve/CurveTestSupport.java: OK
+2026-10-16T22:12:39.7990772Z src/test/java/workshop/vfx/math/curve/EasingTest.java: OK
+2026-10-16T22:12:39.7991578Z src/test/java/workshop/vfx/math/curve/M3BoundaryTest.java: OK
+2026-10-16T22:12:39.7992173Z src/test/java/workshop/vfx/math/curve/M3DeterminismTest.java: OK
+2026-10-16T22:12:39.7993019Z src/test/java/workshop/vfx/math/curve/M3ReferenceVectorTest.java: OK
+2026-10-16T22:12:39.7993989Z src/test/java/workshop/vfx/math/curve/M3ReviewAdversarialTest.java: OK
+2026-10-16T22:12:39.7994896Z src/test/java/workshop/vfx/math/curve/M3UnderflowTest.java: OK
+2026-10-16T22:12:39.7995742Z src/test/java/workshop/vfx/math/curve/PosedCurveTest.java: OK
+2026-10-16T22:12:39.7996547Z src/test/java/workshop/vfx/math/curve/SpiralTest.java: OK
+2026-10-16T22:12:39.7997350Z src/test/java/workshop/vfx/math/time/M2BoundaryTest.java: OK
+2026-10-16T22:12:39.7998184Z src/test/java/workshop/vfx/math/time/M2DeterminismTest.java: OK
+2026-10-16T22:12:39.7999036Z src/test/java/workshop/vfx/math/time/M2GoldenVectorTest.java: OK
+2026-10-16T22:12:39.7999939Z src/test/java/workshop/vfx/math/time/M2ReviewAdversarialTest.java: OK
+2026-10-16T22:12:39.8000817Z src/test/java/workshop/vfx/math/time/M2Revision2Test.java: OK
+2026-10-16T22:12:39.8001595Z src/test/java/workshop/vfx/math/time/M2Support.java: OK
+2026-10-16T22:12:39.8002559Z src/test/java/workshop/vfx/math/time/PlaybackTest.java: OK
+2026-10-16T22:12:39.8003199Z src/test/java/workshop/vfx/math/time/TickTimeTest.java: OK
+2026-10-16T22:12:39.8003663Z src/test/java/workshop/vfx/math/time/TimePointTest.java: OK
+2026-10-16T22:12:39.8004303Z src/test/java/workshop/vfx/math/time/TimingTest.java: OK
+2026-10-16T22:12:39.8004718Z src/test/resources/golden/MANIFEST.sha256: OK
+2026-10-16T22:12:39.8005109Z src/test/resources/golden/compose_cases.csv: OK
+2026-10-16T22:12:39.8005484Z src/test/resources/golden/pose_cases.csv: OK
+2026-10-16T22:12:39.8005865Z src/test/resources/golden/pose_large_cases.csv: OK
+2026-10-16T22:12:39.8006257Z src/test/resources/golden/rotation_cases.csv: OK
+2026-10-16T22:12:39.8006634Z src/test/resources/golden/slerp_cases.csv: OK
+2026-10-16T22:12:39.8007010Z src/test/resources/m2/golden/MANIFEST.sha256: OK
+2026-10-16T22:12:39.8007409Z src/test/resources/m2/golden/playback.csv: OK
+2026-10-16T22:12:39.8007788Z src/test/resources/m2/golden/tick_seconds.csv: OK
+2026-10-16T22:12:39.8008297Z src/test/resources/m2/golden/timepoint.csv: OK
+2026-10-16T22:12:39.8008675Z src/test/resources/m2/golden/timing.csv: OK
+2026-10-16T22:12:39.8009046Z src/test/resources/m2/review/MANIFEST.sha256: OK
+2026-10-16T22:12:39.8009439Z src/test/resources/m2/review/boundary_cases.csv: OK
+2026-10-16T22:12:39.8009834Z src/test/resources/m3/reference/MANIFEST.sha256: OK
+2026-10-16T22:12:39.8010215Z src/test/resources/m3/reference/bezier.csv: OK
+2026-10-16T22:12:39.8010584Z src/test/resources/m3/reference/easing.csv: OK
+2026-10-16T22:12:39.8010958Z src/test/resources/m3/reference/spiral.csv: OK
+2026-10-16T22:12:39.8011315Z tools/generate_golden_vectors.py: OK
+2026-10-16T22:12:39.8011649Z tools/generate_m2_golden_vectors.py: OK
+2026-10-16T22:12:39.8011997Z tools/generate_m3_reference_vectors.py: OK
+2026-10-16T22:12:39.8012525Z validation/mutation-results.txt: OK
+2026-10-16T22:12:39.8012879Z validation/reference-full-check.txt: OK
+2026-10-16T22:12:39.8013223Z validation/reference-full-run.txt: OK
+2026-10-16T22:12:39.8013575Z validation/reference-run-summary.txt: OK
+2026-10-16T22:12:39.8013921Z verification/REPRODUCE.md: OK
+2026-10-16T22:12:39.8014247Z verification/VERIFICATION-REPORT.md: OK
+2026-10-16T22:12:39.8014612Z verification/input/README-FOR-CODEX.md: OK
+2026-10-16T22:12:39.8014963Z verification/input/SHA256SUMS.txt: OK
+2026-10-16T22:12:39.8015374Z verification/input/minecraft-vfx-math-M1-handoff-rev3.zip: OK
+2026-10-16T22:12:39.8015905Z verification/junit/TEST-workshop.vfx.math.core.BoundaryTest.xml: OK
+2026-10-16T22:12:39.8016464Z verification/junit/TEST-workshop.vfx.math.core.ConventionsTest.xml: OK
+2026-10-16T22:12:39.8017261Z verification/junit/TEST-workshop.vfx.math.core.FrameTest.xml: OK
+2026-10-16T22:12:39.8018187Z verification/junit/TEST-workshop.vfx.math.core.JomlOracleTest.xml: OK
+2026-10-16T22:12:39.8019182Z verification/junit/TEST-workshop.vfx.math.core.M0RegressionTest.xml: OK
+2026-10-16T22:12:39.8020236Z verification/junit/TEST-workshop.vfx.math.core.MathUtilTest.xml: OK
+2026-10-16T22:12:39.8020986Z verification/junit/TEST-workshop.vfx.math.core.NumericPolicyTest.xml: OK
+2026-10-16T22:12:39.8080438Z verification/junit/TEST-workshop.vfx.math.core.PolicyClarificationTest.xml: OK
+2026-10-16T22:12:39.8081150Z verification/junit/TEST-workshop.vfx.math.core.PoseTest.xml: OK
+2026-10-16T22:12:39.8081977Z verification/junit/TEST-workshop.vfx.math.core.QuatTest.xml: OK
+2026-10-16T22:12:39.8083004Z verification/junit/TEST-workshop.vfx.math.core.Vec3Test.xml: OK
+2026-10-16T22:12:39.8083475Z verification/logs/archive-checksums.txt: OK
+2026-10-16T22:12:39.8083833Z verification/logs/check.txt: OK
+2026-10-16T22:12:39.8084155Z verification/logs/gate-a.txt: OK
+2026-10-16T22:12:39.8084492Z verification/logs/golden-checksums.txt: OK
+2026-10-16T22:12:39.8084860Z verification/logs/gradlew-version.txt: OK
+2026-10-16T22:12:39.8085235Z verification/logs/initial-clean-test.txt: OK
+2026-10-16T22:12:39.8085606Z verification/logs/java-toolchains.txt: OK
+2026-10-16T22:12:39.8085953Z verification/logs/joml-1.10.9.pom: OK
+2026-10-16T22:12:39.8086301Z verification/logs/os-cpu.txt: OK
+2026-10-16T22:12:39.8086914Z verification/logs/runtime-dependencies.txt: OK
+2026-10-16T22:12:39.8087410Z verification/logs/test-dependencies.txt: OK
+2026-10-16T22:12:39.8088056Z verification/logs/test-integrity.txt: OK
+2026-10-16T22:12:39.8088456Z verification/logs/toolchain-download-checksums.txt: OK
+2026-10-16T22:12:39.8088856Z verification/logs/toolchain.txt: OK
+2026-10-16T22:12:39.8089196Z verification/logs/wrapper-retry.txt: OK
+2026-10-16T22:12:39.8089538Z verification/logs/wrapper.txt: OK
+2026-10-16T22:12:39.8089888Z verification/m2-r2/VERIFICATION-REPORT.md: OK
+2026-10-16T22:12:39.8090472Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.core.Amendment3AcceptanceTest.xml: OK
+2026-10-16T22:12:39.8091653Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.core.BoundaryTest.xml: OK
+2026-10-16T22:12:39.8093317Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.core.ConventionsTest.xml: OK
+2026-10-16T22:12:39.8094226Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.core.FrameTest.xml: OK
+2026-10-16T22:12:39.8094909Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.core.JomlOracleTest.xml: OK
+2026-10-16T22:12:39.8095618Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.core.M0RegressionTest.xml: OK
+2026-10-16T22:12:39.8096293Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.core.MathUtilTest.xml: OK
+2026-10-16T22:12:39.8096964Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.core.NumericPolicyTest.xml: OK
+2026-10-16T22:12:39.8097703Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.core.PolicyClarificationTest.xml: OK
+2026-10-16T22:12:39.8098403Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.core.PoseTest.xml: OK
+2026-10-16T22:12:39.8099027Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.core.QuatTest.xml: OK
+2026-10-16T22:12:39.8099860Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.core.ReviewAdversarialTest.xml: OK
+2026-10-16T22:12:39.8100556Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.core.Vec3Test.xml: OK
+2026-10-16T22:12:39.8101194Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.time.M2BoundaryTest.xml: OK
+2026-10-16T22:12:39.8101882Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.time.M2DeterminismTest.xml: OK
+2026-10-16T22:12:39.8102925Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.time.M2GoldenVectorTest.xml: OK
+2026-10-16T22:12:39.8103672Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.time.M2ReviewAdversarialTest.xml: OK
+2026-10-16T22:12:39.8104388Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.time.M2Revision2Test.xml: OK
+2026-10-16T22:12:39.8105054Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.time.PlaybackTest.xml: OK
+2026-10-16T22:12:39.8105693Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.time.TickTimeTest.xml: OK
+2026-10-16T22:12:39.8106482Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.time.TimePointTest.xml: OK
+2026-10-16T22:12:39.8107682Z verification/m2-r2/before-fix-junit/TEST-workshop.vfx.math.time.TimingTest.xml: OK
+2026-10-16T22:12:39.8108358Z verification/m2-r2/input/DELIVERY-SHA256SUMS.txt: OK
+2026-10-16T22:12:39.8108841Z verification/m2-r2/input/m2-r2-amendment.bundle: OK
+2026-10-16T22:12:39.8109574Z verification/m2-r2/input/minecraft-vfx-math-M2-r2-amendment.zip: OK
+2026-10-16T22:12:39.8110186Z verification/m2-r2/junit/TEST-workshop.vfx.math.core.Amendment3AcceptanceTest.xml: OK
+2026-10-16T22:12:39.8110892Z verification/m2-r2/junit/TEST-workshop.vfx.math.core.BoundaryTest.xml: OK
+2026-10-16T22:12:39.8111994Z verification/m2-r2/junit/TEST-workshop.vfx.math.core.ConventionsTest.xml: OK
+2026-10-16T22:12:39.8113278Z verification/m2-r2/junit/TEST-workshop.vfx.math.core.FrameTest.xml: OK
+2026-10-16T22:12:39.8114010Z verification/m2-r2/junit/TEST-workshop.vfx.math.core.JomlOracleTest.xml: OK
+2026-10-16T22:12:39.8114679Z verification/m2-r2/junit/TEST-workshop.vfx.math.core.M0RegressionTest.xml: OK
+2026-10-16T22:12:39.8115291Z verification/m2-r2/junit/TEST-workshop.vfx.math.core.MathUtilTest.xml: OK
+2026-10-16T22:12:39.8115896Z verification/m2-r2/junit/TEST-workshop.vfx.math.core.NumericPolicyTest.xml: OK
+2026-10-16T22:12:39.8116826Z verification/m2-r2/junit/TEST-workshop.vfx.math.core.PolicyClarificationTest.xml: OK
+2026-10-16T22:12:39.8117992Z verification/m2-r2/junit/TEST-workshop.vfx.math.core.PoseTest.xml: OK
+2026-10-16T22:12:39.8118973Z verification/m2-r2/junit/TEST-workshop.vfx.math.core.QuatTest.xml: OK
+2026-10-16T22:12:39.8119765Z verification/m2-r2/junit/TEST-workshop.vfx.math.core.ReviewAdversarialTest.xml: OK
+2026-10-16T22:12:39.8120369Z verification/m2-r2/junit/TEST-workshop.vfx.math.core.Vec3Test.xml: OK
+2026-10-16T22:12:39.8120931Z verification/m2-r2/junit/TEST-workshop.vfx.math.time.M2BoundaryTest.xml: OK
+2026-10-16T22:12:39.8121552Z verification/m2-r2/junit/TEST-workshop.vfx.math.time.M2DeterminismTest.xml: OK
+2026-10-16T22:12:39.8122624Z verification/m2-r2/junit/TEST-workshop.vfx.math.time.M2GoldenVectorTest.xml: OK
+2026-10-16T22:12:39.8123368Z verification/m2-r2/junit/TEST-workshop.vfx.math.time.M2ReviewAdversarialTest.xml: OK
+2026-10-16T22:12:39.8124008Z verification/m2-r2/junit/TEST-workshop.vfx.math.time.M2Revision2Test.xml: OK
+2026-10-16T22:12:39.8124621Z verification/m2-r2/junit/TEST-workshop.vfx.math.time.PlaybackTest.xml: OK
+2026-10-16T22:12:39.8125207Z verification/m2-r2/junit/TEST-workshop.vfx.math.time.TickTimeTest.xml: OK
+2026-10-16T22:12:39.8125786Z verification/m2-r2/junit/TEST-workshop.vfx.math.time.TimePointTest.xml: OK
+2026-10-16T22:12:39.8126364Z verification/m2-r2/junit/TEST-workshop.vfx.math.time.TimingTest.xml: OK
+2026-10-16T22:12:39.8126849Z verification/m2-r2/logs/amendment-history.txt: OK
+2026-10-16T22:12:39.8127273Z verification/m2-r2/logs/before-after-resolution.txt: OK
+2026-10-16T22:12:39.8127705Z verification/m2-r2/logs/before-fix-clean-test.txt: OK
+2026-10-16T22:12:39.8128127Z verification/m2-r2/logs/before-fix-exit-code.txt: OK
+2026-10-16T22:12:39.8128550Z verification/m2-r2/logs/before-fix-summary.json: OK
+2026-10-16T22:12:39.8128964Z verification/m2-r2/logs/boundary-regeneration.txt: OK
+2026-10-16T22:12:39.8129360Z verification/m2-r2/logs/bundle-verify.txt: OK
+2026-10-16T22:12:39.8129725Z verification/m2-r2/logs/check.txt: OK
+2026-10-16T22:12:39.8130070Z verification/m2-r2/logs/clean-test.txt: OK
+2026-10-16T22:12:39.8130438Z verification/m2-r2/logs/commit-history.txt: OK
+2026-10-16T22:12:39.8130822Z verification/m2-r2/logs/delivery-checksums.txt: OK
+2026-10-16T22:12:39.8131213Z verification/m2-r2/logs/golden-integrity.txt: OK
+2026-10-16T22:12:39.8131610Z verification/m2-r2/logs/golden-regeneration.txt: OK
+2026-10-16T22:12:39.8132027Z verification/m2-r2/logs/implementation-commit.txt: OK
+2026-10-16T22:12:39.8132706Z verification/m2-r2/logs/implementation-status.txt: OK
+2026-10-16T22:12:39.8133125Z verification/m2-r2/logs/input-checksums.txt: OK
+2026-10-16T22:12:39.8133514Z verification/m2-r2/logs/java-toolchains.txt: OK
+2026-10-16T22:12:39.8133895Z verification/m2-r2/logs/m1-integrity.txt: OK
+2026-10-16T22:12:39.8134263Z verification/m2-r2/logs/network-policy.json: OK
+2026-10-16T22:12:39.8134699Z verification/m2-r2/logs/no-independent-input-changes.patch: OK
+2026-10-16T22:12:39.8135161Z verification/m2-r2/logs/patch-verification.txt: OK
+2026-10-16T22:12:39.8135554Z verification/m2-r2/logs/push-amendment.txt: OK
+2026-10-16T22:12:39.8135968Z verification/m2-r2/logs/recovered-file-integrity.txt: OK
+2026-10-16T22:12:39.8136378Z verification/m2-r2/logs/remote-before.txt: OK
+2026-10-16T22:12:39.8136754Z verification/m2-r2/logs/run-exit-codes.json: OK
+2026-10-16T22:12:39.8137158Z verification/m2-r2/logs/runtime-dependencies.txt: OK
+2026-10-16T22:12:39.8137547Z verification/m2-r2/logs/toolchain.txt: OK
+2026-10-16T22:12:39.8137906Z verification/m2-r2/production-vs-r1.diff: OK
+2026-10-16T22:12:39.8138263Z verification/m2-r2/test-summary.csv: OK
+2026-10-16T22:12:39.8138801Z verification/m2-r2/tests/test/classes/workshop.vfx.math.core.Amendment3AcceptanceTest.html: OK
+2026-10-16T22:12:39.8139502Z verification/m2-r2/tests/test/classes/workshop.vfx.math.core.BoundaryTest.html: OK
+2026-10-16T22:12:39.8140162Z verification/m2-r2/tests/test/classes/workshop.vfx.math.core.ConventionsTest.html: OK
+2026-10-16T22:12:39.8140959Z verification/m2-r2/tests/test/classes/workshop.vfx.math.core.FrameTest.html: OK
+2026-10-16T22:12:39.8141596Z verification/m2-r2/tests/test/classes/workshop.vfx.math.core.JomlOracleTest.html: OK
+2026-10-16T22:12:39.8142245Z verification/m2-r2/tests/test/classes/workshop.vfx.math.core.M0RegressionTest.html: OK
+2026-10-16T22:12:39.8143197Z verification/m2-r2/tests/test/classes/workshop.vfx.math.core.MathUtilTest.html: OK
+2026-10-16T22:12:39.8143858Z verification/m2-r2/tests/test/classes/workshop.vfx.math.core.NumericPolicyTest.html: OK
+2026-10-16T22:12:39.8144565Z verification/m2-r2/tests/test/classes/workshop.vfx.math.core.PolicyClarificationTest.html: OK
+2026-10-16T22:12:39.8145244Z verification/m2-r2/tests/test/classes/workshop.vfx.math.core.PoseTest.html: OK
+2026-10-16T22:12:39.8145996Z verification/m2-r2/tests/test/classes/workshop.vfx.math.core.QuatTest.html: OK
+2026-10-16T22:12:39.8146668Z verification/m2-r2/tests/test/classes/workshop.vfx.math.core.ReviewAdversarialTest.html: OK
+2026-10-16T22:12:39.8147335Z verification/m2-r2/tests/test/classes/workshop.vfx.math.core.Vec3Test.html: OK
+2026-10-16T22:12:39.8147953Z verification/m2-r2/tests/test/classes/workshop.vfx.math.time.M2BoundaryTest.html: OK
+2026-10-16T22:12:39.8148601Z verification/m2-r2/tests/test/classes/workshop.vfx.math.time.M2DeterminismTest.html: OK
+2026-10-16T22:12:39.8149276Z verification/m2-r2/tests/test/classes/workshop.vfx.math.time.M2GoldenVectorTest.html: OK
+2026-10-16T22:12:39.8149979Z verification/m2-r2/tests/test/classes/workshop.vfx.math.time.M2ReviewAdversarialTest.html: OK
+2026-10-16T22:12:39.8150663Z verification/m2-r2/tests/test/classes/workshop.vfx.math.time.M2Revision2Test.html: OK
+2026-10-16T22:12:39.8151315Z verification/m2-r2/tests/test/classes/workshop.vfx.math.time.PlaybackTest.html: OK
+2026-10-16T22:12:39.8151944Z verification/m2-r2/tests/test/classes/workshop.vfx.math.time.TickTimeTest.html: OK
+2026-10-16T22:12:39.8152837Z verification/m2-r2/tests/test/classes/workshop.vfx.math.time.TimePointTest.html: OK
+2026-10-16T22:12:39.8153473Z verification/m2-r2/tests/test/classes/workshop.vfx.math.time.TimingTest.html: OK
+2026-10-16T22:12:39.8153991Z verification/m2-r2/tests/test/css/base-style.css: OK
+2026-10-16T22:12:39.8154416Z verification/m2-r2/tests/test/css/style.css: OK
+2026-10-16T22:12:39.8154795Z verification/m2-r2/tests/test/index.html: OK
+2026-10-16T22:12:39.8155169Z verification/m2-r2/tests/test/js/report.js: OK
+2026-10-16T22:12:39.8155620Z verification/m2-r2/tests/test/packages/workshop.vfx.math.core.html: OK
+2026-10-16T22:12:39.8156156Z verification/m2-r2/tests/test/packages/workshop.vfx.math.time.html: OK
+2026-10-16T22:12:39.8156607Z verification/m2/VERIFICATION-REPORT.md: OK
+2026-10-16T22:12:39.8157024Z verification/m2/implementation-and-handoff-vs-M1.patch: OK
+2026-10-16T22:12:39.8157522Z verification/m2/input/minecraft-vfx-math-M2-handoff-r1.zip: OK
+2026-10-16T22:12:39.8158104Z verification/m2/junit/TEST-workshop.vfx.math.core.Amendment3AcceptanceTest.xml: OK
+2026-10-16T22:12:39.8158716Z verification/m2/junit/TEST-workshop.vfx.math.core.BoundaryTest.xml: OK
+2026-10-16T22:12:39.8159291Z verification/m2/junit/TEST-workshop.vfx.math.core.ConventionsTest.xml: OK
+2026-10-16T22:12:39.8159857Z verification/m2/junit/TEST-workshop.vfx.math.core.FrameTest.xml: OK
+2026-10-16T22:12:39.8160412Z verification/m2/junit/TEST-workshop.vfx.math.core.JomlOracleTest.xml: OK
+2026-10-16T22:12:39.8160995Z verification/m2/junit/TEST-workshop.vfx.math.core.M0RegressionTest.xml: OK
+2026-10-16T22:12:39.8161570Z verification/m2/junit/TEST-workshop.vfx.math.core.MathUtilTest.xml: OK
+2026-10-16T22:12:39.8162145Z verification/m2/junit/TEST-workshop.vfx.math.core.NumericPolicyTest.xml: OK
+2026-10-16T22:12:39.8163017Z verification/m2/junit/TEST-workshop.vfx.math.core.PolicyClarificationTest.xml: OK
+2026-10-16T22:12:39.8163660Z verification/m2/junit/TEST-workshop.vfx.math.core.PoseTest.xml: OK
+2026-10-16T22:12:39.8164207Z verification/m2/junit/TEST-workshop.vfx.math.core.QuatTest.xml: OK
+2026-10-16T22:12:39.8164968Z verification/m2/junit/TEST-workshop.vfx.math.core.ReviewAdversarialTest.xml: OK
+2026-10-16T22:12:39.8165559Z verification/m2/junit/TEST-workshop.vfx.math.core.Vec3Test.xml: OK
+2026-10-16T22:12:39.8166112Z verification/m2/junit/TEST-workshop.vfx.math.time.M2BoundaryTest.xml: OK
+2026-10-16T22:12:39.8166707Z verification/m2/junit/TEST-workshop.vfx.math.time.M2DeterminismTest.xml: OK
+2026-10-16T22:12:39.8167311Z verification/m2/junit/TEST-workshop.vfx.math.time.M2GoldenVectorTest.xml: OK
+2026-10-16T22:12:39.8167895Z verification/m2/junit/TEST-workshop.vfx.math.time.PlaybackTest.xml: OK
+2026-10-16T22:12:39.8168453Z verification/m2/junit/TEST-workshop.vfx.math.time.TickTimeTest.xml: OK
+2026-10-16T22:12:39.8169008Z verification/m2/junit/TEST-workshop.vfx.math.time.TimePointTest.xml: OK
+2026-10-16T22:12:39.8169684Z verification/m2/junit/TEST-workshop.vfx.math.time.TimingTest.xml: OK
+2026-10-16T22:12:39.8170146Z verification/m2/logs/check.txt: OK
+2026-10-16T22:12:39.8170472Z verification/m2/logs/clean-test.txt: OK
+2026-10-16T22:12:39.8170822Z verification/m2/logs/commit-history.txt: OK
+2026-10-16T22:12:39.8171209Z verification/m2/logs/final-handoff-checksums.txt: OK
+2026-10-16T22:12:39.8171608Z verification/m2/logs/golden-integrity.txt: OK
+2026-10-16T22:12:39.8172005Z verification/m2/logs/golden-regeneration.txt: OK
+2026-10-16T22:12:39.8172647Z verification/m2/logs/handoff-commit.txt: OK
+2026-10-16T22:12:39.8173133Z verification/m2/logs/implementation-and-handoff-file-changes.txt: OK
+2026-10-16T22:12:39.8173624Z verification/m2/logs/implementation-commit.txt: OK
+2026-10-16T22:12:39.8174035Z verification/m2/logs/implementation-status.txt: OK
+2026-10-16T22:12:39.8174430Z verification/m2/logs/import-checksums.txt: OK
+2026-10-16T22:12:39.8174813Z verification/m2/logs/input-archive-sha256.txt: OK
+2026-10-16T22:12:39.8175208Z verification/m2/logs/input-checksums.txt: OK
+2026-10-16T22:12:39.8175580Z verification/m2/logs/java-toolchains.txt: OK
+2026-10-16T22:12:39.8175943Z verification/m2/logs/m1-integrity.txt: OK
+2026-10-16T22:12:39.8176313Z verification/m2/logs/m2-handoff-integrity.txt: OK
+2026-10-16T22:12:39.8176699Z verification/m2/logs/network-policy.json: OK
+2026-10-16T22:12:39.8177060Z verification/m2/logs/remote-before.txt: OK
+2026-10-16T22:12:39.8177418Z verification/m2/logs/run-exit-codes.json: OK
+2026-10-16T22:12:39.8177791Z verification/m2/logs/runtime-dependencies.txt: OK
+2026-10-16T22:12:39.8178163Z verification/m2/logs/toolchain.txt: OK
+2026-10-16T22:12:39.8178504Z verification/m2/production-vs-M1.diff: OK
+2026-10-16T22:12:39.8178852Z verification/m2/test-summary.csv: OK
+2026-10-16T22:12:39.8179421Z verification/m2/tests/test/classes/workshop.vfx.math.core.Amendment3AcceptanceTest.html: OK
+2026-10-16T22:12:39.8180103Z verification/m2/tests/test/classes/workshop.vfx.math.core.BoundaryTest.html: OK
+2026-10-16T22:12:39.8180739Z verification/m2/tests/test/classes/workshop.vfx.math.core.ConventionsTest.html: OK
+2026-10-16T22:12:39.8181355Z verification/m2/tests/test/classes/workshop.vfx.math.core.FrameTest.html: OK
+2026-10-16T22:12:39.8181973Z verification/m2/tests/test/classes/workshop.vfx.math.core.JomlOracleTest.html: OK
+2026-10-16T22:12:39.8182876Z verification/m2/tests/test/classes/workshop.vfx.math.core.M0RegressionTest.html: OK
+2026-10-16T22:12:39.8183519Z verification/m2/tests/test/classes/workshop.vfx.math.core.MathUtilTest.html: OK
+2026-10-16T22:12:39.8184169Z verification/m2/tests/test/classes/workshop.vfx.math.core.NumericPolicyTest.html: OK
+2026-10-16T22:12:39.8184852Z verification/m2/tests/test/classes/workshop.vfx.math.core.PolicyClarificationTest.html: OK
+2026-10-16T22:12:39.8185507Z verification/m2/tests/test/classes/workshop.vfx.math.core.PoseTest.html: OK
+2026-10-16T22:12:39.8186090Z verification/m2/tests/test/classes/workshop.vfx.math.core.QuatTest.html: OK
+2026-10-16T22:12:39.8186732Z verification/m2/tests/test/classes/workshop.vfx.math.core.ReviewAdversarialTest.html: OK
+2026-10-16T22:12:39.8187386Z verification/m2/tests/test/classes/workshop.vfx.math.core.Vec3Test.html: OK
+2026-10-16T22:12:39.8188160Z verification/m2/tests/test/classes/workshop.vfx.math.time.M2BoundaryTest.html: OK
+2026-10-16T22:12:39.8188810Z verification/m2/tests/test/classes/workshop.vfx.math.time.M2DeterminismTest.html: OK
+2026-10-16T22:12:39.8189473Z verification/m2/tests/test/classes/workshop.vfx.math.time.M2GoldenVectorTest.html: OK
+2026-10-16T22:12:39.8190113Z verification/m2/tests/test/classes/workshop.vfx.math.time.PlaybackTest.html: OK
+2026-10-16T22:12:39.8190725Z verification/m2/tests/test/classes/workshop.vfx.math.time.TickTimeTest.html: OK
+2026-10-16T22:12:39.8191337Z verification/m2/tests/test/classes/workshop.vfx.math.time.TimePointTest.html: OK
+2026-10-16T22:12:39.8191949Z verification/m2/tests/test/classes/workshop.vfx.math.time.TimingTest.html: OK
+2026-10-16T22:12:39.8192868Z verification/m2/tests/test/css/base-style.css: OK
+2026-10-16T22:12:39.8193288Z verification/m2/tests/test/css/style.css: OK
+2026-10-16T22:12:39.8193650Z verification/m2/tests/test/index.html: OK
+2026-10-16T22:12:39.8194005Z verification/m2/tests/test/js/report.js: OK
+2026-10-16T22:12:39.8194447Z verification/m2/tests/test/packages/workshop.vfx.math.core.html: OK
+2026-10-16T22:12:39.8194973Z verification/m2/tests/test/packages/workshop.vfx.math.time.html: OK
+2026-10-16T22:12:39.8195423Z verification/m3/VERIFICATION-REPORT.md: OK
+2026-10-16T22:12:39.8195803Z verification/m3/input/OWNER-AUTHORIZATION.txt: OK
+2026-10-16T22:12:39.8196270Z verification/m3/input/minecraft-vfx-math-M3-r2-amendment-a3.zip: OK
+2026-10-16T22:12:39.8196873Z verification/m3/junit/TEST-workshop.vfx.math.core.Amendment3AcceptanceTest.xml: OK
+2026-10-16T22:12:39.8197488Z verification/m3/junit/TEST-workshop.vfx.math.core.BoundaryTest.xml: OK
+2026-10-16T22:12:39.8198056Z verification/m3/junit/TEST-workshop.vfx.math.core.ConventionsTest.xml: OK
+2026-10-16T22:12:39.8198623Z verification/m3/junit/TEST-workshop.vfx.math.core.FrameTest.xml: OK
+2026-10-16T22:12:39.8199171Z verification/m3/junit/TEST-workshop.vfx.math.core.JomlOracleTest.xml: OK
+2026-10-16T22:12:39.8199752Z verification/m3/junit/TEST-workshop.vfx.math.core.M0RegressionTest.xml: OK
+2026-10-16T22:12:39.8200325Z verification/m3/junit/TEST-workshop.vfx.math.core.MathUtilTest.xml: OK
+2026-10-16T22:12:39.8200904Z verification/m3/junit/TEST-workshop.vfx.math.core.NumericPolicyTest.xml: OK
+2026-10-16T22:12:39.8201537Z verification/m3/junit/TEST-workshop.vfx.math.core.PolicyClarificationTest.xml: OK
+2026-10-16T22:12:39.8202135Z verification/m3/junit/TEST-workshop.vfx.math.core.PoseTest.xml: OK
+2026-10-16T22:12:39.8202931Z verification/m3/junit/TEST-workshop.vfx.math.core.QuatTest.xml: OK
+2026-10-16T22:12:39.8203510Z verification/m3/junit/TEST-workshop.vfx.math.core.ReviewAdversarialTest.xml: OK
+2026-10-16T22:12:39.8204089Z verification/m3/junit/TEST-workshop.vfx.math.core.Vec3Test.xml: OK
+2026-10-16T22:12:39.8204629Z verification/m3/junit/TEST-workshop.vfx.math.curve.BezierTest.xml: OK
+2026-10-16T22:12:39.8205173Z verification/m3/junit/TEST-workshop.vfx.math.curve.EasingTest.xml: OK
+2026-10-16T22:12:39.8205744Z verification/m3/junit/TEST-workshop.vfx.math.curve.M3BoundaryTest.xml: OK
+2026-10-16T22:12:39.8206346Z verification/m3/junit/TEST-workshop.vfx.math.curve.M3DeterminismTest.xml: OK
+2026-10-16T22:12:39.8206973Z verification/m3/junit/TEST-workshop.vfx.math.curve.M3ReferenceVectorTest.xml: OK
+2026-10-16T22:12:39.8207586Z verification/m3/junit/TEST-workshop.vfx.math.curve.M3UnderflowTest.xml: OK
+2026-10-16T22:12:39.8208171Z verification/m3/junit/TEST-workshop.vfx.math.curve.PosedCurveTest.xml: OK
+2026-10-16T22:12:39.8208730Z verification/m3/junit/TEST-workshop.vfx.math.curve.SpiralTest.xml: OK
+2026-10-16T22:12:39.8209286Z verification/m3/junit/TEST-workshop.vfx.math.time.M2BoundaryTest.xml: OK
+2026-10-16T22:12:39.8209884Z verification/m3/junit/TEST-workshop.vfx.math.time.M2DeterminismTest.xml: OK
+2026-10-16T22:12:39.8210493Z verification/m3/junit/TEST-workshop.vfx.math.time.M2GoldenVectorTest.xml: OK
+2026-10-16T22:12:39.8211123Z verification/m3/junit/TEST-workshop.vfx.math.time.M2ReviewAdversarialTest.xml: OK
+2026-10-16T22:12:39.8211912Z verification/m3/junit/TEST-workshop.vfx.math.time.M2Revision2Test.xml: OK
+2026-10-16T22:12:39.8212755Z verification/m3/junit/TEST-workshop.vfx.math.time.PlaybackTest.xml: OK
+2026-10-16T22:12:39.8213354Z verification/m3/junit/TEST-workshop.vfx.math.time.TickTimeTest.xml: OK
+2026-10-16T22:12:39.8213917Z verification/m3/junit/TEST-workshop.vfx.math.time.TimePointTest.xml: OK
+2026-10-16T22:12:39.8214471Z verification/m3/junit/TEST-workshop.vfx.math.time.TimingTest.xml: OK
+2026-10-16T22:12:39.8214932Z verification/m3/logs/bundle-verify.txt: OK
+2026-10-16T22:12:39.8215285Z verification/m3/logs/check.txt: OK
+2026-10-16T22:12:39.8215639Z verification/m3/logs/clean-test-attempt1.txt: OK
+2026-10-16T22:12:39.8216040Z verification/m3/logs/clean-test-exit-code.txt: OK
+2026-10-16T22:12:39.8216558Z verification/m3/logs/clean-test.txt: OK
+2026-10-16T22:12:39.8216914Z verification/m3/logs/commit-history.txt: OK
+2026-10-16T22:12:39.8217299Z verification/m3/logs/implementation-commit.txt: OK
+2026-10-16T22:12:39.8217709Z verification/m3/logs/implementation-status.txt: OK
+2026-10-16T22:12:39.8218115Z verification/m3/logs/input-archive-sha256.txt: OK
+2026-10-16T22:12:39.8218505Z verification/m3/logs/input-checksums.txt: OK
+2026-10-16T22:12:39.8218868Z verification/m3/logs/java-toolchains.txt: OK
+2026-10-16T22:12:39.8219225Z verification/m3/logs/m1-m2-integrity.txt: OK
+2026-10-16T22:12:39.8219642Z verification/m3/logs/m3-independent-input-integrity.txt: OK
+2026-10-16T22:12:39.8220066Z verification/m3/logs/network-policy.json: OK
+2026-10-16T22:12:39.8220482Z verification/m3/logs/no-test-or-contract-changes.patch: OK
+2026-10-16T22:12:39.8220911Z verification/m3/logs/patch-verification.txt: OK
+2026-10-16T22:12:39.8221304Z verification/m3/logs/production-diff-stat.txt: OK
+2026-10-16T22:12:39.8221732Z verification/m3/logs/recovered-file-integrity.txt: OK
+2026-10-16T22:12:39.8222142Z verification/m3/logs/reference-integrity.txt: OK
+2026-10-16T22:12:39.8222800Z verification/m3/logs/reference-regeneration.txt: OK
+2026-10-16T22:12:39.8223222Z verification/m3/logs/reference-row-counts.json: OK
+2026-10-16T22:12:39.8223604Z verification/m3/logs/remote-before.txt: OK
+2026-10-16T22:12:39.8223964Z verification/m3/logs/run-exit-codes.json: OK
+2026-10-16T22:12:39.8224340Z verification/m3/logs/runtime-dependencies.txt: OK
+2026-10-16T22:12:39.8224737Z verification/m3/logs/specification-history.txt: OK
+2026-10-16T22:12:39.8225123Z verification/m3/logs/toolchain.txt: OK
+2026-10-16T22:12:39.8225496Z verification/m3/production-vs-spec.diff: OK
+2026-10-16T22:12:39.8225850Z verification/m3/test-summary.csv: OK
+2026-10-16T22:12:39.8226373Z verification/m3/tests/test/classes/workshop.vfx.math.core.Amendment3AcceptanceTest.html: OK
+2026-10-16T22:12:39.8227057Z verification/m3/tests/test/classes/workshop.vfx.math.core.BoundaryTest.html: OK
+2026-10-16T22:12:39.8227694Z verification/m3/tests/test/classes/workshop.vfx.math.core.ConventionsTest.html: OK
+2026-10-16T22:12:39.8228313Z verification/m3/tests/test/classes/workshop.vfx.math.core.FrameTest.html: OK
+2026-10-16T22:12:39.8228937Z verification/m3/tests/test/classes/workshop.vfx.math.core.JomlOracleTest.html: OK
+2026-10-16T22:12:39.8229573Z verification/m3/tests/test/classes/workshop.vfx.math.core.M0RegressionTest.html: OK
+2026-10-16T22:12:39.8230213Z verification/m3/tests/test/classes/workshop.vfx.math.core.MathUtilTest.html: OK
+2026-10-16T22:12:39.8230846Z verification/m3/tests/test/classes/workshop.vfx.math.core.NumericPolicyTest.html: OK
+2026-10-16T22:12:39.8231535Z verification/m3/tests/test/classes/workshop.vfx.math.core.PolicyClarificationTest.html: OK
+2026-10-16T22:12:39.8232193Z verification/m3/tests/test/classes/workshop.vfx.math.core.PoseTest.html: OK
+2026-10-16T22:12:39.8233048Z verification/m3/tests/test/classes/workshop.vfx.math.core.QuatTest.html: OK
+2026-10-16T22:12:39.8233704Z verification/m3/tests/test/classes/workshop.vfx.math.core.ReviewAdversarialTest.html: OK
+2026-10-16T22:12:39.8234350Z verification/m3/tests/test/classes/workshop.vfx.math.core.Vec3Test.html: OK
+2026-10-16T22:12:39.8234957Z verification/m3/tests/test/classes/workshop.vfx.math.curve.BezierTest.html: OK
+2026-10-16T22:12:39.8235743Z verification/m3/tests/test/classes/workshop.vfx.math.curve.EasingTest.html: OK
+2026-10-16T22:12:39.8236368Z verification/m3/tests/test/classes/workshop.vfx.math.curve.M3BoundaryTest.html: OK
+2026-10-16T22:12:39.8237025Z verification/m3/tests/test/classes/workshop.vfx.math.curve.M3DeterminismTest.html: OK
+2026-10-16T22:12:39.8237709Z verification/m3/tests/test/classes/workshop.vfx.math.curve.M3ReferenceVectorTest.html: OK
+2026-10-16T22:12:39.8238388Z verification/m3/tests/test/classes/workshop.vfx.math.curve.M3UnderflowTest.html: OK
+2026-10-16T22:12:39.8239029Z verification/m3/tests/test/classes/workshop.vfx.math.curve.PosedCurveTest.html: OK
+2026-10-16T22:12:39.8239779Z verification/m3/tests/test/classes/workshop.vfx.math.curve.SpiralTest.html: OK
+2026-10-16T22:12:39.8240400Z verification/m3/tests/test/classes/workshop.vfx.math.time.M2BoundaryTest.html: OK
+2026-10-16T22:12:39.8241034Z verification/m3/tests/test/classes/workshop.vfx.math.time.M2DeterminismTest.html: OK
+2026-10-16T22:12:39.8241694Z verification/m3/tests/test/classes/workshop.vfx.math.time.M2GoldenVectorTest.html: OK
+2026-10-16T22:12:39.8242613Z verification/m3/tests/test/classes/workshop.vfx.math.time.M2ReviewAdversarialTest.html: OK
+2026-10-16T22:12:39.8243303Z verification/m3/tests/test/classes/workshop.vfx.math.time.M2Revision2Test.html: OK
+2026-10-16T22:12:39.8243930Z verification/m3/tests/test/classes/workshop.vfx.math.time.PlaybackTest.html: OK
+2026-10-16T22:12:39.8244550Z verification/m3/tests/test/classes/workshop.vfx.math.time.TickTimeTest.html: OK
+2026-10-16T22:12:39.8245164Z verification/m3/tests/test/classes/workshop.vfx.math.time.TimePointTest.html: OK
+2026-10-16T22:12:39.8245779Z verification/m3/tests/test/classes/workshop.vfx.math.time.TimingTest.html: OK
+2026-10-16T22:12:39.8246279Z verification/m3/tests/test/css/base-style.css: OK
+2026-10-16T22:12:39.8246657Z verification/m3/tests/test/css/style.css: OK
+2026-10-16T22:12:39.8247019Z verification/m3/tests/test/index.html: OK
+2026-10-16T22:12:39.8247369Z verification/m3/tests/test/js/report.js: OK
+2026-10-16T22:12:39.8247809Z verification/m3/tests/test/packages/workshop.vfx.math.core.html: OK
+2026-10-16T22:12:39.8248344Z verification/m3/tests/test/packages/workshop.vfx.math.curve.html: OK
+2026-10-16T22:12:39.8248869Z verification/m3/tests/test/packages/workshop.vfx.math.time.html: OK
+2026-10-16T22:12:39.8249314Z verification/r4/VERIFICATION-REPORT.md: OK
+2026-10-16T22:12:39.8249877Z verification/r4/before-fixes-junit/TEST-workshop.vfx.math.core.Amendment3AcceptanceTest.xml: OK
+2026-10-16T22:12:39.8250595Z verification/r4/before-fixes-junit/TEST-workshop.vfx.math.core.BoundaryTest.xml: OK
+2026-10-16T22:12:39.8251269Z verification/r4/before-fixes-junit/TEST-workshop.vfx.math.core.ConventionsTest.xml: OK
+2026-10-16T22:12:39.8251926Z verification/r4/before-fixes-junit/TEST-workshop.vfx.math.core.FrameTest.xml: OK
+2026-10-16T22:12:39.8252794Z verification/r4/before-fixes-junit/TEST-workshop.vfx.math.core.JomlOracleTest.xml: OK
+2026-10-16T22:12:39.8253495Z verification/r4/before-fixes-junit/TEST-workshop.vfx.math.core.M0RegressionTest.xml: OK
+2026-10-16T22:12:39.8254166Z verification/r4/before-fixes-junit/TEST-workshop.vfx.math.core.MathUtilTest.xml: OK
+2026-10-16T22:12:39.8254841Z verification/r4/before-fixes-junit/TEST-workshop.vfx.math.core.NumericPolicyTest.xml: OK
+2026-10-16T22:12:39.8255869Z verification/r4/before-fixes-junit/TEST-workshop.vfx.math.core.PolicyClarificationTest.xml: OK
+2026-10-16T22:12:39.8256796Z verification/r4/before-fixes-junit/TEST-workshop.vfx.math.core.PoseTest.xml: OK
+2026-10-16T22:12:39.8257418Z verification/r4/before-fixes-junit/TEST-workshop.vfx.math.core.QuatTest.xml: OK
+2026-10-16T22:12:39.8258111Z verification/r4/before-fixes-junit/TEST-workshop.vfx.math.core.ReviewAdversarialTest.xml: OK
+2026-10-16T22:12:39.8258795Z verification/r4/before-fixes-junit/TEST-workshop.vfx.math.core.Vec3Test.xml: OK
+2026-10-16T22:12:39.8259287Z verification/r4/input/m1-review-r4.zip: OK
+2026-10-16T22:12:39.8259983Z verification/r4/junit/TEST-workshop.vfx.math.core.Amendment3AcceptanceTest.xml: OK
+2026-10-16T22:12:39.8260599Z verification/r4/junit/TEST-workshop.vfx.math.core.BoundaryTest.xml: OK
+2026-10-16T22:12:39.8261172Z verification/r4/junit/TEST-workshop.vfx.math.core.ConventionsTest.xml: OK
+2026-10-16T22:12:39.8261749Z verification/r4/junit/TEST-workshop.vfx.math.core.FrameTest.xml: OK
+2026-10-16T22:12:39.8262559Z verification/r4/junit/TEST-workshop.vfx.math.core.JomlOracleTest.xml: OK
+2026-10-16T22:12:39.8263194Z verification/r4/junit/TEST-workshop.vfx.math.core.M0RegressionTest.xml: OK
+2026-10-16T22:12:39.8263772Z verification/r4/junit/TEST-workshop.vfx.math.core.MathUtilTest.xml: OK
+2026-10-16T22:12:39.8264367Z verification/r4/junit/TEST-workshop.vfx.math.core.NumericPolicyTest.xml: OK
+2026-10-16T22:12:39.8265171Z verification/r4/junit/TEST-workshop.vfx.math.core.PolicyClarificationTest.xml: OK
+2026-10-16T22:12:39.8265786Z verification/r4/junit/TEST-workshop.vfx.math.core.PoseTest.xml: OK
+2026-10-16T22:12:39.8266327Z verification/r4/junit/TEST-workshop.vfx.math.core.QuatTest.xml: OK
+2026-10-16T22:12:39.8266927Z verification/r4/junit/TEST-workshop.vfx.math.core.ReviewAdversarialTest.xml: OK
+2026-10-16T22:12:39.8267509Z verification/r4/junit/TEST-workshop.vfx.math.core.Vec3Test.xml: OK
+2026-10-16T22:12:39.8267988Z verification/r4/logs/before-fixes-clean-test.txt: OK
+2026-10-16T22:12:39.8268400Z verification/r4/logs/before-fixes-exit-code.txt: OK
+2026-10-16T22:12:39.8268804Z verification/r4/logs/before-fixes-summary.json: OK
+2026-10-16T22:12:39.8269188Z verification/r4/logs/bundle-verify.txt: OK
+2026-10-16T22:12:39.8269531Z verification/r4/logs/check.txt: OK
+2026-10-16T22:12:39.8269852Z verification/r4/logs/clean-test.txt: OK
+2026-10-16T22:12:39.8270205Z verification/r4/logs/commit-history.txt: OK
+2026-10-16T22:12:39.8270593Z verification/r4/logs/implementation-commit.txt: OK
+2026-10-16T22:12:39.8271005Z verification/r4/logs/implementation-status.txt: OK
+2026-10-16T22:12:39.8271406Z verification/r4/logs/input-archive-sha256.txt: OK
+2026-10-16T22:12:39.8271799Z verification/r4/logs/input-checksums.txt: OK
+2026-10-16T22:12:39.8272161Z verification/r4/logs/java-toolchains.txt: OK
+2026-10-16T22:12:39.8272805Z verification/r4/logs/network-policy.json: OK
+2026-10-16T22:12:39.8273186Z verification/r4/logs/patch-verification.txt: OK
+2026-10-16T22:12:39.8273560Z verification/r4/logs/push-review.txt: OK
+2026-10-16T22:12:39.8273922Z verification/r4/logs/remote-before.txt: OK
+2026-10-16T22:12:39.8274275Z verification/r4/logs/review-history.txt: OK
+2026-10-16T22:12:39.8274637Z verification/r4/logs/run-exit-codes.json: OK
+2026-10-16T22:12:39.8275016Z verification/r4/logs/runtime-dependencies.txt: OK
+2026-10-16T22:12:39.8275441Z verification/r4/logs/test-changes-from-review.patch: OK
+2026-10-16T22:12:39.8275852Z verification/r4/logs/test-integrity.txt: OK
+2026-10-16T22:12:39.8276209Z verification/r4/logs/toolchain.txt: OK
+2026-10-16T22:12:39.8276544Z verification/r4/production.diff: OK
+2026-10-16T22:12:39.8276880Z verification/r4/test-summary.csv: OK
+2026-10-16T22:12:39.8277447Z verification/r4/tests/test/classes/workshop.vfx.math.core.Amendment3AcceptanceTest.html: OK
+2026-10-16T22:12:39.8278133Z verification/r4/tests/test/classes/workshop.vfx.math.core.BoundaryTest.html: OK
+2026-10-16T22:12:39.8278769Z verification/r4/tests/test/classes/workshop.vfx.math.core.ConventionsTest.html: OK
+2026-10-16T22:12:39.8279426Z verification/r4/tests/test/classes/workshop.vfx.math.core.FrameTest.html: OK
+2026-10-16T22:12:39.8280033Z verification/r4/tests/test/classes/workshop.vfx.math.core.JomlOracleTest.html: OK
+2026-10-16T22:12:39.8280681Z verification/r4/tests/test/classes/workshop.vfx.math.core.M0RegressionTest.html: OK
+2026-10-16T22:12:39.8281312Z verification/r4/tests/test/classes/workshop.vfx.math.core.MathUtilTest.html: OK
+2026-10-16T22:12:39.8281953Z verification/r4/tests/test/classes/workshop.vfx.math.core.NumericPolicyTest.html: OK
+2026-10-16T22:12:39.8283075Z verification/r4/tests/test/classes/workshop.vfx.math.core.PolicyClarificationTest.html: OK
+2026-10-16T22:12:39.8283930Z verification/r4/tests/test/classes/workshop.vfx.math.core.PoseTest.html: OK
+2026-10-16T22:12:39.8284513Z verification/r4/tests/test/classes/workshop.vfx.math.core.QuatTest.html: OK
+2026-10-16T22:12:39.8285146Z verification/r4/tests/test/classes/workshop.vfx.math.core.ReviewAdversarialTest.html: OK
+2026-10-16T22:12:39.8285790Z verification/r4/tests/test/classes/workshop.vfx.math.core.Vec3Test.html: OK
+2026-10-16T22:12:39.8286279Z verification/r4/tests/test/css/base-style.css: OK
+2026-10-16T22:12:39.8286665Z verification/r4/tests/test/css/style.css: OK
+2026-10-16T22:12:39.8287027Z verification/r4/tests/test/index.html: OK
+2026-10-16T22:12:39.8287382Z verification/r4/tests/test/js/report.js: OK
+2026-10-16T22:12:39.8287987Z verification/r4/tests/test/packages/workshop.vfx.math.core.html: OK
+2026-10-16T22:12:39.8288438Z verification/test-summary.csv: OK
+2026-10-16T22:12:39.8288888Z verification/tests/test/classes/workshop.vfx.math.core.BoundaryTest.html: OK
+2026-10-16T22:12:39.8289517Z verification/tests/test/classes/workshop.vfx.math.core.ConventionsTest.html: OK
+2026-10-16T22:12:39.8290116Z verification/tests/test/classes/workshop.vfx.math.core.FrameTest.html: OK
+2026-10-16T22:12:39.8290708Z verification/tests/test/classes/workshop.vfx.math.core.JomlOracleTest.html: OK
+2026-10-16T22:12:39.8291334Z verification/tests/test/classes/workshop.vfx.math.core.M0RegressionTest.html: OK
+2026-10-16T22:12:39.8291943Z verification/tests/test/classes/workshop.vfx.math.core.MathUtilTest.html: OK
+2026-10-16T22:12:39.8292750Z verification/tests/test/classes/workshop.vfx.math.core.NumericPolicyTest.html: OK
+2026-10-16T22:12:39.8293426Z verification/tests/test/classes/workshop.vfx.math.core.PolicyClarificationTest.html: OK
+2026-10-16T22:12:39.8294072Z verification/tests/test/classes/workshop.vfx.math.core.PoseTest.html: OK
+2026-10-16T22:12:39.8294652Z verification/tests/test/classes/workshop.vfx.math.core.QuatTest.html: OK
+2026-10-16T22:12:39.8295213Z verification/tests/test/classes/workshop.vfx.math.core.Vec3Test.html: OK
+2026-10-16T22:12:39.8295695Z verification/tests/test/css/base-style.css: OK
+2026-10-16T22:12:39.8296060Z verification/tests/test/css/style.css: OK
+2026-10-16T22:12:39.8296406Z verification/tests/test/index.html: OK
+2026-10-16T22:12:39.8296747Z verification/tests/test/js/report.js: OK
+2026-10-16T22:12:39.8297166Z verification/tests/test/packages/workshop.vfx.math.core.html: OK
+2026-10-16T22:12:39.8297598Z docs/m4/M4-ARCHITECTURE.md: OK
+2026-10-16T22:12:39.8297920Z docs/m4/M4-CONVENTIONS.md: OK
+2026-10-16T22:12:39.8298232Z docs/m4/M4-DESIGN-DECISIONS.md: OK
+2026-10-16T22:12:39.8298551Z docs/m4/M4-ERROR-ANALYSIS.md: OK
+2026-10-16T22:12:39.8298881Z docs/m4/M4-IMPLEMENTATION-CONTRACT.md: OK
+2026-10-16T22:12:39.8299226Z docs/m4/M4-R2-CORRECTIONS.md: OK
+2026-10-16T22:12:39.8299546Z docs/m4/M4-R21-CORRECTIONS.md: OK
+2026-10-16T22:12:39.8299853Z docs/m4/M4-RISKS.md: OK
+2026-10-16T22:12:39.8300145Z docs/m4/M4-TEST-SPECIFICATION.md: OK
+2026-10-16T22:12:39.8300479Z docs/m4/README-FOR-CODEX-M4.md: OK
+2026-10-16T22:12:39.8300814Z docs/m4/validation/DesignProbe.java: OK
+2026-10-16T22:12:39.8301175Z docs/m4/validation/ProbeM4Evidence.java: OK
+2026-10-16T22:12:39.8301535Z docs/m4/validation/design-probe.txt: OK
+2026-10-16T22:12:39.8301866Z docs/m4/validation/evidence.txt: OK
+2026-10-16T22:12:39.8302199Z docs/m4/validation/mutation-results.txt: OK
+2026-10-16T22:12:39.8302700Z docs/m4/validation/r2/Exhaust3.java: OK
+2026-10-16T22:12:39.8303034Z docs/m4/validation/r2/Findings.java: OK
+2026-10-16T22:12:39.8303362Z docs/m4/validation/r2/InvStats.java: OK
+2026-10-16T22:12:39.8303687Z docs/m4/validation/r2/LinCount.java: OK
+2026-10-16T22:12:39.8304011Z docs/m4/validation/r2/README.md: OK
+2026-10-16T22:12:39.8304345Z docs/m4/validation/r2/findings-r1.txt: OK
+2026-10-16T22:12:39.8304697Z docs/m4/validation/r2/findings-r2.txt: OK
+2026-10-16T22:12:39.8305057Z docs/m4/validation/r2/inversion-stats.txt: OK
+2026-10-16T22:12:39.8305420Z docs/m4/validation/r2/linear-mode.txt: OK
+2026-10-16T22:12:39.8305920Z docs/m4/validation/r2/r1-vs-r2-tests.txt: OK
+2026-10-16T22:12:39.8306262Z docs/m4/validation/r21/F45.java: OK
+2026-10-16T22:12:39.8306809Z docs/m4/validation/r21/LenDump.java: OK
+2026-10-16T22:12:39.8307156Z docs/m4/validation/r21/README.md: OK
+2026-10-16T22:12:39.8307510Z docs/m4/validation/r21/before-after-tests.txt: OK
+2026-10-16T22:12:39.8307896Z docs/m4/validation/r21/findings-r2.txt: OK
+2026-10-16T22:12:39.8308248Z docs/m4/validation/r21/findings-r21.txt: OK
+2026-10-16T22:12:39.8308648Z docs/m4/validation/r21/r2-vs-r21-reference-values.txt: OK
+2026-10-16T22:12:39.8309070Z docs/m4/validation/reference-run-summary.txt: OK
+2026-10-16T22:12:39.8309529Z src/test/java/workshop/vfx/math/sample/ArcLengthTableTest.java: OK
+2026-10-16T22:12:39.8310189Z src/test/java/workshop/vfx/math/sample/EqualDistanceTest.java: OK
+2026-10-16T22:12:39.8310701Z src/test/java/workshop/vfx/math/sample/M4AdversarialTest.java: OK
+2026-10-16T22:12:39.8311188Z src/test/java/workshop/vfx/math/sample/M4BoundaryTest.java: OK
+2026-10-16T22:12:39.8311683Z src/test/java/workshop/vfx/math/sample/M4DeterminismTest.java: OK
+2026-10-16T22:12:39.8312183Z src/test/java/workshop/vfx/math/sample/M4R21RegressionTest.java: OK
+2026-10-16T22:12:39.8312879Z src/test/java/workshop/vfx/math/sample/M4R2RegressionTest.java: OK
+2026-10-16T22:12:39.8314011Z src/test/java/workshop/vfx/math/sample/M4ReferenceVectorTest.java: OK
+2026-10-16T22:12:39.8314546Z src/test/java/workshop/vfx/math/sample/SampleSetTest.java: OK
+2026-10-16T22:12:39.8315030Z src/test/java/workshop/vfx/math/sample/SampleTestSupport.java: OK
+2026-10-16T22:12:39.8315548Z src/test/java/workshop/vfx/math/sample/UniformParameterTest.java: OK
+2026-10-16T22:12:39.8316017Z src/test/resources/m4/reference/MANIFEST.sha256: OK
+2026-10-16T22:12:39.8316429Z src/test/resources/m4/reference/arclength.csv: OK
+2026-10-16T22:12:39.8316807Z src/test/resources/m4/reference/counts.csv: OK
+2026-10-16T22:12:39.8317177Z src/test/resources/m4/reference/inverse.csv: OK
+2026-10-16T22:12:39.8317884Z src/test/resources/m4/reference/uniform.csv: OK
+2026-10-16T22:12:39.8318374Z tools/generate_m4_reference_vectors.py: OK
+2026-10-16T22:12:39.8318905Z src/main/java/workshop/vfx/math/sample/ArcLengthTable.java: OK
+2026-10-16T22:12:39.8319611Z src/main/java/workshop/vfx/math/sample/ArcLengthTolerance.java: OK
+2026-10-16T22:12:39.8320094Z src/main/java/workshop/vfx/math/sample/Endpoints.java: OK
+2026-10-16T22:12:39.8320550Z src/main/java/workshop/vfx/math/sample/SampleChecks.java: OK
+2026-10-16T22:12:39.8321290Z src/main/java/workshop/vfx/math/sample/SampleLimits.java: OK
+2026-10-16T22:12:39.8321746Z src/main/java/workshop/vfx/math/sample/SampleSet.java: OK
+2026-10-16T22:12:39.8322170Z src/main/java/workshop/vfx/math/sample/Sampler.java: OK
+2026-10-16T22:12:39.8322735Z bezier.csv: OK
+2026-10-16T22:12:39.8322985Z easing.csv: OK
+2026-10-16T22:12:39.8323239Z spiral.csv: OK
+2026-10-16T22:12:39.8323531Z arclength.csv: OK
+2026-10-16T22:12:39.8323784Z counts.csv: OK
+2026-10-16T22:12:39.8324041Z inverse.csv: OK
+2026-10-16T22:12:39.8324296Z uniform.csv: OK
+2026-10-16T22:12:39.8361893Z ##[group]Run set -o pipefail
+2026-10-16T22:12:39.8362275Z [36;1mset -o pipefail[0m
+2026-10-16T22:12:39.8363231Z [36;1m./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test 2>&1 | tee "$RUNNER_TEMP/m4-evidence/clean-test.txt"[0m
+2026-10-16T22:12:39.8431586Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-16T22:12:39.8431985Z env:
+2026-10-16T22:12:39.8432486Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/25.0.4-1/x64
+2026-10-16T22:12:39.8433044Z   JAVA_HOME_25_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/25.0.4-1/x64
+2026-10-16T22:12:39.8433479Z   MAVEN_ARGS: -ntp
+2026-10-16T22:12:39.8433734Z ##[endgroup]
+2026-10-16T22:12:40.6666066Z To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.1.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+2026-10-16T22:12:42.1628666Z Daemon will be stopped at the end of the build 
+2026-10-16T22:12:50.4649575Z > Task :clean UP-TO-DATE
+2026-10-16T22:12:52.0624839Z > Task :compileJava
+2026-10-16T22:12:52.0627222Z > Task :processResources NO-SOURCE
+2026-10-16T22:12:52.0627690Z > Task :classes
+2026-10-16T22:12:54.0658233Z 
+2026-10-16T22:12:54.0673823Z > Task :compileTestJava
+2026-10-16T22:12:54.0676424Z /home/runner/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.9/438e036486bad66b189bff385dd07dea4f74a146/joml-1.10.9.jar(/org/joml/Quaterniond.class): warning: [classfile] RuntimeVisibleTypeAnnotations attribute introduced in version 52.0 class files is ignored in version 46.0 class files
+2026-10-16T22:12:54.0680958Z /home/runner/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.9/438e036486bad66b189bff385dd07dea4f74a146/joml-1.10.9.jar(/org/joml/Vector3d.class): warning: [classfile] RuntimeVisibleTypeAnnotations attribute introduced in version 52.0 class files is ignored in version 46.0 class files
+2026-10-16T22:12:54.7626846Z /home/runner/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.9/438e036486bad66b189bff385dd07dea4f74a146/joml-1.10.9.jar(/org/joml/Vector4f.class): warning: [classfile] RuntimeVisibleTypeAnnotations attribute introduced in version 52.0 class files is ignored in version 46.0 class files
+2026-10-16T22:12:54.7631942Z /home/runner/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.9/438e036486bad66b189bff385dd07dea4f74a146/joml-1.10.9.jar(/org/joml/Vector3f.class): warning: [classfile] RuntimeVisibleTypeAnnotations attribute introduced in version 52.0 class files is ignored in version 46.0 class files
+2026-10-16T22:12:54.7665121Z /home/runner/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.9/438e036486bad66b189bff385dd07dea4f74a146/joml-1.10.9.jar(/org/joml/Vector4d.class): warning: [classfile] RuntimeVisibleTypeAnnotations attribute introduced in version 52.0 class files is ignored in version 46.0 class files
+2026-10-16T22:12:55.4624503Z 5 warnings
+2026-10-16T22:12:56.0623190Z 
+2026-10-16T22:12:56.0626478Z > Task :processTestResources
+2026-10-16T22:12:56.0627078Z > Task :testClasses
+2026-10-16T22:12:58.0657904Z 
+2026-10-16T22:12:58.0703506Z > Task :test
+2026-10-16T22:12:58.0707965Z 
+2026-10-16T22:12:58.0709249Z Amendment3AcceptanceTest > D1: Pose.then names the scale when the scale product is not representable, even if the translation also overflows PASSED
+2026-10-16T22:12:58.0710502Z 
+2026-10-16T22:12:58.0711460Z Amendment3AcceptanceTest > A3: Tier 3 inputs reject null with IllegalArgumentException (axisAngle axis, Frame axes, Pose fields) PASSED
+2026-10-16T22:12:58.0755329Z 
+2026-10-16T22:12:58.0783629Z Amendment3AcceptanceTest > A1: transportY's y is normalize(newY) to 1e-15 per component (not bitwise), including after antiparallel flips PASSED
+2026-10-16T22:12:58.0832848Z 
+2026-10-16T22:12:58.0893733Z Amendment3AcceptanceTest > A4: a hint that is null, non-finite or below LENGTH_EPS is absent; exactly LENGTH_EPS is present PASSED
+2026-10-16T22:12:58.0895860Z 
+2026-10-16T22:12:58.0964027Z Amendment3AcceptanceTest > D1: Pose.inverse names the scale when 1/s is not representable, whatever the translation PASSED
+2026-10-16T22:12:58.0992684Z 
+2026-10-16T22:12:58.1053637Z Amendment3AcceptanceTest > D1: a translation-only failure names the translation, not the scale; the set of throwing inputs is unchanged PASSED
+2026-10-16T22:12:58.1085878Z 
+2026-10-16T22:12:58.1129165Z Amendment3AcceptanceTest > A2: the inverse of a degenerate quaternion is the identity rotation numerically; signed zeros are equivalent PASSED
+2026-10-16T22:12:58.1158502Z 
+2026-10-16T22:12:58.1173839Z Amendment3AcceptanceTest > A5: fromHeading(f, u) depends only on the directions of f and u, and equals alignZ(-f, u) with an absent u read as +Y PASSED
+2026-10-16T22:12:58.1192648Z 
+2026-10-16T22:12:58.1213690Z Amendment3AcceptanceTest > A6: rotate(v) is within (2|k^2 - 1| + 1e-13)|v| of the rotation by q/|q|, k = |q| within 1e-12 of 1, and finite for |v| <= 1e100 PASSED
+2026-10-16T22:12:58.1242629Z 
+2026-10-16T22:12:58.1253525Z Amendment3AcceptanceTest > A5: fromHeading's parallel test uses the sine of the angle between the normalized vectors; worked examples PASSED
+2026-10-16T22:12:58.1282598Z 
+2026-10-16T22:12:58.1303263Z BoundaryTest > Core classes never expose Paper, Bukkit, Minecraft or JOML types PASSED
+2026-10-16T22:12:58.1333001Z 
+2026-10-16T22:12:58.1343045Z BoundaryTest > Paper and Bukkit are not on the test classpath either PASSED
+2026-10-16T22:12:58.1362738Z 
+2026-10-16T22:12:58.1393171Z ConventionsTest > Frame reference examples from docs/REFERENCE-VECTORS.md PASSED
+2026-10-16T22:12:58.1402612Z 
+2026-10-16T22:12:58.1432997Z ConventionsTest > +90 degrees about +Y sends +X to -Z (east to north) PASSED
+2026-10-16T22:12:58.1452710Z 
+2026-10-16T22:12:58.1483516Z ConventionsTest > +90 degrees about +Y is counter-clockwise when viewed from above PASSED
+2026-10-16T22:12:58.1492635Z 
+2026-10-16T22:12:58.1523034Z ConventionsTest > Axis rotations by +90 degrees, both directions PASSED
+2026-10-16T22:12:58.1543988Z 
+2026-10-16T22:12:58.1563497Z ConventionsTest > Pose reference example: t=(10,0,0), +90 about +Y, scale 2 maps local (1,0,0) to (10,0,-2) PASSED
+2026-10-16T22:12:58.1592656Z 
+2026-10-16T22:12:58.1593271Z ConventionsTest > Clockwise 90 degrees viewed from above sends +X to +Z (east to south) PASSED
+2026-10-16T22:12:58.1593972Z 
+2026-10-16T22:12:58.1594496Z ConventionsTest > Minecraft world axes are a right-handed basis: east x up = south PASSED
+2026-10-16T22:12:58.1595175Z 
+2026-10-16T22:12:58.1643190Z ConventionsTest > Positive rotation about +Y and clockwise-from-above are opposite senses PASSED
+2026-10-16T22:12:58.1662664Z 
+2026-10-16T22:12:58.1693193Z ConventionsTest > Full Heal 0.2.0 ring formula (cos t, 0, sin t) is clockwise from above (audit item 1) PASSED
+2026-10-16T22:12:58.1702542Z 
+2026-10-16T22:12:58.1732873Z ConventionsTest > a.mul(b) applies b first, then a PASSED
+2026-10-16T22:12:58.1752610Z 
+2026-10-16T22:12:58.1763221Z FrameTest > Constructor accepts right-handed orthonormal triples and rejects everything else PASSED
+2026-10-16T22:12:58.1792546Z 
+2026-10-16T22:12:58.1813466Z FrameTest > transportY follows a direction sweep without twist; naive alignY flips by about pi through the hint (negative control) STANDARD_OUT
+2026-10-16T22:12:58.1838062Z     [M1 transport report] worst per-step twist: transport = 1.1102230246251568E-16 rad, naive alignY = 3.141592653589793 rad
+2026-10-16T22:12:58.1838902Z 
+2026-10-16T22:12:58.1883397Z FrameTest > transportY follows a direction sweep without twist; naive alignY flips by about pi through the hint (negative control) PASSED
+2026-10-16T22:12:58.1912573Z 
+2026-10-16T22:12:58.1923246Z FrameTest > fromHeading degeneracy: vertical heading, zero heading, zero or parallel up hint PASSED
+2026-10-16T22:12:58.1924091Z 
+2026-10-16T22:12:58.1933421Z FrameTest > toWorld / toLocal are inverse and use the frame axes as columns PASSED
+2026-10-16T22:12:58.1934207Z 
+2026-10-16T22:12:58.1935147Z FrameTest > transportY: random walks stay valid; zero axis keeps the previous frame; antiparallel stays finite PASSED
+2026-10-16T22:12:58.1936685Z 
+2026-10-16T22:12:58.1937593Z FrameTest > alignY/alignZ degeneracy: parallel, antiparallel, zero and non-finite hints or axes (M0: robustness) PASSED
+2026-10-16T22:12:58.1938646Z 
+2026-10-16T22:12:58.1939554Z FrameTest > M0 audit item 2: Astral's (right, up, forward) basis is left-handed; fromHeading's (right, up, back) is right-handed PASSED
+2026-10-16T22:12:58.1940619Z 
+2026-10-16T22:12:58.1941538Z FrameTest > fromHeading: facing each compass direction gives the correct right, up and back axes PASSED
+2026-10-16T22:12:58.1942711Z 
+2026-10-16T22:12:58.1943164Z FrameTest > alignZ hand-derived reference frames PASSED
+2026-10-16T22:12:58.1943781Z 
+2026-10-16T22:12:58.1944223Z FrameTest > alignY hand-derived reference frames PASSED
+2026-10-16T22:12:58.1944822Z 
+2026-10-16T22:12:58.1945655Z FrameTest > alignY/alignZ: right-handed orthonormal, axis honoured, hint lies in the x-y plane (10,000 random) PASSED
+2026-10-16T22:12:58.1946683Z 
+2026-10-16T22:12:58.1947605Z JomlOracleTest > Records which application order JOML's rotationXYZ uses; it must match one of the two candidates STANDARD_OUT
+2026-10-16T22:12:58.1949322Z     [M1 JOML report] rotationXYZ applies X first = false, applies Z first = true
+2026-10-16T22:12:58.1950086Z 
+2026-10-16T22:12:58.1950949Z JomlOracleTest > Records which application order JOML's rotationXYZ uses; it must match one of the two candidates PASSED
+2026-10-16T22:12:58.1951984Z 
+2026-10-16T22:12:58.1952832Z JomlOracleTest > Quat.rotate agrees with JOML Quaterniond on 10,000 seeded rotations PASSED
+2026-10-16T22:12:58.1953710Z 
+2026-10-16T22:12:58.1954468Z JomlOracleTest > Quat.slerp agrees with JOML slerp (as rotations) away from the near-parallel regime PASSED
+2026-10-16T22:12:58.1955423Z 
+2026-10-16T22:12:58.1956066Z JomlOracleTest > Quat.mul agrees with JOML's Hamilton product (same operand order) PASSED
+2026-10-16T22:12:58.1956887Z 
+2026-10-16T22:12:58.1957791Z M0RegressionTest > Audit item 1: +90 about +Y reaches -Z, but Full Heal's ring parameterization reaches +Z (opposite senses) PASSED
+2026-10-16T22:12:58.1958853Z 
+2026-10-16T22:12:58.1959717Z M0RegressionTest > Audit item 2: the (right, up, forward) mapping is a reflection; the engine frame is a proper rotation PASSED
+2026-10-16T22:12:58.1960751Z 
+2026-10-16T22:12:58.1961565Z M0RegressionTest > Astral Spec pattern: non-finite or out-of-range configuration is rejected at construction PASSED
+2026-10-16T22:12:58.1962721Z 
+2026-10-16T22:12:58.1963504Z M0RegressionTest > Audit (Euler order): Astral-style X-then-Y-then-Z rotation equals the engine's named Euler helper PASSED
+2026-10-16T22:12:58.1964498Z 
+2026-10-16T22:12:58.1965227Z M0RegressionTest > Full Heal outward(): a zero offset must give a finite unit fallback, never NaN PASSED
+2026-10-16T22:12:58.1966204Z 
+2026-10-16T22:12:58.1967044Z M0RegressionTest > Large-coordinate regression: a 0.3-block offset survives at the world edge in double, not in float PASSED
+2026-10-16T22:12:58.1968108Z 
+2026-10-16T22:12:58.1968549Z MathUtilTest > LENGTH_EPS is the documented 1e-12 PASSED
+2026-10-16T22:12:58.1969167Z 
+2026-10-16T22:12:58.1969825Z MathUtilTest > clamp: inside, outside, boundaries, infinities, NaN maps to the lower bound PASSED
+2026-10-16T22:12:58.1970653Z 
+2026-10-16T22:12:58.1971111Z MathUtilTest > clamp rejects an inverted or NaN range PASSED
+2026-10-16T22:12:58.1971793Z 
+2026-10-16T22:12:58.1972689Z MathUtilTest > approxEquals is inclusive at the tolerance and false for NaN PASSED
+2026-10-16T22:12:58.1973551Z 
+2026-10-16T22:12:58.1974389Z NumericPolicyTest > Supported magnitude: Vec3, Quat.rotate and Frame stay finite and homogeneous up to 1e100 PASSED
+2026-10-16T22:12:58.1975454Z 
+2026-10-16T22:12:58.1976363Z NumericPolicyTest > Tier 1: Pose.toWorld overflows to infinity (no exception, no clamping); Frame.toWorld likewise PASSED
+2026-10-16T22:12:58.2001579Z 
+2026-10-16T22:12:58.2002702Z NumericPolicyTest > Tier 1: Vec3 and Quat overflow to infinity with no exception and no saturation PASSED
+2026-10-16T22:12:58.2003698Z 
+2026-10-16T22:12:58.2004982Z NumericPolicyTest > Supported magnitude: Pose with scale and translation up to 1e100 is finite and accurate; compositions of two stay finite PASSED
+2026-10-16T22:12:58.2006622Z 
+2026-10-16T22:12:58.2007752Z NumericPolicyTest > Tier 3: Pose.then throws ArithmeticException when scale overflows or underflows to zero; two valid poses never give an invalid one PASSED
+2026-10-16T22:12:58.2009211Z 
+2026-10-16T22:12:58.2009988Z NumericPolicyTest > Tier 1: NaN and infinity propagate by IEEE rules (no sanitizing, no exceptions) PASSED
+2026-10-16T22:12:58.2010928Z 
+2026-10-16T22:12:58.2011950Z NumericPolicyTest > Tier 3: Pose.inverse throws ArithmeticException when the reciprocal scale or inverse translation is not representable PASSED
+2026-10-16T22:12:58.2646833Z 
+2026-10-16T22:12:58.2648228Z NumericPolicyTest > Tier 2: Quat.normalized and inverse are total: finite unit result for every double input, IDENTITY for zero or non-finite PASSED
+2026-10-16T22:12:58.3622782Z 
+2026-10-16T22:12:58.3663915Z NumericPolicyTest > Tier 2: Frame factories always return a valid right-handed frame, WORLD for a degenerate axis, for every double input PASSED
+2026-10-16T22:12:58.3683176Z 
+2026-10-16T22:12:58.3713853Z NumericPolicyTest > Tier 3: constructors keep throwing IllegalArgumentException for invalid inputs PASSED
+2026-10-16T22:12:58.3723163Z 
+2026-10-16T22:12:58.3724193Z NumericPolicyTest > Tier 2: shortestArc is total: unit result for every pair; IDENTITY for degenerate input; correct mapping otherwise PASSED
+2026-10-16T22:12:58.3725425Z 
+2026-10-16T22:12:58.3726411Z NumericPolicyTest > Tier 2: normalizedOr is total: fallback exactly for degenerate input, otherwise a finite unit vector PASSED
+2026-10-16T22:12:58.3727509Z 
+2026-10-16T22:12:58.3728351Z NumericPolicyTest > Tier 3: Pose.then throws ArithmeticException when the composed translation overflows PASSED
+2026-10-16T22:12:58.3729365Z 
+2026-10-16T22:12:58.3730359Z PolicyClarificationTest > A: clamp always returns a value inside its bounds (or the lower bound for NaN); infinite bounds are allowed PASSED
+2026-10-16T22:12:58.3731552Z 
+2026-10-16T22:12:58.3732853Z PolicyClarificationTest > B: axisAngle accepts any finite angle and any finite axis whose largest component is at least 1e-12 (Tier 3 validation only) PASSED
+2026-10-16T22:12:58.3734180Z 
+2026-10-16T22:12:58.3735054Z PolicyClarificationTest > B: Pose.toLocal with scale 1e-100 and world components at 1e100 is finite (domain edge) PASSED
+2026-10-16T22:12:58.4632928Z 
+2026-10-16T22:12:58.4653985Z PolicyClarificationTest > B: slerp and nlerp are accurate for finite unit quaternions and |t| up to 1e3 (extrapolation included) PASSED
+2026-10-16T22:12:58.4669883Z 
+2026-10-16T22:12:58.4670879Z PolicyClarificationTest > A: approxEquals is false when the difference is NaN (equal infinities) and never throws PASSED
+2026-10-16T22:12:58.4671976Z 
+2026-10-16T22:12:58.4673073Z PolicyClarificationTest > B: Quat.mul and Quat.dot are finite for components up to 1e100 (not only unit quaternions) PASSED
+2026-10-16T22:12:58.4674162Z 
+2026-10-16T22:12:58.4675129Z PolicyClarificationTest > B: Vec3.mul(s) and Vec3.lerp(to, t) are finite for components and scalars up to 1e100; outside that, IEEE PASSED
+2026-10-16T22:12:58.4676227Z 
+2026-10-16T22:12:58.4676966Z PolicyClarificationTest > A: finiteness and unit length of the fallback path belong to the caller PASSED
+2026-10-16T22:12:58.4677905Z 
+2026-10-16T22:12:58.4678902Z PolicyClarificationTest > A: normalizedOr returns the caller's fallback object unchanged, even when it is NaN, infinite, zero or not unit PASSED
+2026-10-16T22:12:58.4681324Z 
+2026-10-16T22:12:58.4682094Z PoseTest > Five-deep chain equals nested sequential application; scale and rotation compose PASSED
+2026-10-16T22:12:58.4683299Z 
+2026-10-16T22:12:58.4683728Z PoseTest > Constructor normalizes the rotation PASSED
+2026-10-16T22:12:58.4684330Z 
+2026-10-16T22:12:58.4684849Z PoseTest > a.then(b) applied equals b first then a; associativity PASSED
+2026-10-16T22:12:58.4685556Z 
+2026-10-16T22:12:58.4686509Z PoseTest > Round trip at the Minecraft world edge (29,999,984) stays within 1e-6 blocks PASSED
+2026-10-16T22:12:58.4689138Z 
+2026-10-16T22:12:58.4689850Z PoseTest > Constructor validation: non-finite translation, bad scale, bad rotation PASSED
+2026-10-16T22:12:58.5625435Z 
+2026-10-16T22:12:58.5639802Z PoseTest > Golden: parent.then(child).toWorld(p) equals the Python oracle (1,500 rows) PASSED
+2026-10-16T22:12:58.5651700Z 
+2026-10-16T22:12:58.5652299Z PoseTest > toLocal(toWorld(p)) = p on 10,000 random poses PASSED
+2026-10-16T22:12:58.5653439Z 
+2026-10-16T22:12:58.5654287Z PoseTest > Why local-space doubles matter: float spacing is 2 blocks near the world edge and 0.0625 blocks at 1e6 PASSED
+2026-10-16T22:12:58.5655330Z 
+2026-10-16T22:12:58.5656019Z PoseTest > Golden: large coordinates near +/-3e7 blocks stay accurate to 1e-7 blocks PASSED
+2026-10-16T22:12:58.5656878Z 
+2026-10-16T22:12:58.5657476Z PoseTest > directionToWorld rotates only: ignores translation and scale PASSED
+2026-10-16T22:12:58.5658245Z 
+2026-10-16T22:12:58.5658880Z PoseTest > inverse: round trip, composition with the original is the identity PASSED
+2026-10-16T22:12:58.5660037Z 
+2026-10-16T22:12:58.5660498Z PoseTest > Identity pose and pure translation PASSED
+2026-10-16T22:12:58.5661093Z 
+2026-10-16T22:12:58.5661787Z QuatTest > Quaternion multiplication is associative (as rotations) and composes rotations PASSED
+2026-10-16T22:12:58.6639405Z 
+2026-10-16T22:12:58.6655908Z QuatTest > Golden: slerp action matches the oracle, also with q1 negated (shortest path) PASSED
+2026-10-16T22:12:58.6656725Z 
+2026-10-16T22:12:58.6659727Z QuatTest > slerp: endpoints and constant angular speed, with extrapolation PASSED
+2026-10-16T22:12:58.6660489Z 
+2026-10-16T22:12:58.6661273Z QuatTest > slerp is continuous across the near-parallel (nlerp) threshold and never NaN PASSED
+2026-10-16T22:12:58.6662013Z 
+2026-10-16T22:12:58.6662851Z QuatTest > axisAngle normalizes non-unit axes and rejects zero or non-finite input PASSED
+2026-10-16T22:12:58.6663502Z 
+2026-10-16T22:12:58.6664211Z QuatTest > Golden: axisAngle(axis, angle).rotate(v) equals Rodrigues from the Python oracle (2,042 rows) PASSED
+2026-10-16T22:12:58.6664990Z 
+2026-10-16T22:12:58.6665527Z QuatTest > angleTo recovers the rotation angle, including tiny angles and near pi PASSED
+2026-10-16T22:12:58.6666234Z 
+2026-10-16T22:12:58.6693130Z QuatTest > Identity, conjugate, inverse and normalization PASSED
+2026-10-16T22:12:58.6695413Z 
+2026-10-16T22:12:58.6696397Z QuatTest > Degenerate quaternions: zero and non-finite normalize to identity (M0: no NaN propagation) PASSED
+2026-10-16T22:12:58.7657003Z 
+2026-10-16T22:12:58.7678431Z QuatTest > Golden: qa.mul(qb).rotate(v) equals Rodrigues(a, Rodrigues(b, v)) (1,500 rows) PASSED
+2026-10-16T22:12:58.7679192Z 
+2026-10-16T22:12:58.7679518Z QuatTest > nlerp: unit norm, endpoints, shortest sign PASSED
+2026-10-16T22:12:58.7680000Z 
+2026-10-16T22:12:58.7680462Z QuatTest > shortestArc maps from-direction onto to-direction for random pairs PASSED
+2026-10-16T22:12:58.7681098Z 
+2026-10-16T22:12:58.7681762Z QuatTest > shortestArc: identical, antiparallel, near-antiparallel and zero inputs (M0: robustness) PASSED
+2026-10-16T22:12:58.7682821Z 
+2026-10-16T22:12:58.7683501Z QuatTest > fromEulerApplyXThenYThenZ equals the explicit rotation sequence X, then Y, then Z about fixed axes PASSED
+2026-10-16T22:12:58.7684373Z 
+2026-10-16T22:12:58.7685073Z QuatTest > 1,000,000 compositions: periodic renormalization keeps the norm within 1e-12; raw drift is reported STANDARD_OUT
+2026-10-16T22:12:58.7686349Z     [M1 drift report] raw |norm-1| after 1,000,000 compositions = 1.6544543512964083E-12
+2026-10-16T22:12:58.7687418Z     [M1 drift report] worst |norm-1| between renormalizations (every 1000) = 6.8833827526759706E-15
+2026-10-16T22:12:58.7688082Z 
+2026-10-16T22:12:58.7688750Z QuatTest > 1,000,000 compositions: periodic renormalization keeps the norm within 1e-12; raw drift is reported PASSED
+2026-10-16T22:12:58.7689568Z 
+2026-10-16T22:12:58.7690220Z QuatTest > toFrame / fromFrame round trip, including 180-degree rotations (all matrix-to-quaternion branches) PASSED
+2026-10-16T22:12:58.7691342Z 
+2026-10-16T22:12:58.7691788Z QuatTest > slerp takes the shortest path: q1 and -q1 give the same result PASSED
+2026-10-16T22:13:03.0624277Z 
+2026-10-16T22:13:03.0625916Z ReviewAdversarialTest > normalizedOr: 1e-12 of the exact unit vector for 200,000 extreme finite inputs; same fallback reference below LENGTH_EPS (section 2) STANDARD_OUT
+2026-10-16T22:13:03.0627859Z     [M1 review] normalizedOr worst component error vs exact: 2.220446049250313E-16
+2026-10-16T22:13:03.0628637Z 
+2026-10-16T22:13:03.0629870Z ReviewAdversarialTest > normalizedOr: 1e-12 of the exact unit vector for 200,000 extreme finite inputs; same fallback reference below LENGTH_EPS (section 2) PASSED
+2026-10-16T22:13:03.9623302Z 
+2026-10-16T22:13:03.9624874Z ReviewAdversarialTest > Tier 1 never throws and Tier 2 is total: NaN, infinities, -0.0, subnormals and MAX_VALUE in every operand (section 0A) PASSED
+2026-10-16T22:13:04.1623401Z 
+2026-10-16T22:13:04.1629971Z ReviewAdversarialTest > Pose.then/inverse: inside the domain never throw; outside, only ArithmeticException, never IllegalArgumentException (section 5) PASSED
+2026-10-16T22:13:04.1631338Z 
+2026-10-16T22:13:04.1631969Z ReviewAdversarialTest > slerp: constant angular speed; slerp(a, b, t) and slerp(a, -b, t) are the same rotation (section 3) PASSED
+2026-10-16T22:13:07.1622668Z 
+2026-10-16T22:13:07.1625406Z ReviewAdversarialTest > Quat.normalized: 1e-12 of the exact unit quaternion for 100,000 extreme inputs; exact IDENTITY for zero (section 3) PASSED
+2026-10-16T22:13:07.1626175Z 
+2026-10-16T22:13:07.1626881Z ReviewAdversarialTest > slerp: action equals the analytic great-circle position for |t| <= 1e3 to 1e-9, incl. phi near 1e-8 and near pi (section 3, R3 domain) STANDARD_OUT
+2026-10-16T22:13:07.1627958Z     [M1 review] slerp |t|<=1e3 worst action error vs analytic: 9.056739506726039E-13
+2026-10-16T22:13:07.1628531Z 
+2026-10-16T22:13:07.1629838Z ReviewAdversarialTest > slerp: action equals the analytic great-circle position for |t| <= 1e3 to 1e-9, incl. phi near 1e-8 and near pi (section 3, R3 domain) PASSED
+2026-10-16T22:13:07.1630845Z 
+2026-10-16T22:13:07.1631463Z ReviewAdversarialTest > Conventions: Euler helper equals Rodrigues X then Y then Z about fixed world axes for random angles (CONVENTIONS 3) PASSED
+2026-10-16T22:13:07.1632190Z 
+2026-10-16T22:13:07.1633228Z ReviewAdversarialTest > Quat.rotate of exactly-normalized quaternions matches Rodrigues to 1e-13 * |v| for |v| up to 1e100 (sections 0A, 6) PASSED
+2026-10-16T22:13:07.2622686Z 
+2026-10-16T22:13:07.2623945Z ReviewAdversarialTest > nlerp: shortest-sign (1-t)a + tb normalized, including extrapolation to |t| = 1e3 (section 3) PASSED
+2026-10-16T22:13:07.2625164Z 
+2026-10-16T22:13:07.2626569Z ReviewAdversarialTest > shortestArc near antiparallel: contract accuracy table, minimal angle, unit norm, half-turn axis rule (section 3) STANDARD_OUT
+2026-10-16T22:13:07.2628060Z     [M1 review] shortestArc offset 0.1 worst error 8.065179992641965E-15 (allowed 1.0E-9)
+2026-10-16T22:13:07.3634149Z     [M1 review] shortestArc offset 0.001 worst error 7.980693752677138E-13 (allowed 1.0E-9)
+2026-10-16T22:13:07.3635630Z     [M1 review] shortestArc offset 1.0E-6 worst error 7.624904121111344E-10 (allowed 1.0E-9)
+2026-10-16T22:13:07.3637282Z     [M1 review] shortestArc offset 1.0E-7 worst error 7.937575590433542E-9 (allowed 1.0E-8)
+2026-10-16T22:13:07.3638373Z     [M1 review] shortestArc offset 1.0E-9 worst error 7.908609860608958E-7 (allowed 1.0E-6)
+2026-10-16T22:13:07.5623754Z 
+2026-10-16T22:13:07.5627230Z ReviewAdversarialTest > shortestArc near antiparallel: contract accuracy table, minimal angle, unit norm, half-turn axis rule (section 3) PASSED
+2026-10-16T22:13:07.8624524Z 
+2026-10-16T22:13:07.8629944Z ReviewAdversarialTest > Frame factories: valid at 1e-12 for extreme magnitudes and hints within a factor 2 of the 1e-8 threshold (section 4) PASSED
+2026-10-16T22:13:07.8631418Z 
+2026-10-16T22:13:07.8632764Z ReviewAdversarialTest > angleTo: 1e-12 absolute from 1e-9 to pi - 1e-6, sign-insensitive, both argument orders (section 3) PASSED
+2026-10-16T22:13:08.5624247Z 
+2026-10-16T22:13:08.5625555Z ReviewAdversarialTest > fromHeading equals the contract formula right = n(f x u), up = right x f, back = -f for well-conditioned input (section 4) PASSED
+2026-10-16T22:13:08.6623287Z 
+2026-10-16T22:13:08.6624910Z ReviewAdversarialTest > Pose near Minecraft's world border (|x|,|z| <= 3e7): composition 1e-7, inverse and toLocal round trips 1e-6 (section 6) PASSED
+2026-10-16T22:13:08.8625672Z 
+2026-10-16T22:13:08.8626697Z ReviewAdversarialTest > fromFrame(q.toFrame()) is q (as a rotation) for half turns about arbitrary and diagonal axes and near-half turns (section 3) PASSED
+2026-10-16T22:13:09.5624115Z 
+2026-10-16T22:13:09.5625588Z ReviewAdversarialTest > alignY: x is the normalized perpendicular component of the hint, to within its conditioning (section 4) PASSED
+2026-10-16T22:13:10.8623015Z 
+2026-10-16T22:13:10.8624826Z ReviewAdversarialTest > transportY: 200,000-step walk with an antiparallel flip every 1,000 steps stays valid; y within 1e-12 of normalize(newY) (section 4) PASSED
+2026-10-16T22:13:10.8626672Z 
+2026-10-16T22:13:10.8627486Z ReviewAdversarialTest > Environment: the test JVM is Java 25 (contract header: Java 25) PASSED
+2026-10-16T22:13:10.8628443Z 
+2026-10-16T22:13:10.8629028Z Vec3Test > normalizedOr returns unit vectors for ordinary input PASSED
+2026-10-16T22:13:10.8629783Z 
+2026-10-16T22:13:10.8630318Z Vec3Test > normalizedOr is accurate at both ends of the finite range PASSED
+2026-10-16T22:13:10.8630991Z 
+2026-10-16T22:13:10.8631347Z Vec3Test > Algebraic identities on 10,000 seeded random vectors PASSED
+2026-10-16T22:13:10.8631772Z 
+2026-10-16T22:13:10.8632047Z Vec3Test > Constants and basic arithmetic PASSED
+2026-10-16T22:13:10.8632742Z 
+2026-10-16T22:13:10.8633334Z Vec3Test > Full Heal outward-direction pattern: zero offset yields a finite unit fallback for any yaw PASSED
+2026-10-16T22:13:10.8634077Z 
+2026-10-16T22:13:10.8634433Z Vec3Test > Cross product: hand-derived values and right-hand rule PASSED
+2026-10-16T22:13:10.8634954Z 
+2026-10-16T22:13:10.8635602Z Vec3Test > normalizedOr returns the fallback for zero, tiny, NaN and infinite input (M0: Full Heal outward fallback) PASSED
+2026-10-16T22:13:10.8636396Z 
+2026-10-16T22:13:10.8636760Z Vec3Test > lerp: endpoints, midpoint, extrapolation (no clamping) PASSED
+2026-10-16T22:13:10.8637082Z 
+2026-10-16T22:13:10.8637311Z Vec3Test > isFinite detects NaN and infinities; Vec3 itself never validates PASSED
+2026-10-16T22:13:10.9622536Z 
+2026-10-16T22:13:10.9624170Z BezierTest > Derivatives agree with central finite differences of the points (independent of the derivative formulas) (section 4) PASSED
+2026-10-16T22:13:10.9625159Z 
+2026-10-16T22:13:10.9625820Z BezierTest > End derivatives: B'(0) = n (P1 - P0), B'(1) = n (Pn - Pn-1); joining with mirrored handles is C1 (section 4) PASSED
+2026-10-16T22:13:10.9626645Z 
+2026-10-16T22:13:10.9635546Z BezierTest > Validation: null or non-finite control points and non-finite parameters are IllegalArgumentExceptions (sections 4, 8) PASSED
+2026-10-16T22:13:10.9636510Z 
+2026-10-16T22:13:10.9643577Z BezierTest > Endpoints are exact for arbitrary control points: point(0) = first, point(1) = last (section 4) PASSED
+2026-10-16T22:13:10.9644663Z 
+2026-10-16T22:13:10.9645752Z BezierTest > Degree elevation: a line and a quadratic written as higher-degree Beziers give the same points (section 4, metamorphic) PASSED
+2026-10-16T22:13:10.9646980Z 
+2026-10-16T22:13:10.9648205Z BezierTest > Affine invariance and reversal: Bezier of posed control points = posed Bezier; reversed control points at 1 - t give the same point (section 4) PASSED
+2026-10-16T22:13:10.9649250Z 
+2026-10-16T22:13:10.9649734Z BezierTest > Degenerate geometry: coincident control points give a constant point and a zero derivative, without exceptions (sections 4, 8) PASSED
+2026-10-16T22:13:11.0631635Z 
+2026-10-16T22:13:11.0633592Z EasingTest > Composition with M2: easing a TimingSample progress keeps [0, 1] and the ends (section 6, DM3-13) PASSED
+2026-10-16T22:13:11.0634441Z 
+2026-10-16T22:13:11.0635521Z EasingTest > Continuity: IN_OUT easings join at 1/2; smoothstep/smootherstep have zero slope at both ends (C1/C2 ends) (section 6) PASSED
+2026-10-16T22:13:12.2622953Z 
+2026-10-16T22:13:12.2624496Z EasingTest > Range and accuracy fuzz: 0 <= f <= 1 and |f - exact| <= 2^-50 against an exact rational evaluation (section 6) PASSED
+2026-10-16T22:13:12.6622955Z 
+2026-10-16T22:13:12.6624125Z EasingTest > Power easings are exactly monotone on doubles; smoothstep and smootherstep are monotone up to 2^-49 (section 6, DM3-11) PASSED
+2026-10-16T22:13:12.7622814Z 
+2026-10-16T22:13:12.7628600Z EasingTest > Symmetry f(1 - t) = 1 - f(t) for symmetric easings and duality OUT(t) = 1 - IN(1 - t), to 2^-49 (section 6) PASSED
+2026-10-16T22:13:12.7629602Z 
+2026-10-16T22:13:12.7630568Z EasingTest > Endpoints and clamping: f(t) = 0 for t <= 0 (including -0.0 and -infinity), 1 for t >= 1 (including +infinity); NaN is rejected (section 6) PASSED
+2026-10-16T22:13:12.7631677Z 
+2026-10-16T22:13:12.7632229Z EasingTest > Closed-form values at hand-checked points (section 6) PASSED
+2026-10-16T22:13:12.7633546Z 
+2026-10-16T22:13:12.7634180Z EasingTest > Exactly the 15 specified easings exist, in the specified order (section 6) PASSED
+2026-10-16T22:13:12.7634964Z 
+2026-10-16T22:13:12.7635903Z M3BoundaryTest > Purity: no clocks, randomness, threads, platform types or dependency on the M2 time package; no mutable statics (sections 1, 9) PASSED
+2026-10-16T22:13:12.7637027Z 
+2026-10-16T22:13:12.7637994Z M3BoundaryTest > Portability: no java.lang.Math transcendental, pow, hypot or fma calls; trigonometry goes through StrictMath (section 7, DM3-7) PASSED
+2026-10-16T22:13:12.7639134Z 
+2026-10-16T22:13:12.7640160Z M3BoundaryTest > Public API: the seven specified types are public; curves are records implementing Curve; every other source type is not public (section 2) PASSED
+2026-10-16T22:13:12.7641376Z 
+2026-10-16T22:13:12.7642507Z M3DeterminismTest > Evaluation is path independent: the value at t does not depend on which parameters were evaluated before (section 7.1) PASSED
+2026-10-16T22:13:12.9643127Z 
+2026-10-16T22:13:12.9655787Z M3DeterminismTest > Determinism: curves are values; equal curves give bit-identical results, before and after JIT compilation (section 7.1) PASSED
+2026-10-16T22:13:13.0623833Z 
+2026-10-16T22:13:13.0654284Z M3ReferenceVectorTest > bezier.csv: 645 line, quadratic and cubic cases (point, derivative, second derivative), 189 exact, extrapolated t included (section 4) PASSED
+2026-10-16T22:13:13.0660414Z 
+2026-10-16T22:13:13.0661362Z M3ReferenceVectorTest > easing.csv: 1,155 cases, 450 exact, the rest within 2^-50 of the exact rational value (section 6) PASSED
+2026-10-16T22:13:13.0662665Z 
+2026-10-16T22:13:13.0664417Z M3ReferenceVectorTest > spiral.csv: 959 spiral cases against 60-digit Taylor references (549 revision 1 rows, 410 revision 2 adversarial rows: large startTurn, near seams, radius cancellation); exact quarter-turn points; bounds relative to S (sections 5, 7.2) PASSED
+2026-10-16T22:13:13.1626452Z 
+2026-10-16T22:13:13.1629029Z M3ReferenceVectorTest > Reference files are intact: MANIFEST.sha256 matches every file PASSED
+2026-10-16T22:13:17.6633076Z 
+2026-10-16T22:13:17.6643298Z M3ReviewAdversarialTest > R05: spirals against an exact-phase 90-digit Taylor oracle: 30,000 cases with subnormal to 1e100 radii, subnormal to 2^20 turns, startTurn up to +-MAX_VALUE and -0.0, t extrapolated to +-1e3, within the R2+A3 bounds PASSED
+2026-10-16T22:13:17.7622129Z 
+2026-10-16T22:13:17.7623634Z M3ReviewAdversarialTest > R11: determinism: bitwise identical results from 8 concurrent threads and from repeated sequential evaluation (no shared mutable state) PASSED
+2026-10-16T22:13:17.8623600Z 
+2026-10-16T22:13:17.8625654Z M3ReviewAdversarialTest > R04: Bezier metamorphic relations: reversal B(P)(t) = B(reversed P)(1 - t), translation equivariance, degree elevation and C1 continuity near the ends PASSED
+2026-10-16T22:13:24.8622669Z 
+2026-10-16T22:13:24.8626167Z M3ReviewAdversarialTest > R03: exact endpoints for every input (E1), including t = -0.0, signed-zero and subnormal control points; end derivatives n (P1 - P0) and n (Pn - Pn-1) within bounds PASSED
+2026-10-16T22:13:24.8627865Z 
+2026-10-16T22:13:24.8629141Z M3ReviewAdversarialTest > R08: constant radius exact under extrapolation; degenerate zero-radius and zero-turn spirals exact; t = -0.0 equals t = 0; startTurn -0.0 equals 0 PASSED
+2026-10-16T22:13:25.0622198Z 
+2026-10-16T22:13:25.0624336Z M3ReviewAdversarialTest > R07: exactness: T3 quarter turns (any startTurn magnitude, products just below 2^51), T4 seams up to the overflow of turns * k, T5 period invariance with subnormal and large fractions PASSED
+2026-10-16T22:13:26.0622211Z 
+2026-10-16T22:13:26.0624862Z M3ReviewAdversarialTest > R09: all 15 easings against exact polynomials (G1: 2^-50), dense adjacent-double windows at 0, 0.5 and 1, exact monotonicity of power easings (G4), 2^-49 near-monotonicity of the smooth ones (G5), symmetry and duality (G3, G6), +0.0 for non-positive input PASSED
+2026-10-16T22:13:26.0627251Z 
+2026-10-16T22:13:26.0629052Z M3ReviewAdversarialTest > R12: T2 bitwise: a product turns * t whose fraction rounds up to 1.0 (tiny negative) contributes exactly 0, so the phase equals the startTurn fraction bit for bit PASSED
+2026-10-16T22:13:26.0630369Z 
+2026-10-16T22:13:26.0631191Z M3ReviewAdversarialTest > R01: every method of every curve, posed or not, rejects NaN and infinite t; extreme finite inputs never throw PASSED
+2026-10-16T22:13:26.3622138Z 
+2026-10-16T22:13:26.3624487Z M3ReviewAdversarialTest > R10: PosedCurve against an exact BigDecimal rotation (points translated, derivatives scaled directions never translated), bitwise translation invariance of derivatives, exact power-of-two scale linearity, composition with Pose.then PASSED
+2026-10-16T22:13:27.1622218Z 
+2026-10-16T22:13:27.1623976Z M3ReviewAdversarialTest > R02: lines and Beziers against the exact Bernstein form: 30,000 curves, magnitudes from subnormal to 1e100, t near 0 and 1 and extrapolated to +-1e3, within the R2+A3 bounds PASSED
+2026-10-16T22:13:27.1625362Z 
+2026-10-16T22:13:27.1626856Z M3ReviewAdversarialTest > R06: handedness and +Y axis: positive turns rotate like M1 Quat.axisAngle(+Y, angle) (counter-clockwise from above, +X towards -Z); the normal p x p' is +Y for positive turns and -Y for negative PASSED
+2026-10-16T22:13:27.1628572Z 
+2026-10-16T22:13:27.1629712Z M3UnderflowTest > A3: r0 = q, r1 = 2q, t = 1/2 (q = MIN_VALUE): no double is within the revision 2 bounds of the exact 1.5 q; the amended bounds hold (radius, spiral point, line) PASSED
+2026-10-16T22:13:27.6622270Z 
+2026-10-16T22:13:27.6623939Z M3UnderflowTest > A3: lines and Beziers with subnormal control points, against the exact Bernstein form, within the amended bounds (absolute term 2 n^k G^n MIN_VALUE) PASSED
+2026-10-16T22:13:27.7622429Z 
+2026-10-16T22:13:27.7623904Z M3UnderflowTest > A3: the radius underflow error is multiplied by w in the derivative and by w^2 in the second derivative (r0 = q, r1 = 2q, t = 1/2, turns 1000 and others) PASSED
+2026-10-16T22:13:27.7625083Z 
+2026-10-16T22:13:27.7626086Z M3UnderflowTest > T4 (clarified): seams are exact up to the largest k for which the double product turns * k is finite; beyond that only 'no exception' is promised PASSED
+2026-10-16T22:13:27.9623174Z 
+2026-10-16T22:13:27.9624394Z M3UnderflowTest > A3: radii, rise and products in the subnormal range and around MIN_NORMAL, on exact quarter phases, within the amended bounds PASSED
+2026-10-16T22:13:28.3631382Z 
+2026-10-16T22:13:28.3632959Z M3UnderflowTest > A3: subnormal turns (w = 2 pi turns underflows) with radii up to 1e100: derivatives within the amended bounds (absolute term proportional to S) PASSED
+2026-10-16T22:13:30.0622366Z 
+2026-10-16T22:13:30.0630426Z M3UnderflowTest > A3: the test tolerances are never below the contract bounds computed exactly (BigDecimal, pi rounded up), including subnormal inputs, and never grossly above them PASSED
+2026-10-16T22:13:30.0631852Z 
+2026-10-16T22:13:30.0633153Z PosedCurveTest > Composition: c.transformed(a).transformed(b) equals c.transformed(b.then(a)) (M1 Pose.then) (section 3) PASSED
+2026-10-16T22:13:30.0634087Z 
+2026-10-16T22:13:30.0634783Z PosedCurveTest > A placed circle lies in the plane normal to the rotated +Y, at distance scale * r from the translation, and runs counter-clockwise about that normal (sections 3, 5) PASSED
+2026-10-16T22:13:30.0635547Z 
+2026-10-16T22:13:30.0636132Z PosedCurveTest > Orientation by Frame: Quat.fromFrame(Frame.fromHeading(...)) places a circle facing a heading, without new orientation types (sections 3, 9) PASSED
+2026-10-16T22:13:30.0636825Z 
+2026-10-16T22:13:30.0637197Z PosedCurveTest > Validation: curve and pose are required; transformed(pose) is a PosedCurve (section 3) PASSED
+2026-10-16T22:13:30.1622190Z 
+2026-10-16T22:13:30.1623697Z PosedCurveTest > Derivatives transform as directions scaled by the pose scale: they match finite differences of the placed points (section 3) PASSED
+2026-10-16T22:13:30.1624895Z 
+2026-10-16T22:13:30.1626180Z SpiralTest > Radius accuracy relative to S near an end: very different radii and t close to the end with the small radius (contract 5, radius rule) PASSED
+2026-10-16T22:13:30.1627816Z 
+2026-10-16T22:13:30.1628819Z SpiralTest > Derivatives agree with central finite differences, including extrapolated t (section 5) PASSED
+2026-10-16T22:13:30.1629870Z 
+2026-10-16T22:13:30.1630733Z SpiralTest > A1: near-seam offsets (-2^-60, +-MIN_VALUE, 1 - 2^-53, ...) match the exact small-angle values within the section 7.2 bound PASSED
+2026-10-16T22:13:30.1631690Z 
+2026-10-16T22:13:30.1632686Z SpiralTest > Factories: circle, arc, helix, planar and conical spirals, and the M1 horizontal circle factories (section 5) PASSED
+2026-10-16T22:13:30.1633583Z 
+2026-10-16T22:13:30.1634510Z SpiralTest > Helix and spirals: radius interpolates exactly at the ends; height is rise * t; helix speed is constant sqrt((2 pi r turns)^2 + rise^2) (section 5) PASSED
+2026-10-16T22:13:30.1635606Z 
+2026-10-16T22:13:30.1636468Z SpiralTest > Large turn counts: quarter phases stay exact after 2^20 turns, where a radian implementation is off by about 1e-9 (section 5, DM3-6) PASSED
+2026-10-16T22:13:30.1637489Z 
+2026-10-16T22:13:30.1638350Z SpiralTest > M1 CONVENTIONS 5: starting at +X with normal +Y, counter-clockwise from above reaches -Z at +90 degrees, clockwise reaches +Z (exact) PASSED
+2026-10-16T22:13:30.1639382Z 
+2026-10-16T22:13:30.1640010Z SpiralTest > Validation: radii finite and >= 0; rise, turns, startTurn finite; parameters finite (sections 5, 8) PASSED
+2026-10-16T22:13:30.2623089Z 
+2026-10-16T22:13:30.2625038Z SpiralTest > T4: seams are exact for every integer t (up to 2^60) and every startTurn magnitude (section 5) PASSED
+2026-10-16T22:13:30.2625747Z 
+2026-10-16T22:13:30.2626538Z SpiralTest > Full Heal ring (r cos th, 0, r sin th) is horizontalClockwiseFromAbove; Astral Prism's +Y rotation is horizontalCounterClockwiseFromAbove (M1 CONVENTIONS 2, 5) PASSED
+2026-10-16T22:13:30.2627449Z 
+2026-10-16T22:13:30.2627925Z SpiralTest > Exact quarter-turn points for any radius and start phase that land on quarter turns (section 5) PASSED
+2026-10-16T22:13:30.3622348Z 
+2026-10-16T22:13:30.3623824Z SpiralTest > A1 / T5: for non-negative startTurn the result depends only on startTurn mod 1, bitwise; negative offsets agree within the bound PASSED
+2026-10-16T22:13:30.4622326Z 
+2026-10-16T22:13:30.4623778Z SpiralTest > A2: extrapolated radius cancellation; the error is bounded relative to S = |1-t| r0 + |t| r1, not to r(t) (review counterexample: exact radius 2^-52) PASSED
+2026-10-16T22:13:30.4624558Z 
+2026-10-16T22:13:30.4625174Z SpiralTest > A1 / T3: quarter-turn phases are exact for startTurn of any magnitude (2^52, -2^52, 2^53, 2^60, +-MAX_VALUE, 2^50 + 1/4, ...) and for negative offsets PASSED
+2026-10-16T22:13:30.5624580Z 
+2026-10-16T22:13:30.5625434Z SpiralTest > Seams: a closed spiral (equal radii, no rise, integer non-zero turns) has point(k) == point(0) and derivative(k) == derivative(0) exactly for integer k (section 5) PASSED
+2026-10-16T22:13:30.5626113Z 
+2026-10-16T22:13:30.5626868Z ArcLengthTableTest > Convergence: for a cubic, the length error shrinks with the tolerance and stays below tau for tau = 1e-3 ... 1e-12 relative PASSED
+2026-10-16T22:13:30.6621574Z 
+2026-10-16T22:13:30.6623200Z ArcLengthTableTest > Circles and helices: length |t1 - t0| sqrt((2 pi r turns)^2 + rise^2) (constant speed, BigDecimal pi) within the M3 derivative error plus 64 eps PASSED
+2026-10-16T22:13:30.6624663Z 
+2026-10-16T22:13:30.6625924Z ArcLengthTableTest > Exact ends: lengthAt(t0) = 0, lengthAt(t1) = length, parameterAt(0) = t0, parameterAt(length) = t1 (bit for bit); lengthAt non-decreasing on a grid for smooth curves PASSED
+2026-10-16T22:13:30.6627298Z 
+2026-10-16T22:13:30.6628362Z ArcLengthTableTest > Validation: null arguments; non-finite, reversed or overflowing ranges; lengthAt and parameterAt outside their domains PASSED
+2026-10-16T22:13:30.7621559Z 
+2026-10-16T22:13:30.7623869Z ArcLengthTableTest > Rigid motion and uniform scale: the posed curve's length is scale * length (within tau), rotation and translation invariant; subranges add up PASSED
+2026-10-16T22:13:31.0621441Z 
+2026-10-16T22:13:31.0623556Z ArcLengthTableTest > Lines: length |t1 - t0| |P1 - P0| (BigDecimal oracle) within 64 eps relative, for magnitudes 1e-300 to 1e100 and extrapolated ranges PASSED
+2026-10-16T22:13:31.2621463Z 
+2026-10-16T22:13:31.2623824Z ArcLengthTableTest > Quadratic Beziers and conical spirals against the closed-form antiderivative: |L - L*| <= tau + rounding allowance, with converged() and errorEstimate() <= tau PASSED
+2026-10-16T22:13:31.2625351Z 
+2026-10-16T22:13:31.2626571Z ArcLengthTableTest > Effective tolerance: tau = max(absolute, relative * initial estimate); tau >= absolute, and with absolute = 0 tau is relative * L within 1e-6 for smooth curves PASSED
+2026-10-16T22:13:31.2627930Z 
+2026-10-16T22:13:31.2628987Z ArcLengthTableTest > Collapsed and stationary geometry: zero length, converged; a stationary point off the initial nodes converges to the exact length PASSED
+2026-10-16T22:13:31.2630222Z 
+2026-10-16T22:13:31.2631609Z EqualDistanceTest > Spacing: count = round-half-up(L / d) intervals (+1 for INCLUDE_END, at least 1 for EXCLUDE_END); the realised spacing is L / intervals; denser spacing on a longer spiral keeps the density PASSED
+2026-10-16T22:13:31.2633340Z 
+2026-10-16T22:13:31.2634534Z EqualDistanceTest > Spacing validation and explosion guard: non-positive, non-finite or tiny spacing is rejected before any sample is evaluated; countForSpacing saturates PASSED
+2026-10-16T22:13:31.2635882Z 
+2026-10-16T22:13:31.2636996Z EqualDistanceTest > Zero-length curves: equal-distance sampling falls back to the uniform parameters (all points coincide); spacing gives exactly one sample PASSED
+2026-10-16T22:13:32.2621515Z 
+2026-10-16T22:13:32.2624290Z EqualDistanceTest > Conical and planar spirals (radius changing, as for a spiral around a trident): consecutive samples are equally spaced in arc length within 2 tau (closed-form oracle) PASSED
+2026-10-16T22:13:32.8622187Z 
+2026-10-16T22:13:32.8624861Z EqualDistanceTest > Parameters are non-decreasing and within [t0, t1] for every policy and count, also for cusps, stationary points and adversarial curves PASSED
+2026-10-16T22:13:33.3621901Z 
+2026-10-16T22:13:33.3624754Z EqualDistanceTest > Monotone parameters under a loose tolerance (relative 2^-3) and dense sampling (60,000 samples), where the inversion's stopping tolerance exceeds the spacing PASSED
+2026-10-16T22:13:33.4621983Z 
+2026-10-16T22:13:33.4653903Z EqualDistanceTest > Quadratic Beziers: equal arc-length spacing within 2 tau (closed-form oracle), including extrapolated ranges PASSED
+2026-10-16T22:13:33.4655564Z 
+2026-10-16T22:13:33.4684227Z EqualDistanceTest > Constant-speed curves: equal-distance parameters equal the uniform parameters within 2 tau / speed; a closed circle sampled with EXCLUDE_END has no duplicate seam point PASSED
+2026-10-16T22:13:33.4701795Z 
+2026-10-16T22:13:33.4743588Z M4AdversarialTest > Signed zero and tiny ranges: t0 = -0.0 is kept; a range of one ulp works; t0 == t1 gives length 0 and one repeated point PASSED
+2026-10-16T22:13:33.4744819Z 
+2026-10-16T22:13:33.4774267Z M4AdversarialTest > Particle-count explosion: the largest permitted request is bounded by SampleLimits; limit violations are reported before any allocation-sized work PASSED
+2026-10-16T22:13:33.4792889Z 
+2026-10-16T22:13:33.4833738Z M4AdversarialTest > Sampling work: each equal-distance sample calls point() exactly once and derivative() at most 336 times; parameterAt and lengthAt are bounded too PASSED
+2026-10-16T22:13:33.4835397Z 
+2026-10-16T22:13:33.4858399Z M4AdversarialTest > Failures: a non-finite derivative gives ArithmeticException; exceptions thrown by a user curve propagate unchanged; overflow of the length gives ArithmeticException PASSED
+2026-10-16T22:13:33.4882875Z 
+2026-10-16T22:13:33.4909862Z M4AdversarialTest > Fast oscillation (200 periods): a small budget terminates unconverged with an honest estimate; a large budget converges; more budget never increases the error estimate much PASSED
+2026-10-16T22:13:33.8763367Z 
+2026-10-16T22:13:33.8845247Z M4AdversarialTest > Budget: build() never calls derivative() more than maxEvaluations times, evaluations() reports the exact count, and point()/secondDerivative() are never called PASSED
+2026-10-16T22:13:33.8932769Z 
+2026-10-16T22:13:33.8993964Z M4AdversarialTest > Extreme magnitudes: subnormal and 1e100-scale curves give accurate lengths (scaled speed norm: no overflow or underflow of squares); ranges up to +-1e3 PASSED
+2026-10-16T22:13:33.9022832Z 
+2026-10-16T22:13:33.9053795Z M4AdversarialTest > Inversion cost on smooth curves (validated, contract 6.3): Newton steps keep the mean below 40 derivative evaluations per equal-distance sample (pure bisection would need about 6 x 30) PASSED
+2026-10-16T22:13:33.9055508Z 
+2026-10-16T22:13:33.9083314Z M4BoundaryTest > Purity: no mutable static state (every static field is final and of an immutable type) PASSED
+2026-10-16T22:13:33.9093417Z 
+2026-10-16T22:13:33.9095065Z M4BoundaryTest > Dependencies and calls: imports only java.*, workshop.vfx.math.core and workshop.vfx.math.curve (never time); no trigonometry, pow, exp, log, fma, random, clocks, threads, synchronization or I/O PASSED
+2026-10-16T22:13:33.9095898Z 
+2026-10-16T22:13:33.9096532Z M4BoundaryTest > API shape (contract section 2): exactly the six public types with exactly the specified public members; no public constructors on ArcLengthTable, SampleSet, Sampler PASSED
+2026-10-16T22:13:34.0622134Z 
+2026-10-16T22:13:34.0624554Z M4DeterminismTest > Concurrent use: 8 threads building and sampling, and 8 threads sharing one table, give the sequential bits PASSED
+2026-10-16T22:13:34.3622209Z 
+2026-10-16T22:13:34.3626048Z M4DeterminismTest > Repeated evaluation (before and after JIT warm-up) gives bit-identical tables and samples PASSED
+2026-10-16T22:13:34.3627223Z 
+2026-10-16T22:13:34.3628783Z M4R21RegressionTest > F4: subnormal speeds over long ranges lose at most MIN_VALUE/2 per half-panel rule (no MIN_VALUE per unit of parameter): lines with components (q, q, 0), (q, 2q, 2q), (3q, q, 0) and (q, 0, 0) on [0, 1000] and [-7, 9] PASSED
+2026-10-16T22:13:34.3630554Z 
+2026-10-16T22:13:34.3633107Z M4R21RegressionTest > F4: M3 lines on ranges of a few MIN_VALUE (half-width rounds to 0): length within the contract 10.2 allowance (R2.1), whose underflow term is MIN_VALUE/2 per half-panel rule of nonzero width (1 to 7 rules on [0, k MIN_VALUE]); unit speed on [0, k MIN_VALUE] is exact (a consequence of the normative operation order); lengthAt one ulp above t0 accurate PASSED
+2026-10-16T22:13:34.3635681Z 
+2026-10-16T22:13:34.3637585Z M4R21RegressionTest > F5: a finite table whose partial integral overflowed (speed 1e308, or components at MAX_VALUE, only for t <= 1e-300; 1 elsewhere): lengthAt and parameterAt near t0 are finite, never NaN, and within [0, length()] (F_k need not be monotone for such a curve) PASSED
+2026-10-16T22:13:34.3639747Z 
+2026-10-16T22:13:34.3641783Z M4R21RegressionTest > F5: finite smooth curves whose weighted node sum overflows (speeds 1e308 to 2.5e308, components up to MAX_VALUE): build returns the finite length, converged, within the allowance; lengthAt and parameterAt finite PASSED
+2026-10-16T22:13:34.5639431Z 
+2026-10-16T22:13:34.5641812Z M4R21RegressionTest > F4/F5: no spurious overflow or underflow in the panel rule: 3,000 random lines (speeds 1e-300 to 2.9e308 with components up to MAX_VALUE, range widths 1 MIN_VALUE to 1e3, exact lengths below MAX_VALUE/4) all give finite, converged lengths within the allowance PASSED
+2026-10-16T22:13:34.5644488Z 
+2026-10-16T22:13:34.5645896Z M4R2RegressionTest > F2: ratio mode is clamped to the panel value: a speed seen only by the partial integral's nodes cannot make lengthAt exceed the length at the panel end (F_k in [0, I2_k], contract 5.5) PASSED
+2026-10-16T22:13:34.5647489Z 
+2026-10-16T22:13:34.5650235Z M4R2RegressionTest > F3: iteration cap: a target inside a jump of F (unreachable tolerance) near t = 2^-40, where the bracket cannot collapse within 64 iterations, and zero speed at the first iterate: all 64 iterations run (332 to 336 evaluations); the result is the bracket end with the smaller residual, on the correct side of the jump and within 2^-47 (b - a) + 2 ulp of it PASSED
+2026-10-16T22:13:34.5653758Z 
+2026-10-16T22:13:34.5655326Z M4R2RegressionTest > Non-finite derivative after build (contract 9, R2 mutation survivor M12): a curve finite at every table node but NaN elsewhere makes lengthAt and parameterAt throw ArithmeticException, never return NaN PASSED
+2026-10-16T22:13:34.5657086Z 
+2026-10-16T22:13:34.5658643Z M4R2RegressionTest > F2: pathological panels (I2/I1 overflowing, I1 = 0, I2 = 1000 I1, I1 = 1000 I2, I2/I1 underflowing) on finite tables: lengthAt and parameterAt are finite, monotone and follow the linear fallback of contract 5.5 exactly PASSED
+2026-10-16T22:13:34.5660372Z 
+2026-10-16T22:13:34.5662128Z M4R2RegressionTest > Stationary intervals (R2 mutation survivors M26, M15): parameterAt(length()) == t1 even when the last panels have zero length; a distance reached at the start of a stationary interval maps to its start (the smallest panel k with S_(k+1) >= distance) PASSED
+2026-10-16T22:13:34.5664352Z 
+2026-10-16T22:13:34.5666330Z M4R2RegressionTest > F3: a speed discontinuous at a 2^-41 scale (F has jumps, the tolerance is unreachable; in this scenario every exit is by tolerance or by bracket collapse): every result is within the tolerance or is the better end of an adjacent-double bracket; at most 336 evaluations; deterministic PASSED
+2026-10-16T22:13:34.5668575Z 
+2026-10-16T22:13:34.5670295Z M4R2RegressionTest > F3: Newton creep (a speed spike at the root, invisible to the quadrature, makes Newton steps tiny): at most 336 derivative evaluations; |lengthAt(t) - s| <= max(tau 2^-10, 4 (b - a) 2^-47); t within the bound of the exact inverse -1 + sqrt(1 + 2s) PASSED
+2026-10-16T22:13:34.5672142Z 
+2026-10-16T22:13:34.5673830Z M4R2RegressionTest > F1: nonzero subnormal-speed lines and constant-speed spirals converge with 16 panels; tau = max(abs, rel L0, 1024 MIN_VALUE); |L - L*| <= rounding allowance with the absolute underflow term 8 K MIN_VALUE PASSED
+2026-10-16T22:13:34.5675488Z 
+2026-10-16T22:13:34.5677047Z M4R2RegressionTest > F3: ties go to the upper end: (a) a target exactly halfway across a panel shorter than 2 tau 2^-10 returns b_k; (b) after a collapse exit between adjacent doubles with exactly equal residuals, the upper double is returned PASSED
+2026-10-16T22:13:34.5678722Z 
+2026-10-16T22:13:34.5679906Z M4R2RegressionTest > F3: a target equal to the length at a panel end (an end of the bracket is already within the tolerance) returns that end exactly, with no derivative evaluation PASSED
+2026-10-16T22:13:34.5681262Z 
+2026-10-16T22:13:34.5682168Z M4ReferenceVectorTest > counts.csv: 202 normative spacing counts (round half up of fl(L / d), saturation at Long.MAX_VALUE) PASSED
+2026-10-16T22:13:34.5683480Z 
+2026-10-16T22:13:34.5684164Z M4ReferenceVectorTest > Reference files are intact: MANIFEST.sha256 matches every file PASSED
+2026-10-16T22:13:34.5685048Z 
+2026-10-16T22:13:34.5686885Z M4ReferenceVectorTest > arclength.csv: 336 lengths (lines, circles, helices, spirals, quadratic and cubic Beziers, cusps, stationary and collapsed curves, extrapolated ranges): converged, |L - L*| <= tau + rounding allowance PASSED
+2026-10-16T22:13:34.5688670Z 
+2026-10-16T22:13:34.5689778Z M4ReferenceVectorTest > inverse.csv: 216 inversions (quadratic and cubic Beziers, spirals; distances 1/4, 1/2, 3/4 of L): |t - t*| <= (3 tau + allowance) / minimum speed PASSED
+2026-10-16T22:13:37.8622208Z 
+2026-10-16T22:13:37.8625545Z M4ReferenceVectorTest > uniform.csv: 2,310 normative uniform parameters, compared bit for bit (counts up to 2^20, ranges from subnormal to 1e100, -0.0) PASSED
+2026-10-16T22:13:38.6621936Z 
+2026-10-16T22:13:38.6625788Z SampleSetTest > transformed(pose): the same parameters, and points bit for bit equal to curve.transformed(pose).point(t) (sample once, move every tick) PASSED
+2026-10-16T22:13:38.6627147Z 
+2026-10-16T22:13:38.6628158Z SampleSetTest > Immutability: parameters() returns a copy; points() is unmodifiable; later changes to returned data do not affect the set PASSED
+2026-10-16T22:13:38.6629692Z 
+2026-10-16T22:13:38.6630716Z SampleSetTest > SampleLimits: maxSamples in [1, 2^20], maxEvaluations in [256, 2^24]; ArcLengthTolerance: absolute finite >= 0, relative in [2^-40, 2^-3] PASSED
+2026-10-16T22:13:38.6631926Z 
+2026-10-16T22:13:38.6633038Z UniformParameterTest > On [0, 1] the parameters are exactly the correctly rounded k/(n-1) (INCLUDE_END) and k/n (EXCLUDE_END) PASSED
+2026-10-16T22:13:38.6634122Z 
+2026-10-16T22:13:38.6635040Z UniformParameterTest > Counts 0, 1 and 2: empty set; one sample at the start (representative value t0) for both policies; both ends PASSED
+2026-10-16T22:13:38.6636146Z 
+2026-10-16T22:13:38.6637147Z UniformParameterTest > Uniform parameter samples of constant-speed curves are equally spaced in distance (circle chords equal to rounding) PASSED
+2026-10-16T22:13:38.6638353Z 
+2026-10-16T22:13:38.6639597Z UniformParameterTest > Validation: null curve, policy or limits; non-finite or reversed range; range width overflow; negative count; count above maxSamples (before any evaluation) PASSED
+2026-10-16T22:13:38.6641001Z 
+2026-10-16T22:13:38.6641885Z UniformParameterTest > Uniform parameter sampling evaluates point(t) exactly once per sample and never the derivatives PASSED
+2026-10-16T22:13:38.7621714Z 
+2026-10-16T22:13:38.7654274Z UniformParameterTest > Exact endpoints and points: first parameter t0, last t1 (INCLUDE_END), every point equals curve.point(t) bit for bit; parameters non-decreasing; extrapolated and signed-zero ranges PASSED
+2026-10-16T22:13:38.7656133Z 
+2026-10-16T22:13:38.7682745Z M2BoundaryTest > No mutable static state: every static field is final and primitive, String or an enum constant (section 6.1) PASSED
+2026-10-16T22:13:38.7684082Z 
+2026-10-16T22:13:38.7685117Z M2BoundaryTest > The public API is exactly the eight specified types; none exposes platform, java.time, concurrency or random types (section 1) PASSED
+2026-10-16T22:13:38.7686349Z 
+2026-10-16T22:13:38.7687299Z M2BoundaryTest > No hidden clock reads, randomness, threads or platform imports in the time package sources (sections 1, 6.1) PASSED
+2026-10-16T22:13:38.7688419Z 
+2026-10-16T22:13:38.7689648Z M2DeterminismTest > Discontinuities: a cosmetic gap jumps forward by design; pause/resume or seek removes it; a reset tick counter is rejected for control (section 6.5) PASSED
+2026-10-16T22:13:38.7691010Z 
+2026-10-16T22:13:38.7692068Z M2DeterminismTest > Low TPS: GAME time follows ticks (half speed at 10 TPS), COSMETIC time follows supplied nanoseconds (real-time speed) (sections 3, 6.2) PASSED
+2026-10-16T22:13:38.7693516Z 
+2026-10-16T22:13:38.7694359Z M2DeterminismTest > Reversal: a negative rate runs a timing backwards through its start into BEFORE (sections 4, 5) PASSED
+2026-10-16T22:13:38.7695389Z 
+2026-10-16T22:13:38.7696352Z M2DeterminismTest > Integer pause/resume chains are exact: local time equals the playing span, after 100,000 control events (section 6.3) PASSED
+2026-10-16T22:13:38.8622217Z 
+2026-10-16T22:13:38.8626365Z M2DeterminismTest > Determinism: equal inputs give bit-identical outputs, across repeated calls and freshly built equal objects (section 6.1) PASSED
+2026-10-16T22:13:38.8627621Z 
+2026-10-16T22:13:38.8628659Z M2DeterminismTest > Path independence: skipped, irregular or out-of-order evaluation gives exactly the values of regular evaluation (section 6.2) PASSED
+2026-10-16T22:13:38.9621669Z 
+2026-10-16T22:13:38.9653401Z M2DeterminismTest > Long-running: 10 million consecutive ticks from 2^40 are exact integers with exact loop phases, no drift (section 6.4) PASSED
+2026-10-16T22:13:38.9682554Z 
+2026-10-16T22:13:38.9683264Z M2DeterminismTest > Fractional rate chains: the error after n re-anchorings is at most 2 n 2^-52 max|local| against exact arithmetic (section 6.4) PASSED
+2026-10-16T22:13:38.9712591Z 
+2026-10-16T22:13:38.9742960Z M2GoldenVectorTest > playback.csv: 29 control scripts, every anchor and every evaluation bit for bit (section 4) PASSED
+2026-10-16T22:13:38.9762955Z 
+2026-10-16T22:13:38.9764380Z M2GoldenVectorTest > timing.csv: stage, cycle and progress bit for bit over 1,692 cases (section 5) PASSED
+2026-10-16T22:13:38.9765716Z 
+2026-10-16T22:13:38.9766295Z M2GoldenVectorTest > Golden files are intact: MANIFEST.sha256 matches every file PASSED
+2026-10-16T22:13:38.9767050Z 
+2026-10-16T22:13:38.9768044Z M2GoldenVectorTest > timepoint.csv: ticksSince bit for bit, including the overflow rows (section 3) PASSED
+2026-10-16T22:13:38.9768935Z 
+2026-10-16T22:13:38.9769671Z M2GoldenVectorTest > tick_seconds.csv: ticksToSeconds and secondsToTicks bit for bit (section 2) PASSED
+2026-10-16T22:13:38.9770570Z 
+2026-10-16T22:13:38.9771717Z M2ReviewAdversarialTest > Subnormal and extreme durations: exact cycles for small multiples of Double.MIN_VALUE; huge durations stay in cycle 0 (section 5) PASSED
+2026-10-16T22:13:38.9773240Z 
+2026-10-16T22:13:38.9774277Z M2ReviewAdversarialTest > Time-translation invariance: shifting every instant by the same amount changes no bit, in both domains (sections 3, 4) PASSED
+2026-10-16T22:13:39.2622304Z 
+2026-10-16T22:13:39.2623677Z M2ReviewAdversarialTest > Stage and cycle are monotone in local time for finite runs: never AFTER -> ACTIVE or a lower cycle later (section 5) PASSED
+2026-10-16T22:13:39.3621918Z 
+2026-10-16T22:13:39.3623565Z M2ReviewAdversarialTest > COSMETIC differences beyond 2^53 ns round twice, as specified, and stay within 2 ulp of the exact quotient (section 3) PASSED
+2026-10-16T22:13:39.3624998Z 
+2026-10-16T22:13:39.3626513Z M2ReviewAdversarialTest > Boundary oracle: on and next to 11 cycle boundaries up to 2^51 - 1, for 14 durations including subnormals, stage and cycle are exact and forward progress is correctly rounded (sections 5, 6.4) PASSED
+2026-10-16T22:13:39.4622475Z 
+2026-10-16T22:13:39.4624060Z M2ReviewAdversarialTest > Determinism under JIT: results computed before and after 3 million hot iterations are bit-identical (section 6.1) PASSED
+2026-10-16T22:13:39.5622490Z 
+2026-10-16T22:13:39.5624481Z M2ReviewAdversarialTest > Integer control scripts: random pause/resume/restart/seek/withRate (integer rates in [-3, 3]) match a pure long-arithmetic model bit for bit, through Timing as well (section 6.3) PASSED
+2026-10-16T22:13:39.8623369Z 
+2026-10-16T22:13:39.8625192Z M2ReviewAdversarialTest > Re-anchoring error: GAME stays within the contract's 1.5 * 2^-52 * M; COSMETIC needs 2.5 * 2^-52 * M (finding A1: the contract's 1.5 is exceeded) PASSED
+2026-10-16T22:13:39.8626679Z 
+2026-10-16T22:13:39.8628033Z M2ReviewAdversarialTest > Exhaustive small integers: every delay in [-6, 6], duration in [1, 8], local in [-30, 90], all modes and cycle counts agree with integer arithmetic (section 6.3) PASSED
+2026-10-16T22:13:40.2622204Z 
+2026-10-16T22:13:40.2623993Z M2ReviewAdversarialTest > The 2^51 cycle-exact domain is sufficient: 200,000 random elapsed times with elapsed/duration in [2^50, 2^51) give the exact cycle (section 6.4) PASSED
+2026-10-16T22:13:40.2625422Z 
+2026-10-16T22:13:40.2626460Z M2ReviewAdversarialTest > PING_PONG mirror symmetry: for integer d and u in [0, 2d], progress(u) == progress(2d - u) bit for bit (section 5) PASSED
+2026-10-16T22:13:40.2627638Z 
+2026-10-16T22:13:40.2629229Z M2ReviewAdversarialTest > Validation order: control-instant checks, then argument checks, then evaluation; so an invalid rate is an IAE even where evaluation would overflow (section 4) PASSED
+2026-10-16T22:13:40.2630680Z 
+2026-10-16T22:13:40.2631192Z M2ReviewAdversarialTest > Environment: tests run on Java 25 PASSED
+2026-10-16T22:13:40.2631860Z 
+2026-10-16T22:13:40.2632938Z M2Revision2Test > P-R1: GAME keeps checked subtraction and raw ordering: no wrap-around for tick counters (sections 3, 4) PASSED
+2026-10-16T22:13:40.2633992Z 
+2026-10-16T22:13:40.2635123Z M2Revision2Test > P-R1: COSMETIC playback evaluates and accepts control events across the wrap; earlier instants are rejected by wrapped order (section 4 [R2]) PASSED
+2026-10-16T22:13:40.2636399Z 
+2026-10-16T22:13:40.2637459Z M2Revision2Test > P-A2: no-op controls return the same object and keep the stored anchor; the next control is checked against that anchor only (section 4 [R2]) PASSED
+2026-10-16T22:13:40.2638900Z 
+2026-10-16T22:13:40.2639772Z M2Revision2Test > P-A3: FOREVER reports AFTER only when the cycle index reaches 2^63 (documented limitation, section 5 [R2]) PASSED
+2026-10-16T22:13:40.3621929Z 
+2026-10-16T22:13:40.3638350Z M2Revision2Test > P-R1: translating a COSMETIC history so that it crosses the wrap changes no bit (section 3 [R2]) PASSED
+2026-10-16T22:13:40.3662706Z 
+2026-10-16T22:13:40.3680023Z M2Revision2Test > P-R1: the wrapping difference d is valid for |true elapsed| < 2^63; d = -2^63 is read as 2^63 ns backwards (section 3 [R2]) PASSED
+2026-10-16T22:13:40.3681192Z 
+2026-10-16T22:13:40.3682278Z M2Revision2Test > P-R1: COSMETIC ticksSince across the Long.MAX_VALUE -> Long.MIN_VALUE wrap is the elapsed time, forwards and backwards (section 3 [R2]) PASSED
+2026-10-16T22:13:40.3683859Z 
+2026-10-16T22:13:40.3684914Z M2Revision2Test > P-R1: domain checks are unchanged: mixing COSMETIC and GAME is an IllegalArgumentException, also near the wrap (sections 3, 4) PASSED
+2026-10-16T22:13:40.3686164Z 
+2026-10-16T22:13:40.3687007Z M2Revision2Test > P-R1: zero elapsed time is +0.0 everywhere, including at both ends of the long range (section 3 [R2]) PASSED
+2026-10-16T22:13:40.3688047Z 
+2026-10-16T22:13:40.3688942Z PlaybackTest > Construction: anchor required, anchorTicks and rate finite; start() is local 0, rate 1, playing (sections 4, 7) PASSED
+2026-10-16T22:13:40.3690026Z 
+2026-10-16T22:13:40.3690996Z PlaybackTest > withRate keeps the value continuous at the switch instant; negative rates reverse; rate 0 freezes without pausing (section 4) PASSED
+2026-10-16T22:13:40.3692139Z 
+2026-10-16T22:13:40.3693089Z PlaybackTest > COSMETIC playback runs at one local tick per 50 ms of supplied nanoseconds (sections 3, 4) PASSED
+2026-10-16T22:13:40.4622537Z 
+2026-10-16T22:13:40.4623836Z PlaybackTest > localTicks = anchorTicks + rate * ticksSince(anchor); integer data give exact integers (sections 4, 6.3) PASSED
+2026-10-16T22:13:40.4624980Z 
+2026-10-16T22:13:40.4626049Z PlaybackTest > seek sets the value at the instant and keeps rate and pause state; restart is local 0, playing, same rate (section 4) PASSED
+2026-10-16T22:13:40.4627156Z 
+2026-10-16T22:13:40.4628168Z PlaybackTest > pause on a paused playback and resume on a playing one return the same object (idempotent), after validating the instant (section 4) PASSED
+2026-10-16T22:13:40.4629362Z 
+2026-10-16T22:13:40.4630429Z PlaybackTest > Unrepresentable results: instant overflow while playing and a non-finite re-anchored value are ArithmeticExceptions (sections 4, 7) PASSED
+2026-10-16T22:13:40.4631667Z 
+2026-10-16T22:13:40.4633112Z PlaybackTest > Control instants: same domain, not before the anchor (equal allowed); localTicks also validates its domain (sections 4, 7) PASSED
+2026-10-16T22:13:40.4641016Z 
+2026-10-16T22:13:40.4642142Z PlaybackTest > pause holds the value exactly, even far in the future; resume continues from it; a paused span adds exactly nothing (section 4) PASSED
+2026-10-16T22:13:40.4643641Z 
+2026-10-16T22:13:40.4644741Z TickTimeTest > Tier 1: conversions follow IEEE-754 for NaN and infinities and never throw (section 6) PASSED
+2026-10-16T22:13:40.4646026Z 
+2026-10-16T22:13:40.4646867Z TickTimeTest > Constants: 20 ticks per second, 50,000,000 ns per tick, and their product is exactly one second (section 2) PASSED
+2026-10-16T22:13:40.4647881Z 
+2026-10-16T22:13:40.4648977Z TickTimeTest > secondsToTicks is seconds * 20.0; the seconds round trip is not exact for large counts, so authoritative ticks never come from seconds (section 2) PASSED
+2026-10-16T22:13:40.4650245Z 
+2026-10-16T22:13:40.4651018Z TickTimeTest > ticksToSeconds is ticks / 20.0, the correctly rounded quotient, not ticks * 0.05 (section 2) PASSED
+2026-10-16T22:13:40.5622558Z 
+2026-10-16T22:13:40.5635162Z TimePointTest > COSMETIC ticksSince is the exact nanosecond difference divided by 5e7 with one rounding below 2^53 ns (section 3) PASSED
+2026-10-16T22:13:40.5649268Z 
+2026-10-16T22:13:40.5650603Z TimePointTest > Mixing domains or passing null is an IllegalArgumentException; an unrepresentable difference is an ArithmeticException (sections 3, 7) PASSED
+2026-10-16T22:13:40.5652235Z 
+2026-10-16T22:13:40.5653229Z TimePointTest > GAME ticksSince is the exact tick difference converted once to double (section 3) PASSED
+2026-10-16T22:13:40.5654142Z 
+2026-10-16T22:13:40.5654846Z TimePointTest > Factories set the domain and the raw value; a null domain is rejected (section 3) PASSED
+2026-10-16T22:13:40.7621882Z 
+2026-10-16T22:13:40.7624109Z TimingTest > Integer exactness: integer delay, duration and local time give the exact stage and cycle and a once-rounded progress (section 6.3) PASSED
+2026-10-16T22:13:40.7625138Z 
+2026-10-16T22:13:40.7625784Z TimingTest > Phase precision does not depend on elapsed time: exact remainder, unlike frac(u / d) (sections 5, 6.4) PASSED
+2026-10-16T22:13:40.8622200Z 
+2026-10-16T22:13:40.8625396Z TimingTest > Fuzz: for every finite input the sample is valid, ACTIVE forward progress is below 1, nothing throws (sections 5, 6) PASSED
+2026-10-16T22:13:40.8626590Z 
+2026-10-16T22:13:40.8627676Z TimingTest > sample rejects non-finite local time (IAE) and an unrepresentable elapsed time (ArithmeticException) (sections 5, 7) PASSED
+2026-10-16T22:13:40.8628794Z 
+2026-10-16T22:13:40.8629792Z TimingTest > PING_PONG: odd cycles run backwards as (d - r) / d, values are continuous at every turn, the end value depends on parity (section 5) PASSED
+2026-10-16T22:13:40.8630945Z 
+2026-10-16T22:13:40.8631791Z TimingTest > Validation: finite delay, finite positive duration, cycles >= 1, ONCE has exactly one cycle (sections 5, 7) PASSED
+2026-10-16T22:13:40.8633049Z 
+2026-10-16T22:13:40.8633910Z TimingTest > LOOP: half-open cycles [n d, (n+1) d); finite cycles end in AFTER with cycle = cycles - 1 and progress 1 (section 5) PASSED
+2026-10-16T22:13:40.8634946Z 
+2026-10-16T22:13:40.8635782Z TimingTest > ONCE: BEFORE below the delay, ACTIVE on [0, d) with progress u/d < 1, AFTER from d on with progress 1 (section 5) PASSED
+2026-10-16T22:13:40.8636786Z 
+2026-10-16T22:13:40.8637644Z TimingTest > Delay: u = local - delay; negative delays start part-way; -0.0 elapsed time gives +0.0 progress (section 5) PASSED
+2026-10-16T22:13:40.8638660Z 
+2026-10-16T22:13:40.8639329Z TimingTest > TimingSample validates stage, cycle >= 0 and progress in [0, 1] (sections 5, 7) PASSED
+2026-10-16T22:13:40.9622228Z 
+2026-10-16T22:13:40.9623558Z TimingTest > Within one pass progress is monotone in local time: non-decreasing forward, non-increasing backward (section 5) PASSED
+2026-10-16T22:13:41.2246099Z 
+2026-10-16T22:13:41.2249270Z [Incubating] Problems report is available at: file:///home/runner/work/Bedwenton/Bedwenton/build/reports/problems/problems-report.html
+2026-10-16T22:13:41.2250288Z 
+2026-10-16T22:13:41.2250491Z BUILD SUCCESSFUL in 1m 1s
+2026-10-16T22:13:41.2250980Z 5 actionable tasks: 4 executed, 1 up-to-date
+2026-10-16T22:13:41.2252127Z Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.1.0/userguide/configuration_cache_enabling.html
+2026-10-16T22:13:41.3275013Z ##[group]Run set -o pipefail
+2026-10-16T22:13:41.3275387Z [36;1mset -o pipefail[0m
+2026-10-16T22:13:41.3275986Z [36;1m./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false check 2>&1 | tee "$RUNNER_TEMP/m4-evidence/check.txt"[0m
+2026-10-16T22:13:41.3277131Z [36;1m./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false dependencies --configuration runtimeClasspath 2>&1 | tee "$RUNNER_TEMP/m4-evidence/runtime-dependencies.txt"[0m
+2026-10-16T22:13:41.3340719Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-16T22:13:41.3341062Z env:
+2026-10-16T22:13:41.3341367Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/25.0.4-1/x64
+2026-10-16T22:13:41.3341885Z   JAVA_HOME_25_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/25.0.4-1/x64
+2026-10-16T22:13:41.3342488Z   MAVEN_ARGS: -ntp
+2026-10-16T22:13:41.3342735Z ##[endgroup]
+2026-10-16T22:13:42.0325357Z To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.1.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+2026-10-16T22:13:43.1314267Z Daemon will be stopped at the end of the build 
+2026-10-16T22:13:46.7301388Z > Task :compileJava UP-TO-DATE
+2026-10-16T22:13:46.8291368Z > Task :processResources NO-SOURCE
+2026-10-16T22:13:46.8295299Z > Task :classes UP-TO-DATE
+2026-10-16T22:13:46.9294609Z > Task :compileTestJava UP-TO-DATE
+2026-10-16T22:13:46.9313232Z > Task :processTestResources UP-TO-DATE
+2026-10-16T22:13:46.9313851Z > Task :testClasses UP-TO-DATE
+2026-10-16T22:13:47.0292663Z > Task :test UP-TO-DATE
+2026-10-16T22:13:47.0964377Z > Task :verifyNoRuntimeDependencies
+2026-10-16T22:13:47.0970924Z > Task :check
+2026-10-16T22:13:47.0984302Z 
+2026-10-16T22:13:47.0984770Z BUILD SUCCESSFUL in 5s
+2026-10-16T22:13:47.0985928Z 5 actionable tasks: 1 executed, 4 up-to-date
+2026-10-16T22:13:47.0987905Z Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.1.0/userguide/configuration_cache_enabling.html
+2026-10-16T22:13:47.8524553Z To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.1.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+2026-10-16T22:13:48.9509602Z Daemon will be stopped at the end of the build 
+2026-10-16T22:13:52.2373149Z 
+2026-10-16T22:13:52.2400159Z > Task :dependencies
+2026-10-16T22:13:52.2412961Z 
+2026-10-16T22:13:52.2413554Z ------------------------------------------------------------
+2026-10-16T22:13:52.2414478Z Root project 'minecraft-vfx-math'
+2026-10-16T22:13:52.2415185Z ------------------------------------------------------------
+2026-10-16T22:13:52.2415725Z 
+2026-10-16T22:13:52.2416165Z runtimeClasspath - Runtime classpath of source set 'main'.
+2026-10-16T22:13:52.2416898Z No dependencies
+2026-10-16T22:13:52.2417258Z 
+2026-10-16T22:13:52.2417850Z A web-based, searchable dependency report is available by adding the --scan option.
+2026-10-16T22:13:52.2418618Z 
+2026-10-16T22:13:52.2418915Z BUILD SUCCESSFUL in 4s
+2026-10-16T22:13:52.2419464Z 1 actionable task: 1 executed
+2026-10-16T22:13:52.2420624Z Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.1.0/userguide/configuration_cache_enabling.html
+2026-10-16T22:13:52.3272955Z ##[group]Run python3 - <<'PY' | tee "$RUNNER_TEMP/m4-evidence/test-summary.txt"
+2026-10-16T22:13:52.3273580Z [36;1mpython3 - <<'PY' | tee "$RUNNER_TEMP/m4-evidence/test-summary.txt"[0m
+2026-10-16T22:13:52.3273968Z [36;1mimport os[0m
+2026-10-16T22:13:52.3274232Z [36;1mimport xml.etree.ElementTree as ET[0m
+2026-10-16T22:13:52.3274537Z [36;1mfrom pathlib import Path[0m
+2026-10-16T22:13:52.3274915Z [36;1mreports = sorted(Path('build/test-results/test').glob('TEST-*.xml'))[0m
+2026-10-16T22:13:52.3275361Z [36;1mcounts = dict(core=0, time=0, curve=0, sample=0)[0m
+2026-10-16T22:13:52.3275748Z [36;1mtotals = dict(tests=0, failures=0, errors=0, skipped=0)[0m
+2026-10-16T22:13:52.3276112Z [36;1mfor path in reports:[0m
+2026-10-16T22:13:52.3276387Z [36;1m    suite = ET.parse(path).getroot()[0m
+2026-10-16T22:13:52.3276792Z [36;1m    counts[suite.attrib['name'].split('.')[3]] += int(suite.attrib['tests'])[0m
+2026-10-16T22:13:52.3277190Z [36;1m    for key in totals:[0m
+2026-10-16T22:13:52.3277511Z [36;1m        totals[key] += int(suite.attrib.get(key, '0'))[0m
+2026-10-16T22:13:52.3277868Z [36;1mprint('JUnit XML reports:', len(reports))[0m
+2026-10-16T22:13:52.3278185Z [36;1mprint('Milestone counts:', counts)[0m
+2026-10-16T22:13:52.3278467Z [36;1mprint('Totals:', totals)[0m
+2026-10-16T22:13:52.3278741Z [36;1massert len(reports) == 41, len(reports)[0m
+2026-10-16T22:13:52.3279134Z [36;1massert counts == dict(core=125, time=66, curve=63, sample=59), counts[0m
+2026-10-16T22:13:52.3279624Z [36;1massert totals == dict(tests=313, failures=0, errors=0, skipped=0), totals[0m
+2026-10-16T22:13:52.3280156Z [36;1mlog = (Path(os.environ['RUNNER_TEMP'])/'m4-evidence/clean-test.txt').read_text()[0m
+2026-10-16T22:13:52.3280866Z [36;1mproduction = log.split('> Task :compileJava', 1)[1].split('> Task :', 1)[0][0m
+2026-10-16T22:13:52.3281311Z [36;1massert 'warning:' not in production, production[0m
+2026-10-16T22:13:52.3281657Z [36;1mprint('Production compiler warnings: 0')[0m
+2026-10-16T22:13:52.3281948Z [36;1mPY[0m
+2026-10-16T22:13:52.3346406Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-16T22:13:52.3346776Z env:
+2026-10-16T22:13:52.3347090Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/25.0.4-1/x64
+2026-10-16T22:13:52.3347605Z   JAVA_HOME_25_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/25.0.4-1/x64
+2026-10-16T22:13:52.3347991Z   MAVEN_ARGS: -ntp
+2026-10-16T22:13:52.3348205Z ##[endgroup]
+2026-10-16T22:13:52.3715457Z JUnit XML reports: 41
+2026-10-16T22:13:52.3716280Z Milestone counts: {'core': 125, 'time': 66, 'curve': 63, 'sample': 59}
+2026-10-16T22:13:52.3717283Z Totals: {'tests': 313, 'failures': 0, 'errors': 0, 'skipped': 0}
+2026-10-16T22:13:52.3718134Z Production compiler warnings: 0
+2026-10-16T22:13:52.3810070Z ##[group]Run set -o pipefail
+2026-10-16T22:13:52.3810396Z [36;1mset -o pipefail[0m
+2026-10-16T22:13:52.3811029Z [36;1mpython3 tools/generate_m3_reference_vectors.py "$RUNNER_TEMP/m4-m3-reference" 2>&1 | tee "$RUNNER_TEMP/m4-evidence/m3-reference-generator.txt"[0m
+2026-10-16T22:13:52.3811974Z [36;1mdiff -r src/test/resources/m3/reference "$RUNNER_TEMP/m4-m3-reference" 2>&1 | tee "$RUNNER_TEMP/m4-evidence/m3-reference-diff.txt"[0m
+2026-10-16T22:13:52.3813274Z [36;1mpython3 tools/generate_m4_reference_vectors.py "$RUNNER_TEMP/m4-reference" 2>&1 | tee "$RUNNER_TEMP/m4-evidence/m4-reference-generator.txt"[0m
+2026-10-16T22:13:52.3814213Z [36;1mdiff -r src/test/resources/m4/reference "$RUNNER_TEMP/m4-reference" 2>&1 | tee "$RUNNER_TEMP/m4-evidence/m4-reference-diff.txt"[0m
+2026-10-16T22:13:52.3814905Z [36;1mpython3 - <<'PY' | tee "$RUNNER_TEMP/m4-evidence/reference-summary.txt"[0m
+2026-10-16T22:13:52.3815294Z [36;1mimport csv[0m
+2026-10-16T22:13:52.3815577Z [36;1mfrom pathlib import Path[0m
+2026-10-16T22:13:52.3815904Z [36;1mfor milestone, expected in [('m3', 2759), ('m4', 3064)]:[0m
+2026-10-16T22:13:52.3825993Z [36;1m    counts = {}[0m
+2026-10-16T22:13:52.3826442Z [36;1m    for path in sorted(Path(f'src/test/resources/{milestone}/reference').glob('*.csv')):[0m
+2026-10-16T22:13:52.3827070Z [36;1m        lines = [line for line in path.read_text().splitlines() if not line.startswith('#')][0m
+2026-10-16T22:13:52.3827583Z [36;1m        counts[path.name] = len(list(csv.DictReader(lines)))[0m
+2026-10-16T22:13:52.3828005Z [36;1m    print(milestone, counts, 'total:', sum(counts.values()))[0m
+2026-10-16T22:13:52.3828408Z [36;1m    assert sum(counts.values()) == expected, counts[0m
+2026-10-16T22:13:52.3828843Z [36;1mprint('Independent M3/M4 regeneration and byte comparisons: PASS')[0m
+2026-10-16T22:13:52.3829218Z [36;1mPY[0m
+2026-10-16T22:13:52.3893406Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-16T22:13:52.3893765Z env:
+2026-10-16T22:13:52.3894086Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/25.0.4-1/x64
+2026-10-16T22:13:52.3894577Z   JAVA_HOME_25_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/25.0.4-1/x64
+2026-10-16T22:13:52.3894979Z   MAVEN_ARGS: -ntp
+2026-10-16T22:13:52.3895191Z ##[endgroup]
+2026-10-16T22:13:52.7212016Z {'easing.csv': 1155, 'bezier.csv': 645, 'spiral.csv': 959}
+2026-10-16T22:14:44.3633554Z {'arclength.csv': 336, 'inverse.csv': 216, 'uniform.csv': 2310, 'counts.csv': 202}
+2026-10-16T22:14:44.4095480Z m3 {'bezier.csv': 645, 'easing.csv': 1155, 'spiral.csv': 959} total: 2759
+2026-10-16T22:14:44.4097373Z m4 {'arclength.csv': 336, 'counts.csv': 202, 'inverse.csv': 216, 'uniform.csv': 2310} total: 3064
+2026-10-16T22:14:44.4098561Z Independent M3/M4 regeneration and byte comparisons: PASS
+2026-10-16T22:14:44.4226674Z ##[group]Run actions/upload-artifact@v6
+2026-10-16T22:14:44.4226989Z with:
+2026-10-16T22:14:44.4227213Z   name: m4-java25-verification-38974334716
+2026-10-16T22:14:44.4227687Z   if-no-files-found: error
+2026-10-16T22:14:44.4227916Z   retention-days: 30
+2026-10-16T22:14:44.4228321Z   path: /home/runner/work/_temp/m4-evidence/
+build/test-results/test/
+build/reports/tests/test/
+
+2026-10-16T22:14:44.4228777Z   compression-level: 6
+2026-10-16T22:14:44.4228991Z   overwrite: false
+2026-10-16T22:14:44.4229205Z   include-hidden-files: false
+2026-10-16T22:14:44.4229434Z env:
+2026-10-16T22:14:44.4229717Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/25.0.4-1/x64
+2026-10-16T22:14:44.4230196Z   JAVA_HOME_25_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/25.0.4-1/x64
+2026-10-16T22:14:44.4230571Z   MAVEN_ARGS: -ntp
+2026-10-16T22:14:44.4230772Z ##[endgroup]
+2026-10-16T22:14:44.6091068Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-10-16T22:14:44.6094786Z The least common ancestor is /home/runner/work. This will be the root directory of the artifact
+2026-10-16T22:14:44.6095707Z With the provided path, there will be 104 files uploaded
+2026-10-16T22:14:44.6103804Z Artifact name is valid!
+2026-10-16T22:14:44.6104643Z Root directory input is valid!
+2026-10-16T22:14:44.8170419Z Beginning upload of artifact content to blob storage
+2026-10-16T22:14:45.0046638Z Uploaded bytes 165098
+2026-10-16T22:14:45.0210667Z Finished uploading artifact content to blob storage!
+2026-10-16T22:14:45.0212243Z SHA256 digest of uploaded artifact zip is 6262d6d2b144cc36399f80514c98db7e419da78c67b4d00e83873be5e0bac361
+2026-10-16T22:14:45.0214249Z Finalizing artifact upload
+2026-10-16T22:14:45.2589067Z Artifact m4-java25-verification-38974334716.zip successfully finalized. Artifact ID 12078606454
+2026-10-16T22:14:45.2590111Z Artifact m4-java25-verification-38974334716 has been successfully uploaded! Final size is 165098 bytes. Artifact ID is 12078606454
+2026-10-16T22:14:45.2595422Z Artifact download URL: https://github.com/Koi36m/Bedwenton/actions/runs/38974334716/artifacts/12078606454
+2026-10-16T22:14:45.2794791Z Post job cleanup.
+2026-10-16T22:14:45.4293263Z Post job cleanup.
+2026-10-16T22:14:45.5290244Z [command]/usr/bin/git version
+2026-10-16T22:14:45.5335192Z git version 2.55.0
+2026-10-16T22:14:45.5378979Z Temporarily overriding HOME='/home/runner/work/_temp/1736bfbc-5a60-4d8b-ab98-ecaafc93b3c4' before making global git config changes
+2026-10-16T22:14:45.5380563Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-16T22:14:45.5385907Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Bedwenton/Bedwenton
+2026-10-16T22:14:45.5431229Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-16T22:14:45.5474652Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-16T22:14:45.5736194Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-16T22:14:45.5773475Z http.https://github.com/.extraheader
+2026-10-16T22:14:45.5785123Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-16T22:14:45.5824649Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-16T22:14:45.6093632Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-16T22:14:45.6134158Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-16T22:14:45.6532741Z Cleaning up orphan processes
+

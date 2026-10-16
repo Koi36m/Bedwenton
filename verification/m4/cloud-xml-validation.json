@@ -1,0 +1,15 @@
+{
+  "reports": 41,
+  "counts": {
+    "core": 125,
+    "time": 66,
+    "curve": 63,
+    "sample": 59
+  },
+  "totals": {
+    "tests": 313,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+}

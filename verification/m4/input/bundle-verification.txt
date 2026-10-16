@@ -1,0 +1,6 @@
+Original bundle verified complete, SHA-1 object format, no prerequisites, 14 refs.
+Recovered exact specification tip: 6ad7232cf030df649c70920893adb1f8a424a7cf
+Accepted M3 baseline is an ancestor: a6726c42a20940a6a6d2dd24477e6a642f6b8cbc
+Recovered repository git fsck --full passed.
+All 59 M4 @Test declarations preserved.
+All 50 tracked M4 handoff files byte-identical to archive.

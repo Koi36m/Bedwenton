@@ -1,0 +1,1771 @@
+From 664a23cfa9ce20c78bf8c244518ea25431103000 Mon Sep 17 00:00:00 2001
+From: "Claude Code (independent review)" <noreply@anthropic.com>
+Date: Fri, 16 Oct 2026 11:26:07 +0000
+Subject: [PATCH 2/5] Revise M4 proposal (R2): tolerance floor, finite partial
+ integrals, inversion exits
+
+Address the three blocking findings of the independent R1 review:
+- F1: effective tolerance floor 1024 MIN_VALUE; B5 split into an unconditional
+  part (constant computed speed) and an explicit condition; 8 K MIN_VALUE
+  underflow term in the rounding allowance.
+- F2: ratio mode only for 1/2 <= I2/I1 <= 2, linear fallback otherwise;
+  F_k is never NaN and lies in [0, I2_k].
+- F3: Newton for at most 16 iterations, then bisection; proven bracket bound
+  2^-47 (b - a) + 2 ulp; cap and collapse exits return the better bracket end
+  (ties to hi); work bound 336 derivative evaluations (was 400).
+
+Adds M4R2RegressionTest (9 tests); no test removed. Reference data unchanged.
+No production code; M1, M2 and M3 untouched.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_017wk67VdfTJWcfKRwchBikr
+---
+ docs/m4/M4-ARCHITECTURE.md                    |   7 +-
+ docs/m4/M4-CONVENTIONS.md                     |   7 +-
+ docs/m4/M4-DESIGN-DECISIONS.md                |  44 ++-
+ docs/m4/M4-ERROR-ANALYSIS.md                  | 113 ++++--
+ docs/m4/M4-IMPLEMENTATION-CONTRACT.md         | 124 +++++--
+ docs/m4/M4-R2-CORRECTIONS.md                  | 169 +++++++++
+ docs/m4/M4-RISKS.md                           |   6 +-
+ docs/m4/M4-TEST-SPECIFICATION.md              |  25 +-
+ docs/m4/README-FOR-CODEX-M4.md                |   4 +-
+ docs/m4/validation/ProbeM4Evidence.java       |   2 +-
+ docs/m4/validation/evidence.txt               |   7 +-
+ docs/m4/validation/r2/Exhaust3.java           |  31 ++
+ docs/m4/validation/r2/Findings.java           |  51 +++
+ docs/m4/validation/r2/InvStats.java           |  65 ++++
+ docs/m4/validation/r2/LinCount.java           |  17 +
+ docs/m4/validation/r2/README.md               |  19 +
+ docs/m4/validation/r2/findings-r1.txt         |  57 +++
+ docs/m4/validation/r2/findings-r2.txt         |  57 +++
+ docs/m4/validation/r2/inversion-stats.txt     |  48 +++
+ docs/m4/validation/r2/linear-mode.txt         |   3 +
+ docs/m4/validation/r2/r1-vs-r2-tests.txt      |  14 +
+ docs/m4/validation/reference-run-summary.txt  |  92 ++---
+ .../vfx/math/sample/M4AdversarialTest.java    |   6 +-
+ .../vfx/math/sample/M4R2RegressionTest.java   | 344 ++++++++++++++++++
+ 24 files changed, 1173 insertions(+), 139 deletions(-)
+ create mode 100644 docs/m4/M4-R2-CORRECTIONS.md
+ create mode 100644 docs/m4/validation/r2/Exhaust3.java
+ create mode 100644 docs/m4/validation/r2/Findings.java
+ create mode 100644 docs/m4/validation/r2/InvStats.java
+ create mode 100644 docs/m4/validation/r2/LinCount.java
+ create mode 100644 docs/m4/validation/r2/README.md
+ create mode 100644 docs/m4/validation/r2/findings-r1.txt
+ create mode 100644 docs/m4/validation/r2/findings-r2.txt
+ create mode 100644 docs/m4/validation/r2/inversion-stats.txt
+ create mode 100644 docs/m4/validation/r2/linear-mode.txt
+ create mode 100644 docs/m4/validation/r2/r1-vs-r2-tests.txt
+ create mode 100644 src/test/java/workshop/vfx/math/sample/M4R2RegressionTest.java
+
+diff --git a/docs/m4/M4-ARCHITECTURE.md b/docs/m4/M4-ARCHITECTURE.md
+index 2b24e97..9c9ca79 100644
+--- a/docs/m4/M4-ARCHITECTURE.md
++++ b/docs/m4/M4-ARCHITECTURE.md
+@@ -1,6 +1,6 @@
+ # M4 architecture proposal: particle sampling and distribution
+ 
+-Status: **PROPOSED, not approved** (see `M4-DESIGN-DECISIONS.md`).
++Status: **PROPOSED (revision 2), not approved** (see `M4-DESIGN-DECISIONS.md`; R2 changes in `M4-R2-CORRECTIONS.md`).
+ - Baseline: verified M3 `a6726c42a20940a6a6d2dd24477e6a642f6b8cbc`.
+ - GitHub Actions run 38875973066 passed 254/254 tests (M1 125, M2 66, M3 51, M3 review 12) on Java 25 and Gradle 9.1.0,
+   with no production dependencies.
+@@ -106,6 +106,7 @@ tick -> M2 TimingSample.progress -> M3 Easing / curve parameters -> M3 Curve
+ | performance and resource risks | `docs/m4/M4-RISKS.md` |
+ | test specification and acceptance criteria | `docs/m4/M4-TEST-SPECIFICATION.md` |
+ | Codex handoff guide (for after approval) | `docs/m4/README-FOR-CODEX-M4.md` |
+-| independent tests | `src/test/java/workshop/vfx/math/sample/` (44 tests in 8 classes, plus a helper) |
++| independent tests | `src/test/java/workshop/vfx/math/sample/` (53 tests in 9 classes, plus a helper) |
++| R2 corrections after the R1 review | `docs/m4/M4-R2-CORRECTIONS.md` |
+ | reference data and generator | `src/test/resources/m4/reference/` (3,064 rows), `tools/generate_m4_reference_vectors.py` |
+-| validation evidence | `docs/m4/validation/` |
++| validation evidence | `docs/m4/validation/` (R2 probes and before/after evidence in `validation/r2/`) |
+diff --git a/docs/m4/M4-CONVENTIONS.md b/docs/m4/M4-CONVENTIONS.md
+index cf08cda..33e87a5 100644
+--- a/docs/m4/M4-CONVENTIONS.md
++++ b/docs/m4/M4-CONVENTIONS.md
+@@ -1,6 +1,6 @@
+ # M4 numerical conventions and supported domains
+ 
+-Status: PROPOSED, with the contract. The M1 conventions (`docs/CONVENTIONS.md`), M2 conventions and M3 conventions
++Status: PROPOSED, with the contract (revision 2). The M1 conventions (`docs/CONVENTIONS.md`), M2 conventions and M3 conventions
+ (`docs/m3/M3-CONVENTIONS.md`) remain in force unchanged.
+ 
+ ## 1. Coordinates and orientation (inherited)
+@@ -43,7 +43,7 @@ Status: PROPOSED, with the contract. The M1 conventions (`docs/CONVENTIONS.md`),
+ | counts | `0..maxSamples`, `maxSamples <= 2^20` | larger requests are rejected before work |
+ | budgets | `256..2^24` derivative evaluations per table | the initial pass needs 240 |
+ | relative tolerance | `2^-40..2^-3` | the effective minimum is about `(K + 64) eps` for K panels (summation limit) |
+-| absolute tolerance | finite, `>= 0` | |
++| absolute tolerance | finite, `>= 0` | the effective tolerance is at least `1024 MIN_VALUE` (R2 floor, contract 5.3) |
+ 
+ ## 5. Separation of numerical accuracy and visual quality
+ 
+@@ -68,5 +68,6 @@ Status: PROPOSED, with the contract. The M1 conventions (`docs/CONVENTIONS.md`),
+ | F4 | Depth-first refinement starves the right-hand panels under a budget; global refinement does not (estimate 0.35 vs 7e-8 at 65,536 evaluations) | `validation/design-probe.txt`, `evidence.txt` |
+ | F5 | `floor(nextDown(0.5) + 0.5) == 1` (the naive rounding), while round half up (and Java's `Math.round`) give 0 | `counts.csv` row; probe in `validation/mutation-results.txt` (M20 equivalent) |
+ | F6 | The naive norm `sqrt(x^2 + y^2 + z^2)` overflows above 1e154 and underflows below 1e-162 | `M4AdversarialTest.magnitudes`; mutant M11 |
+-| F7 | Inversion needs 14 derivative evaluations on average and at most 29 on the reference curves | `evidence.txt` |
++| F7 | Inversion needs 13.8 derivative evaluations on average and at most 29 on the reference curves (R2; R1: 14.0 and 29) | `evidence.txt` |
+ | F8 | An exact-quarter circle sampled with 2,000 equal-distance samples on t in [-1000, 1000] lands on integer parameters within 1e-6 | `M4AdversarialTest.magnitudes` |
++| F9 | R1 had `tau = 0` for subnormal lengths, so rounding decided convergence (32 panels for some subnormal circles). It produced NaN in `lengthAt` for panels with `I2/I1` overflowing, or with `I1 = 0` and a large `I2`. It crept through all 64 Newton iterations (384 evaluations) on a speed spike. R2 fixes all three: 16 panels and `tau = 1024 MIN_VALUE`; finite linear-mode values; tolerance exits within 286 evaluations | `validation/r2/findings-r1.txt`, `findings-r2.txt`; `M4R2RegressionTest` |
+diff --git a/docs/m4/M4-DESIGN-DECISIONS.md b/docs/m4/M4-DESIGN-DECISIONS.md
+index d6b47ba..d67f3ee 100644
+--- a/docs/m4/M4-DESIGN-DECISIONS.md
++++ b/docs/m4/M4-DESIGN-DECISIONS.md
+@@ -1,7 +1,8 @@
+ # M4 design decisions: particle sampling and distribution
+ 
+-Status: **PROPOSED, not approved.** The contract and tests implement the **recommended** option of each decision.
+-Owner approval follows ChatGPT's independent review.
++Status: **PROPOSED (revision 2), not approved.** The contract and tests implement the **recommended** option of each
++decision. Owner approval follows ChatGPT's independent review. Revision 2 changes DM4-5, DM4-6 and DM4-17 only, as
++required by the R1 review's findings (`M4-R2-CORRECTIONS.md`). No decision was replaced.
+ 
+ Baseline: verified M3 `a6726c42a20940a6a6d2dd24477e6a642f6b8cbc` (254/254 tests; M3 production `d76258f`).
+ 
+@@ -19,8 +20,8 @@ Evidence: `validation/evidence.txt` (reference families) and `validation/design-
+ | DM4-2 | Package and dependencies | `workshop.vfx.math.sample` using `core` and `curve` only | merge into `curve`; depend on `time` |
+ | DM4-3 | Uniform parameter vs uniform distance | both, as separate calls; distance needs an explicit table | distance only; parameter only |
+ | DM4-4 | Arc-length quadrature | globally adaptive 5-point Gauss-Legendre with a bisection error estimate | fixed-step chords; adaptive Simpson; Gauss-Kronrod; Romberg; depth-first refinement |
+-| DM4-5 | Tolerance | `tau = max(absolute, relative * initial length estimate)`; reported, not thrown | absolute only; relative only; tolerance per panel |
+-| DM4-6 | Arc-length inversion | per-panel normalised Gauss primitive with safeguarded Newton-bisection (64-iteration cap) | dense lookup with linear interpolation; pure bisection; ODE reparameterisation |
++| DM4-5 | Tolerance | `tau = max(absolute, relative * initial length estimate, 1024 MIN_VALUE)`; reported, not thrown | absolute only; relative only; tolerance per panel |
++| DM4-6 | Arc-length inversion | per-panel normalised Gauss primitive (ratio mode, linear fallback) with Newton for at most 16 iterations, then bisection (64-iteration cap; better bracket end on exhaustion) | dense lookup with linear interpolation; pure bisection; ODE reparameterisation; Newton guarded by a halving test |
+ | DM4-7 | Reuse | immutable `ArcLengthTable` built once; `SampleSet.transformed(Pose)` for moving effects | rebuild per tick; lazy per-call integration |
+ | DM4-8 | Seams and endpoints | explicit `Endpoints.INCLUDE_END` / `EXCLUDE_END` | infer from `Spiral.closed()`; always include both ends |
+ | DM4-9 | Counts | 0 empty, 1 start, reject above `maxSamples`; spacing count by round half up; saturating pre-check | clamp silently; ceil or floor of L / d |
+@@ -106,7 +107,10 @@ initial partition of 16 panels:
+ 
+ ## DM4-5. Tolerance definition
+ 
+-- **Recommended:** `tau = max(absolute, relative * L0)`, with `L0` the initial 16-panel estimate.
++- **Recommended:** `tau = max(absolute, relative * L0, 1024 MIN_VALUE)`, with `L0` the initial 16-panel estimate.
++  - R2: the floor `1024 MIN_VALUE` (contract 5.3) prevents `tau = 0` when `relative * L0` underflows for a
++    subnormal length. With `tau = 0`, convergence of a constant-speed curve depended on the last bits of the
++    rounding (finding 1). It changes nothing for lengths of at least `2^-1022`.
+   - Relative tolerance makes the work independent of the curve's scale (a ring of radius 1 and of radius 100 cost
+     the same).
+   - Absolute tolerance expresses a block-scale requirement, such as 1/16 block.
+@@ -127,19 +131,27 @@ initial partition of 16 panels:
+ - **Recommended:**
+   - Find the panel by binary search on the cumulative distances.
+   - Inside a panel, use the 5-point primitive `F(t) = G(a, t)` scaled by `I2 / I1`, so that `F(b) = I2` and adjacent
+-    panels join without a jump.
+-  - Solve `F(t) = r` by Newton steps (derivative: the speed) inside a shrinking bracket, falling back to bisection,
+-    with at most 64 iterations.
+-  - Stop at a residual of `tau * 2^-10`.
++    panels join without a jump. R2: this **ratio mode** applies only when `1/2 <= I2 / I1 <= 2`. Otherwise the panel
++    is grossly unresolved, and `F` is linear in t (contract 5.5). `F` is then never NaN and always in `[0, I2]`
++    (finding 2).
++  - Solve `F(t) = r` inside a strictly shrinking bracket. Newton steps (derivative: the speed) are allowed in the
++    first 16 iterations, then only bisection. There are at most 64 iterations. On a cap or collapse exit, the
++    result is the bracket end with the smaller residual (contract 5.6, finding 3).
++  - Stop at a residual of `tau * 2^-10`, also when a bracket end already meets it.
+ - [fact]
+-  - 64 bisections reduce any bracket within [-1e3, 1e3] below one ulp, so the loop terminates with ulp accuracy
+-    even without Newton.
+-  - The measured cost is 14 derivative evaluations on average and 29 at most (20,979 inversions).
+-  - The contract's bound is 400.
++  - Proven (contract P3): after the 64th iteration the bracket is at most `2^-47` of the panel width, plus 2 ulp.
++    R1's claim that "64 bisections reduce any bracket below one ulp, so the loop terminates with ulp accuracy" did
++    not hold, because a Newton step only has to land strictly inside the bracket. A speed spike near the root made
++    R1 creep through all 64 iterations with a residual of 2.7e-8 (`validation/r2/findings-r1.txt`).
++  - The measured cost is 13.8 derivative evaluations on average and 29 at most (20,979 inversions; R1: 14.0 and 29).
++  - The contract's bound is 336 (R1: 400).
+ - **Alternatives:**
+   - a dense table with linear interpolation of t(s): an error `O(h^2)` with no estimate, and memory proportional to
+     the accuracy;
+-  - pure bisection: always 64 iterations (384 evaluations);
++  - pure bisection: about 180 derivative evaluations per sample at relative 2^-30 (contract 6.3), against 13.8 measured;
++  - Newton allowed only after a step that halved the bracket. This is also provable (`2^-32`), but it disables
++    Newton after every one-sided step, and the mean cost on the reference spiral rose to about 57 (the validated
++    limit is 40) (`validation/r2/inversion-stats.txt`);
+   - ODE-based reparameterisation: drift with no bound.
+ - Monotonicity: samples use `t_k = max(t_(k-1), parameterAt(s_k))`, so the parameters never go backwards, even where
+   the speed vanishes (stationary intervals, cusps).
+@@ -289,7 +301,9 @@ spacing.
+   parameters follow IEEE arithmetic.
+ - **Subnormal values:**
+   - geometry down to subnormal coordinates has accurate lengths (scaled norm);
+-  - subnormal speeds contribute absolute errors of a few `MIN_VALUE` (M3 A3).
++  - subnormal speeds contribute absolute errors of a few `MIN_VALUE` (M3 A3): at most `8 K MIN_VALUE` in the length
++    (contract 10.2, R2);
++  - the effective tolerance never underflows below `1024 MIN_VALUE` (DM4-5, R2).
+ - **Overflow:**
+   - a non-finite derivative or length gives `ArithmeticException`;
+   - a range whose width overflows gives `IllegalArgumentException`;
+diff --git a/docs/m4/M4-ERROR-ANALYSIS.md b/docs/m4/M4-ERROR-ANALYSIS.md
+index 52e1b80..533512e 100644
+--- a/docs/m4/M4-ERROR-ANALYSIS.md
++++ b/docs/m4/M4-ERROR-ANALYSIS.md
+@@ -1,6 +1,7 @@
+ # M4 error analysis: derivations and evidence
+ 
+-Status: PROPOSED, with the contract.
++Status: PROPOSED, with the contract (revision 2: sections 4, 6 and 7 corrected after the R1 review; see
++`M4-R2-CORRECTIONS.md`).
+ 
+ Notation:
+ - `u = eps = 2^-53` and `eta = Double.MIN_VALUE`;
+@@ -60,13 +61,39 @@ For the panel `G(a, b) = h (W0 v(c) + W1 (v(c - hX1) + v(c + hX1)) + W2 (v(c - h
+ - With the panel errors of section 3, the **rounding part** of the length error is
+   `abs(L^ - Q) <= (t1 - t0)(dv + 4u T max abs(C'')) + (K + 64) u L`, where Q is the exact sum of the exact panel
+   rules. This is contract 10.2.
++- **Underflow (R2).** Every product in the rule (`W v`, three per rule, and `h * sum`) may underflow, with an
++  absolute error of at most `eta/2` each. Sums of subnormals are exact. So each rule has an absolute error of at most
++  `2 eta` beyond its relative error, and a panel record (four rules) at most `8 eta`. Hence the `8 K eta` term of
++  contract 10.2.
+ - **Constant speed (lines, circles, arcs, helices):**
+   - The 5-point rule integrates a constant exactly: `G = h * 2 v`.
+   - Therefore `Q = L` and `I2 = I1` up to rounding.
+-  - The error estimate is pure rounding, below `tau` for every valid tolerance once `L > 0`:
+-    `tau >= 2^-40 L` exceeds the panel rounding (at most `10u` of each panel).
+-  - Hence `converged()`, `panelCount() == 16` and `abs(L^ - L) <= (t1 - t0) dv + 80u L` (B5).
+-  - Measured: the lines and circles of `ArcLengthTableTest`, within 64 eps plus the M3 derivative error.
++  - **Error estimate (B5 proof).** For one panel of exact value `I`, `I1` and `I2` are computed from the same
++    constant. Their relative errors are at most 10u (one rule) and 11u (two rules and a sum), and their absolute
++    underflow errors at most `2 eta + 0.5 eta` (rule, speed) and `4 eta + 1 eta`. So
++    `e_k = abs(I2 - I1) <= 21u I + 9 eta`, plus `2 (b_k - a_k) dsv` when the computed speed varies by up to `dsv`
++    between nodes. Over the 16 initial panels,
++    `sum e <= 24u L + 144 eta + 2 (t1 - t0) dsv` (24u bounds 21u with the rounding of `L0` against L).
++  - **Comparison with tau.** `tau = max(abs, rel L0, 1024 eta) >= max(2^-40 L0, 1024 eta)`, and
++    `24u L <= 2^-48.4 L`. When `dsv = 0` (lines):
++    - if `2^-40 L0 >= 1024 eta`: `sum e <= (2^-8.4 + 144/1024) tau < tau`;
++    - otherwise: `24u L + 144 eta <= (2^-8.4 + 144/1024) 1024 eta < tau`.
++
++    So the 16 initial panels satisfy `E <= tau`. No refinement happens: `converged()` holds and
++    `panelCount() == 16`, at every magnitude. This is the unconditional part of B5.
++  - With `dsv > 0` (circles and helices: the M3 trigonometry rounds differently at each node), the same holds
++    whenever `2 (t1 - t0) dsv + 24u L + 144 eta <= tau`. This is the conditional part of B5.
++  - **R1 gap (finding 1).** Without the floor, `tau = rel * L0` underflows to 0 for subnormal lengths (`2^-40 * 7 eta
++    = 0`). Then convergence needs `sum e == 0` exactly, which rounding decides. R1 needed 32 panels for some
++    subnormal circles. R1 also computed `L^ = 0` for a `7 eta` line (`h * sum` underflows), which is outside R1's
++    allowance `(t1 - t0) dv + 80u L`. R1's B5 argument (`tau >= 2^-40 L` exceeds the panel rounding) ignored both
++    the absolute underflow terms and `tau = 0`. R2 still computes `L^ = 0` for that line; this is now within the
++    allowance (`7 eta <= 128 eta`), and the tests check it.
++  - **Length error:** `abs(L^ - L) <= (t1 - t0) dv + 80u L + 128 eta` with `K = 16` (contract 10.2).
++  - Measured: the lines and circles of `ArcLengthTableTest`, within 64 eps plus the M3 derivative error. The
++    subnormal lines, circles and helices of `M4R2RegressionTest.subnormalConstantSpeed` (lengths from 1 eta to
++    `2^40 eta`, and radii from 3 eta to 1e-310) are within the allowance, converged with 16 panels and
++    `tau = 1024 eta`.
+ - **Limit of tight tolerances:** K can reach `16 + (2^24 - 240)/20`, about 840,000, so `K u` can exceed `2^-40`. The
+   smallest meaningful relative tolerance is about `(K + 64) u`. The contract keeps `MIN_RELATIVE = 2^-40` and
+   documents the summation limit, rather than imposing compensated summation.
+@@ -99,24 +126,68 @@ For the panel `G(a, b) = h (W0 v(c) + W1 (v(c - hX1) + v(c + hX1)) + W2 (v(c - h
+ | 336 reference lengths (lines, circles, helices, planar and conical spirals, quadratic and cubic Beziers, 4 cusps off-node, stationary points, collapsed curves, extrapolated ranges, magnitudes 1e-6 to 1e100) at relative tolerances 1e-4, 1e-7, 2^-30, 1e-12 | **all converged; no row exceeds tau; worst achieved error / tau = 0.31** (the collinear-reversal quadratic, a kink at t = 2/3) |
+ | evaluations per table | mean 240 to 259, max 540 (at 1e-12) |
+ | the same cost spent on chords (one chord point per GL5 evaluation), rel 1e-7 | worst relative error **6.5e-2** for chords against **2.0e-8** for the table |
+-| inversion: 20,979 `parameterAt` calls on the reference curves at 2^-30 | mean **14.0** derivative evaluations, max **29** (contract limit 400) |
++| inversion: 20,979 `parameterAt` calls on the reference curves at 2^-30 | R2: mean **13.8** derivative evaluations, max **29** (contract limit 336). R1: mean 14.0, max 29 |
+ | oscillating user curve (200 periods), rel 1e-9 | budget 256: not converged (estimate 0.94, honest); 65,536: estimate 7e-8; 2^20: converged with 81,120 evaluations |
+ 
+-## 7. Inversion error
+-
+-- `parameterAt(s)` returns t inside the bracket of panel k, with `abs(F_k(t) - r) <= tau 2^-10`. Otherwise the
+-  bracket has collapsed to adjacent doubles, and t is within one ulp of the solution of `F_k = r`.
+-- The distance error against the true arc length is
+-  `abs(L(t0, t) - s) <= abs(S_k - L(t0, a_k)) + abs(F_k(t) - L(a_k, t)) + tau 2^-10`.
+-  - The first term is the table error up to panel k.
+-  - The second is the 5-point rule on `[a_k, t]`, inside an accepted panel, scaled by `I2/I1`. It is within
+-    `e_k` plus the rule's error on a sub-panel.
+-  - Both are bounded empirically by about tau for the reference families. The test bound is `2 tau + allowance`
+-    for distances, and `(3 tau + allowance) / v_min` for parameters. Both held on all 216 inverse rows and all
+-    equal-distance sets (`EqualDistanceTest`, `M4ReferenceVectorTest.inversions`).
+-- **Termination:** at most 64 iterations. Each either takes a Newton step strictly inside the bracket or bisects, so
+-  64 iterations shrink any finite bracket by `2^-64`. That is below one ulp of `T` for every panel of a range with
+-  `abs(t) <= 2^11` (and below the panel width resolution generally).
++## 7. Inversion error and termination (R2)
++
++**Exits.** `parameterAt(s)` returns t in the bracket of panel k (contract 5.6):
++- after a tolerance or `f == 0` exit, `abs(F_k(t) - r) <= tau 2^-10`;
++- after a cap or collapse exit, t is the end with the smaller residual of a final bracket, of width W, across which
++  `F_k - r` changes sign.
++
++**Distance error** (tolerance exits):
++`abs(L(t0, t) - s) <= abs(S_k - L(t0, a_k)) + abs(F_k(t) - L(a_k, t)) + tau 2^-10`.
++- The first term is the table error up to panel k.
++- The second is the 5-point rule on `[a_k, t]` inside an accepted panel, scaled by `rho_k` in ratio mode. It is
++  within `e_k` plus the rule's error on a sub-panel. In linear mode, which in a converged table occurs only when
++  `I2_k <= 2 tau` (contract 5.5), it is at most `I2_k`.
++- Both are bounded empirically by about tau for the reference families. The test bound is `2 tau + allowance` for
++  distances, and `(3 tau + allowance) / v_min` for parameters. Both held on all 216 inverse rows and all
++  equal-distance sets (`EqualDistanceTest`, `M4ReferenceVectorTest.inversions`).
++
++**Bracket progress (proof of contract P3).**
++- Write `W_i` for the bracket width after iteration i (step 7.3), and `W_(-1) = b_k - a_k`.
++- Every iterate lies strictly inside the current bracket (steps 6 to 8), so `W_i < W_(i-1)`: the bracket strictly
++  shrinks.
++- For `i >= 16`, no Newton candidate is formed. The iterate evaluated at iteration `i + 1` is then the computed
++  midpoint `m = fl(lo + fl(0.5 fl(hi - lo)))` of the bracket after iteration i. This covers iterations 17 to 63:
++  47 midpoints.
++- **One midpoint step.** Let `W = hi - lo` (exact), `M = M_k`, and `u = 2^-53`.
++  - `fl(hi - lo) = W (1 + d1)` with `abs(d1) <= u`; halving is exact.
++  - The sum rounds by at most `u abs(m) <= u M`.
++  - So `abs(m - (lo + W/2)) <= u W/2 + u M`, and the new width, `hi - m` or `m - lo`, is at most
++    `W (1 + u)/2 + u M`.
++- **Iterating 47 times** from `W_16 <= b_k - a_k`:
++  `W_63 <= 2^-47 (1 + u)^47 (b_k - a_k) + u M sum_j ((1 + u)/2)^j
++  <= 2^-47 (1 + 2^-46)(b_k - a_k) + 2 ulp(M)`, using `2 u M (1 + 2u) <= 2 ulp(M)`.
++- **Collapse.** The computed midpoint fails to be strictly inside only if `W <= 2 ulp(M)` (otherwise
++  `0.5 fl(W) > ulp(M) >= ` the rounding of the sum).
++- Hence the bound of P3 holds at every non-early exit.
++
++**What R1 claimed and why it was wrong (finding 3).** R1 said that each iteration "either takes a Newton step
++strictly inside the bracket or bisects, so 64 iterations shrink any finite bracket by `2^-64`". A Newton step only
++has to land strictly inside. When the speed seen by Newton is much larger than the slope of `F_k` (a spike of the
++speed near the root, invisible to the quadrature nodes), every step moves t by a tiny amount, and the bracket
++shrinks by far less than half. The probe `validation/r2/findings-r1.txt` shows R1 exhausting all 64 iterations
++(384 evaluations), with a residual of 2.7e-8, against a tolerance of 1e-15. R1 also did not specify the result
++after the 64th iteration.
++
++**Why the Newton phase is limited, not guarded by a halving test.** A first R2 draft allowed a Newton step only if
++the previous step had at least halved the bracket. This also proves geometric progress (`W_(i+2) <= W_i / 2`), but
++it disables Newton after every one-sided Newton step. One-sided convergence is the normal case for a convex `F_k`.
++On the conical spiral of `M4AdversarialTest.newtonEfficiency`, that draft cost a mean of 56.7 evaluations per
++sample, and the validated criterion (a mean of at most 40) failed. With the 16-iteration Newton phase, the mean is
++17.7 for the same setup. No smooth-curve measurement needed more than 7 iterations. The phase also gives the
++stronger bound `2^-47`. Both measurements
++are in `validation/r2/inversion-stats.txt`.
++
++**Measured** (`validation/r2/inversion-stats.txt`), against the R2 reference implementation:
++- smooth curves at relative 1e-6 to 1e-12: at most 7 iterations and 41 evaluations; no cap or collapse exit;
++- Newton creep (a 1e6 speed spike within 1e-7 of the root): tolerance exits after at most 54 iterations
++  (286 evaluations), with t within 7e-16 of the exact inverse;
++- a speed that is discontinuous at the scale of the nodes (bit 11 of t): 830 collapse exits, 1 cap exit, at most
++  336 evaluations.
+ 
+ ## 8. Spacing counts (exact)
+ 
+diff --git a/docs/m4/M4-IMPLEMENTATION-CONTRACT.md b/docs/m4/M4-IMPLEMENTATION-CONTRACT.md
+index a89b046..4a60cd8 100644
+--- a/docs/m4/M4-IMPLEMENTATION-CONTRACT.md
++++ b/docs/m4/M4-IMPLEMENTATION-CONTRACT.md
+@@ -2,10 +2,13 @@
+ 
+ Audience: the engineer implementing the production source (Codex).
+ 
+-Status: **PROPOSED, revision 1. Not authorized for implementation.** The owner approves this contract with DM4-1 to
++Status: **PROPOSED, revision 2. Not authorized for implementation.** The owner approves this contract with DM4-1 to
+ DM4-17 (`M4-DESIGN-DECISIONS.md`) after ChatGPT's independent review. Until then nothing in
+ `src/main/java/workshop/vfx/math/sample` may be written.
+ 
++Revision 2 corrects the three blocking findings of the R1 review (tolerance floor, 5.3 and B5; finite partial
++integrals, 5.5; inversion progress, exits and work, 5.6 and 8). Every change is listed in `M4-R2-CORRECTIONS.md`.
++
+ Baseline: the verified M3 baseline `a6726c42a20940a6a6d2dd24477e6a642f6b8cbc` (M3 production
+ `d76258f343e28a8acb43f3ad8ba776adcabdd575`, 254/254 tests). **Nothing in M1, M2 or M3 changes**: no production class,
+ test, reference data, contract or verification record. M4 adds a package, its tests and its reference data.
+@@ -144,7 +147,8 @@ up to rounding (DM4-3); they need no `ArcLengthTable`.
+   `v = m * Math.sqrt((x/m)^2 + (y/m)^2 + (z/m)^2)`, with the squares summed in the order x, y, z.
+ 
+   This cannot overflow or underflow in the squares. Its relative error is at most 5 eps, plus `MIN_VALUE` when `v` is
+-  subnormal.
++  subnormal. (For finite components above `MAX_VALUE / sqrt(3)`, outside the domain of 10.4, `v` may round to
++  infinity; then the length is not finite, and 5.5 and 5.6 still never produce NaN.)
+ 
+ **Failures:**
+ - If the length is not finite, `ArithmeticException`.
+@@ -185,7 +189,15 @@ Creating a panel record from a known `I1` costs 10 evaluations.
+    - Compute `I1` of the 16 panels (80 evaluations), then their records (160 evaluations), all left to right.
+    - `L0 = sum of the 16 I2`, left to right.
+    - If `L0` is not finite, `ArithmeticException`.
+-2. **Effective tolerance.** `tau = max(tolerance.absolute(), tolerance.relative() * L0)`.
++2. **Effective tolerance.** `tau = max(max(tolerance.absolute(), tolerance.relative() * L0), TAU_FLOOR)`, with
++   `TAU_FLOOR = 1024 * Double.MIN_VALUE` (exact: `0x0.0000000000400p-1022`, about 5.06e-321).
++   - The floor exists because `relative * L0` underflows to 0 for subnormal lengths (for example
++     `2^-40 * 7 MIN_VALUE`). With `tau = 0`, the rounding of the panel sums (up to about 9 `MIN_VALUE` per panel)
++     would make `converged()` depend on the last bits, and refinement would spend the budget on underflow noise.
++   - The floor changes nothing for normal lengths: if `L0 >= 2^-1022`, then `relative * L0 >= 2^-1062`, which is more
++     than `TAU_FLOOR = 2^-1064`. It relaxes the requested accuracy only for lengths below about `2^-1024` blocks, and
++     then only to an absolute 5.06e-321 blocks.
++   - The accuracy of constant-speed lengths does not depend on tau. B5 and the 10.2 allowance bound it directly.
+ 3. **Running estimate.** `E = sum of the 16 e`, left to right.
+ 4. **Global refinement.** While `E > tau`, the active set is not empty, and `evaluations + 20 <= limits.maxEvaluations()`:
+    1. Remove from the active set the panel P with the largest `e`. Ties go to the smaller `a`, then the smaller `b`
+@@ -210,7 +222,7 @@ Creating a panel record from a known `I1` costs 10 evaluations.
+ | B2 | panels: `16 <= panelCount() <= 16 + (maxEvaluations - 240) / 20`. Memory is O(maxEvaluations) | normative |
+ | B3 | `converged()` holds exactly when `errorEstimate() <= effectiveTolerance()` | normative |
+ | B4 | `length() >= 0` and finite; `length() == 0` when every speed evaluated is 0 | normative |
+-| B5 | constant speed (lines, circles, arcs, helices): `converged()`, `panelCount() == 16`, and the error is rounding only (section 10.2) | normative (follows from the exactness of the rule) |
++| B5 | constant speed: `converged()`, `panelCount() == 16`, and the error is rounding only (10.2). **Unconditional** when the computed speed is the same at every node (lines: a constant derivative), at every magnitude, including subnormal speeds. For curves whose computed speed varies only by rounding (circles, arcs, helices), it holds whenever `2 (t1 - t0) dsv + 24 eps L + 144 MIN_VALUE <= tau`, with `dsv` the largest difference between two computed speeds on the range (`M4-ERROR-ANALYSIS.md` 4). The tests check it for circles and helices with radii up to 1e3, up to 64 turns and ranges within [-2, 3] (`ArcLengthTableTest.constantSpeedSpirals`), and with radii from `3 MIN_VALUE` to 1e-310 (`M4R2RegressionTest.subnormalConstantSpeed`) | normative (proof in `M4-ERROR-ANALYSIS.md` 4) |
+ | B6 | for curves whose speed is smooth on `[t0, t1]` (the reference families): `abs(length() - L) <= effectiveTolerance()` plus the rounding allowance of 10.2 | **validated** (10.3) |
+ 
+ ### 5.5 `lengthAt(t)`
+@@ -218,30 +230,74 @@ Creating a panel record from a known `I1` costs 10 evaluations.
+ - `t` must lie in `[t0, t1]`, else `IllegalArgumentException` (NaN included).
+ - `lengthAt(t0) == 0` and `lengthAt(t1) == length()` exactly.
+ - Otherwise let k be the largest panel index with `a_k <= t`. Then `lengthAt(t) = min(length(), S_k + F_k(t))`,
+-  where `F_k(t)` is:
+-  - 0 for `t <= a_k`, and `I2_k` for `t >= b_k`;
+-  - else, if `I1_k > 0`, `G(a_k, t) * (I2_k / I1_k)`, clamped to `[0, I2_k]`;
+-  - else `I2_k * ((t - a_k) / (b_k - a_k))`.
+-- At most 5 derivative evaluations. The result lies in `[0, length()]`.
++  where `F_k(t)` is defined by the first matching rule:
++  1. `t <= a_k`: 0;
++  2. `t >= b_k`: `I2_k`;
++  3. `I2_k == 0`: 0;
++  4. **ratio mode**, when `I1_k > 0 && I2_k <= 2 * I1_k && I1_k <= 2 * I2_k` (that is, `1/2 <= I2_k / I1_k <= 2`,
++     tested without dividing): `min(I2_k, G(a_k, t) * rho_k)`, with `rho_k = I2_k / I1_k` computed first;
++  5. otherwise, **linear mode**: `I2_k * ((t - a_k) / (b_k - a_k))`.
++- **Guarantees (normative):** `F_k(t)` is never NaN and lies in `[0, I2_k]`, for every finite table.
++  - Ratio mode: `rho_k` lies in `[1/2, 2]`, so it is finite and positive. `G(a_k, t)` is non-negative, possibly
++    `+infinity`, never NaN (a sum of non-negative terms times `h > 0`). The product is therefore non-negative or
++    `+infinity`, and the `min` makes it at most `I2_k`. The R1 formula `G * (I2 / I1)` could overflow
++    (`I2 / I1 = infinity`) or form `0 * infinity = NaN` (finding 2).
++  - Linear mode: `0 < t - a_k <= b_k - a_k` after rounding (rounding is monotone), so the fraction lies in `(0, 1]`.
++- **When linear mode occurs:** only in panels whose estimate is grossly unresolved. Outside `[1/2, 2]`,
++  `e_k = abs(I2_k - I1_k) >= I2_k / 2`; with `I1_k == 0`, `e_k = I2_k`. So in a **converged** table, linear mode
++  occurs only in panels with `I2_k <= 2 tau`, where its error is at most `2 tau`. For the reference families, no
++  panel is in linear mode (measured: 0 of 21,876 panels in the 1,344 reference tables,
++  `validation/r2/linear-mode.txt`).
++- At most 5 derivative evaluations (none in linear mode). The result lies in `[0, length()]`.
+ 
+ ### 5.6 `parameterAt(distance)`
+ 
+ - `distance` must lie in `[0, length()]`, else `IllegalArgumentException` (NaN included).
+ - `parameterAt(0) == t0` (the same double), and `parameterAt(length()) == t1`.
+-- Otherwise:
+-  - k is the smallest panel index with `S_(k+1) >= distance`, and `r = distance - S_k`;
+-  - if `I2_k == 0` or `r <= 0`, the result is `a_k`;
+-  - else solve `F_k(t) = r` on the bracket `[a_k, b_k]` by safeguarded Newton-bisection:
+-    - initial `t = clamp(a_k + (b_k - a_k) * (r / I2_k))`;
+-    - each iteration evaluates `f = F_k(t) - r`, shrinks the bracket, and returns t when `f == 0` or
+-      `abs(f) <= tau * 2^-10`;
+-    - the Newton step `t - f / (v(t) * I2_k / I1_k)` is used only if `I1_k > 0`, `v(t) > 0` and the step lies
+-      strictly inside the bracket. Otherwise the bracket midpoint is used, without evaluating `v(t)` when
+-      `I1_k == 0`, where `F_k` is the linear fallback of 5.5;
+-    - when the bracket admits no double strictly inside, return the bracket end on the side where `F_k >= r` (`hi`
+-      if `f < 0`, else `t`);
+-    - at most 64 iterations.
+-- The result lies in `[t0, t1]`. At most 400 derivative evaluations (64 iterations of 6); `point` is never called.
++- Otherwise, with `M_k = max(abs(a_k), abs(b_k))` and `tolInv = tau * 2^-10`:
++  1. **Panel.** k is the smallest panel index with `S_(k+1) >= distance`, and `r = min(distance - S_k, I2_k)`. (The
++     clamp matters because `S_(k+1)` is the rounded `S_k + I2_k`, so `distance - S_k` can exceed `I2_k` by
++     rounding.)
++  2. If `I2_k == 0` or `r <= 0`, the result is `a_k`.
++  3. **Bracket.** `lo = a_k`, `hi = b_k`, with residuals `f_lo = -r` and `f_hi = I2_k - r`. These follow from
++     `F_k(a_k) = 0` and `F_k(b_k) = I2_k` (5.5) and need no evaluation. The **better end** of the bracket is `lo` if
++     `abs(f_lo) < abs(f_hi)`, else `hi` (ties go to `hi`).
++  4. **Ends within the tolerance.** If `min(r, f_hi) <= tolInv`, return the better end (no evaluation).
++  5. **Mode.** Ratio or linear mode of panel k (5.5). In ratio mode, `rho_k = I2_k / I1_k`. In every mode,
++     `sigma_k = I2_k / (b_k - a_k)`.
++  6. **Initial iterate.** `t = lo + (hi - lo) * (r / I2_k)`. If it is not strictly inside (`lo < t < hi` fails),
++     `t = lo + 0.5 * (hi - lo)`. If that is not strictly inside either, return the better end.
++  7. **Iterations** `i = 0, 1, ..., 63`, in this order:
++     1. `f = F_k(t) - r` (5 derivative evaluations in ratio mode, none in linear mode);
++     2. if `f == 0`, return t;
++     3. if `f < 0`, set `lo = t` and `f_lo = f`; otherwise set `hi = t` and `f_hi = f`;
++     4. if `abs(f) <= tolInv`, return t;
++     5. if `i == 63`, stop (**cap exit**);
++     6. **Newton candidate, only while `i < 16`:** the slope is `v(t) * rho_k` in ratio mode (one derivative
++        evaluation) and `sigma_k` in linear mode. If the slope is `> 0`, the candidate is `t - f / slope`. From
++        `i = 16` on there is no candidate, and the speed is not evaluated;
++     7. if there is no candidate, or it is not strictly inside `(lo, hi)` (NaN included), the candidate is the
++        midpoint `lo + 0.5 * (hi - lo)` of the updated bracket;
++     8. if the midpoint is not strictly inside either, stop (**collapse exit**);
++     9. `t` = the candidate.
++  8. After a cap or collapse exit, return the **better end** of the final bracket.
++
++**Guarantees of `parameterAt` (normative):**
++
++| # | Guarantee |
++|---|---|
++| P1 | The result lies in `[a_k, b_k]`, a subset of `[t0, t1]`. It is a deterministic function of the table and `distance`. `point` is never called |
++| P2 | **Bracket invariant:** `f_lo < 0 < f_hi` from step 4 on. (If `r <= tolInv` or `f_hi <= tolInv`, step 4 returns, and `tolInv >= MIN_VALUE > 0`.) Every evaluated iterate is strictly inside the current bracket, so every completed iteration strictly shrinks it. Under deterministic curves the bracket sequence is bit-reproducible |
++| P3 | **Bracket progress:** the iterates evaluated at `i = 17` to `63` are midpoints, because Newton candidates are formed only for `i < 16`. Each midpoint at least halves the bracket, up to rounding. So, whenever the loop reaches the cap, the final bracket width is `W <= 2^-47 (b_k - a_k)(1 + 2^-46) + 2 ulp(M_k)`. At a collapse exit `W <= 2 ulp(M_k)`. Both satisfy the same bound (proof: `M4-ERROR-ANALYSIS.md` 7) |
++| P4 | **Exits:** after an `f == 0` or tolerance exit (steps 4, 7.2, 7.4), `abs(F_k(t) - r) <= tolInv`. After a cap or collapse exit, the result is the end of a bracket of width at most W (P3) at which `F_k - r` changes sign, and it is the end with the smaller residual (ties: `hi`). If `F_k` is continuous on the bracket, a root of `F_k = r` lies within W of the result. **No residual bound** is claimed at these exits: `F_k` may jump (a speed discontinuous at the scale of the Gauss nodes), so `abs(F_k(t) - r)` can stay above tolInv |
++| P5 | **Work:** at most 64 evaluations of `F_k` (5 derivative calls each) plus 16 speed evaluations, so **at most 336 derivative evaluations**. None in linear mode. At most 64 iterations; no loop depends on a floating-point condition alone |
++
++Not guaranteed: convergence to `tolInv` within 64 iterations for arbitrary curves. **R1 corrections:**
++- R1 claimed that 64 iterations shrink any bracket by `2^-64` and reach ulp accuracy. That was unsupported: a Newton
++  step strictly inside the bracket may shrink it by as little as one ulp, which is the "Newton creep" of finding 3.
++  P3 is the replacement, and it is proven.
++- R1 did not specify the result after 64 iterations; P4 now does.
++- At a collapse, R1 returned the end where `F_k >= r`; R2 returns the better end, for both exits.
+ 
+ ## 6. Equal-distance sampling
+ 
+@@ -257,7 +313,7 @@ Creating a panel record from a known `I1` costs 10 evaluations.
+ 
+   The parameters are non-decreasing by construction, even for stationary intervals, cusps and adversarial curves.
+ - Points as in section 3.
+-- Work: n calls of `point`, at most `400 n` calls of `derivative`.
++- Work: n calls of `point`, at most `336 n` calls of `derivative`.
+ 
+ ### 6.2 Spacing
+ 
+@@ -282,7 +338,8 @@ Creating a panel record from a known `I1` costs 10 evaluations.
+ - **Validated** (10.3): for converged tables of the reference families, `abs(L(t0, t_k) - s_k) <= 2 tau` plus the
+   rounding allowance of 10.2.
+ - **Validated cost:** on smooth reference curves at relative tolerance 2^-30, the Newton steps keep the mean below 40
+-  derivative evaluations per sample (measured: mean 14, max 29). Pure bisection would need about 180.
++  derivative evaluations per sample. Measured with R2: mean 13.8, max 29, over 20,979 inversions
++  (`validation/evidence.txt`). Pure bisection would need about 180.
+ 
+ ## 7. `SampleSet`
+ 
+@@ -310,8 +367,8 @@ Creating a panel record from a known `I1` costs 10 evaluations.
+ | `uniformParameter(n)` | n | 0 |
+ | `ArcLengthTable.build` | 0 | at most `maxEvaluations` |
+ | `lengthAt` | 0 | at most 5 |
+-| `parameterAt` | 0 | at most 400 |
+-| `uniformDistance(n)`, `bySpacing` | n | at most `400 n` |
++| `parameterAt` | 0 | at most 336 (5.6 P5) |
++| `uniformDistance(n)`, `bySpacing` | n | at most `336 n` |
+ | `transformed`, `countForSpacing` | 0 | 0 |
+ 
+ Allocation is O(n) for sample sets and O(panelCount) for tables. Every loop has a fixed iteration bound, and no loop
+@@ -342,14 +399,17 @@ is driven by a floating-point accumulation.
+ 
+ Let:
+ - `dv` bound the absolute error of the computed speed on the range: `sqrt(3)` times the M3 per-component derivative
+-  bound (M3 contract 7.2 with A3), plus 5 eps of the speed;
++  bound (M3 contract 7.2 with A3), plus 5 eps of the speed, plus `MIN_VALUE` (a subnormal speed);
+ - `T = max(abs(t0), abs(t1))` and `K = panelCount()`.
+ 
+ Then:
+-- **Constant-speed curves:** `abs(length() - L) <= (t1 - t0) * dv + (K + 64) eps L`.
++- **Constant-speed curves:** `abs(length() - L) <= (t1 - t0) * dv + (K + 64) eps L + 8 K MIN_VALUE`.
+ - **In general:** the rounding part of the error is at most
+-  `(t1 - t0) * (dv + 4 eps T max abs(C''))` (the last term: rounded node positions) `+ (K + 64) eps L`. It adds to
+-  the quadrature part of 10.3.
++  `(t1 - t0) * (dv + 4 eps T max abs(C''))` (the last term: rounded node positions) `+ (K + 64) eps L + 8 K MIN_VALUE`.
++  It adds to the quadrature part of 10.3.
++- The `8 K MIN_VALUE` term (R2) bounds the absolute underflow of the products in the panel rule (at most
++  `2 MIN_VALUE` per rule, four rules per panel record). It matters only for subnormal or near-subnormal lengths; R1
++  omitted it, so the R1 allowance was too small for a subnormal-speed line (finding 1).
+ - The `K eps L` term comes from the plain left-to-right summation. It stays below `2^-40 L` only up to about 8,000
+   panels. Very tight relative tolerances with huge budgets are therefore limited by summation, as documented in
+   `M4-ERROR-ANALYSIS.md`.
+@@ -376,7 +436,7 @@ error 0.31 tau over 336 lengths at four tolerances (`validation/evidence.txt`).
+ | lengths | finite | a non-finite length gives `ArithmeticException` |
+ | counts | up to `maxSamples <= 2^20` | |
+ | budgets | 256 to 2^24 derivative evaluations | the initial pass uses 240 |
+-| tolerance | relative `2^-40` to `2^-3`, absolute any finite value `>= 0` | |
++| tolerance | relative `2^-40` to `2^-3`, absolute any finite value `>= 0` | the effective tolerance is at least `TAU_FLOOR = 1024 MIN_VALUE` (5.3) |
+ 
+ ## 11. Out of scope
+ 
+diff --git a/docs/m4/M4-R2-CORRECTIONS.md b/docs/m4/M4-R2-CORRECTIONS.md
+new file mode 100644
+index 0000000..6cfacda
+--- /dev/null
++++ b/docs/m4/M4-R2-CORRECTIONS.md
+@@ -0,0 +1,169 @@
++# M4 revision 2: corrections after the R1 independent review
++
++Status: PROPOSED, revision 2. **Not authorized for implementation.** This revision answers ChatGPT's review of M4 R1
++(decision: REVISION REQUIRED). It stops for ChatGPT's independent R2 acceptance review.
++
++**What stays the same:**
++- the architecture, scope, and the six public types and their signatures;
++- the baseline `a6726c42a20940a6a6d2dd24477e6a642f6b8cbc`, and M1, M2 and M3, which are untouched;
++- the reference data and generator, which are byte-identical to R1;
++- every R1 test, none removed.
++
++**Review document.** `M4-R1-Independent-Review.md` was not available in this session: it was not attached, and it is
++not on any branch of the repository. The three blocking findings are addressed as the revision request states them.
++The review's minor clarifications could not be read. Section 4 lists the clarifications I found myself. **Any minor
++item in the review that is not covered there remains open.**
++
++## 1. Finding 1: subnormal constant-speed arc lengths
++
++**Problem (reproduced on R1, `validation/r2/findings-r1.txt`):**
++- `tau = max(absolute, relative * L0)` underflows to 0 for subnormal lengths, so convergence needs `sum e == 0`
++  exactly, which the last bits of the rounding decide. Some subnormal circles needed 32 panels; B5 claimed 16.
++- A `7 MIN_VALUE` line has computed length 0, because `h * sum` underflows. That is outside the R1 allowance
++  `(t1 - t0) dv + 80 eps L`, which had no absolute underflow term.
++- R1's B5 proof ("`tau >= 2^-40 L` exceeds the panel rounding") ignored both effects.
++
++**Correction:**
++- **Contract 5.3:** `tau = max(max(absolute, relative * L0), TAU_FLOOR)`, with `TAU_FLOOR = 1024 MIN_VALUE`. The
++  floor changes nothing for lengths of at least `2^-1022`, since `2^-40 * 2^-1022 > 2^-1064`.
++- **Contract 10.2:** the allowance gains `8 K MIN_VALUE` (underflow of the rule's products, at most `2 MIN_VALUE`
++  per rule), and `dv` gains `MIN_VALUE` (a subnormal speed).
++- **Contract B5:** split into two parts.
++  - **Unconditional** for a computed speed that is the same at every node (lines), at every magnitude, with a proof
++    in `M4-ERROR-ANALYSIS.md` 4: `sum e <= 24 eps L + 144 MIN_VALUE <= tau`.
++  - **Conditional** for curves whose computed speed varies by rounding (circles, helices): it holds when
++    `2 (t1 - t0) dsv + 24 eps L + 144 MIN_VALUE <= tau`.
++
++  R1 asserted B5 for circles without that condition. The condition is now explicit, and every tested circle and
++  helix satisfies it.
++- **DM4-5, DM4-17, conventions:** updated to match.
++
++**Regression test:** `M4R2RegressionTest.subnormalConstantSpeed`.
++- Inputs:
++  - lines with nonzero subnormal speeds `7q`, `(3q, 5q, 11q)`, `q`, `123456q`, `(2^40 q, 3q)`, `(1e-320, 2e-320)`, on
++    [0, 1] and on [-0.5, 1.5] (extrapolated);
++  - circles and helices of radius `3q`, 1e-320, 1e-315 and 1e-310.
++- Assertions:
++  - `converged()`, 16 panels and 240 evaluations;
++  - `tau == 1024 MIN_VALUE` exactly;
++  - `abs(L^ - L) <=` the contract 10.2 allowance against an exact `BigDecimal` length;
++  - the absolute-tolerance floor;
++  - sampling a subnormal table.
++
++R1 fails it: `tau` is 0 for the `7q` line.
++
++## 2. Finding 2: overflow and NaN in the normalised partial integral
++
++**Problem (R1):**
++- `F_k(t) = G(a_k, t) * (I2_k / I1_k)` overflows when `I1_k` is tiny and `I2_k` huge (`I2 / I1 = infinity`).
++- With `G = 0` at the sampled nodes it gives `0 * infinity = NaN`.
++- So `lengthAt` returned NaN, and `parameterAt` misbehaved, on a finite-length table.
++
++**Correction (contract 5.5):**
++- **Ratio mode** only when `I1 > 0 && I2 <= 2 I1 && I1 <= 2 I2` (that is, `1/2 <= I2/I1 <= 2`, tested without
++  dividing), with `F = min(I2, G * rho)`.
++- Otherwise **linear mode**, `F = I2 (t - a)/(b - a)`.
++- **Proven:** F is never NaN and lies in `[0, I2]`.
++- Linear mode occurs only in panels with `e_k >= I2_k / 2`, so in a converged table only where `I2_k <= 2 tau`.
++- No reference panel is in linear mode (0 of 21,876 panels in 1,344 tables, `validation/r2/linear-mode.txt`), so
++  the reference results are unchanged.
++
++**Regression test:** `M4R2RegressionTest.pathologicalPanels`.
++- Setup: a user curve whose speed is `half` at the half-panel Gauss nodes of [0, 1/16], `whole` at the whole-panel
++  nodes, and 0 elsewhere. The cases for (whole, half) are (1e-300, 1e300), (0, 1e300), (1, 1000), (1e-300, 1e-200),
++  (1000, 1) and (1e300, 1e-300).
++- Assertions:
++  - `lengthAt` is finite and monotone, and equals the linear fallback within 4 ulp;
++  - `parameterAt(k L/16)` equals `k/256` within 4 ulp;
++  - equal-distance samples are finite and monotone.
++
++R1 fails it: `lengthAt` returns NaN.
++
++**Second test:** `M4R2RegressionTest.partialClampedToPanel`, added for mutation survivor M37. A speed seen only by
++the nodes of `G(0, 3/64)` makes `G * rho` exceed `I2_0`. `lengthAt` must stay within `[0, S_1]`, and must equal `S_1`
++at `t = 3/64`.
++
++## 3. Finding 3: Newton-bisection exhaustion
++
++**Problem (R1):**
++- R1 claimed that 64 iterations shrink any bracket by `2^-64`, to ulp accuracy. A Newton step only has to land
++  strictly inside the bracket, so a large speed near the root (a spike invisible to the quadrature) makes every step
++  tiny: Newton creep.
++- R1 used all 64 iterations (384 evaluations) and stopped with a residual of 2.7e-8 and a parameter error of
++  1.4e-8, against a tolerance of about 1e-15 (`validation/r2/findings-r1.txt`; 26 of 32 runs reach 384).
++- The result after the 64th iteration was unspecified.
++
++**Correction (contract 5.6, fully normative):**
++- **Phases:** Newton candidates are formed only in iterations 0 to 15. From then on, every iterate is the midpoint.
++- **Proven bracket progress (P3):** whenever the loop reaches the cap, the bracket is at most
++  `2^-47 (b - a)(1 + 2^-46) + 2 ulp(M_k)`; at a collapse, at most `2 ulp(M_k)`. The proof, including midpoint
++  rounding, is in `M4-ERROR-ANALYSIS.md` 7.
++- **Exact exit behaviour (P4):**
++  - tolerance or `f == 0` exits return the iterate;
++  - cap and collapse exits return the end of the final bracket with the smaller residual (ties go to `hi`). The
++    residuals `f_lo < 0 < f_hi` are tracked; the ends' residuals are known exactly, with no evaluation.
++- **Defined edge cases:**
++  - `r` is clamped to `I2_k`, because rounding of `S_(k+1)` could make `distance - S_k` exceed `I2_k`;
++  - an end of the bracket already within the tolerance is returned at once;
++  - if no double lies strictly inside the panel, the better end is returned.
++- **Work bound (P5):** `64 * 5 + 16 = 336` derivative evaluations (R1: 400). The bound is tightened, never
++  loosened. The tests that used 400 now use 336.
++
++**Why not the first R2 draft:**
++- The draft allowed a Newton step only after a step that at least halved the bracket. This is also provable
++  (`2^-32`).
++- But it disables Newton after every one-sided Newton step, which is the normal case. On the conical spiral of
++  `M4AdversarialTest.newtonEfficiency` the mean cost rose to about 57 evaluations per sample, and the validated
++  limit of 40 failed.
++- The limit was **not** relaxed. The algorithm was changed instead: the measured mean is 17.7 there, and 13.8 over
++  the reference rows (R1: 14.0) (`validation/r2/inversion-stats.txt`).
++
++**Why the end acceptance (step 4):**
++- The R1 algorithm evaluated its initial guess even when it sat on a bracket end. There, `F_k(b_k) = I2_k` costs
++  nothing.
++- R2 requires every evaluated iterate to lie strictly inside the bracket (needed for P2 and P3). Without step 4, a
++  target at a panel's end could only be approached by bisection from one side (196 to 201 evaluations, measured).
++- Step 4 restores the R1 cost: mean 13.8, max 29.
++
++**Regression tests (`M4R2RegressionTest`):**
++
++| Test | What it checks |
++|---|---|
++| `newtonCreep` | A 1e6 speed spike within 1e-7 of the exact root `-1 + sqrt(1 + 2s)`, at seven targets. The spike is invisible to the table, whose length equals the unspiked one. At most 336 evaluations; `abs(lengthAt(t) - s)` and `abs(t - t*)` within the bound |
++| `nonConvergedExit` | A speed taken from bit 11 of t, so `F` jumps and the tolerance is unreachable. Every result is within the tolerance, or is the better end of an adjacent-double bracket. At most 336 evaluations; deterministic; more than 100 non-converged exits |
++| `iterationCapExit` | A jump of F near `t = 2^-40`, where the bracket cannot collapse within 64 iterations, with zero speed at the first iterate. All 64 iterations run (332 to 336 evaluations). The result is the better end, on the correct side of the jump, within the P3 width of it |
++| `panelEndTargets` | A target equal to a panel end returns that end exactly, with no evaluation |
++| `tieGoesToUpperEnd` | Equal residuals return `hi`: (a) in the end acceptance, with a target halfway across a panel shorter than `2 tolInv`; (b) after a collapse between adjacent doubles, with five exact ties on a line over [1e6, 1e6 + 1]. Added for mutation survivor M40 |
++| `stationaryTail` | `parameterAt(length()) == t1` when the last panels have zero length. Added for mutation survivor M26: with the end acceptance, the special case of 5.6 is needed only there |
++
++R1 fails `newtonCreep`, `nonConvergedExit`, `iterationCapExit` (384 evaluations, or not the better end) and
++`tieGoesToUpperEnd`. R1 passes the tests that guard R2 rules it happens to satisfy: `panelEndTargets` and
++`stationaryTail`.
++
++## 4. Minor clarifications (self-identified; the review's own list was not available)
++
++| # | Where | Clarification |
++|---|---|---|
++| C1 | contract 5.1 | Finite components above `MAX_VALUE / sqrt(3)` (outside the domain) can round the speed to infinity. The length is then not finite, and 5.5 and 5.6 still never produce NaN |
++| C2 | contract 5.5 | States when linear mode can occur, and the bound on its error in converged tables |
++| C3 | contract 5.6 | Every step is in a fixed order. `f_lo` and `f_hi` are defined at the panel ends without evaluation. "Strictly inside" includes NaN rejection. At a collapse, R1 returned the end where `F >= r`; R2 returns the better end, the same rule as for the cap |
++| C4 | contract 6.3, DM4-6, risks P4, conventions F7 | Measured costs refreshed from the R2 run (mean 13.8, max 29). R1's false ulp-accuracy claim removed. Pure bisection's cost corrected |
++| C5 | error analysis 4 and 7 | Proofs rewritten: B5 with absolute underflow terms and the floor; the bracket bound with midpoint rounding |
++| C6 | test specification, README, architecture | Counts updated: 53 M4 tests in 9 classes, 307 in total |
++
++## 5. Tests, data and validation
++
++- **Tests:**
++  - M4 has 53 test methods in 9 classes, against 44 in 8 classes in R1. Added: `M4R2RegressionTest`, with 9 tests.
++  - The only edit to an existing test is in `M4AdversarialTest.samplingWork`. It tightens the per-sample bound from
++    400 to 336, the new contract bound. No test was removed or weakened.
++- **Reference data:** unchanged. Regeneration is byte-identical, and `MANIFEST.sha256` verifies.
++- **Full suite on Java 25.0.4.1, against the temporary R2 reference implementation (not delivered):**
++  307 tests, 307 passed (M1 125, M2 66, M3 51, M3 review 12, M4 53). `check` succeeds. See
++  `validation/reference-run-summary.txt`.
++- **Before and after:**
++  - the R2 test suite against the R1 reference: 47 of 53 pass. The 6 failures are the F1 to F3 regression tests and
++    the tie rule;
++  - against the R2 reference: 53 of 53 pass (`validation/r2/r1-vs-r2-tests.txt`).
++- **Mutation analysis:** `validation/mutation-results.txt` (R2, 47 mutants including 14 new R2 mutants) and the
++  test specification, section 5.
+diff --git a/docs/m4/M4-RISKS.md b/docs/m4/M4-RISKS.md
+index aa30826..2b805f1 100644
+--- a/docs/m4/M4-RISKS.md
++++ b/docs/m4/M4-RISKS.md
+@@ -1,6 +1,6 @@
+ # M4 performance and resource-limit risks
+ 
+-Status: PROPOSED, with the contract.
++Status: PROPOSED, with the contract (revision 2).
+ 
+ No universal performance target is asserted. Timings depend on hardware, JIT state and server load. The guarantees
+ are **work bounds in curve evaluations** (contract section 8): deterministic, input-independent and testable.
+@@ -13,11 +13,11 @@ only, not acceptance criteria.
+ | P1 | Particle-count explosion (tiny spacing, huge count, a unit mistake such as spacing in pixels instead of blocks) | millions of particles, tick stall, client lag | `maxSamples` (max 2^20) checked before work; `bySpacing` rejects; `countForSpacing` saturates and lets the effect check first | the effect must choose sane limits per trigger frequency (emission milestone) |
+ | P2 | Expensive tables rebuilt every tick | at least 240 derivative evaluations (Spiral: StrictMath trig each) per tick per effect | immutable, reusable `ArcLengthTable`; `SampleSet.transformed(Pose)` moves sets without re-integration (DM4-7) | callers must cache tables per shape; the adapter should key caches by shape parameters, not by M3 record `equals` (M3 review N-4: signed zeros) |
+ | P3 | Adversarial or very oscillatory curves | build hits the budget | budget never exceeded; global refinement spends it where the error is; `converged()` reports failure | the effect decides whether unconverged spacing is acceptable |
+-| P4 | Per-sample inversion cost | at most 400 derivative evaluations per equal-distance sample (measured mean 14, max 29) | Newton-bisection with a 64-iteration cap | for frequently triggered effects, prefer uniform parameters on constant-speed curves (no inversion) |
++| P4 | Per-sample inversion cost | at most 336 derivative evaluations per equal-distance sample (measured mean 13.8, max 29; adversarial speeds reach 336) | Newton for at most 16 iterations, then bisection, with a 64-iteration cap (proven bracket progress, contract 5.6) | for frequently triggered effects, prefer uniform parameters on constant-speed curves (no inversion) |
+ | P5 | Memory | O(maxEvaluations) per table; O(n) per sample set | ceilings 2^24 and 2^20; tables are small (about 16 to 30 panels for typical curves, 40 bytes each) | the adapter controls how many tables are kept |
+ | P6 | Allocation churn | one `Vec3` per sample per call | sample once, transform per tick (still one `Vec3` per point); allocation-free orbits via `parameterAt` plus `Curve.point` | Vec3 is an M1 record; value types are out of scope |
+ | P7 | Thread safety | async workers on Paper | immutable results; no static mutable state; concurrency test | user `Curve` implementations must be thread-safe if shared |
+-| P8 | Non-terminating floating-point loops | server hang | every loop has a fixed bound (panels, 50 depth, 64 iterations, n samples); no loop advances a float until a condition | none |
++| P8 | Non-terminating floating-point loops | server hang | every loop has a fixed bound (panels, 50 depth, 64 iterations, n samples); no loop advances a float until a condition; inversion results are defined for every exit (contract 5.6 P4) | none |
+ | P9 | Non-deterministic results across servers | desynchronized visuals between shards | normative operation order; Java strict IEEE; no transcendental functions in M4 (M3's StrictMath is portable) | a user `Curve` using `Math.sin` is the user's portability risk |
+ | P10 | Tolerance misunderstanding | loose tolerance gives visibly uneven spacing; very tight wastes budget | explicit `ArcLengthTolerance`; effective tau and estimate reported; documented summation floor | effect designers choose 1e-4 to 1e-6 relative for visuals |
+ | P11 | Large parameter ranges (extrapolation, many spiral turns) | phase precision loss (M3), more panels | domain recommendation `abs(t) <= 1e3`; M3 bounds | callers should restructure long spirals into shorter ranges if needed |
+diff --git a/docs/m4/M4-TEST-SPECIFICATION.md b/docs/m4/M4-TEST-SPECIFICATION.md
+index fc1fdab..a001871 100644
+--- a/docs/m4/M4-TEST-SPECIFICATION.md
++++ b/docs/m4/M4-TEST-SPECIFICATION.md
+@@ -1,8 +1,10 @@
+ # M4 test specification and acceptance criteria
+ 
+-Status: PROPOSED, with the contract.
+-- **Tests:** `src/test/java/workshop/vfx/math/sample/`, 44 test methods in 8 classes plus the helper
+-  `SampleTestSupport`.
++Status: PROPOSED, with the contract (revision 2).
++- **Tests:** `src/test/java/workshop/vfx/math/sample/`, 53 test methods in 9 classes plus the helper
++  `SampleTestSupport`. R2 added `M4R2RegressionTest` (9 tests), removed no test, and tightened one bound
++  (`samplingWork`: from 400 to 336 evaluations).
++- **Reference data:** unchanged in R2.
+ - **Reference data:** `src/test/resources/m4/reference/`: 4 CSV files with 3,064 rows, and `MANIFEST.sha256`.
+ - **Generator:** `tools/generate_m4_reference_vectors.py`.
+ 
+@@ -34,7 +36,8 @@ Provenance: written for this project; Python standard library only. No third-par
+ | `ArcLengthTableTest` | 9 | 5 | exact lines (1e-300 to 1e100, extrapolated); circles and helices (BigDecimal pi, 16 panels); quadratic Beziers and conical spirals (closed form) at four tolerances; tau definition; convergence in the tolerance; exact ends and grid monotonicity; pose invariance and additivity; collapsed and stationary geometry; validation |
+ | `EqualDistanceTest` | 8 | 6 | spirals with changing radius and quadratics equally spaced within 2 tau (closed-form distances); constant-speed curves and seams (no duplicate seam with EXCLUDE_END); monotone parameters for cusps, stationary points and an oscillating curve, and under a loose tolerance with 60,000 samples; zero-length fallback; spacing rule and density; spacing and explosion guards |
+ | `SampleSetTest` | 3 | 7, 8 | immutability; `transformed` bit for bit equal to `PosedCurve`; limits and tolerance validation |
+-| `M4AdversarialTest` | 8 | 6.3, 8, 9 | budget never exceeded and `evaluations()` exact for six budgets and four curve kinds; oscillating curve (unconverged under a small budget, converged with a large one); per-call work bounds; Newton efficiency (mean below 40 evaluations per sample); failures (NaN, infinity, user exceptions, overflowing length); magnitudes from subnormal to 1e200; signed zero and one-ulp ranges; explosion guard with server-style limits |
++| `M4AdversarialTest` | 8 | 6.3, 8, 9 | budget never exceeded and `evaluations()` exact for six budgets and four curve kinds; oscillating curve (unconverged under a small budget, converged with a large one); per-call work bounds (336 per sample); Newton efficiency (mean below 40 evaluations per sample); failures (NaN, infinity, user exceptions, overflowing length); magnitudes from subnormal to 1e200; signed zero and one-ulp ranges; explosion guard with server-style limits |
++| `M4R2RegressionTest` | 9 | 5.3 to 5.6, 10.2 | R1 review findings and R2 rules. F1: nonzero subnormal-speed lines and subnormal circles and helices: converged, 16 panels, `tau = 1024 MIN_VALUE`, within the 10.2 allowance (BigDecimal). F2: pathological panels (`I2/I1` overflowing or underflowing, `I1 = 0`, `I2 = 1000 I1`, `I1 = 1000 I2`): finite linear-mode `lengthAt` and `parameterAt`; ratio mode clamped to `I2`. F3: Newton creep (a speed spike at the root), non-converged exits (the better end of the bracket), an exit at the iteration cap (332 to 336 evaluations, the better end within the P3 width), panel-end targets (exact, no evaluation), ties to the upper end (early and after a collapse). `parameterAt(length()) == t1` with a stationary tail |
+ | `M4ReferenceVectorTest` | 5 | 4 to 6 | manifest; 336 lengths; 216 inversions; 2,310 uniform parameters bit for bit; 202 spacing counts |
+ | `M4DeterminismTest` | 2 | 10.1 | bit-identical repetition (20 rounds, JIT); 8 threads, including a shared table |
+ | `M4BoundaryTest` | 3 | 1, 2, 10 | imports (core and curve only; never time); no trigonometry, pow, exp, log, fma, random, clocks, threads, synchronization or I/O; no mutable statics; exact API shape |
+@@ -48,11 +51,13 @@ Reference data:
+ 
+ ## 3. Validation of the tests (before handoff)
+ 
+-- **Throwaway reference implementation:** the tests were run against an implementation of the contract kept outside
+-  the repository and not delivered. Result: **44/44 passed**. With the 254 baseline tests: **298/298**
+-  (`validation/reference-run-summary.txt`).
++- **Throwaway reference implementation:** the tests were run against an implementation of contract revision 2,
++  kept outside the repository and not delivered. Result: **53/53 passed**. With the 254 baseline tests: **307/307**
++  on Java 25.0.4.1 (`validation/reference-run-summary.txt`).
++- **Before and after:** the same tests against the R1 reference implementation: 47/53. The 6 failures are exactly
++  the R2 regression tests for findings 1 to 3 and for the tie rule (`validation/r2/r1-vs-r2-tests.txt`).
+ - **Measured accuracy and work** (`validation/evidence.txt`): all reference lengths converge with achieved error at
+-  most 0.31 tau; inversion costs 14 derivative evaluations on average and 29 at most.
++  most 0.31 tau; inversion costs 13.8 derivative evaluations on average and 29 at most (R1: 14.0 and 29).
+ - **Mutation analysis** (`validation/mutation-results.txt`): 33 plausible defects were injected one at a time.
+   Results are in that file and summarised in section 5.
+ - The generator is deterministic, and regenerating gives byte-identical files.
+@@ -70,8 +75,8 @@ Reference data:
+ 4. **Production scope.** Only the six public types of contract section 2, plus optional package-private helpers. No
+    dependencies.
+ 5. **Java 25 run.**
+-   `./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test` reports **298 tests,
+-   298 passed** (M1 125, M2 66, M3 51, M3 review 12, M4 44). `check` succeeds.
++   `./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test` reports **307 tests,
++   307 passed** (M1 125, M2 66, M3 51, M3 review 12, M4 53). `check` succeeds.
+ 6. **Evidence** as for M1 to M3, then Claude Code's independent review.
+ 
+ Before the implementation exists, the M4 tests do not compile; this is expected (as for M1 to M3). The M3 GitHub
+diff --git a/docs/m4/README-FOR-CODEX-M4.md b/docs/m4/README-FOR-CODEX-M4.md
+index af9cdb6..fcd10b1 100644
+--- a/docs/m4/README-FOR-CODEX-M4.md
++++ b/docs/m4/README-FOR-CODEX-M4.md
+@@ -28,6 +28,8 @@ Read in this order:
+   - `evaluations()` must equal the count exactly.
+ - Validate counts and spacing **before** evaluating the curve or allocating proportional arrays.
+ - Every loop must have a fixed bound. No loop advances a double until a floating-point condition holds.
++- Contract revision 2 (`M4-R2-CORRECTIONS.md`) changed 5.3 (tolerance floor), 5.5 (ratio and linear modes) and 5.6
++  (inversion: Newton phase, exits and the better bracket end). Implement 5.6 step by step, in the stated order.
+ - Do not modify M1, M2, M3, any existing test, reference data, generator, contract or verification record. If a test
+   seems wrong, stop and report it.
+ - Do not modify Full Heal, Astral Prism, Cloudstep, ParticleEmitter or other plugins. Do not add Paper or Bukkit code.
+@@ -37,7 +39,7 @@ Read in this order:
+ ```sh
+ sha256sum -c SHA256SUMS.txt     # from the handoff package root
+ export JAVA_HOME=/path/to/jdk-25 PATH="$JAVA_HOME/bin:$PATH"
+-./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test   # 298 tests, 298 passed
++./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test   # 307 tests, 307 passed
+ ./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false check
+ python3 tools/generate_m4_reference_vectors.py /tmp/m4-ref && diff -r /tmp/m4-ref src/test/resources/m4/reference   # about 1 minute
+ python3 tools/generate_m3_reference_vectors.py /tmp/m3-ref && diff -r /tmp/m3-ref src/test/resources/m3/reference
+diff --git a/docs/m4/validation/ProbeM4Evidence.java b/docs/m4/validation/ProbeM4Evidence.java
+index a14b634..adbbf14 100644
+--- a/docs/m4/validation/ProbeM4Evidence.java
++++ b/docs/m4/validation/ProbeM4Evidence.java
+@@ -79,7 +79,7 @@ public class ProbeM4Evidence {
+                 long used = c.d - before; evals += used; samples++; maxPer = Math.max(maxPer, used);
+             }
+         }
+-        System.out.printf("parameterAt: %d calls, mean %.1f derivative evaluations, max %d (contract limit 400)%n", samples, evals / (double) samples, maxPer);
++        System.out.printf("parameterAt: %d calls, mean %.1f derivative evaluations, max %d (contract limit 336)%n", samples, evals / (double) samples, maxPer);
+         System.out.println("== budget behaviour: oscillating user curve x = t, y = 0.01 sin(400 pi t) (200 periods), rel 1e-9");
+         Curve w = new Curve() {
+             public Vec3 point(double t) { return new Vec3(t, 0.01 * StrictMath.sin(400 * Math.PI * t), 0); }
+diff --git a/docs/m4/validation/evidence.txt b/docs/m4/validation/evidence.txt
+index 23eb62c..935cff9 100644
+--- a/docs/m4/validation/evidence.txt
++++ b/docs/m4/validation/evidence.txt
+@@ -1,5 +1,6 @@
+-M4 evidence (ProbeM4Evidence.java) against the THROWAWAY reference implementation of the contract (not delivered); Java 25.0.4.1.
++M4 evidence (ProbeM4Evidence.java) against the THROWAWAY reference implementation of contract REVISION 2 (not delivered); Java 25.0.4.1.
+ Timings are indicative only (one container, warm JIT); they are not acceptance criteria.
++R1 values for comparison: parameterAt mean 14.0, max 29 (contract limit then 400); all length rows identical to R1.
+ 
+ == arclength.csv: achieved error / tau, by tolerance
+ rel 1.0e-04: rows 336, converged 336, rows with error > tau 0, worst error/tau 2.447e-01 (CUBIC cusp at 13/64), evaluations mean 240 max 260
+@@ -8,11 +9,11 @@ rel 1.0e-07: rows 336, converged 336, rows with error > tau 0, worst error/tau 2
+ rel 9.3e-10: rows 336, converged 336, rows with error > tau 0, worst error/tau 8.413e-02 (QUAD collinear reversal at t=2/3), evaluations mean 243 max 420
+ rel 1.0e-12: rows 336, converged 336, rows with error > tau 0, worst error/tau 3.060e-01 (QUAD collinear reversal at t=2/3), evaluations mean 259 max 540
+ == equal-distance sampling work (rel 2^-30): derivative evaluations per parameterAt call
+-parameterAt: 20979 calls, mean 14.0 derivative evaluations, max 29 (contract limit 400)
++parameterAt: 20979 calls, mean 13.8 derivative evaluations, max 29 (contract limit 336)
+ == budget behaviour: oscillating user curve x = t, y = 0.01 sin(400 pi t) (200 periods), rel 1e-9
+ budget      256: evaluations      240 panels     16 converged false length 8.314000105996852 estimate 9.43e-01
+ budget     4096: evaluations     4080 panels    208 converged false length 8.069419970394225 estimate 2.96e-01
+ budget    65536: evaluations    65520 panels   3280 converged false length 8.111828619064610 estimate 7.03e-08
+ budget  1048576: evaluations    81120 panels   4060 converged true  length 8.111828618895730 estimate 8.30e-09
+ == indicative timing on this machine (not a target): conical spiral, rel 1e-8, warm JIT
+-build 20.4 us; 128 equal-distance samples 164.3 us; 128 uniform-parameter samples 5.6 us
++build 15.5 us; 128 equal-distance samples 160.7 us; 128 uniform-parameter samples 5.7 us
+diff --git a/docs/m4/validation/r2/Exhaust3.java b/docs/m4/validation/r2/Exhaust3.java
+new file mode 100644
+index 0000000..2b792d9
+--- /dev/null
++++ b/docs/m4/validation/r2/Exhaust3.java
+@@ -0,0 +1,31 @@
++import workshop.vfx.math.core.Vec3;
++import workshop.vfx.math.curve.*;
++import workshop.vfx.math.sample.*;
++/** M4 R2 probe (review scratch): Newton creep (finding 3). x = t + t^2/2 with a 1e6 speed spike around the exact root; reports derivative calls and errors per parameterAt. */
++public class Exhaust3 {
++    static long d;
++    static Curve curve(double lo, double hi) {
++        return new Curve() {   // x = t + t^2/2 (speed 1 + t) with a speed spike on [lo, hi] invisible to the quadrature near the root
++            public Vec3 point(double t) { return new Vec3(t + 0.5 * t * t, 0, 0); }
++            public Vec3 derivative(double t) { d++; return new Vec3(t >= lo && t <= hi ? 1e6 : 1 + t, 0, 0); }
++            public Vec3 secondDerivative(double t) { return Vec3.ZERO; }
++        };
++    }
++    public static void main(String[] a) {
++        ArcLengthTolerance tol = new ArcLengthTolerance(0, 0x1p-40);
++        SampleLimits lim = new SampleLimits(64, 256);
++        ArcLengthTable base = ArcLengthTable.build(curve(2, 2), tol, lim);
++        int capped = 0, total = 0;
++        for (double f : new double[] {0.11, 0.23, 0.37, 0.41, 0.53, 0.67, 0.71, 0.89}) {
++            double s = f * base.length();
++            double ts = base.parameterAt(s);
++            for (double eps : new double[] {3e-5, 1e-4, 3e-4, 1e-3}) {
++                ArcLengthTable sp = ArcLengthTable.build(curve(ts - eps, ts + eps), tol, lim);
++                d = 0; double t = sp.parameterAt(s); long used = d;
++                total++; if (used == 383) capped++;
++                System.out.printf("f=%.2f eps=%.0e: same length %s, evals %d, t - t* = %.3e, lengthAt(t) - s = %.3e%n", f, eps, sp.length() == base.length(), used, t - ts, sp.lengthAt(t) - s);
++            }
++        }
++        System.out.println("runs: " + total + " (R1 makes 6 derivative calls per iteration, R2 5 plus 1 in the 16 Newton iterations; 384 = R1 cap)");
++    }
++}
+diff --git a/docs/m4/validation/r2/Findings.java b/docs/m4/validation/r2/Findings.java
+new file mode 100644
+index 0000000..75d582d
+--- /dev/null
++++ b/docs/m4/validation/r2/Findings.java
+@@ -0,0 +1,51 @@
++import workshop.vfx.math.core.Vec3;
++import workshop.vfx.math.curve.*;
++import workshop.vfx.math.sample.*;
++
++/** M4 R2 probe (review scratch): reproduces the three R1 review findings on a given reference implementation. */
++public class Findings {
++    static final double Q = Double.MIN_VALUE;
++    public static void main(String[] a) {
++        System.out.println("== F1: nonzero subnormal-speed lines, tolerance (0, 2^-40), budget 4096");
++        for (double[] d : new double[][] {{7, 0, 0}, {3, 5, 11}, {1, 0, 0}, {123456, 0, 0}, {1e-310 / Q, 0, 0}}) {
++            Vec3 e = new Vec3(d[0] * Q, d[1] * Q, d[2] * Q);
++            try {
++                ArcLengthTable t = ArcLengthTable.build(new LineSegment(Vec3.ZERO, e), new ArcLengthTolerance(0, 0x1p-40), new SampleLimits(16, 4096));
++                System.out.printf("  end=%s: length=%s (%.1f q) tau=%s converged=%s panels=%d evals=%d estimate=%s%n", e, t.length(), t.length() / Q, t.effectiveTolerance(), t.converged(), t.panelCount(), t.evaluations(), t.errorEstimate());
++            } catch (RuntimeException x) { System.out.println("  end=" + e + ": " + x); }
++        }
++        System.out.println("== F2: pathological panel, I1 tiny and I2 huge (ratio overflows); speed 0 elsewhere; budget 256 (no refinement)");
++        // panel 0 is [0, 1/16]; whole-panel nodes c +- h X with h = 1/32; half-panel nodes on [0, 1/32] and [1/32, 1/16]
++        double x1 = 0x1.13b23fd99b705p-1, x2 = 0x1.cff6ce0533a69p-1;
++        java.util.Set<Double> whole = new java.util.HashSet<>(), halves = new java.util.HashSet<>();
++        addNodes(whole, 0, 1.0 / 16, x1, x2);
++        addNodes(halves, 0, 1.0 / 32, x1, x2);
++        addNodes(halves, 1.0 / 32, 1.0 / 16, x1, x2);
++        halves.removeAll(whole);
++        Curve spike = new Curve() {
++            public Vec3 point(double t) { return new Vec3(t, 0, 0); }
++            public Vec3 derivative(double t) { return new Vec3(halves.contains(t) ? 1e300 : whole.contains(t) ? 1e-300 : 0, 0, 0); }
++            public Vec3 secondDerivative(double t) { return Vec3.ZERO; }
++        };
++        ArcLengthTable t = ArcLengthTable.build(spike, new ArcLengthTolerance(0, 1e-6), new SampleLimits(64, 256));
++        System.out.printf("  length=%s converged=%s panels=%d%n", t.length(), t.converged(), t.panelCount());
++        for (double u : new double[] {0.001, 0.01, 0.03, 0.05}) System.out.println("  lengthAt(" + u + ") = " + t.lengthAt(u));
++        for (double f : new double[] {0.25, 0.5, 0.75}) System.out.println("  parameterAt(" + f + " L) = " + t.parameterAt(f * t.length()));
++        System.out.println("== F3: inversion on a speed discontinuous at a 2^-40 scale (F has jumps); 16 panels, tolerance (0, 2^-40)");
++        Curve noisy = new Curve() {
++            public Vec3 point(double t) { return new Vec3(t, 0, 0); }
++            public Vec3 derivative(double t) { long b = Double.doubleToRawLongBits(t); return new Vec3(((b >>> 11) & 1) == 0 ? 0.25 : 1.75, 0, 0); }
++            public Vec3 secondDerivative(double t) { return Vec3.ZERO; }
++        };
++        ArcLengthTable n = ArcLengthTable.build(noisy, new ArcLengthTolerance(0, 0x1p-40), new SampleLimits(64, 256));
++        System.out.printf("  length=%s converged=%s panels=%d%n", n.length(), n.converged(), n.panelCount());
++        for (double f : new double[] {0.1, 0.3, 0.5, 0.7, 0.9}) {
++            double s = f * n.length(); double p = n.parameterAt(s);
++            System.out.printf("  s=%.6f -> t=%.17g, lengthAt(t) - s = %.3e%n", s, p, n.lengthAt(p) - s);
++        }
++    }
++    static void addNodes(java.util.Set<Double> set, double lo, double hi, double x1, double x2) {
++        double h = 0.5 * (hi - lo), c = lo + h;
++        set.add(c); set.add(c - h * x1); set.add(c + h * x1); set.add(c - h * x2); set.add(c + h * x2);
++    }
++}
+diff --git a/docs/m4/validation/r2/InvStats.java b/docs/m4/validation/r2/InvStats.java
+new file mode 100644
+index 0000000..18bbfca
+--- /dev/null
++++ b/docs/m4/validation/r2/InvStats.java
+@@ -0,0 +1,65 @@
++import workshop.vfx.math.core.Vec3;
++import workshop.vfx.math.curve.*;
++import workshop.vfx.math.sample.*;
++/**
++ * M4 R2 probe (review scratch): inversion exits and costs. Needs a copy of the throwaway reference implementation
++ * instrumented with public static counters ArcLengthTable.EXIT[exact, tolerance, cap, collapse] and ITERS[iterations]
++ * (four increments at the exits of parameterAt); the delivered contract has no such members.
++ */
++public class InvStats {
++    static long d;
++    static Curve counting(Curve c) {
++        return new Curve() {
++            public Vec3 point(double t) { return c.point(t); }
++            public Vec3 derivative(double t) { d++; return c.derivative(t); }
++            public Vec3 secondDerivative(double t) { return c.secondDerivative(t); }
++        };
++    }
++    static void reset() { java.util.Arrays.fill(ArcLengthTable.EXIT, 0); java.util.Arrays.fill(ArcLengthTable.ITERS, 0); }
++    static void report(String name, long calls, long maxEv, double sumEv) {
++        long[] e = ArcLengthTable.EXIT; int maxIt = 0; for (int i = 0; i < 65; i++) if (ArcLengthTable.ITERS[i] > 0) maxIt = i;
++        System.out.printf("%-58s calls=%5d mean evals=%7.2f max evals=%3d max iterations=%2d exits: exact=%d tolerance=%d cap=%d collapse=%d%n",
++            name, calls, sumEv / calls, maxEv, maxIt, e[0], e[1], e[2], e[3]);
++    }
++    static void run(String name, ArcLengthTable t, double[] targets) {
++        reset(); long max = 0; double sum = 0;
++        for (double s : targets) { d = 0; t.parameterAt(s); max = Math.max(max, d); sum += d; }
++        report(name, targets.length, max, sum);
++    }
++    static double[] grid(double L, int n) { double[] r = new double[n - 2]; for (int k = 1; k < n - 1; k++) r[k - 1] = L * k / (n - 1); return r; }
++    public static void main(String[] a) {
++        SampleLimits lim = new SampleLimits(1 << 20, 1 << 20);
++        System.out.println("== smooth curves (the newtonEfficiency curves plus a cusp), relative tolerances 2^-20, 2^-30, 2^-40; 998 equally spaced interior targets each");
++        Curve[] smooth = {Spiral.conicalSpiral(0.5, 5, 1, 9), new CubicBezier(new Vec3(0, 0, 0), new Vec3(4, 6, 0), new Vec3(-3, 5, 2), new Vec3(2, 0, 1)),
++            new QuadraticBezier(Vec3.ZERO, new Vec3(3, 7, 0), new Vec3(6, 0, 2)),
++            new CubicBezier(new Vec3(0, 0, 0), new Vec3(1, 1, 0), new Vec3(0, 1, 0), new Vec3(1, 0, 0))};
++        for (double rel : new double[] {0x1p-20, 0x1p-30, 0x1p-40}) for (Curve c : smooth) {
++            ArcLengthTable t = ArcLengthTable.build(counting(c), new ArcLengthTolerance(0, rel), lim);
++            run(String.format("rel %.0e %s", rel, c.getClass().getSimpleName() + (c instanceof CubicBezier cb && cb.p1().x() == 1 ? "(cusp)" : "")), t, grid(t.length(), 1000));
++        }
++        System.out.println("== Newton creep: x = t + t^2/2 with a 1e6 speed spike within +-eps of the exact root; tolerance (0, 2^-40), budget 256");
++        for (double eps : new double[] {1e-7, 3e-5, 1e-3}) {
++            reset(); long max = 0; double sum = 0; int n = 0; double worstT = 0;
++            for (double f : new double[] {0.11, 0.23, 0.37, 0.41, 0.53, 0.67, 0.71, 0.89}) {
++                double L = 1.5, s = f * L, ts = -1 + Math.sqrt(1 + 2 * s);
++                final double lo = ts - eps, hi = ts + eps;
++                Curve c = new Curve() {
++                    public Vec3 point(double t) { return new Vec3(t + 0.5 * t * t, 0, 0); }
++                    public Vec3 derivative(double t) { d++; return new Vec3(t >= lo && t <= hi ? 1e6 : 1 + t, 0, 0); }
++                    public Vec3 secondDerivative(double t) { return Vec3.ZERO; }
++                };
++                ArcLengthTable t = ArcLengthTable.build(c, new ArcLengthTolerance(0, 0x1p-40), new SampleLimits(64, 256));
++                d = 0; double p = t.parameterAt(s); max = Math.max(max, d); sum += d; n++; worstT = Math.max(worstT, Math.abs(p - ts));
++            }
++            report(String.format("creep eps=%.0e (max |t - t*| = %.2e)", eps, worstT), n, max, sum);
++        }
++        System.out.println("== noisy speed (bit 11 of t selects 0.25 or 1.75); tolerance (0, 2^-40), budget 256");
++        Curve noisy = counting(new Curve() {
++            public Vec3 point(double t) { return new Vec3(t, 0, 0); }
++            public Vec3 derivative(double t) { long b = Double.doubleToRawLongBits(t); return new Vec3(((b >>> 11) & 1) == 0 ? 0.25 : 1.75, 0, 0); }
++            public Vec3 secondDerivative(double t) { return Vec3.ZERO; }
++        });
++        ArcLengthTable nt = ArcLengthTable.build(noisy, new ArcLengthTolerance(0, 0x1p-40), new SampleLimits(1 << 12, 256));
++        run("noisy, 998 targets", nt, grid(nt.length(), 1000));
++    }
++}
+diff --git a/docs/m4/validation/r2/LinCount.java b/docs/m4/validation/r2/LinCount.java
+new file mode 100644
+index 0000000..0a52240
+--- /dev/null
++++ b/docs/m4/validation/r2/LinCount.java
+@@ -0,0 +1,17 @@
++import java.nio.file.*; import java.util.*;
++import workshop.vfx.math.core.Vec3; import workshop.vfx.math.curve.*; import workshop.vfx.math.sample.*;
++/** M4 R2 probe (review scratch): counts panels in linear mode (contract 5.5) over the arclength.csv rows at four tolerances. Needs a reference implementation instrumented with public static counters PANELS and LINEAR (panels with I2 > 0 outside ratio mode). */
++public class LinCount {
++    static Vec3 v(double[] p, int i) { return new Vec3(p[i], p[i + 1], p[i + 2]); }
++    public static void main(String[] a) throws Exception {
++        List<String> lines = Files.readAllLines(Path.of(a[0])); boolean header = false; int rows = 0;
++        for (double rel : new double[] {1e-4, 1e-7, 0x1p-30, 1e-12}) { header = false; for (String l : lines) {
++            if (l.isBlank() || l.startsWith("#")) continue; if (!header) { header = true; continue; }
++            String[] r = l.split(","); double[] p = new double[12]; for (int i = 0; i < 12; i++) p[i] = Double.parseDouble(r[1 + i]);
++            Curve c = switch (r[0]) { case "LINE" -> new LineSegment(v(p, 0), v(p, 3)); case "QUAD" -> new QuadraticBezier(v(p, 0), v(p, 3), v(p, 6));
++                case "CUBIC" -> new CubicBezier(v(p, 0), v(p, 3), v(p, 6), v(p, 9)); default -> new Spiral(p[0], p[1], p[2], p[3], p[4]); };
++            ArcLengthTable.build(c, Double.parseDouble(r[13]), Double.parseDouble(r[14]), new ArcLengthTolerance(0, rel), new SampleLimits(1 << 20, 1 << 22)); rows++; }
++        }
++        System.out.println("tables " + rows + " panels " + ArcLengthTable.PANELS + " linear-mode panels with I2 > 0: " + ArcLengthTable.LINEAR);
++    }
++}
+diff --git a/docs/m4/validation/r2/README.md b/docs/m4/validation/r2/README.md
+new file mode 100644
+index 0000000..5ec7e12
+--- /dev/null
++++ b/docs/m4/validation/r2/README.md
+@@ -0,0 +1,19 @@
++# M4 R2 validation evidence
++
++These files are review scratch, kept as evidence. All runs used Java 25.0.4.1 against the **throwaway** R1 and R2
++reference implementations of the contract. Those implementations are kept outside the repository and are not
++delivered.
++
++| File | Content |
++|---|---|
++| `findings-r1.txt` | `Findings.java` and `Exhaust3.java` against R1. It reproduces findings 1 to 3: `tau = 0` for subnormal lengths; NaN from `lengthAt` on a pathological panel; Newton creep through all 64 iterations (384 evaluations), with a residual of 2.7e-8 |
++| `findings-r2.txt` | the same probes against R2: `tau = 1024 MIN_VALUE` with 16 panels; finite linear-mode values. Creep, counting only the runs where the spike is invisible to the table (same length): for eps of at most 3e-4, all 21 runs end by tolerance within 321 evaluations, with `abs(t - t*) <= 8.4e-16` (R1: all 21 reach 384 evaluations, with errors up to 2.4e-4). For eps = 1e-3, the spike also reaches the nodes of `F_k`, which then jumps. 1 of 4 runs ends at the cap (336), with `abs(t - t*) = 1.1e-4`, at the better end of the bracket (R1: all 4 runs at 384, error up to 4.2e-4). Runs where the table sees the spike measure a different curve, so `t*` does not apply |
++| `inversion-stats.txt` | `InvStats.java` against R2 and against the rejected R2 draft (Newton only after a halving step): exit kinds, iterations and evaluations for smooth curves, creep and a noisy speed |
++| `linear-mode.txt` | `LinCount.java`: no reference panel is in linear mode (0 of 21,876 panels in 1,344 tables) |
++| `r1-vs-r2-tests.txt` | the 53 R2 M4 tests against R1 (47 pass; the 6 failures are the F1 to F3 regression tests and the tie rule) and against R2 (53 pass) |
++
++Running the probes:
++- Compile them against the main classes of a build that contains a reference implementation, for example
++  `javac -d out -cp build/classes/java/main docs/m4/validation/r2/Findings.java`.
++- `InvStats.java` also needs a copy of the reference implementation instrumented with exit counters, as described
++  in its header.
+diff --git a/docs/m4/validation/r2/findings-r1.txt b/docs/m4/validation/r2/findings-r1.txt
+new file mode 100644
+index 0000000..bf1cb97
+--- /dev/null
++++ b/docs/m4/validation/r2/findings-r1.txt
+@@ -0,0 +1,57 @@
++Finding probes (Findings.java, Exhaust3.java) against the THROWAWAY R1 reference implementation; Java 25.0.4.1
++== F1: nonzero subnormal-speed lines, tolerance (0, 2^-40), budget 4096
++  end=Vec3[x=3.5E-323, y=0.0, z=0.0]: length=0.0 (0.0 q) tau=0.0 converged=true panels=16 evals=240 estimate=0.0
++  end=Vec3[x=1.5E-323, y=2.5E-323, z=5.4E-323]: length=0.0 (0.0 q) tau=0.0 converged=true panels=32 evals=560 estimate=0.0
++  end=Vec3[x=4.9E-324, y=0.0, z=0.0]: length=0.0 (0.0 q) tau=0.0 converged=true panels=16 evals=240 estimate=0.0
++  end=Vec3[x=6.09954E-319, y=0.0, z=0.0]: length=6.09954E-319 (123456.0 q) tau=0.0 converged=true panels=16 evals=240 estimate=0.0
++  end=Vec3[x=1.0E-310, y=0.0, z=0.0]: length=9.9999999999945E-311 (20240225330720.0 q) tau=8.9E-323 converged=true panels=16 evals=240 estimate=7.9E-323
++== F2: pathological panel, I1 tiny and I2 huge (ratio overflows); speed 0 elsewhere; budget 256 (no refinement)
++  length=6.25E298 converged=false panels=16
++  lengthAt(0.001) = NaN
++  lengthAt(0.01) = NaN
++  lengthAt(0.03) = NaN
++  lengthAt(0.05) = NaN
++  parameterAt(0.25 L) = 8.470329472543003E-22
++  parameterAt(0.5 L) = 1.6940658945086007E-21
++  parameterAt(0.75 L) = 2.541098841762901E-21
++== F3: inversion on a speed discontinuous at a 2^-40 scale (F has jumps); 16 panels, tolerance (0, 2^-40)
++  length=0.7922196405351714 converged=false panels=16
++  s=0.079222 -> t=0.093647021421626330, lengthAt(t) - s = 0.000e+00
++  s=0.237666 -> t=0.28487794649549864, lengthAt(t) - s = 6.872e-03
++  s=0.396110 -> t=0.49531810873236276, lengthAt(t) - s = 2.776e-03
++  s=0.554554 -> t=0.69719619387751650, lengthAt(t) - s = 3.597e-03
++  s=0.712998 -> t=0.89266113422081600, lengthAt(t) - s = 2.317e-03
++== F3 creep (Exhaust3): x = t + t^2/2 with a 1e6 speed spike on [t* - eps, t* + eps]
++f=0.11 eps=3e-05: same length true, evals 384, t - t* = 7.593e-08, lengthAt(t) - s = 8.756e-08
++f=0.11 eps=1e-04: same length true, evals 384, t - t* = 7.593e-08, lengthAt(t) - s = 8.756e-08
++f=0.11 eps=3e-04: same length true, evals 384, t - t* = 7.593e-08, lengthAt(t) - s = 8.756e-08
++f=0.11 eps=1e-03: same length true, evals 384, t - t* = -4.184e-04, lengthAt(t) - s = -4.824e-04
++f=0.23 eps=3e-05: same length true, evals 384, t - t* = 2.288e-08, lengthAt(t) - s = 2.975e-08
++f=0.23 eps=1e-04: same length true, evals 384, t - t* = 2.288e-08, lengthAt(t) - s = 2.975e-08
++f=0.23 eps=3e-04: same length true, evals 384, t - t* = -2.439e-04, lengthAt(t) - s = -3.170e-04
++f=0.23 eps=1e-03: same length true, evals 384, t - t* = -2.439e-04, lengthAt(t) - s = -3.170e-04
++f=0.37 eps=3e-05: same length true, evals 384, t - t* = 2.041e-08, lengthAt(t) - s = 2.964e-08
++f=0.37 eps=1e-04: same length true, evals 384, t - t* = 2.041e-08, lengthAt(t) - s = 2.964e-08
++f=0.37 eps=3e-04: same length true, evals 384, t - t* = -2.435e-04, lengthAt(t) - s = -3.536e-04
++f=0.37 eps=1e-03: same length false, evals 23, t - t* = 1.021e-02, lengthAt(t) - s = 1.110e-16
++f=0.41 eps=3e-05: same length true, evals 384, t - t* = 5.397e-09, lengthAt(t) - s = 8.060e-09
++f=0.41 eps=1e-04: same length true, evals 384, t - t* = 5.397e-09, lengthAt(t) - s = 8.060e-09
++f=0.41 eps=3e-04: same length true, evals 384, t - t* = -1.270e-04, lengthAt(t) - s = -1.896e-04
++f=0.41 eps=1e-03: same length false, evals 17, t - t* = -5.582e-02, lengthAt(t) - s = 3.175e-12
++f=0.53 eps=3e-05: same length false, evals 17, t - t* = -4.685e-02, lengthAt(t) - s = -6.714e-12
++f=0.53 eps=1e-04: same length false, evals 17, t - t* = -4.685e-02, lengthAt(t) - s = -6.714e-12
++f=0.53 eps=3e-04: same length false, evals 17, t - t* = -4.685e-02, lengthAt(t) - s = -6.714e-12
++f=0.53 eps=1e-03: same length false, evals 17, t - t* = -4.685e-02, lengthAt(t) - s = -6.714e-12
++f=0.67 eps=3e-05: same length true, evals 384, t - t* = 1.245e-08, lengthAt(t) - s = 2.161e-08
++f=0.67 eps=1e-04: same length true, evals 384, t - t* = 1.245e-08, lengthAt(t) - s = 2.161e-08
++f=0.67 eps=3e-04: same length true, evals 384, t - t* = -2.079e-04, lengthAt(t) - s = -3.606e-04
++f=0.67 eps=1e-03: same length false, evals 384, t - t* = -5.565e-04, lengthAt(t) - s = -3.351e-02
++f=0.71 eps=3e-05: same length true, evals 384, t - t* = 1.537e-08, lengthAt(t) - s = 2.720e-08
++f=0.71 eps=1e-04: same length true, evals 384, t - t* = 1.537e-08, lengthAt(t) - s = 2.720e-08
++f=0.71 eps=3e-04: same length true, evals 384, t - t* = -2.332e-04, lengthAt(t) - s = -4.126e-04
++f=0.71 eps=1e-03: same length true, evals 384, t - t* = -2.332e-04, lengthAt(t) - s = -4.126e-04
++f=0.89 eps=3e-05: same length true, evals 384, t - t* = 1.412e-08, lengthAt(t) - s = 2.705e-08
++f=0.89 eps=1e-04: same length true, evals 384, t - t* = 1.412e-08, lengthAt(t) - s = 2.705e-08
++f=0.89 eps=3e-04: same length true, evals 384, t - t* = -2.326e-04, lengthAt(t) - s = -4.455e-04
++f=0.89 eps=1e-03: same length true, evals 384, t - t* = -2.326e-04, lengthAt(t) - s = -4.455e-04
++runs: 32 (R1 makes 6 derivative calls per iteration, R2 5 plus 1 in the 16 Newton iterations; 384 = R1 cap)
+diff --git a/docs/m4/validation/r2/findings-r2.txt b/docs/m4/validation/r2/findings-r2.txt
+new file mode 100644
+index 0000000..c160c6e
+--- /dev/null
++++ b/docs/m4/validation/r2/findings-r2.txt
+@@ -0,0 +1,57 @@
++Finding probes (Findings.java, Exhaust3.java) against the THROWAWAY R2 reference implementation; Java 25.0.4.1
++== F1: nonzero subnormal-speed lines, tolerance (0, 2^-40), budget 4096
++  end=Vec3[x=3.5E-323, y=0.0, z=0.0]: length=0.0 (0.0 q) tau=5.06E-321 converged=true panels=16 evals=240 estimate=0.0
++  end=Vec3[x=1.5E-323, y=2.5E-323, z=5.4E-323]: length=0.0 (0.0 q) tau=5.06E-321 converged=true panels=16 evals=240 estimate=7.9E-323
++  end=Vec3[x=4.9E-324, y=0.0, z=0.0]: length=0.0 (0.0 q) tau=5.06E-321 converged=true panels=16 evals=240 estimate=0.0
++  end=Vec3[x=6.09954E-319, y=0.0, z=0.0]: length=6.09954E-319 (123456.0 q) tau=5.06E-321 converged=true panels=16 evals=240 estimate=0.0
++  end=Vec3[x=1.0E-310, y=0.0, z=0.0]: length=9.9999999999945E-311 (20240225330720.0 q) tau=5.06E-321 converged=true panels=16 evals=240 estimate=7.9E-323
++== F2: pathological panel, I1 tiny and I2 huge (ratio overflows); speed 0 elsewhere; budget 256 (no refinement)
++  length=6.25E298 converged=false panels=16
++  lengthAt(0.001) = 1.0E297
++  lengthAt(0.01) = 1.0000000000000001E298
++  lengthAt(0.03) = 3.0E298
++  lengthAt(0.05) = 5.0E298
++  parameterAt(0.25 L) = 0.015625
++  parameterAt(0.5 L) = 0.03125
++  parameterAt(0.75 L) = 0.046875
++== F3: inversion on a speed discontinuous at a 2^-40 scale (F has jumps); 16 panels, tolerance (0, 2^-40)
++  length=0.7922196405351714 converged=false panels=16
++  s=0.079222 -> t=0.093647021421626330, lengthAt(t) - s = 0.000e+00
++  s=0.237666 -> t=0.28487794649549864, lengthAt(t) - s = 6.872e-03
++  s=0.396110 -> t=0.49531810873236270, lengthAt(t) - s = -9.066e-04
++  s=0.554554 -> t=0.69719619387751640, lengthAt(t) - s = -5.398e-04
++  s=0.712998 -> t=0.89266113422081600, lengthAt(t) - s = 2.317e-03
++== F3 creep (Exhaust3): x = t + t^2/2 with a 1e6 speed spike on [t* - eps, t* + eps]
++f=0.11 eps=3e-05: same length true, evals 281, t - t* = -5.551e-16, lengthAt(t) - s = -6.384e-16
++f=0.11 eps=1e-04: same length true, evals 281, t - t* = -5.551e-16, lengthAt(t) - s = -6.384e-16
++f=0.11 eps=3e-04: same length true, evals 281, t - t* = -5.551e-16, lengthAt(t) - s = -6.384e-16
++f=0.11 eps=1e-03: same length true, evals 316, t - t* = 8.327e-16, lengthAt(t) - s = 9.714e-16
++f=0.23 eps=3e-05: same length true, evals 281, t - t* = 5.551e-17, lengthAt(t) - s = 3.331e-16
++f=0.23 eps=1e-04: same length true, evals 281, t - t* = 5.551e-17, lengthAt(t) - s = 3.331e-16
++f=0.23 eps=3e-04: same length true, evals 316, t - t* = -2.776e-16, lengthAt(t) - s = -1.110e-16
++f=0.23 eps=1e-03: same length true, evals 316, t - t* = -2.776e-16, lengthAt(t) - s = -1.110e-16
++f=0.37 eps=3e-05: same length true, evals 286, t - t* = -7.216e-16, lengthAt(t) - s = -8.882e-16
++f=0.37 eps=1e-04: same length true, evals 286, t - t* = -7.216e-16, lengthAt(t) - s = -8.882e-16
++f=0.37 eps=3e-04: same length true, evals 321, t - t* = -8.327e-16, lengthAt(t) - s = -9.992e-16
++f=0.37 eps=1e-03: same length false, evals 23, t - t* = 1.021e-02, lengthAt(t) - s = 1.110e-16
++f=0.41 eps=3e-05: same length true, evals 281, t - t* = 5.551e-17, lengthAt(t) - s = 1.110e-16
++f=0.41 eps=1e-04: same length true, evals 281, t - t* = 5.551e-17, lengthAt(t) - s = 1.110e-16
++f=0.41 eps=3e-04: same length true, evals 301, t - t* = 1.665e-16, lengthAt(t) - s = 2.220e-16
++f=0.41 eps=1e-03: same length false, evals 0, t - t* = -5.582e-02, lengthAt(t) - s = -4.186e-14
++f=0.53 eps=3e-05: same length false, evals 0, t - t* = -4.685e-02, lengthAt(t) - s = 5.244e-12
++f=0.53 eps=1e-04: same length false, evals 0, t - t* = -4.685e-02, lengthAt(t) - s = 5.244e-12
++f=0.53 eps=3e-04: same length false, evals 0, t - t* = -4.685e-02, lengthAt(t) - s = 5.244e-12
++f=0.53 eps=1e-03: same length false, evals 0, t - t* = -4.685e-02, lengthAt(t) - s = 5.244e-12
++f=0.67 eps=3e-05: same length true, evals 281, t - t* = -3.331e-16, lengthAt(t) - s = -4.441e-16
++f=0.67 eps=1e-04: same length true, evals 281, t - t* = -3.331e-16, lengthAt(t) - s = -4.441e-16
++f=0.67 eps=3e-04: same length true, evals 306, t - t* = 4.441e-16, lengthAt(t) - s = 8.882e-16
++f=0.67 eps=1e-03: same length false, evals 336, t - t* = 1.293e-02, lengthAt(t) - s = -1.955e-02
++f=0.71 eps=3e-05: same length true, evals 286, t - t* = 2.220e-16, lengthAt(t) - s = 6.661e-16
++f=0.71 eps=1e-04: same length true, evals 286, t - t* = 2.220e-16, lengthAt(t) - s = 6.661e-16
++f=0.71 eps=3e-04: same length true, evals 316, t - t* = -3.331e-16, lengthAt(t) - s = -4.441e-16
++f=0.71 eps=1e-03: same length true, evals 336, t - t* = -1.052e-04, lengthAt(t) - s = -1.861e-04
++f=0.89 eps=3e-05: same length true, evals 286, t - t* = 1.110e-16, lengthAt(t) - s = 4.441e-16
++f=0.89 eps=1e-04: same length true, evals 286, t - t* = 1.110e-16, lengthAt(t) - s = 4.441e-16
++f=0.89 eps=3e-04: same length true, evals 321, t - t* = -1.110e-16, lengthAt(t) - s = 0.000e+00
++f=0.89 eps=1e-03: same length true, evals 321, t - t* = -1.110e-16, lengthAt(t) - s = 0.000e+00
++runs: 32 (R1 makes 6 derivative calls per iteration, R2 5 plus 1 in the 16 Newton iterations; 384 = R1 cap)
+diff --git a/docs/m4/validation/r2/inversion-stats.txt b/docs/m4/validation/r2/inversion-stats.txt
+new file mode 100644
+index 0000000..32b2c7c
+--- /dev/null
++++ b/docs/m4/validation/r2/inversion-stats.txt
+@@ -0,0 +1,48 @@
++Inversion statistics (InvStats.java) against the THROWAWAY R2 reference implementation, instrumented with exit counters
++(exact = f == 0, tolerance = abs(f) <= tau 2^-10, cap = 64 iterations, collapse = no midpoint strictly inside). Java 25.0.4.1.
++Evaluations are derivative calls per parameterAt; contract limit 336.
++Creep: t* is the exact inverse of the curve without the spike. For eps >= 3e-5 the spike is wide enough to be seen by the
++table's quadrature nodes, so the table (and t) legitimately differ from t*; eps = 1e-7 is the invisible-spike case of the test.
++The rejected draft run also contains R2's other rules (ratio/linear modes, end acceptance); only the Newton rule differs.
++
++#### R2 (Newton phase of 16 iterations, then bisection; contract 5.6)
++== smooth curves (the newtonEfficiency curves plus a cusp), relative tolerances 2^-20, 2^-30, 2^-40; 998 equally spaced interior targets each
++rel 1e-06 Spiral                                           calls=  998 mean evals=  16.86 max evals= 23 max iterations= 4 exits: exact=2 tolerance=996 cap=0 collapse=0
++rel 1e-06 CubicBezier                                      calls=  998 mean evals=  16.89 max evals= 17 max iterations= 3 exits: exact=0 tolerance=998 cap=0 collapse=0
++rel 1e-06 QuadraticBezier                                  calls=  998 mean evals=  16.81 max evals= 17 max iterations= 3 exits: exact=2 tolerance=996 cap=0 collapse=0
++rel 1e-06 CubicBezier(cusp)                                calls=  998 mean evals=  17.48 max evals= 35 max iterations= 6 exits: exact=1 tolerance=997 cap=0 collapse=0
++rel 9e-10 Spiral                                           calls=  998 mean evals=  17.65 max evals= 23 max iterations= 4 exits: exact=18 tolerance=980 cap=0 collapse=0
++rel 9e-10 CubicBezier                                      calls=  998 mean evals=  21.39 max evals= 23 max iterations= 4 exits: exact=105 tolerance=893 cap=0 collapse=0
++rel 9e-10 QuadraticBezier                                  calls=  998 mean evals=  17.85 max evals= 23 max iterations= 4 exits: exact=19 tolerance=979 cap=0 collapse=0
++rel 9e-10 CubicBezier(cusp)                                calls=  998 mean evals=  22.16 max evals= 41 max iterations= 7 exits: exact=109 tolerance=889 cap=0 collapse=0
++rel 9e-13 Spiral                                           calls=  998 mean evals=  21.80 max evals= 23 max iterations= 4 exits: exact=50 tolerance=948 cap=0 collapse=0
++rel 9e-13 CubicBezier                                      calls=  998 mean evals=  22.59 max evals= 23 max iterations= 4 exits: exact=122 tolerance=876 cap=0 collapse=0
++rel 9e-13 QuadraticBezier                                  calls=  998 mean evals=  22.06 max evals= 23 max iterations= 4 exits: exact=123 tolerance=875 cap=0 collapse=0
++rel 9e-13 CubicBezier(cusp)                                calls=  998 mean evals=  23.11 max evals= 41 max iterations= 7 exits: exact=125 tolerance=873 cap=0 collapse=0
++== Newton creep: x = t + t^2/2 with a 1e6 speed spike within +-eps of the exact root; tolerance (0, 2^-40), budget 256
++creep eps=1e-07 (max |t - t*| = 6.66e-16)                  calls=    8 mean evals= 282.88 max evals=286 max iterations=54 exits: exact=0 tolerance=8 cap=0 collapse=0
++creep eps=3e-05 (max |t - t*| = 4.68e-02)                  calls=    8 mean evals= 247.75 max evals=286 max iterations=54 exits: exact=0 tolerance=8 cap=0 collapse=0
++creep eps=1e-03 (max |t - t*| = 5.58e-02)                  calls=    8 mean evals= 206.00 max evals=336 max iterations=64 exits: exact=0 tolerance=6 cap=2 collapse=0
++== noisy speed (bit 11 of t selects 0.25 or 1.75); tolerance (0, 2^-40), budget 256
++noisy, 998 targets                                         calls=  998 mean evals= 216.63 max evals=336 max iterations=64 exits: exact=18 tolerance=149 cap=1 collapse=830
++
++#### Rejected R2 draft (Newton allowed only if the previous step at least halved the bracket), same probe
++== smooth curves (the newtonEfficiency curves plus a cusp), relative tolerances 2^-20, 2^-30, 2^-40; 998 equally spaced interior targets each
++rel 1e-06 Spiral                                           calls=  998 mean evals=  35.14 max evals=107 max iterations=20 exits: exact=2 tolerance=996 cap=0 collapse=0
++rel 1e-06 CubicBezier                                      calls=  998 mean evals=  40.28 max evals=123 max iterations=23 exits: exact=0 tolerance=998 cap=0 collapse=0
++rel 1e-06 QuadraticBezier                                  calls=  998 mean evals=  35.38 max evals=103 max iterations=19 exits: exact=1 tolerance=997 cap=0 collapse=0
++rel 1e-06 CubicBezier(cusp)                                calls=  998 mean evals=  45.90 max evals=126 max iterations=24 exits: exact=1 tolerance=997 cap=0 collapse=0
++rel 9e-10 Spiral                                           calls=  998 mean evals=  56.61 max evals=160 max iterations=30 exits: exact=2 tolerance=996 cap=0 collapse=0
++rel 9e-10 CubicBezier                                      calls=  998 mean evals=  96.67 max evals=162 max iterations=30 exits: exact=2 tolerance=996 cap=0 collapse=0
++rel 9e-10 QuadraticBezier                                  calls=  998 mean evals=  58.32 max evals=182 max iterations=34 exits: exact=1 tolerance=997 cap=0 collapse=0
++rel 9e-10 CubicBezier(cusp)                                calls=  998 mean evals= 104.83 max evals=174 max iterations=32 exits: exact=1 tolerance=997 cap=0 collapse=0
++rel 9e-13 Spiral                                           calls=  998 mean evals= 120.40 max evals=208 max iterations=39 exits: exact=5 tolerance=993 cap=0 collapse=0
++rel 9e-13 CubicBezier                                      calls=  998 mean evals= 146.40 max evals=222 max iterations=41 exits: exact=11 tolerance=987 cap=0 collapse=0
++rel 9e-13 QuadraticBezier                                  calls=  998 mean evals= 127.21 max evals=219 max iterations=41 exits: exact=13 tolerance=985 cap=0 collapse=0
++rel 9e-13 CubicBezier(cusp)                                calls=  998 mean evals= 154.48 max evals=222 max iterations=41 exits: exact=12 tolerance=986 cap=0 collapse=0
++== Newton creep: x = t + t^2/2 with a 1e6 speed spike within +-eps of the exact root; tolerance (0, 2^-40), budget 256
++creep eps=1e-07 (max |t - t*| = 4.44e-16)                  calls=    8 mean evals= 310.38 max evals=353 max iterations=64 exits: exact=0 tolerance=8 cap=0 collapse=0
++creep eps=3e-05 (max |t - t*| = 4.68e-02)                  calls=    8 mean evals= 264.00 max evals=329 max iterations=60 exits: exact=0 tolerance=8 cap=0 collapse=0
++creep eps=1e-03 (max |t - t*| = 5.58e-02)                  calls=    8 mean evals= 237.88 max evals=343 max iterations=62 exits: exact=0 tolerance=5 cap=0 collapse=3
++== noisy speed (bit 11 of t selects 0.25 or 1.75); tolerance (0, 2^-40), budget 256
++noisy, 998 targets                                         calls=  998 mean evals= 236.97 max evals=339 max iterations=59 exits: exact=18 tolerance=146 cap=0 collapse=834
+diff --git a/docs/m4/validation/r2/linear-mode.txt b/docs/m4/validation/r2/linear-mode.txt
+new file mode 100644
+index 0000000..b9911f0
+--- /dev/null
++++ b/docs/m4/validation/r2/linear-mode.txt
+@@ -0,0 +1,3 @@
++LinCount.java against the THROWAWAY R2 reference implementation (instrumented); Java 25.0.4.1.
++arclength.csv (336 rows) at relative tolerances 1e-4, 1e-7, 2^-30, 1e-12, budget 2^22:
++tables 1344 panels 21876 linear-mode panels with I2 > 0: 0
+diff --git a/docs/m4/validation/r2/r1-vs-r2-tests.txt b/docs/m4/validation/r2/r1-vs-r2-tests.txt
+new file mode 100644
+index 0000000..d0c51de
+--- /dev/null
++++ b/docs/m4/validation/r2/r1-vs-r2-tests.txt
+@@ -0,0 +1,14 @@
++The 53 M4 tests of revision 2 against the two THROWAWAY reference implementations (not delivered); Java 25.0.4.1, Gradle 9.1.0.
++
++== R1 reference implementation (contract revision 1): 53 tests, 47 passed, 6 failed
++  FAILED M4R2RegressionTest :: F3: iteration cap: a target inside a jump of F (unreachable tolerance) near t = 2^-40, whe :: org.opentest4j.AssertionFailedError: the cap is reached: 384 evaluations ==> expected: <true> but was: <false>
++  FAILED M4R2RegressionTest :: F2: pathological panels (I2/I1 overflowing, I1 = 0, I2 = 1000 I1, I1 = 1000 I2, I2/I1 unde :: org.opentest4j.AssertionFailedError: whole 1.0E-300, half 1.0E300 lengthAt(9.765625E-4) = NaN ==> expected: <true> but was: <false>
++  FAILED M4R2RegressionTest :: F3: a speed discontinuous at a 2^-41 scale (F has jumps, the tolerance is unreachable; in  :: org.opentest4j.AssertionFailedError: s = 0.01188329460802757: t = 0.012785606934079924 is not the better end of an adjacent-double bracket (-0.00196615579597971
++  FAILED M4R2RegressionTest :: F3: Newton creep (a speed spike at the root, invisible to the quadrature, makes Newton ste :: org.opentest4j.AssertionFailedError: evaluations 384 ==> expected: <true> but was: <false>
++  FAILED M4R2RegressionTest :: F1: nonzero subnormal-speed lines and constant-speed spirals converge with 16 panels; tau  :: org.opentest4j.AssertionFailedError: line to Vec3[x=3.5E-323, y=0.0, z=0.0] on 0.0..1.0 tau is the floor ==> expected: <5.06E-321> but was: <0.0>
++  FAILED M4R2RegressionTest :: F3: ties go to the upper end: (a) a target exactly halfway across a panel shorter than 2 t :: org.opentest4j.AssertionFailedError: tie: the upper end ==> expected: <0.0625> but was: <0.03125>
++
++== R2 reference implementation (contract revision 2): 53 tests, 53 passed, 0 failed
++
++On R1, the failures are the regression tests for findings 1 to 3 and the tie rule, which R1 did not have. The other R2 tests
++(panel-end targets, the clamp to I2, the stationary tail) guard R2 rules that R1 happens to satisfy.
+diff --git a/docs/m4/validation/reference-run-summary.txt b/docs/m4/validation/reference-run-summary.txt
+index 9f51ffe..587d237 100644
+--- a/docs/m4/validation/reference-run-summary.txt
++++ b/docs/m4/validation/reference-run-summary.txt
+@@ -1,48 +1,52 @@
+-M4 tests against a THROWAWAY reference implementation of the M4 contract (kept outside the repository, not delivered, not committed).
+-Base: a6726c42a20940a6a6d2dd24477e6a642f6b8cbc (verified M3 baseline, 254 tests) plus the M4 tests and reference data of this proposal.
++M4 tests against a THROWAWAY reference implementation of the M4 contract, REVISION 2 (kept outside the repository, not delivered, not committed).
++Base: a6726c42a20940a6a6d2dd24477e6a642f6b8cbc (verified M3 baseline, 254 tests) plus the M4 R2 tests and reference data of this proposal.
+ java version "25.0.4.1" 2026-08-18 LTS
+-Gradle 9.1.0 (project wrapper); fresh copy, clean run: clean test, then check
++Gradle 9.1.0 (project wrapper); fresh copy, clean run: ./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test, then check
++test: BUILD SUCCESSFUL in 1m 5s
++check: BUILD SUCCESSFUL in 7s
+ 
+-workshop.vfx.math.core.Amendment3AcceptanceTest         tests= 10 not-passed=0 time=0.562
+-workshop.vfx.math.core.BoundaryTest                     tests=  2 not-passed=0 time=0.005
+-workshop.vfx.math.core.ConventionsTest                  tests= 10 not-passed=0 time=0.007
+-workshop.vfx.math.core.FrameTest                        tests= 11 not-passed=0 time=0.052
+-workshop.vfx.math.core.JomlOracleTest                   tests=  4 not-passed=0 time=0.047
+-workshop.vfx.math.core.M0RegressionTest                 tests=  6 not-passed=0 time=0.011
+-workshop.vfx.math.core.MathUtilTest                     tests=  4 not-passed=0 time=0.004
+-workshop.vfx.math.core.NumericPolicyTest                tests= 13 not-passed=0 time=0.225
+-workshop.vfx.math.core.PolicyClarificationTest          tests=  9 not-passed=0 time=0.053
+-workshop.vfx.math.core.PoseTest                         tests= 12 not-passed=0 time=0.166
+-workshop.vfx.math.core.QuatTest                         tests= 17 not-passed=0 time=0.195
+-workshop.vfx.math.core.ReviewAdversarialTest            tests= 18 not-passed=0 time=15.529
++workshop.vfx.math.core.Amendment3AcceptanceTest         tests= 10 not-passed=0 time=0.573
++workshop.vfx.math.core.BoundaryTest                     tests=  2 not-passed=0 time=0.007
++workshop.vfx.math.core.ConventionsTest                  tests= 10 not-passed=0 time=0.015
++workshop.vfx.math.core.FrameTest                        tests= 11 not-passed=0 time=0.087
++workshop.vfx.math.core.JomlOracleTest                   tests=  4 not-passed=0 time=0.083
++workshop.vfx.math.core.M0RegressionTest                 tests=  6 not-passed=0 time=0.033
++workshop.vfx.math.core.MathUtilTest                     tests=  4 not-passed=0 time=0.012
++workshop.vfx.math.core.NumericPolicyTest                tests= 13 not-passed=0 time=0.267
++workshop.vfx.math.core.PolicyClarificationTest          tests=  9 not-passed=0 time=0.057
++workshop.vfx.math.core.PoseTest                         tests= 12 not-passed=0 time=0.17
++workshop.vfx.math.core.QuatTest                         tests= 17 not-passed=0 time=0.227
++workshop.vfx.math.core.ReviewAdversarialTest            tests= 18 not-passed=0 time=15.841
+ workshop.vfx.math.core.Vec3Test                         tests=  9 not-passed=0 time=0.015
+-workshop.vfx.math.curve.BezierTest                      tests=  7 not-passed=0 time=0.104
+-workshop.vfx.math.curve.EasingTest                      tests=  8 not-passed=0 time=1.962
+-workshop.vfx.math.curve.M3BoundaryTest                  tests=  3 not-passed=0 time=0.009
+-workshop.vfx.math.curve.M3DeterminismTest               tests=  2 not-passed=0 time=0.169
+-workshop.vfx.math.curve.M3ReferenceVectorTest           tests=  4 not-passed=0 time=0.098
+-workshop.vfx.math.curve.M3ReviewAdversarialTest         tests= 12 not-passed=0 time=17.857
+-workshop.vfx.math.curve.M3UnderflowTest                 tests=  7 not-passed=0 time=3.634
+-workshop.vfx.math.curve.PosedCurveTest                  tests=  5 not-passed=0 time=0.034
+-workshop.vfx.math.curve.SpiralTest                      tests= 15 not-passed=0 time=0.473
+-workshop.vfx.math.sample.ArcLengthTableTest             tests=  9 not-passed=0 time=0.247
+-workshop.vfx.math.sample.EqualDistanceTest              tests=  8 not-passed=0 time=1.129
+-workshop.vfx.math.sample.M4AdversarialTest              tests=  8 not-passed=0 time=0.261
+-workshop.vfx.math.sample.M4BoundaryTest                 tests=  3 not-passed=0 time=0.025
+-workshop.vfx.math.sample.M4DeterminismTest              tests=  2 not-passed=0 time=0.447
+-workshop.vfx.math.sample.M4ReferenceVectorTest          tests=  5 not-passed=0 time=3.313
+-workshop.vfx.math.sample.SampleSetTest                  tests=  3 not-passed=0 time=0.802
+-workshop.vfx.math.sample.UniformParameterTest           tests=  6 not-passed=0 time=0.167
+-workshop.vfx.math.time.M2BoundaryTest                   tests=  3 not-passed=0 time=0.007
+-workshop.vfx.math.time.M2DeterminismTest                tests=  8 not-passed=0 time=0.164
+-workshop.vfx.math.time.M2GoldenVectorTest               tests=  5 not-passed=0 time=0.021
+-workshop.vfx.math.time.M2ReviewAdversarialTest          tests= 13 not-passed=0 time=1.551
+-workshop.vfx.math.time.M2Revision2Test                  tests=  9 not-passed=0 time=0.033
+-workshop.vfx.math.time.PlaybackTest                     tests=  9 not-passed=0 time=0.109
+-workshop.vfx.math.time.TickTimeTest                     tests=  4 not-passed=0 time=0.051
+-workshop.vfx.math.time.TimePointTest                    tests=  4 not-passed=0 time=0.099
++workshop.vfx.math.curve.BezierTest                      tests=  7 not-passed=0 time=0.141
++workshop.vfx.math.curve.EasingTest                      tests=  8 not-passed=0 time=2.088
++workshop.vfx.math.curve.M3BoundaryTest                  tests=  3 not-passed=0 time=0.018
++workshop.vfx.math.curve.M3DeterminismTest               tests=  2 not-passed=0 time=0.227
++workshop.vfx.math.curve.M3ReferenceVectorTest           tests=  4 not-passed=0 time=0.069
++workshop.vfx.math.curve.M3ReviewAdversarialTest         tests= 12 not-passed=0 time=18.08
++workshop.vfx.math.curve.M3UnderflowTest                 tests=  7 not-passed=0 time=4.085
++workshop.vfx.math.curve.PosedCurveTest                  tests=  5 not-passed=0 time=0.031
++workshop.vfx.math.curve.SpiralTest                      tests= 15 not-passed=0 time=0.517
++workshop.vfx.math.sample.ArcLengthTableTest             tests=  9 not-passed=0 time=0.271
++workshop.vfx.math.sample.EqualDistanceTest              tests=  8 not-passed=0 time=1.231
++workshop.vfx.math.sample.M4AdversarialTest              tests=  8 not-passed=0 time=0.35
++workshop.vfx.math.sample.M4BoundaryTest                 tests=  3 not-passed=0 time=0.039
++workshop.vfx.math.sample.M4DeterminismTest              tests=  2 not-passed=0 time=0.718
++workshop.vfx.math.sample.M4R2RegressionTest             tests=  9 not-passed=0 time=0.025
++workshop.vfx.math.sample.M4ReferenceVectorTest          tests=  5 not-passed=0 time=3.564
++workshop.vfx.math.sample.SampleSetTest                  tests=  3 not-passed=0 time=0.822
++workshop.vfx.math.sample.UniformParameterTest           tests=  6 not-passed=0 time=0.159
++workshop.vfx.math.time.M2BoundaryTest                   tests=  3 not-passed=0 time=0.008
++workshop.vfx.math.time.M2DeterminismTest                tests=  8 not-passed=0 time=0.158
++workshop.vfx.math.time.M2GoldenVectorTest               tests=  5 not-passed=0 time=0.019
++workshop.vfx.math.time.M2ReviewAdversarialTest          tests= 13 not-passed=0 time=1.353
++workshop.vfx.math.time.M2Revision2Test                  tests=  9 not-passed=0 time=0.035
++workshop.vfx.math.time.PlaybackTest                     tests=  9 not-passed=0 time=0.1
++workshop.vfx.math.time.TickTimeTest                     tests=  4 not-passed=0 time=0.047
++workshop.vfx.math.time.TimePointTest                    tests=  4 not-passed=0 time=0.093
+ workshop.vfx.math.time.TimingTest                       tests= 11 not-passed=0 time=0.349
+-TOTAL 298 not passed 0
+-by package: core 125 (M1), time 66 (M2), curve 51 (M3) + 12 (M3 review), sample 44 (M4)
+-test: BUILD SUCCESSFUL in 1m 2s
+-check: BUILD SUCCESSFUL in 6s
++TOTAL 307 not passed 0
++
++JUnit XML totals: tests 307, failures 0, errors 0, skipped 0.
++By package: M1 core 125, M2 time 66, M3 curve 51 + M3 review 12 = 63, M4 sample 53. Total 307, passed 307.
++(R1: 298/298 with 44 M4 tests. R2 adds M4R2RegressionTest, 9 tests; no test removed.)
+diff --git a/src/test/java/workshop/vfx/math/sample/M4AdversarialTest.java b/src/test/java/workshop/vfx/math/sample/M4AdversarialTest.java
+index 6793fad..0d48a37 100644
+--- a/src/test/java/workshop/vfx/math/sample/M4AdversarialTest.java
++++ b/src/test/java/workshop/vfx/math/sample/M4AdversarialTest.java
+@@ -65,7 +65,7 @@ class M4AdversarialTest {
+     }
+ 
+     @Test
+-    @DisplayName("Sampling work: each equal-distance sample calls point() exactly once and derivative() at most 400 times; parameterAt and lengthAt are bounded too")
++    @DisplayName("Sampling work: each equal-distance sample calls point() exactly once and derivative() at most 336 times; parameterAt and lengthAt are bounded too")
+     void samplingWork() {
+         for (Curve inner : new Curve[] {SampleTestSupport.wiggle(0.05, 30), Spiral.conicalSpiral(0, 5, 1, 9), new CubicBezier(Vec3.ZERO, Vec3.X, Vec3.ZERO, Vec3.X)}) {
+             SampleTestSupport.CountingCurve c = new SampleTestSupport.CountingCurve(inner);
+@@ -75,11 +75,11 @@ class M4AdversarialTest {
+             int n = 500;
+             Sampler.uniformDistance(t, n, Endpoints.INCLUDE_END, LIMITS);
+             assertEquals(n, c.points, "point() once per sample");
+-            assertTrue(c.derivatives <= 400L * n, "derivatives " + c.derivatives);
++            assertTrue(c.derivatives <= 336L * n, "derivatives " + c.derivatives);
+             c.derivatives = 0;
+             c.points = 0;
+             t.parameterAt(t.length() * 0.37);
+-            assertTrue(c.derivatives <= 400 && c.points == 0);
++            assertTrue(c.derivatives <= 336 && c.points == 0);
+             c.derivatives = 0;
+             t.lengthAt(0.61);
+             assertTrue(c.derivatives <= 5 && c.points == 0);
+diff --git a/src/test/java/workshop/vfx/math/sample/M4R2RegressionTest.java b/src/test/java/workshop/vfx/math/sample/M4R2RegressionTest.java
+new file mode 100644
+index 0000000..a10451c
+--- /dev/null
++++ b/src/test/java/workshop/vfx/math/sample/M4R2RegressionTest.java
+@@ -0,0 +1,344 @@
++package workshop.vfx.math.sample;
++
++import static org.junit.jupiter.api.Assertions.assertEquals;
++import static org.junit.jupiter.api.Assertions.assertFalse;
++import static org.junit.jupiter.api.Assertions.assertTrue;
++import static org.junit.jupiter.api.Assertions.fail;
++
++import java.math.BigDecimal;
++import java.math.MathContext;
++import java.util.HashSet;
++import java.util.Set;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import workshop.vfx.math.core.Vec3;
++import workshop.vfx.math.curve.Curve;
++import workshop.vfx.math.curve.LineSegment;
++import workshop.vfx.math.curve.Spiral;
++
++/**
++ * Regression tests for the three blocking findings of ChatGPT's independent review of M4 R1 (contract revision 2):
++ * F1 subnormal constant-speed lengths and the tolerance floor; F2 finite handling of pathological panels in the
++ * normalised partial integral; F3 deterministic Newton-bisection progress and the result after a non-converged exit.
++ * Oracles: exact BigDecimal lengths, a closed-form inverse, and properties stated by the contract.
++ */
++class M4R2RegressionTest {
++    private static final double Q = Double.MIN_VALUE;
++    private static final double EPS = 0x1p-53;
++    private static final double FLOOR = 1024 * Double.MIN_VALUE;
++    private static final double X1 = 0x1.13b23fd99b705p-1, X2 = 0x1.cff6ce0533a69p-1; // contract 5.2
++
++    // ------------------------------------------------------------------ F1
++
++    @Test
++    @DisplayName("F1: nonzero subnormal-speed lines and constant-speed spirals converge with 16 panels; tau = max(abs, rel L0, 1024 MIN_VALUE); |L - L*| <= rounding allowance with the absolute underflow term 8 K MIN_VALUE")
++    void subnormalConstantSpeed() {
++        double[][] ends = {{7, 0, 0}, {3, 5, 11}, {1, 0, 0}, {123456, 0, 0}, {Math.scalb(1.0, 40), 3, 0}, {1e-320 / Q, 2e-320 / Q, 0}};
++        for (double[] e : ends) {
++            Vec3 end = new Vec3(e[0] * Q, e[1] * Q, e[2] * Q);
++            for (double[] range : new double[][] {{0, 1}, {-0.5, 1.5}}) {
++                ArcLengthTable t = ArcLengthTable.build(new LineSegment(Vec3.ZERO, end), range[0], range[1], new ArcLengthTolerance(0, 0x1p-40), new SampleLimits(16, 4096));
++                BigDecimal x = new BigDecimal(end.x()), y = new BigDecimal(end.y()), z = new BigDecimal(end.z());
++                double exact = x.multiply(x).add(y.multiply(y)).add(z.multiply(z)).sqrt(MathContext.DECIMAL128)
++                    .multiply(new BigDecimal(range[1] - range[0])).doubleValue();
++                String label = "line to " + end + " on " + range[0] + ".." + range[1];
++                assertTrue(t.converged(), label + " converged");
++                assertEquals(16, t.panelCount(), label + " panels");
++                assertEquals(240, t.evaluations(), label + " evaluations");
++                assertEquals(FLOOR, t.effectiveTolerance(), label + " tau is the floor");
++                assertTrue(t.errorEstimate() <= FLOOR);
++                double allowance = (range[1] - range[0]) * (5 * EPS * exact + Q) + (16 + 64) * EPS * exact + 8 * 16 * Q;
++                assertEquals(exact, t.length(), allowance, label + " length");
++            }
++        }
++        for (double r : new double[] {3 * Q, 1e-320, 1e-315, 1e-310}) {
++            for (Spiral s : new Spiral[] {Spiral.circle(r), new Spiral(r, r, r, 3, 0.1)}) {
++                ArcLengthTable t = ArcLengthTable.build(s, -0.5, 1.5, new ArcLengthTolerance(0, 0x1p-40), new SampleLimits(16, 4096));
++                assertTrue(t.converged(), s + " converged");
++                assertEquals(16, t.panelCount(), s + " panels");
++                assertEquals(FLOOR, t.effectiveTolerance());
++                double speed = Math.hypot(2 * Math.PI * r * s.turns(), s.rise());
++                double allowance = 2 * SampleTestSupport.speedErrorBound("SPIRAL", new double[] {r, r, s.rise(), s.turns(), s.startTurn()}, -0.5, 1.5)
++                    + 80 * EPS * 2 * speed + 8 * 16 * Q;
++                assertEquals(2 * speed, t.length(), allowance, s + " length");
++            }
++        }
++        // an absolute tolerance below the floor is raised to the floor; above it, it is kept
++        LineSegment tiny = new LineSegment(Vec3.ZERO, new Vec3(7 * Q, 0, 0));
++        assertEquals(FLOOR, ArcLengthTable.build(tiny, new ArcLengthTolerance(Q, 0x1p-40), SampleTestSupport.LIMITS).effectiveTolerance());
++        assertEquals(1e-300, ArcLengthTable.build(tiny, new ArcLengthTolerance(1e-300, 0x1p-40), SampleTestSupport.LIMITS).effectiveTolerance());
++        // sampling a subnormal-length table stays finite, monotone and inside the range
++        ArcLengthTable t = ArcLengthTable.build(new LineSegment(Vec3.ZERO, new Vec3(123456 * Q, 0, 0)), new ArcLengthTolerance(0, 0x1p-40), SampleTestSupport.LIMITS);
++        SampleSet set = Sampler.uniformDistance(t, 33, Endpoints.INCLUDE_END, SampleTestSupport.LIMITS);
++        for (int k = 1; k < 33; k++) {
++            assertTrue(set.parameter(k) >= set.parameter(k - 1) && set.parameter(k) <= 1);
++        }
++    }
++
++    // ------------------------------------------------------------------ F2
++
++    /** The five nodes of the 5-point rule on [lo, hi] (contract 5.2). */
++    private static void nodes(Set<Double> out, double lo, double hi) {
++        double h = 0.5 * (hi - lo), c = lo + h;
++        out.add(c);
++        out.add(c - h * X1);
++        out.add(c + h * X1);
++        out.add(c - h * X2);
++        out.add(c + h * X2);
++    }
++
++    /** A user curve along +X whose speed is `half` at the half-panel nodes of panel [0, 1/16], `whole` at its whole-panel nodes, 0 elsewhere. */
++    private static Curve pathological(double whole, double half) {
++        Set<Double> w = new HashSet<>(), h = new HashSet<>();
++        nodes(w, 0, 1.0 / 16);
++        nodes(h, 0, 1.0 / 32);
++        nodes(h, 1.0 / 32, 1.0 / 16);
++        h.removeAll(w);
++        return new Curve() {
++            @Override public Vec3 point(double t) { return new Vec3(t, 0, 0); }
++            @Override public Vec3 derivative(double t) { return new Vec3(h.contains(t) ? half : w.contains(t) ? whole : 0, 0, 0); }
++            @Override public Vec3 secondDerivative(double t) { return Vec3.ZERO; }
++        };
++    }
++
++    @Test
++    @DisplayName("F2: pathological panels (I2/I1 overflowing, I1 = 0, I2 = 1000 I1, I1 = 1000 I2, I2/I1 underflowing) on finite tables: lengthAt and parameterAt are finite, monotone and follow the linear fallback of contract 5.5 exactly")
++    void pathologicalPanels() {
++        double[][] cases = {{1e-300, 1e300}, {0, 1e300}, {1, 1000}, {1e-300, 1e-200}, {1000, 1}, {1e300, 1e-300}};
++        for (double[] c : cases) {
++            Curve curve = pathological(c[0], c[1]);
++            ArcLengthTable t = ArcLengthTable.build(curve, new ArcLengthTolerance(0, 1e-6), new SampleLimits(64, 256)); // 256: no refinement possible
++            String label = "whole " + c[0] + ", half " + c[1];
++            double len = t.length();
++            assertTrue(Double.isFinite(len) && len > 0, label + " finite length " + len);
++            assertFalse(t.converged(), label);
++            double previous = 0;
++            for (int i = 1; i < 64; i++) {
++                double u = i / 1024.0; // inside panel [0, 1/16]
++                double l = t.lengthAt(u);
++                assertTrue(Double.isFinite(l) && l >= previous && l <= len, label + " lengthAt(" + u + ") = " + l);
++                // pathological panel: linear fallback F(t) = I2 (t - a) / (b - a), and here I2 = length (all other panels are 0)
++                assertEquals(len * (u * 16), l, 4 * Math.ulp(len), label + " linear fallback at " + u);
++                previous = l;
++            }
++            for (int k = 1; k < 16; k++) {
++                double s = len * (k / 16.0);
++                double p = t.parameterAt(s);
++                assertTrue(Double.isFinite(p) && p >= 0 && p <= 1, label + " parameterAt");
++                assertEquals(k / 256.0, p, 4 * Math.ulp(1.0 / 16), label + " inverse of the linear fallback at " + k + "/16");
++            }
++            SampleSet set = Sampler.uniformDistance(t, 17, Endpoints.INCLUDE_END, SampleTestSupport.LIMITS);
++            for (int k = 1; k < 17; k++) {
++                assertTrue(Double.isFinite(set.parameter(k)) && set.parameter(k) >= set.parameter(k - 1));
++            }
++        }
++    }
++
++    @Test
++    @DisplayName("F2: ratio mode is clamped to the panel value: a speed seen only by the partial integral's nodes cannot make lengthAt exceed the length at the panel end (F_k in [0, I2_k], contract 5.5)")
++    void partialClampedToPanel() {
++        Set<Double> spike = new HashSet<>();
++        nodes(spike, 0, 3.0 / 64); // the nodes of G(0, 3/64), none of which is a table node
++        Set<Double> table = new HashSet<>();
++        nodes(table, 0, 1.0 / 16);
++        nodes(table, 0, 1.0 / 32);
++        nodes(table, 1.0 / 32, 1.0 / 16);
++        spike.removeAll(table);
++        assertEquals(5, spike.size());
++        Curve curve = new Curve() {
++            @Override public Vec3 point(double t) { return new Vec3(t, 0, 0); }
++            @Override public Vec3 derivative(double t) { return new Vec3(spike.contains(t) ? 1e6 : 1, 0, 0); }
++            @Override public Vec3 secondDerivative(double t) { return Vec3.ZERO; }
++        };
++        ArcLengthTable t = ArcLengthTable.build(curve, new ArcLengthTolerance(0, 0x1p-30), new SampleLimits(64, 256));
++        assertEquals(16, t.panelCount());
++        double end = t.lengthAt(1.0 / 16);
++        assertEquals(end, t.lengthAt(3.0 / 64), "F_0(3/64) is clamped to I2_0");
++        assertTrue(t.lengthAt(3.0 / 64) < t.length());
++        for (int i = 1; i < 64; i++) {
++            double u = i / 1024.0;
++            assertTrue(t.lengthAt(u) >= 0 && t.lengthAt(u) <= end, "lengthAt(" + u + ") within [0, S_1]");
++        }
++    }
++
++    @Test
++    @DisplayName("F3: ties go to the upper end: (a) a target exactly halfway across a panel shorter than 2 tau 2^-10 returns b_k; (b) after a collapse exit between adjacent doubles with exactly equal residuals, the upper double is returned")
++    void tieGoesToUpperEnd() {
++        Curve slowStart = new Curve() {
++            @Override public Vec3 point(double t) { return new Vec3(t, 0, 0); } // positions are not used by the table
++            @Override public Vec3 derivative(double t) { return new Vec3(t < 1.0 / 16 ? 0x1p-40 : 1, 0, 0); }
++            @Override public Vec3 secondDerivative(double t) { return Vec3.ZERO; }
++        };
++        ArcLengthTable t = ArcLengthTable.build(slowStart, new ArcLengthTolerance(0, 0x1p-30), new SampleLimits(64, 256));
++        assertEquals(16, t.panelCount());
++        double i2 = t.lengthAt(1.0 / 16); // S_1 = 0 + I2_0
++        assertTrue(0.5 * i2 <= t.effectiveTolerance() * 0x1p-10, "both ends within the tolerance");
++        assertEquals(1.0 / 16, t.parameterAt(0.5 * i2), "tie: the upper end");
++        assertEquals(1.0 / 16, t.parameterAt(Math.nextUp(0.5 * i2)), "upper end has the smaller residual");
++        assertEquals(0.0, t.parameterAt(Math.nextDown(0.5 * i2)), "lower end has the smaller residual");
++
++        // (b) a line on [1e6, 1e6 + 1]: adjacent parameters differ by 2^-33, so F_0 steps by about 2^-33 > tolInv and the
++        // bracket collapses. A target exactly halfway between F_0(lo) and F_0(hi) (lengthAt = F_0 in panel 0) is a tie.
++        ArcLengthTable line = ArcLengthTable.build(new LineSegment(Vec3.ZERO, Vec3.X), 1e6, 1e6 + 1, new ArcLengthTolerance(0, 0x1p-30), new SampleLimits(64, 256));
++        int ties = 0;
++        for (int i = 20; i < 60 && ties < 5; i++) {
++            double lo = 1e6 + i / 1000.0, hi = Math.nextUp(lo);
++            double flo = line.lengthAt(lo), fhi = line.lengthAt(hi), mid = 0.5 * (flo + fhi);
++            if (!(flo < mid && mid < fhi && mid - flo == fhi - mid)) {
++                continue;
++            }
++            assertTrue(mid - flo > line.effectiveTolerance() * 0x1p-10, "the tolerance is unreachable");
++            assertEquals(hi, line.parameterAt(mid), "tie at " + lo + ": the upper end");
++            assertEquals(lo, line.parameterAt(Math.nextDown(mid)), "the lower end is better just below the tie");
++            ties++;
++        }
++        assertEquals(5, ties, "exact ties found");
++    }
++
++    // ------------------------------------------------------------------ F3
++
++    private static int derivativeCalls;
++
++    /** x = t + t^2/2 (speed 1 + t, exact arc length x(t)), with a speed spike of 1e6 on [lo, hi]. */
++    private static Curve creeping(double lo, double hi) {
++        return new Curve() {
++            @Override public Vec3 point(double t) { return new Vec3(t + 0.5 * t * t, 0, 0); }
++            @Override public Vec3 derivative(double t) { derivativeCalls++; return new Vec3(t >= lo && t <= hi ? 1e6 : 1 + t, 0, 0); }
++            @Override public Vec3 secondDerivative(double t) { return Vec3.ZERO; }
++        };
++    }
++
++    @Test
++    @DisplayName("F3: Newton creep (a speed spike at the root, invisible to the quadrature, makes Newton steps tiny): at most 336 derivative evaluations; |lengthAt(t) - s| <= max(tau 2^-10, 4 (b - a) 2^-47); t within the bound of the exact inverse -1 + sqrt(1 + 2s)")
++    void newtonCreep() {
++        ArcLengthTolerance tol = new ArcLengthTolerance(0, 0x1p-40);
++        SampleLimits lim = new SampleLimits(64, 256);
++        ArcLengthTable plain = ArcLengthTable.build(creeping(2, 2), tol, lim);
++        for (double f : new double[] {0.11, 0.23, 0.37, 0.41, 0.67, 0.71, 0.89}) {
++            double s = f * plain.length();
++            double exact = -1 + Math.sqrt(1 + 2 * s); // x(t) = s
++            ArcLengthTable spiked = ArcLengthTable.build(creeping(exact - 1e-7, exact + 1e-7), tol, lim);
++            assertEquals(plain.length(), spiked.length(), "the spike is invisible to the table (f = " + f + ")");
++            derivativeCalls = 0;
++            double t = spiked.parameterAt(s);
++            assertTrue(derivativeCalls <= 336, "evaluations " + derivativeCalls);
++            double bound = Math.max(spiked.effectiveTolerance() * 0x1p-10, 4 * (1.0 / 16) * 0x1p-47) + 4 * Math.ulp(s);
++            assertTrue(Math.abs(spiked.lengthAt(t) - s) <= bound, "f = " + f + ": |lengthAt(t) - s| = " + Math.abs(spiked.lengthAt(t) - s) + " > " + bound);
++            assertEquals(exact, t, 2 * spiked.effectiveTolerance() + bound + 1e-15, "f = " + f + ": exact inverse");
++        }
++    }
++
++    @Test
++    @DisplayName("F3: a speed discontinuous at a 2^-41 scale (F has jumps, the tolerance is unreachable; in this scenario every exit is by tolerance or by bracket collapse): every result is within the tolerance or is the better end of an adjacent-double bracket; at most 336 evaluations; deterministic")
++    void nonConvergedExit() {
++        Curve noisy = new Curve() {
++            @Override public Vec3 point(double t) { return new Vec3(t, 0, 0); }
++            @Override public Vec3 derivative(double t) {
++                derivativeCalls++;
++                return new Vec3(((Double.doubleToRawLongBits(t) >>> 11) & 1) == 0 ? 0.25 : 1.75, 0, 0);
++            }
++            @Override public Vec3 secondDerivative(double t) { return Vec3.ZERO; }
++        };
++        ArcLengthTable t = ArcLengthTable.build(noisy, new ArcLengthTolerance(0, 0x1p-40), new SampleLimits(64, 256));
++        double len = t.length(), slack = 4 * Math.ulp(len);
++        int nonConverged = 0;
++        for (int k = 1; k < 200; k++) {
++            double s = len * (k / 200.0);
++            derivativeCalls = 0;
++            double p = t.parameterAt(s);
++            assertTrue(derivativeCalls <= 336, "evaluations " + derivativeCalls);
++            assertTrue(p >= 0 && p <= 1);
++            assertEquals(p, t.parameterAt(s), "deterministic");
++            double dl = t.lengthAt(p) - s;
++            if (Math.abs(dl) <= t.effectiveTolerance() * 0x1p-10 + slack) {
++                continue;
++            }
++            nonConverged++;
++            double dn = t.lengthAt(Math.nextDown(p)) - s, du = t.lengthAt(Math.nextUp(p)) - s;
++            boolean upperEnd = dl >= -slack && dn < slack && Math.abs(dl) <= Math.abs(dn) + slack;
++            boolean lowerEnd = dl < slack && du >= -slack && Math.abs(dl) <= Math.abs(du) + slack;
++            if (!(upperEnd || lowerEnd)) {
++                fail("s = " + s + ": t = " + p + " is not the better end of an adjacent-double bracket (" + dn + ", " + dl + ", " + du + ")");
++            }
++        }
++        assertTrue(nonConverged > 100, "the scenario exercises non-converged exits: " + nonConverged);
++    }
++
++    @Test
++    @DisplayName("F3: a target equal to the length at a panel end (an end of the bracket is already within the tolerance) returns that end exactly, with no derivative evaluation")
++    void panelEndTargets() {
++        Curve[] curves = {Spiral.circle(2.5), Spiral.conicalSpiral(0.5, 5, 1, 9), creeping(2, 2)};
++        for (Curve inner : curves) {
++            Curve counted = new Curve() {
++                @Override public Vec3 point(double t) { return inner.point(t); }
++                @Override public Vec3 derivative(double t) { derivativeCalls++; return inner.derivative(t); }
++                @Override public Vec3 secondDerivative(double t) { return inner.secondDerivative(t); }
++            };
++            ArcLengthTable t = ArcLengthTable.build(counted, new ArcLengthTolerance(0, 0x1p-3), new SampleLimits(16, 256));
++            assertEquals(16, t.panelCount(), inner + ": the 16 initial panels (contract 5.3)");
++            for (int k = 1; k < 16; k++) {
++                double end = k / 16.0, s = t.lengthAt(end); // S_k: F_k(a_k) = 0
++                derivativeCalls = 0;
++                assertEquals(end, t.parameterAt(s), inner + ": panel end " + k);
++                assertEquals(0, derivativeCalls, inner + ": evaluations at panel end " + k);
++            }
++        }
++    }
++
++    @Test
++    @DisplayName("Endpoint exactness with a stationary tail (R2 mutation survivor M26): parameterAt(length()) == t1 even when the last panels have zero length, where the panel search alone would stop at the start of the tail")
++    void stationaryTail() {
++        Curve stopsHalfway = new Curve() {
++            @Override public Vec3 point(double t) { return new Vec3(Math.min(t, 0.5), 0, 0); }
++            @Override public Vec3 derivative(double t) { return new Vec3(t < 0.5 ? 1 : 0, 0, 0); }
++            @Override public Vec3 secondDerivative(double t) { return Vec3.ZERO; }
++        };
++        for (double[] range : new double[][] {{0, 1}, {-0.5, 1.5}}) {
++            ArcLengthTable t = ArcLengthTable.build(stopsHalfway, range[0], range[1], new ArcLengthTolerance(0, 0x1p-30), SampleTestSupport.LIMITS);
++            assertEquals(range[1], t.parameterAt(t.length()), "parameterAt(length()) is t1 on " + range[0] + ".." + range[1]);
++            assertEquals(range[0], t.parameterAt(0), "parameterAt(0) is t0");
++            assertTrue(t.parameterAt(Math.nextDown(t.length())) <= 0.5 + 1e-9, "the tail adds no length");
++        }
++    }
++
++    @Test
++    @DisplayName("F3: iteration cap: a target inside a jump of F (unreachable tolerance) near t = 2^-40, where the bracket cannot collapse within 64 iterations, and zero speed at the first iterate: all 64 iterations run (332 to 336 evaluations); the result is the bracket end with the smaller residual, on the correct side of the jump and within 2^-47 (b - a) + 2 ulp of it")
++    void iterationCapExit() {
++        double c = 0x1p-40;
++        double j0 = c / (0.5 * (1 + X2)); // approximate parameter where the top Gauss node of F_0 crosses c
++        Curve jump = new Curve() {
++            private double speed(double t) { return t >= 0.3 * j0 && t <= 0.4 * j0 ? 0 : t < c ? 1 : 3; }
++            @Override public Vec3 point(double t) { return new Vec3(t, 0, 0); } // positions are not used by the table
++            @Override public Vec3 derivative(double t) { derivativeCalls++; return new Vec3(speed(t), 0, 0); }
++            @Override public Vec3 secondDerivative(double t) { return Vec3.ZERO; }
++        };
++        ArcLengthTable t = ArcLengthTable.build(jump, new ArcLengthTolerance(0, 0x1p-40), new SampleLimits(64, 256));
++        assertEquals(16, t.panelCount());
++        // The jump of lengthAt: the smallest double J in [c, 2c] with lengthAt(J) > 1.1 J (found by bisection on the bit patterns).
++        long lo = Double.doubleToRawLongBits(c), hi = Double.doubleToRawLongBits(2 * c);
++        while (hi - lo > 1) {
++            long mid = (lo + hi) >>> 1;
++            double m = Double.longBitsToDouble(mid);
++            if (t.lengthAt(m) > 1.1 * m) hi = mid; else lo = mid;
++        }
++        double jAt = Double.longBitsToDouble(hi), below = t.lengthAt(Math.nextDown(jAt)), above = t.lengthAt(jAt);
++        assertTrue(above - below > 0.2 * jAt, "a jump of F: " + below + " -> " + above);
++        double w = 0x1p-47 * (1.0 / 16) * (1 + 0x1p-40) + 2 * Math.ulp(1.0 / 16); // contract 5.6: final bracket width
++        for (double frac : new double[] {1.0 / 3, 2.0 / 3}) {
++            double s = below + frac * (above - below);
++            derivativeCalls = 0;
++            double p = t.parameterAt(s);
++            assertTrue(derivativeCalls >= 332 && derivativeCalls <= 336, "the cap is reached: " + derivativeCalls + " evaluations");
++            assertEquals(p, t.parameterAt(s), "deterministic");
++            double res = t.lengthAt(p) - s;
++            assertTrue(Math.abs(res) > t.effectiveTolerance() * 0x1p-10, "the tolerance is unreachable");
++            if (frac < 0.5) {
++                assertTrue(p < jAt && res < 0, "lower end (smaller residual): p = " + p + ", J = " + jAt);
++            } else {
++                assertTrue(p >= jAt && res > 0, "upper end (smaller residual): p = " + p + ", J = " + jAt);
++            }
++            assertTrue(Math.abs(p - jAt) <= w, "within the final bracket width: " + Math.abs(p - jAt));
++            assertTrue(Math.abs(p - jAt) <= 0x1p-20 * jAt, "measured: the bracket closed on the jump: " + Math.abs(p - jAt) / jAt);
++        }
++    }
++}
+-- 
+2.43.0
+

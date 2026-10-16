@@ -1,0 +1,32 @@
+e3bf5578c126a7d3498be0b30fb431d9ec9a3099
+openjdk version "25.0.4.1" 2026-08-18 LTS
+OpenJDK Runtime Environment Temurin-25.0.4.1+1 (build 25.0.4.1+1-LTS)
+OpenJDK 64-Bit Server VM Temurin-25.0.4.1+1 (build 25.0.4.1+1-LTS, mixed mode, sharing)
+javac 25.0.4.1
+Downloading https://services.gradle.org/distributions/gradle-9.1.0-bin.zip
+............10%.............20%.............30%.............40%.............50%............60%.............70%.............80%.............90%.............100%
+
+Welcome to Gradle 9.1.0!
+
+Here are the highlights of this release:
+ - Full Java 25 support
+ - Native task graph visualization
+ - Enhanced console output
+
+For more details see https://docs.gradle.org/9.1.0/release-notes.html
+
+
+------------------------------------------------------------
+Gradle 9.1.0
+------------------------------------------------------------
+
+Build time:    2025-09-18 13:05:56 UTC
+Revision:      e45a8dbf2470c2e2474ccc25be9f49331406a07e
+
+Kotlin:        2.2.0
+Groovy:        4.0.28
+Ant:           Apache Ant(TM) version 1.10.15 compiled on August 25 2024
+Launcher JVM:  25.0.4.1 (Eclipse Adoptium 25.0.4.1+1-LTS)
+Daemon JVM:    /usr/lib/jvm/temurin-25-jdk-amd64 (no JDK specified, using current Java home)
+OS:            Linux 6.17.0-1022-azure amd64
+

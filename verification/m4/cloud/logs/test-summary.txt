@@ -1,0 +1,4 @@
+JUnit XML reports: 41
+Milestone counts: {'core': 125, 'time': 66, 'curve': 63, 'sample': 59}
+Totals: {'tests': 313, 'failures': 0, 'errors': 0, 'skipped': 0}
+Production compiler warnings: 0
