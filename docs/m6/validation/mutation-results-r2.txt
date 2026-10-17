@@ -1,0 +1,16 @@
+M6 R2 targeted mutation check (no new full campaign, as instructed): 8 mutants of the revised THROWAWAY reference,
+covering only the R2 changes. Each mutant is applied alone, and the final 52 M6 tests run (Java 25.0.4.1, Gradle 9.1.0).
+R2A-R2C are new; M06, M08, M09, M18 and M19 are R1 mutants rerun against the R2 tests.
+
+Result: 8 of 8 killed. R2A, which restores the R1 lowest-tier fallback, is killed by the G11 tests, the random phase-1
+replay and the stress fixture. M09 and M19 (ambient barred from its reserves) are now also killed by the new
+counterexample tests.
+
+R2A (R1 behaviour: fall back to the lowest (higher) tier) failing=4 AdmissionTest.G11 strict ceiling: the next lower tier ; AdmissionTest.SKIPPED_NO_ELIGIBLE_TIER: decided after ; BudgetPropertyTest.G1 to G5, G7, G9 and the phase-1 decisio; DeliveryReferenceTest.stress
+R2B (no eligible tier reported as SKIPPED_UNSUPPORTED) failing=4 AdmissionTest.G11 strict ceiling: the next lower tier ; AdmissionTest.SKIPPED_NO_ELIGIBLE_TIER: decided after ; BudgetPropertyTest.G1 to G5, G7, G9 and the phase-1 decisio; DeliveryReferenceTest.stress
+R2C (fall back to the highest tier) failing=4 AdmissionTest.G11 strict ceiling: the next lower tier ; AdmissionTest.SKIPPED_NO_ELIGIBLE_TIER: decided after ; BudgetPropertyTest.G1 to G5, G7, G9 and the phase-1 decisio; DeliveryReferenceTest.stress
+M06 (tier upgrades allowed) failing=9 AdmissionTest.Deliverability: a variant without a supp; AdmissionTest.Downgrade only: the highest tier at most; AdmissionTest.G11 strict ceiling: the next lower tier ; AdmissionTest.SKIPPED_NO_ELIGIBLE_TIER: decided after ; BudgetPropertyTest.G1 to G5, G7, G9 and the phase-1 decisio; DeliveryReferenceTest.bloom; DeliveryReferenceTest.cloudstep; DeliveryReferenceTest.stress; M6StressTest.Ceilings: 2^16 requests in one call, max
+M08 (generation reserve ignored) failing=2 AdmissionTest.Generation reserve: non-ambient requests; BudgetPropertyTest.G1 to G5, G7, G9 and the phase-1 decisio
+M09 (ambient cannot use its generation reserve) failing=5 AdmissionTest.Generation reserve: non-ambient requests; BudgetPropertyTest.G1 to G5, G7, G9 and the phase-1 decisio; BudgetPropertyTest.G10 counterexample 1 (R2): generation re; DeliveryReferenceTest.bloom; DeliveryReferenceTest.stress
+M18 (placement reserve ignored) failing=3 BudgetPropertyTest.G1 to G5, G7, G9 and the phase-1 decisio; BudgetPropertyTest.G10: non-ambient effects never consume t; DeliveryReferenceTest.bloom
+M19 (ambient cannot use its placement reserve) failing=4 BudgetPropertyTest.G1 to G5, G7, G9 and the phase-1 decisio; BudgetPropertyTest.G10 counterexample 2 (R2): placement cos; DeliveryReferenceTest.bloom; DeliveryReferenceTest.stress

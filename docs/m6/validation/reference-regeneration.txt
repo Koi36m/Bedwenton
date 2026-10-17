@@ -1,0 +1,11 @@
+Reference regeneration (R2), 2026-10-17T07:03Z, Python 3.13.16
+generate_golden_vectors.py -> src/test/resources/golden: byte-identical (6 files, 7069 lines)
+generate_m2_golden_vectors.py -> src/test/resources/m2/golden: byte-identical (5 files, 3188 lines)
+generate_m3_reference_vectors.py -> src/test/resources/m3/reference: byte-identical (4 files, 2768 lines)
+generate_m4_reference_vectors.py -> src/test/resources/m4/reference: byte-identical (5 files, 3076 lines)
+generate_m5_reference_frames.py -> src/test/resources/m5/reference: byte-identical (5 files, 1125 lines)
+generate_m6_reference_plans.py -> src/test/resources/m6/reference: byte-identical (7 files, 738 lines)
+Second M6 run: byte-identical to run 1
+M6 MANIFEST.sha256 verifies
+R1 -> R2 fixture change: only stress.txt (5 cases appended; the 8 R1 stress cases and the other five families are unchanged) and MANIFEST.sha256
+ 2 files changed, 69 insertions(+), 1 deletion(-)

@@ -1,0 +1,101 @@
+# M6 R1 independent reference plans; generator tools/generate_m6_reference_plans.py (Python standard library)
+# family astral
+case astral-gen400-cap1024 tick=0
+policy 256 1024 65536 400 0 100000 0 100000 100000 64 256 1024
+styles astral:link;astral:star;astral:trail
+recipe astral-prism ACTION roles=stars:ESSENTIAL;trail-a:DECORATIVE;trail-b:DECORATIVE
+variant astral-prism SIMPLE lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:20:astral:link:ALL:1000000
+variant astral-prism BALANCED lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:45:astral:link:ALL:1000000;trail-a:40:astral:trail:ALL:1000000;trail-b:40:astral:trail:ALL:1000000
+variant astral-prism HEAVY lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:90:astral:link:ALL:1000000;trail-a:120:astral:trail:ALL:1000000;trail-b:120:astral:trail:ALL:1000000
+request 3 recipe=astral-prism tier=HEAVY world=0 ordinal=0 local=1 viewers=1;2 fail=0
+expect 3 rank=0 outcome=DELIVERED tier=HEAVY reserved=335 source=335 unsupported=0 kept=335 placements=670 batches=0:5:0:5;1:90:0:90;2:120:0:120;3:120:0:120 recipients=1:335;2:335
+totals reserved=335 source=335 kept=335 recipients=2 placements=670 unsupported=0 counts=DELIVERED:1
+end
+case astral-gen400-cap200 tick=0
+policy 256 1024 65536 400 0 100000 0 100000 100000 64 200 200
+styles astral:link;astral:star;astral:trail
+recipe astral-prism ACTION roles=stars:ESSENTIAL;trail-a:DECORATIVE;trail-b:DECORATIVE
+variant astral-prism SIMPLE lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:20:astral:link:ALL:1000000
+variant astral-prism BALANCED lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:45:astral:link:ALL:1000000;trail-a:40:astral:trail:ALL:1000000;trail-b:40:astral:trail:ALL:1000000
+variant astral-prism HEAVY lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:90:astral:link:ALL:1000000;trail-a:120:astral:trail:ALL:1000000;trail-b:120:astral:trail:ALL:1000000
+request 3 recipe=astral-prism tier=HEAVY world=0 ordinal=1 local=1 viewers=1;2 fail=0
+expect 3 rank=0 outcome=THINNED tier=HEAVY reserved=335 source=335 unsupported=0 kept=200 placements=400 batches=0:5:0:5;1:90:0:90;2:53:1:120;3:52:1:120 recipients=1:200;2:200
+totals reserved=335 source=335 kept=200 recipients=2 placements=400 unsupported=0 counts=THINNED:1
+end
+case astral-gen400-cap60 tick=0
+policy 256 1024 65536 400 0 100000 0 100000 100000 60 60 60
+styles astral:link;astral:star;astral:trail
+recipe astral-prism ACTION roles=stars:ESSENTIAL;trail-a:DECORATIVE;trail-b:DECORATIVE
+variant astral-prism SIMPLE lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:20:astral:link:ALL:1000000
+variant astral-prism BALANCED lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:45:astral:link:ALL:1000000;trail-a:40:astral:trail:ALL:1000000;trail-b:40:astral:trail:ALL:1000000
+variant astral-prism HEAVY lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:90:astral:link:ALL:1000000;trail-a:120:astral:trail:ALL:1000000;trail-b:120:astral:trail:ALL:1000000
+request 3 recipe=astral-prism tier=HEAVY world=0 ordinal=2 local=1 viewers=1;2 fail=0
+expect 3 rank=0 outcome=THINNED tier=HEAVY reserved=335 source=335 unsupported=0 kept=60 placements=120 batches=0:5:0:5;1:55:0:90 recipients=1:60;2:60
+totals reserved=335 source=335 kept=60 recipients=2 placements=120 unsupported=0 counts=THINNED:1
+end
+case astral-gen130-cap1024 tick=0
+policy 256 1024 65536 130 0 100000 0 100000 100000 64 256 1024
+styles astral:link;astral:star;astral:trail
+recipe astral-prism ACTION roles=stars:ESSENTIAL;trail-a:DECORATIVE;trail-b:DECORATIVE
+variant astral-prism SIMPLE lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:20:astral:link:ALL:1000000
+variant astral-prism BALANCED lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:45:astral:link:ALL:1000000;trail-a:40:astral:trail:ALL:1000000;trail-b:40:astral:trail:ALL:1000000
+variant astral-prism HEAVY lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:90:astral:link:ALL:1000000;trail-a:120:astral:trail:ALL:1000000;trail-b:120:astral:trail:ALL:1000000
+request 3 recipe=astral-prism tier=HEAVY world=0 ordinal=3 local=1 viewers=1;2 fail=0
+expect 3 rank=0 outcome=DELIVERED tier=BALANCED reserved=130 source=130 unsupported=0 kept=130 placements=260 batches=0:5:0:5;1:45:0:45;2:40:0:40;3:40:0:40 recipients=1:130;2:130
+totals reserved=130 source=130 kept=130 recipients=2 placements=260 unsupported=0 counts=DELIVERED:1
+end
+case astral-gen40-cap1024 tick=0
+policy 256 1024 65536 40 0 100000 0 100000 100000 64 256 1024
+styles astral:link;astral:star;astral:trail
+recipe astral-prism ACTION roles=stars:ESSENTIAL;trail-a:DECORATIVE;trail-b:DECORATIVE
+variant astral-prism SIMPLE lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:20:astral:link:ALL:1000000
+variant astral-prism BALANCED lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:45:astral:link:ALL:1000000;trail-a:40:astral:trail:ALL:1000000;trail-b:40:astral:trail:ALL:1000000
+variant astral-prism HEAVY lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:90:astral:link:ALL:1000000;trail-a:120:astral:trail:ALL:1000000;trail-b:120:astral:trail:ALL:1000000
+request 3 recipe=astral-prism tier=HEAVY world=0 ordinal=4 local=1 viewers=1;2 fail=0
+expect 3 rank=0 outcome=DELIVERED tier=SIMPLE reserved=25 source=25 unsupported=0 kept=25 placements=50 batches=0:5:0:5;1:20:0:20 recipients=1:25;2:25
+totals reserved=25 source=25 kept=25 recipients=2 placements=50 unsupported=0 counts=DELIVERED:1
+end
+case astral-gen24-cap1024 tick=0
+policy 256 1024 65536 24 0 100000 0 100000 100000 64 256 1024
+styles astral:link;astral:star;astral:trail
+recipe astral-prism ACTION roles=stars:ESSENTIAL;trail-a:DECORATIVE;trail-b:DECORATIVE
+variant astral-prism SIMPLE lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:20:astral:link:ALL:1000000
+variant astral-prism BALANCED lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:45:astral:link:ALL:1000000;trail-a:40:astral:trail:ALL:1000000;trail-b:40:astral:trail:ALL:1000000
+variant astral-prism HEAVY lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:90:astral:link:ALL:1000000;trail-a:120:astral:trail:ALL:1000000;trail-b:120:astral:trail:ALL:1000000
+request 3 recipe=astral-prism tier=HEAVY world=0 ordinal=5 local=1 viewers=1;2 fail=0
+expect 3 rank=0 outcome=SKIPPED_GENERATION_BUDGET tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+totals reserved=0 source=0 kept=0 recipients=0 placements=0 unsupported=0 counts=SKIPPED_GENERATION_BUDGET:1
+end
+case astral-gen335-cap100 tick=0
+policy 256 1024 65536 335 0 100000 0 100000 100000 64 100 100
+styles astral:link;astral:star;astral:trail
+recipe astral-prism ACTION roles=stars:ESSENTIAL;trail-a:DECORATIVE;trail-b:DECORATIVE
+variant astral-prism SIMPLE lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:20:astral:link:ALL:1000000
+variant astral-prism BALANCED lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:45:astral:link:ALL:1000000;trail-a:40:astral:trail:ALL:1000000;trail-b:40:astral:trail:ALL:1000000
+variant astral-prism HEAVY lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:90:astral:link:ALL:1000000;trail-a:120:astral:trail:ALL:1000000;trail-b:120:astral:trail:ALL:1000000
+request 3 recipe=astral-prism tier=HEAVY world=0 ordinal=17 local=1 viewers=1;2 fail=0
+expect 3 rank=0 outcome=THINNED tier=HEAVY reserved=335 source=335 unsupported=0 kept=100 placements=200 batches=0:5:0:5;1:90:0:90;2:3:17:120;3:2:17:120 recipients=1:100;2:100
+totals reserved=335 source=335 kept=100 recipients=2 placements=200 unsupported=0 counts=THINNED:1
+end
+case astral-unsupported-trails tick=0
+policy 256 1024 65536 10000 0 100000 0 100000 100000 64 256 1024
+styles astral:link;astral:star
+recipe astral-prism ACTION roles=stars:ESSENTIAL;trail-a:DECORATIVE;trail-b:DECORATIVE
+variant astral-prism SIMPLE lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:20:astral:link:ALL:1000000
+variant astral-prism BALANCED lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:45:astral:link:ALL:1000000;trail-a:40:astral:trail:ALL:1000000;trail-b:40:astral:trail:ALL:1000000
+variant astral-prism HEAVY lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:90:astral:link:ALL:1000000;trail-a:120:astral:trail:ALL:1000000;trail-b:120:astral:trail:ALL:1000000
+request 3 recipe=astral-prism tier=HEAVY world=0 ordinal=0 local=1 viewers=1 fail=0
+expect 3 rank=0 outcome=THINNED tier=HEAVY reserved=335 source=335 unsupported=240 kept=95 placements=95 batches=0:5:0:5;1:90:0:90 recipients=1:95
+totals reserved=335 source=335 kept=95 recipients=1 placements=95 unsupported=240 counts=THINNED:1
+end
+case astral-nothing-supported tick=0
+policy 256 1024 65536 10000 0 100000 0 100000 100000 64 256 1024
+styles other:style
+recipe astral-prism ACTION roles=stars:ESSENTIAL;trail-a:DECORATIVE;trail-b:DECORATIVE
+variant astral-prism SIMPLE lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:20:astral:link:ALL:1000000
+variant astral-prism BALANCED lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:45:astral:link:ALL:1000000;trail-a:40:astral:trail:ALL:1000000;trail-b:40:astral:trail:ALL:1000000
+variant astral-prism HEAVY lifetime=1000000 layers=stars:5:astral:star:ALL:1000000;links:90:astral:link:ALL:1000000;trail-a:120:astral:trail:ALL:1000000;trail-b:120:astral:trail:ALL:1000000
+request 3 recipe=astral-prism tier=HEAVY world=0 ordinal=0 local=1 viewers=1 fail=0
+expect 3 rank=0 outcome=SKIPPED_UNSUPPORTED tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+totals reserved=0 source=0 kept=0 recipients=0 placements=0 unsupported=0 counts=SKIPPED_UNSUPPORTED:1
+end

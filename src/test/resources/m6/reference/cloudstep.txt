@@ -1,0 +1,75 @@
+# M6 R1 independent reference plans; generator tools/generate_m6_reference_plans.py (Python standard library)
+# family cloudstep
+case cloudstep-overlap tick=11
+policy 256 1024 65536 10000 0 100000 0 500 90 50 50 50
+styles cloud:puff;cloud:wisp
+recipe cloudstep NORMAL roles=puff:ESSENTIAL;wisp:DECORATIVE
+variant cloudstep SIMPLE lifetime=1000000 layers=puff:8:cloud:puff:ALL:1000000
+variant cloudstep BALANCED lifetime=1000000 layers=puff:20:cloud:puff:ALL:1000000;wisp:12:cloud:wisp:ALL:1000000
+variant cloudstep HEAVY lifetime=1000000 layers=puff:40:cloud:puff:ALL:1000000;wisp:30:cloud:wisp:ALL:1000000
+request 10 recipe=cloudstep tier=HEAVY world=0 ordinal=0 local=2 viewers=0;1 fail=0
+request 11 recipe=cloudstep tier=HEAVY world=1 ordinal=3 local=2 viewers=0;1;2 fail=0
+request 12 recipe=cloudstep tier=HEAVY world=0 ordinal=6 local=2 viewers=0;1;2;3 fail=0
+request 13 recipe=cloudstep tier=HEAVY world=1 ordinal=9 local=2 viewers=0;1;2;3;4 fail=0
+request 14 recipe=cloudstep tier=HEAVY world=0 ordinal=12 local=2 viewers=0;1;2;3;4;5 fail=0
+request 15 recipe=cloudstep tier=HEAVY world=1 ordinal=15 local=2 viewers=0;1 fail=0
+request 16 recipe=cloudstep tier=HEAVY world=0 ordinal=18 local=2 viewers=0;1;2 fail=0
+request 17 recipe=cloudstep tier=HEAVY world=1 ordinal=21 local=2 viewers=0;1;2;3 fail=0
+request 18 recipe=cloudstep tier=HEAVY world=0 ordinal=24 local=2 viewers=0;1;2;3;4 fail=0
+request 19 recipe=cloudstep tier=HEAVY world=1 ordinal=27 local=2 viewers=0;1;2;3;4;5 fail=0
+expect 10 rank=9 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=70 source=70 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 11 rank=0 outcome=THINNED tier=HEAVY reserved=70 source=70 unsupported=0 kept=50 placements=150 batches=0:40:0:40;1:10:0:30 recipients=0:50;1:50;2:50
+expect 12 rank=1 outcome=THINNED tier=HEAVY reserved=70 source=70 unsupported=0 kept=50 placements=170 batches=0:40:0:40;1:10:0:30 recipients=0:40;1:40;2:40;3:50
+expect 13 rank=2 outcome=THINNED tier=HEAVY reserved=70 source=70 unsupported=0 kept=50 placements=90 batches=0:40:0:40;1:10:0:30 recipients=3:40;4:50
+expect 14 rank=3 outcome=THINNED tier=HEAVY reserved=70 source=70 unsupported=0 kept=50 placements=90 batches=0:40:0:40;1:10:0:30 recipients=4:40;5:50
+expect 15 rank=4 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=70 source=70 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 16 rank=5 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=70 source=70 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 17 rank=6 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=70 source=70 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 18 rank=7 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=70 source=70 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 19 rank=8 outcome=THINNED tier=HEAVY reserved=70 source=70 unsupported=0 kept=40 placements=40 batches=0:40:0:40 recipients=5:40
+totals reserved=700 source=700 kept=240 recipients=12 placements=540 unsupported=0 counts=SKIPPED_DELIVERY_BUDGET:5;THINNED:5
+end
+case cloudstep-no-wisp-support tick=11
+policy 256 1024 65536 10000 0 100000 0 500 90 50 50 50
+styles cloud:puff
+recipe cloudstep NORMAL roles=puff:ESSENTIAL;wisp:DECORATIVE
+variant cloudstep SIMPLE lifetime=1000000 layers=puff:8:cloud:puff:ALL:1000000
+variant cloudstep BALANCED lifetime=1000000 layers=puff:20:cloud:puff:ALL:1000000;wisp:12:cloud:wisp:ALL:1000000
+variant cloudstep HEAVY lifetime=1000000 layers=puff:40:cloud:puff:ALL:1000000;wisp:30:cloud:wisp:ALL:1000000
+request 10 recipe=cloudstep tier=HEAVY world=0 ordinal=0 local=2 viewers=0;1 fail=0
+request 11 recipe=cloudstep tier=HEAVY world=1 ordinal=3 local=2 viewers=0;1;2 fail=0
+request 12 recipe=cloudstep tier=HEAVY world=0 ordinal=6 local=2 viewers=0;1;2;3 fail=0
+request 13 recipe=cloudstep tier=HEAVY world=1 ordinal=9 local=2 viewers=0;1;2;3;4 fail=0
+request 14 recipe=cloudstep tier=HEAVY world=0 ordinal=12 local=2 viewers=0;1;2;3;4;5 fail=0
+request 15 recipe=cloudstep tier=HEAVY world=1 ordinal=15 local=2 viewers=0;1 fail=0
+request 16 recipe=cloudstep tier=HEAVY world=0 ordinal=18 local=2 viewers=0;1;2 fail=0
+request 17 recipe=cloudstep tier=HEAVY world=1 ordinal=21 local=2 viewers=0;1;2;3 fail=0
+request 18 recipe=cloudstep tier=HEAVY world=0 ordinal=24 local=2 viewers=0;1;2;3;4 fail=0
+request 19 recipe=cloudstep tier=HEAVY world=1 ordinal=27 local=2 viewers=0;1;2;3;4;5 fail=0
+expect 10 rank=9 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=70 source=70 unsupported=30 kept=0 placements=0 batches=- recipients=-
+expect 11 rank=0 outcome=THINNED tier=HEAVY reserved=70 source=70 unsupported=30 kept=40 placements=120 batches=0:40:0:40 recipients=0:40;1:40;2:40
+expect 12 rank=1 outcome=THINNED tier=HEAVY reserved=70 source=70 unsupported=30 kept=40 placements=160 batches=0:40:0:40 recipients=0:40;1:40;2:40;3:40
+expect 13 rank=2 outcome=THINNED tier=HEAVY reserved=70 source=70 unsupported=30 kept=40 placements=110 batches=0:40:0:40 recipients=0:10;1:10;2:10;3:40;4:40
+expect 14 rank=3 outcome=THINNED tier=HEAVY reserved=70 source=70 unsupported=30 kept=40 placements=90 batches=0:40:0:40 recipients=3:10;4:40;5:40
+expect 15 rank=4 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=70 source=70 unsupported=30 kept=0 placements=0 batches=- recipients=-
+expect 16 rank=5 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=70 source=70 unsupported=30 kept=0 placements=0 batches=- recipients=-
+expect 17 rank=6 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=70 source=70 unsupported=30 kept=0 placements=0 batches=- recipients=-
+expect 18 rank=7 outcome=THINNED tier=HEAVY reserved=70 source=70 unsupported=30 kept=10 placements=10 batches=0:10:0:40 recipients=4:10
+expect 19 rank=8 outcome=THINNED tier=HEAVY reserved=70 source=70 unsupported=30 kept=40 placements=40 batches=0:40:0:40 recipients=5:40
+totals reserved=700 source=700 kept=210 recipients=17 placements=530 unsupported=300 counts=SKIPPED_DELIVERY_BUDGET:4;THINNED:6
+end
+case cloudstep-one-viewer-many-effects tick=0
+policy 256 1024 65536 10000 0 100000 0 100000 45 64 256 1024
+styles cloud:puff;cloud:wisp
+recipe cloudstep NORMAL roles=puff:ESSENTIAL;wisp:DECORATIVE
+variant cloudstep SIMPLE lifetime=1000000 layers=puff:8:cloud:puff:ALL:1000000
+variant cloudstep BALANCED lifetime=1000000 layers=puff:20:cloud:puff:ALL:1000000;wisp:12:cloud:wisp:ALL:1000000
+variant cloudstep HEAVY lifetime=1000000 layers=puff:40:cloud:puff:ALL:1000000;wisp:30:cloud:wisp:ALL:1000000
+request 5 recipe=cloudstep tier=BALANCED world=0 ordinal=0 local=2 viewers=7 fail=0
+request 6 recipe=cloudstep tier=BALANCED world=0 ordinal=1 local=2 viewers=7 fail=0
+request 7 recipe=cloudstep tier=BALANCED world=1 ordinal=2 local=2 viewers=7 fail=0
+expect 5 rank=0 outcome=DELIVERED tier=BALANCED reserved=32 source=32 unsupported=0 kept=32 placements=32 batches=0:20:0:20;1:12:0:12 recipients=7:32
+expect 6 rank=1 outcome=THINNED tier=BALANCED reserved=32 source=32 unsupported=0 kept=13 placements=13 batches=0:13:1:20 recipients=7:13
+expect 7 rank=2 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=32 source=32 unsupported=0 kept=0 placements=0 batches=- recipients=-
+totals reserved=96 source=96 kept=45 recipients=2 placements=45 unsupported=0 counts=DELIVERED:1;SKIPPED_DELIVERY_BUDGET:1;THINNED:1
+end

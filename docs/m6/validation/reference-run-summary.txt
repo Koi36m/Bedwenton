@@ -1,0 +1,18 @@
+M6 R2 reference run: ./gradlew --no-daemon clean test check (Java 25.0.4.1, Gradle 9.1.0), BUILD SUCCESSFUL
+Implementation under test: the THROWAWAY M6 reference implementation (scratch only, not delivered),
+revised for R2, on top of the unchanged accepted sources of d4970cc.
+
+M1-M4 math tests: 313   M5 scene tests: 50   M6 delivery tests: 52   total: 415   not passed: 0
+JUnit XML reports: 59
+R1 for comparison: 313 + 50 + 49 = 412.
+
+M6 classes:
+  AdmissionTest                                   9 tests, 0 not passed
+  BudgetPropertyTest                              7 tests, 0 not passed
+  DeliveryReferenceTest                           7 tests, 0 not passed
+  DeliveryValidationTest                          7 tests, 0 not passed
+  FairnessTest                                    4 tests, 0 not passed
+  M6BoundaryTest                                  4 tests, 0 not passed
+  M6DeterminismTest                               2 tests, 0 not passed
+  M6StressTest                                    6 tests, 0 not passed
+  ThinningSelectionTest                           6 tests, 0 not passed

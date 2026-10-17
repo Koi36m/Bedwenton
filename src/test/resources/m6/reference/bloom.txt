@@ -1,0 +1,190 @@
+# M6 R1 independent reference plans; generator tools/generate_m6_reference_plans.py (Python standard library)
+# family bloom
+case bloom-reserve-t0 tick=0
+policy 256 1024 65536 200 48 300 60 100000 80 64 256 1024
+styles bloom:burst;bloom:petal
+recipe bloom-flower AMBIENT roles=-
+variant bloom-flower SIMPLE lifetime=1000000 layers=main:6:bloom:petal:ALL:1000000
+variant bloom-flower BALANCED lifetime=1000000 layers=main:12:bloom:petal:ALL:1000000
+variant bloom-flower HEAVY lifetime=1000000 layers=main:24:bloom:petal:ALL:1000000
+recipe bloom-strike ACTION roles=-
+variant bloom-strike SIMPLE lifetime=1000000 layers=main:16:bloom:burst:ALL:1000000
+variant bloom-strike BALANCED lifetime=1000000 layers=main:32:bloom:burst:ALL:1000000
+variant bloom-strike HEAVY lifetime=1000000 layers=main:64:bloom:burst:ALL:1000000
+request 100 recipe=bloom-flower tier=BALANCED world=0 ordinal=0 local=5 viewers=0;4 fail=0
+request 101 recipe=bloom-flower tier=BALANCED world=0 ordinal=1 local=5 viewers=1;5 fail=0
+request 102 recipe=bloom-flower tier=BALANCED world=0 ordinal=2 local=5 viewers=2;6 fail=0
+request 103 recipe=bloom-flower tier=BALANCED world=0 ordinal=3 local=5 viewers=3;4 fail=0
+request 104 recipe=bloom-flower tier=BALANCED world=0 ordinal=4 local=5 viewers=0;5 fail=0
+request 105 recipe=bloom-flower tier=BALANCED world=0 ordinal=5 local=5 viewers=1;6 fail=0
+request 106 recipe=bloom-flower tier=BALANCED world=0 ordinal=6 local=5 viewers=2;4 fail=0
+request 107 recipe=bloom-flower tier=BALANCED world=0 ordinal=7 local=5 viewers=3;5 fail=0
+request 1 recipe=bloom-strike tier=HEAVY world=0 ordinal=0 local=5 viewers=0;1;2;3 fail=0
+expect 100 rank=1 outcome=DELIVERED tier=BALANCED reserved=12 source=12 unsupported=0 kept=12 placements=24 batches=0:12:0:12 recipients=0:12;4:12
+expect 101 rank=2 outcome=DELIVERED tier=BALANCED reserved=12 source=12 unsupported=0 kept=12 placements=24 batches=0:12:0:12 recipients=1:12;5:12
+expect 102 rank=3 outcome=THINNED tier=BALANCED reserved=12 source=12 unsupported=0 kept=6 placements=12 batches=0:6:0:12 recipients=2:6;6:6
+expect 103 rank=4 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 104 rank=5 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 105 rank=6 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 106 rank=7 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 107 rank=8 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 1 rank=0 outcome=THINNED tier=HEAVY reserved=64 source=64 unsupported=0 kept=60 placements=240 batches=0:60:0:64 recipients=0:60;1:60;2:60;3:60
+totals reserved=160 source=160 kept=90 recipients=10 placements=300 unsupported=0 counts=DELIVERED:2;SKIPPED_DELIVERY_BUDGET:5;THINNED:2
+end
+case bloom-reserve-t1 tick=1
+policy 256 1024 65536 200 48 300 60 100000 80 64 256 1024
+styles bloom:burst;bloom:petal
+recipe bloom-flower AMBIENT roles=-
+variant bloom-flower SIMPLE lifetime=1000000 layers=main:6:bloom:petal:ALL:1000000
+variant bloom-flower BALANCED lifetime=1000000 layers=main:12:bloom:petal:ALL:1000000
+variant bloom-flower HEAVY lifetime=1000000 layers=main:24:bloom:petal:ALL:1000000
+recipe bloom-strike ACTION roles=-
+variant bloom-strike SIMPLE lifetime=1000000 layers=main:16:bloom:burst:ALL:1000000
+variant bloom-strike BALANCED lifetime=1000000 layers=main:32:bloom:burst:ALL:1000000
+variant bloom-strike HEAVY lifetime=1000000 layers=main:64:bloom:burst:ALL:1000000
+request 100 recipe=bloom-flower tier=BALANCED world=0 ordinal=0 local=5 viewers=0;4 fail=0
+request 101 recipe=bloom-flower tier=BALANCED world=0 ordinal=1 local=5 viewers=1;5 fail=0
+request 102 recipe=bloom-flower tier=BALANCED world=0 ordinal=2 local=5 viewers=2;6 fail=0
+request 103 recipe=bloom-flower tier=BALANCED world=0 ordinal=3 local=5 viewers=3;4 fail=0
+request 104 recipe=bloom-flower tier=BALANCED world=0 ordinal=4 local=5 viewers=0;5 fail=0
+request 105 recipe=bloom-flower tier=BALANCED world=0 ordinal=5 local=5 viewers=1;6 fail=0
+request 106 recipe=bloom-flower tier=BALANCED world=0 ordinal=6 local=5 viewers=2;4 fail=0
+request 107 recipe=bloom-flower tier=BALANCED world=0 ordinal=7 local=5 viewers=3;5 fail=0
+request 1 recipe=bloom-strike tier=HEAVY world=0 ordinal=1 local=5 viewers=0;1;2;3 fail=0
+expect 100 rank=8 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 101 rank=1 outcome=DELIVERED tier=BALANCED reserved=12 source=12 unsupported=0 kept=12 placements=24 batches=0:12:0:12 recipients=1:12;5:12
+expect 102 rank=2 outcome=DELIVERED tier=BALANCED reserved=12 source=12 unsupported=0 kept=12 placements=24 batches=0:12:0:12 recipients=2:12;6:12
+expect 103 rank=3 outcome=THINNED tier=BALANCED reserved=12 source=12 unsupported=0 kept=6 placements=12 batches=0:6:1:12 recipients=3:6;4:6
+expect 104 rank=4 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 105 rank=5 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 106 rank=6 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 107 rank=7 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 1 rank=0 outcome=THINNED tier=HEAVY reserved=64 source=64 unsupported=0 kept=60 placements=240 batches=0:60:1:64 recipients=0:60;1:60;2:60;3:60
+totals reserved=160 source=160 kept=90 recipients=10 placements=300 unsupported=0 counts=DELIVERED:2;SKIPPED_DELIVERY_BUDGET:5;THINNED:2
+end
+case bloom-reserve-t2 tick=2
+policy 256 1024 65536 200 48 300 60 100000 80 64 256 1024
+styles bloom:burst;bloom:petal
+recipe bloom-flower AMBIENT roles=-
+variant bloom-flower SIMPLE lifetime=1000000 layers=main:6:bloom:petal:ALL:1000000
+variant bloom-flower BALANCED lifetime=1000000 layers=main:12:bloom:petal:ALL:1000000
+variant bloom-flower HEAVY lifetime=1000000 layers=main:24:bloom:petal:ALL:1000000
+recipe bloom-strike ACTION roles=-
+variant bloom-strike SIMPLE lifetime=1000000 layers=main:16:bloom:burst:ALL:1000000
+variant bloom-strike BALANCED lifetime=1000000 layers=main:32:bloom:burst:ALL:1000000
+variant bloom-strike HEAVY lifetime=1000000 layers=main:64:bloom:burst:ALL:1000000
+request 100 recipe=bloom-flower tier=BALANCED world=0 ordinal=0 local=5 viewers=0;4 fail=0
+request 101 recipe=bloom-flower tier=BALANCED world=0 ordinal=1 local=5 viewers=1;5 fail=0
+request 102 recipe=bloom-flower tier=BALANCED world=0 ordinal=2 local=5 viewers=2;6 fail=0
+request 103 recipe=bloom-flower tier=BALANCED world=0 ordinal=3 local=5 viewers=3;4 fail=0
+request 104 recipe=bloom-flower tier=BALANCED world=0 ordinal=4 local=5 viewers=0;5 fail=0
+request 105 recipe=bloom-flower tier=BALANCED world=0 ordinal=5 local=5 viewers=1;6 fail=0
+request 106 recipe=bloom-flower tier=BALANCED world=0 ordinal=6 local=5 viewers=2;4 fail=0
+request 107 recipe=bloom-flower tier=BALANCED world=0 ordinal=7 local=5 viewers=3;5 fail=0
+request 1 recipe=bloom-strike tier=HEAVY world=0 ordinal=2 local=5 viewers=0;1;2;3 fail=0
+expect 100 rank=7 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 101 rank=8 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 102 rank=1 outcome=DELIVERED tier=BALANCED reserved=12 source=12 unsupported=0 kept=12 placements=24 batches=0:12:0:12 recipients=2:12;6:12
+expect 103 rank=2 outcome=DELIVERED tier=BALANCED reserved=12 source=12 unsupported=0 kept=12 placements=24 batches=0:12:0:12 recipients=3:12;4:12
+expect 104 rank=3 outcome=THINNED tier=BALANCED reserved=12 source=12 unsupported=0 kept=6 placements=12 batches=0:6:0:12 recipients=0:6;5:6
+expect 105 rank=4 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 106 rank=5 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 107 rank=6 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 1 rank=0 outcome=THINNED tier=HEAVY reserved=64 source=64 unsupported=0 kept=60 placements=240 batches=0:60:0:64 recipients=0:60;1:60;2:60;3:60
+totals reserved=160 source=160 kept=90 recipients=10 placements=300 unsupported=0 counts=DELIVERED:2;SKIPPED_DELIVERY_BUDGET:5;THINNED:2
+end
+case bloom-reserve-t3 tick=3
+policy 256 1024 65536 200 48 300 60 100000 80 64 256 1024
+styles bloom:burst;bloom:petal
+recipe bloom-flower AMBIENT roles=-
+variant bloom-flower SIMPLE lifetime=1000000 layers=main:6:bloom:petal:ALL:1000000
+variant bloom-flower BALANCED lifetime=1000000 layers=main:12:bloom:petal:ALL:1000000
+variant bloom-flower HEAVY lifetime=1000000 layers=main:24:bloom:petal:ALL:1000000
+recipe bloom-strike ACTION roles=-
+variant bloom-strike SIMPLE lifetime=1000000 layers=main:16:bloom:burst:ALL:1000000
+variant bloom-strike BALANCED lifetime=1000000 layers=main:32:bloom:burst:ALL:1000000
+variant bloom-strike HEAVY lifetime=1000000 layers=main:64:bloom:burst:ALL:1000000
+request 100 recipe=bloom-flower tier=BALANCED world=0 ordinal=0 local=5 viewers=0;4 fail=0
+request 101 recipe=bloom-flower tier=BALANCED world=0 ordinal=1 local=5 viewers=1;5 fail=0
+request 102 recipe=bloom-flower tier=BALANCED world=0 ordinal=2 local=5 viewers=2;6 fail=0
+request 103 recipe=bloom-flower tier=BALANCED world=0 ordinal=3 local=5 viewers=3;4 fail=0
+request 104 recipe=bloom-flower tier=BALANCED world=0 ordinal=4 local=5 viewers=0;5 fail=0
+request 105 recipe=bloom-flower tier=BALANCED world=0 ordinal=5 local=5 viewers=1;6 fail=0
+request 106 recipe=bloom-flower tier=BALANCED world=0 ordinal=6 local=5 viewers=2;4 fail=0
+request 107 recipe=bloom-flower tier=BALANCED world=0 ordinal=7 local=5 viewers=3;5 fail=0
+request 1 recipe=bloom-strike tier=HEAVY world=0 ordinal=3 local=5 viewers=0;1;2;3 fail=0
+expect 100 rank=6 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 101 rank=7 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 102 rank=8 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 103 rank=1 outcome=DELIVERED tier=BALANCED reserved=12 source=12 unsupported=0 kept=12 placements=24 batches=0:12:0:12 recipients=3:12;4:12
+expect 104 rank=2 outcome=DELIVERED tier=BALANCED reserved=12 source=12 unsupported=0 kept=12 placements=24 batches=0:12:0:12 recipients=0:12;5:12
+expect 105 rank=3 outcome=THINNED tier=BALANCED reserved=12 source=12 unsupported=0 kept=6 placements=12 batches=0:6:1:12 recipients=1:6;6:6
+expect 106 rank=4 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 107 rank=5 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 1 rank=0 outcome=THINNED tier=HEAVY reserved=64 source=64 unsupported=0 kept=60 placements=240 batches=0:60:1:64 recipients=0:60;1:60;2:60;3:60
+totals reserved=160 source=160 kept=90 recipients=10 placements=300 unsupported=0 counts=DELIVERED:2;SKIPPED_DELIVERY_BUDGET:5;THINNED:2
+end
+case bloom-reserve-t7 tick=7
+policy 256 1024 65536 200 48 300 60 100000 80 64 256 1024
+styles bloom:burst;bloom:petal
+recipe bloom-flower AMBIENT roles=-
+variant bloom-flower SIMPLE lifetime=1000000 layers=main:6:bloom:petal:ALL:1000000
+variant bloom-flower BALANCED lifetime=1000000 layers=main:12:bloom:petal:ALL:1000000
+variant bloom-flower HEAVY lifetime=1000000 layers=main:24:bloom:petal:ALL:1000000
+recipe bloom-strike ACTION roles=-
+variant bloom-strike SIMPLE lifetime=1000000 layers=main:16:bloom:burst:ALL:1000000
+variant bloom-strike BALANCED lifetime=1000000 layers=main:32:bloom:burst:ALL:1000000
+variant bloom-strike HEAVY lifetime=1000000 layers=main:64:bloom:burst:ALL:1000000
+request 100 recipe=bloom-flower tier=BALANCED world=0 ordinal=0 local=5 viewers=0;4 fail=0
+request 101 recipe=bloom-flower tier=BALANCED world=0 ordinal=1 local=5 viewers=1;5 fail=0
+request 102 recipe=bloom-flower tier=BALANCED world=0 ordinal=2 local=5 viewers=2;6 fail=0
+request 103 recipe=bloom-flower tier=BALANCED world=0 ordinal=3 local=5 viewers=3;4 fail=0
+request 104 recipe=bloom-flower tier=BALANCED world=0 ordinal=4 local=5 viewers=0;5 fail=0
+request 105 recipe=bloom-flower tier=BALANCED world=0 ordinal=5 local=5 viewers=1;6 fail=0
+request 106 recipe=bloom-flower tier=BALANCED world=0 ordinal=6 local=5 viewers=2;4 fail=0
+request 107 recipe=bloom-flower tier=BALANCED world=0 ordinal=7 local=5 viewers=3;5 fail=0
+request 1 recipe=bloom-strike tier=HEAVY world=0 ordinal=7 local=5 viewers=0;1;2;3 fail=0
+expect 100 rank=2 outcome=DELIVERED tier=BALANCED reserved=12 source=12 unsupported=0 kept=12 placements=24 batches=0:12:0:12 recipients=0:12;4:12
+expect 101 rank=3 outcome=THINNED tier=BALANCED reserved=12 source=12 unsupported=0 kept=6 placements=12 batches=0:6:1:12 recipients=1:6;5:6
+expect 102 rank=4 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 103 rank=5 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 104 rank=6 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 105 rank=7 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 106 rank=8 outcome=SKIPPED_DELIVERY_BUDGET tier=BALANCED reserved=12 source=12 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 107 rank=1 outcome=DELIVERED tier=BALANCED reserved=12 source=12 unsupported=0 kept=12 placements=24 batches=0:12:0:12 recipients=3:12;5:12
+expect 1 rank=0 outcome=THINNED tier=HEAVY reserved=64 source=64 unsupported=0 kept=60 placements=240 batches=0:60:1:64 recipients=0:60;1:60;2:60;3:60
+totals reserved=160 source=160 kept=90 recipients=10 placements=300 unsupported=0 counts=DELIVERED:2;SKIPPED_DELIVERY_BUDGET:5;THINNED:2
+end
+case bloom-burst-tiers tick=4
+policy 256 1024 65536 170 0 100000 0 100000 100000 64 256 1024
+styles bloom:petal
+recipe bloom-flower AMBIENT roles=-
+variant bloom-flower SIMPLE lifetime=1000000 layers=main:6:bloom:petal:ALL:1000000
+variant bloom-flower BALANCED lifetime=1000000 layers=main:12:bloom:petal:ALL:1000000
+variant bloom-flower HEAVY lifetime=1000000 layers=main:24:bloom:petal:ALL:1000000
+request 100 recipe=bloom-flower tier=HEAVY world=0 ordinal=0 local=5 viewers=0 fail=0
+request 101 recipe=bloom-flower tier=HEAVY world=0 ordinal=0 local=5 viewers=1 fail=0
+request 102 recipe=bloom-flower tier=HEAVY world=0 ordinal=0 local=5 viewers=2 fail=0
+request 103 recipe=bloom-flower tier=HEAVY world=0 ordinal=0 local=5 viewers=3 fail=0
+request 104 recipe=bloom-flower tier=HEAVY world=0 ordinal=0 local=5 viewers=4 fail=0
+request 105 recipe=bloom-flower tier=HEAVY world=0 ordinal=0 local=5 viewers=5 fail=0
+request 106 recipe=bloom-flower tier=HEAVY world=0 ordinal=0 local=5 viewers=6 fail=0
+request 107 recipe=bloom-flower tier=HEAVY world=0 ordinal=0 local=5 viewers=7 fail=0
+request 108 recipe=bloom-flower tier=HEAVY world=0 ordinal=0 local=5 viewers=8 fail=0
+request 109 recipe=bloom-flower tier=HEAVY world=0 ordinal=0 local=5 viewers=9 fail=0
+request 110 recipe=bloom-flower tier=HEAVY world=0 ordinal=0 local=5 viewers=10 fail=0
+request 111 recipe=bloom-flower tier=HEAVY world=0 ordinal=0 local=5 viewers=11 fail=0
+expect 100 rank=8 outcome=SKIPPED_GENERATION_BUDGET tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 101 rank=9 outcome=SKIPPED_GENERATION_BUDGET tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 102 rank=10 outcome=SKIPPED_GENERATION_BUDGET tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 103 rank=11 outcome=SKIPPED_GENERATION_BUDGET tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 104 rank=0 outcome=DELIVERED tier=HEAVY reserved=24 source=24 unsupported=0 kept=24 placements=24 batches=0:24:0:24 recipients=4:24
+expect 105 rank=1 outcome=DELIVERED tier=HEAVY reserved=24 source=24 unsupported=0 kept=24 placements=24 batches=0:24:0:24 recipients=5:24
+expect 106 rank=2 outcome=DELIVERED tier=HEAVY reserved=24 source=24 unsupported=0 kept=24 placements=24 batches=0:24:0:24 recipients=6:24
+expect 107 rank=3 outcome=DELIVERED tier=HEAVY reserved=24 source=24 unsupported=0 kept=24 placements=24 batches=0:24:0:24 recipients=7:24
+expect 108 rank=4 outcome=DELIVERED tier=HEAVY reserved=24 source=24 unsupported=0 kept=24 placements=24 batches=0:24:0:24 recipients=8:24
+expect 109 rank=5 outcome=DELIVERED tier=HEAVY reserved=24 source=24 unsupported=0 kept=24 placements=24 batches=0:24:0:24 recipients=9:24
+expect 110 rank=6 outcome=DELIVERED tier=HEAVY reserved=24 source=24 unsupported=0 kept=24 placements=24 batches=0:24:0:24 recipients=10:24
+expect 111 rank=7 outcome=SKIPPED_GENERATION_BUDGET tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+totals reserved=168 source=168 kept=168 recipients=7 placements=168 unsupported=0 counts=DELIVERED:7;SKIPPED_GENERATION_BUDGET:5
+end

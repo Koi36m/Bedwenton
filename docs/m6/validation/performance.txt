@@ -1,0 +1,10 @@
+M6 R1 performance probe (indicative; throwaway reference implementation; java version "25.0.4.1" 2026-08-18 LTS; 4 CPUs; -Xmx2g; 2026-10-17T05:47Z)
+small: 16 effects x 8 viewers, roomy         requests     16, viewer entries      128, generated     2296, placements     18368:       86095 ns/plan (M5 evaluation       35371 ns),  396.3 ns/viewer entry,       87172 bytes/plan
+small: 16 effects x 8 viewers, tight         requests     16, viewer entries      128, generated     2296, placements      8408:       91099 ns/plan (M5 evaluation       36298 ns),  428.1 ns/viewer entry,       84085 bytes/plan
+busy: 256 effects x 32 viewers, roomy        requests    256, viewer entries     8192, generated    34936, placements   1117952:     1344797 ns/plan (M5 evaluation      584480 ns),   92.8 ns/viewer entry,     1809424 bytes/plan
+busy: 256 effects x 32 viewers, tight        requests    256, viewer entries     8192, generated    20000, placements     60000:      609253 ns/plan (M5 evaluation      311670 ns),   36.3 ns/viewer entry,      920457 bytes/plan
+crowd: 64 effects x 1024 viewers, tight      requests     64, viewer entries    65536, generated     8824, placements     59392:     2169406 ns/plan (M5 evaluation      133334 ns),   31.1 ns/viewer entry,     4088269 bytes/plan
+ceiling: 65536 effects x 1 viewer, tight     requests  65536, viewer entries    65536, generated    20000, placements     20000:    53578809 ns/plan (M5 evaluation      969565 ns),  802.8 ns/viewer entry,    27860416 bytes/plan
+ceiling: 256 effects x 4096 viewers, tight   requests    256, viewer entries  1048576, generated     6144, placements     57344:    20988650 ns/plan (M5 evaluation      204319 ns),   19.8 ns/viewer entry,    59860952 bytes/plan
+full frame: 2^20 points, kept 2^20 x 4 viewers requests      1, viewer entries        4, generated  1048576, placements   4194304:    18521362 ns/plan (M5 evaluation    18454397 ns), 16741.4 ns/viewer entry,    25168800 bytes/plan
+sink 0

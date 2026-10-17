@@ -1,0 +1,74 @@
+# M6 R1 independent reference plans; generator tools/generate_m6_reference_plans.py (Python standard library)
+# family healer
+case healer-cap-3 tick=0
+policy 256 1024 65536 10000 0 100000 0 100000 100000 3 3 1024
+styles heal:marker;heal:ring;heal:sparkle
+recipe healer ACTION roles=marker:ESSENTIAL;sparkle:DECORATIVE
+variant healer BALANCED lifetime=60 layers=pulse-0:24:heal:ring:ALL:1000000;pulse-1:24:heal:ring:ALL:1000000;pulse-2:24:heal:ring:ALL:1000000;marker:3:heal:marker:ALL:1000000;sparkle:60:heal:sparkle:ALL:1000000
+request 1 recipe=healer tier=BALANCED world=0 ordinal=3 local=10 viewers=1;2;3 fail=0
+expect 1 rank=0 outcome=THINNED tier=BALANCED reserved=135 source=135 unsupported=0 kept=3 placements=9 batches=3:3:0:3 recipients=1:3;2:3;3:3
+totals reserved=135 source=135 kept=3 recipients=3 placements=9 unsupported=0 counts=THINNED:1
+end
+case healer-cap-10 tick=0
+policy 256 1024 65536 10000 0 100000 0 100000 100000 10 10 1024
+styles heal:marker;heal:ring;heal:sparkle
+recipe healer ACTION roles=marker:ESSENTIAL;sparkle:DECORATIVE
+variant healer BALANCED lifetime=60 layers=pulse-0:24:heal:ring:ALL:1000000;pulse-1:24:heal:ring:ALL:1000000;pulse-2:24:heal:ring:ALL:1000000;marker:3:heal:marker:ALL:1000000;sparkle:60:heal:sparkle:ALL:1000000
+request 1 recipe=healer tier=BALANCED world=0 ordinal=10 local=10 viewers=1;2;3 fail=0
+expect 1 rank=0 outcome=THINNED tier=BALANCED reserved=135 source=135 unsupported=0 kept=10 placements=30 batches=3:3:0:3;0:3:2:24;1:2:10:24;2:2:10:24 recipients=1:10;2:10;3:10
+totals reserved=135 source=135 kept=10 recipients=3 placements=30 unsupported=0 counts=THINNED:1
+end
+case healer-cap-75 tick=0
+policy 256 1024 65536 10000 0 100000 0 100000 100000 64 75 1024
+styles heal:marker;heal:ring;heal:sparkle
+recipe healer ACTION roles=marker:ESSENTIAL;sparkle:DECORATIVE
+variant healer BALANCED lifetime=60 layers=pulse-0:24:heal:ring:ALL:1000000;pulse-1:24:heal:ring:ALL:1000000;pulse-2:24:heal:ring:ALL:1000000;marker:3:heal:marker:ALL:1000000;sparkle:60:heal:sparkle:ALL:1000000
+request 1 recipe=healer tier=BALANCED world=0 ordinal=75 local=10 viewers=1;2;3 fail=0
+expect 1 rank=0 outcome=THINNED tier=BALANCED reserved=135 source=135 unsupported=0 kept=75 placements=225 batches=3:3:0:3;0:24:0:24;1:24:0:24;2:24:0:24 recipients=1:75;2:75;3:75
+totals reserved=135 source=135 kept=75 recipients=3 placements=225 unsupported=0 counts=THINNED:1
+end
+case healer-cap-80 tick=0
+policy 256 1024 65536 10000 0 100000 0 100000 100000 64 80 1024
+styles heal:marker;heal:ring;heal:sparkle
+recipe healer ACTION roles=marker:ESSENTIAL;sparkle:DECORATIVE
+variant healer BALANCED lifetime=60 layers=pulse-0:24:heal:ring:ALL:1000000;pulse-1:24:heal:ring:ALL:1000000;pulse-2:24:heal:ring:ALL:1000000;marker:3:heal:marker:ALL:1000000;sparkle:60:heal:sparkle:ALL:1000000
+request 1 recipe=healer tier=BALANCED world=0 ordinal=80 local=10 viewers=1;2;3 fail=0
+expect 1 rank=0 outcome=THINNED tier=BALANCED reserved=135 source=135 unsupported=0 kept=80 placements=240 batches=3:3:0:3;0:24:0:24;1:24:0:24;2:24:0:24;4:5:8:60 recipients=1:80;2:80;3:80
+totals reserved=135 source=135 kept=80 recipients=3 placements=240 unsupported=0 counts=THINNED:1
+end
+case healer-cap-135 tick=0
+policy 256 1024 65536 10000 0 100000 0 100000 100000 64 135 1024
+styles heal:marker;heal:ring;heal:sparkle
+recipe healer ACTION roles=marker:ESSENTIAL;sparkle:DECORATIVE
+variant healer BALANCED lifetime=60 layers=pulse-0:24:heal:ring:ALL:1000000;pulse-1:24:heal:ring:ALL:1000000;pulse-2:24:heal:ring:ALL:1000000;marker:3:heal:marker:ALL:1000000;sparkle:60:heal:sparkle:ALL:1000000
+request 1 recipe=healer tier=BALANCED world=0 ordinal=135 local=10 viewers=1;2;3 fail=0
+expect 1 rank=0 outcome=DELIVERED tier=BALANCED reserved=135 source=135 unsupported=0 kept=135 placements=405 batches=3:3:0:3;0:24:0:24;1:24:0:24;2:24:0:24;4:60:0:60 recipients=1:135;2:135;3:135
+totals reserved=135 source=135 kept=135 recipients=3 placements=405 unsupported=0 counts=DELIVERED:1
+end
+case healer-cap-200 tick=0
+policy 256 1024 65536 10000 0 100000 0 100000 100000 64 200 1024
+styles heal:marker;heal:ring;heal:sparkle
+recipe healer ACTION roles=marker:ESSENTIAL;sparkle:DECORATIVE
+variant healer BALANCED lifetime=60 layers=pulse-0:24:heal:ring:ALL:1000000;pulse-1:24:heal:ring:ALL:1000000;pulse-2:24:heal:ring:ALL:1000000;marker:3:heal:marker:ALL:1000000;sparkle:60:heal:sparkle:ALL:1000000
+request 1 recipe=healer tier=BALANCED world=0 ordinal=200 local=10 viewers=1;2;3 fail=0
+expect 1 rank=0 outcome=DELIVERED tier=BALANCED reserved=135 source=135 unsupported=0 kept=135 placements=405 batches=3:3:0:3;0:24:0:24;1:24:0:24;2:24:0:24;4:60:0:60 recipients=1:135;2:135;3:135
+totals reserved=135 source=135 kept=135 recipients=3 placements=405 unsupported=0 counts=DELIVERED:1
+end
+case healer-ended tick=0
+policy 256 1024 65536 10000 0 100000 0 100000 100000 64 256 1024
+styles heal:marker;heal:ring;heal:sparkle
+recipe healer ACTION roles=marker:ESSENTIAL;sparkle:DECORATIVE
+variant healer BALANCED lifetime=60 layers=pulse-0:24:heal:ring:ALL:1000000;pulse-1:24:heal:ring:ALL:1000000;pulse-2:24:heal:ring:ALL:1000000;marker:3:heal:marker:ALL:1000000;sparkle:60:heal:sparkle:ALL:1000000
+request 1 recipe=healer tier=BALANCED world=0 ordinal=5 local=60 viewers=1 fail=0
+expect 1 rank=0 outcome=SKIPPED_INACTIVE tier=BALANCED reserved=135 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+totals reserved=135 source=0 kept=0 recipients=0 placements=0 unsupported=0 counts=SKIPPED_INACTIVE:1
+end
+case healer-placement-limited tick=0
+policy 256 1024 65536 10000 0 40 0 100000 100000 64 256 1024
+styles heal:marker;heal:ring;heal:sparkle
+recipe healer ACTION roles=marker:ESSENTIAL;sparkle:DECORATIVE
+variant healer BALANCED lifetime=60 layers=pulse-0:24:heal:ring:ALL:1000000;pulse-1:24:heal:ring:ALL:1000000;pulse-2:24:heal:ring:ALL:1000000;marker:3:heal:marker:ALL:1000000;sparkle:60:heal:sparkle:ALL:1000000
+request 1 recipe=healer tier=HEAVY world=0 ordinal=5 local=10 viewers=1;2 fail=0
+expect 1 rank=0 outcome=THINNED tier=BALANCED reserved=135 source=135 unsupported=0 kept=20 placements=40 batches=3:3:0:3;0:6:1:24;1:6:1:24;2:5:0:24 recipients=1:20;2:20
+totals reserved=135 source=135 kept=20 recipients=2 placements=40 unsupported=0 counts=THINNED:1
+end

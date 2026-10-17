@@ -1,0 +1,224 @@
+# M6 R1 independent reference plans; generator tools/generate_m6_reference_plans.py (Python standard library)
+# family stress
+case stress-many tick=5
+policy 256 1024 65536 10000 0 97 0 40 9 64 256 1024
+styles stress:dot
+recipe dot NORMAL roles=-
+variant dot SIMPLE lifetime=1000000 layers=main:1:stress:dot:ALL:1000000
+variant dot BALANCED lifetime=1000000 layers=main:2:stress:dot:ALL:1000000
+variant dot HEAVY lifetime=1000000 layers=main:4:stress:dot:ALL:1000000
+request 0 recipe=dot tier=HEAVY world=0 ordinal=0 local=1 viewers=- fail=0
+request 1 recipe=dot tier=HEAVY world=1 ordinal=1 local=1 viewers=0 fail=0
+request 2 recipe=dot tier=HEAVY world=2 ordinal=2 local=1 viewers=0;1 fail=0
+request 3 recipe=dot tier=HEAVY world=0 ordinal=3 local=1 viewers=0;1;2 fail=0
+request 4 recipe=dot tier=HEAVY world=1 ordinal=4 local=1 viewers=- fail=0
+request 5 recipe=dot tier=HEAVY world=2 ordinal=5 local=1 viewers=0 fail=0
+request 6 recipe=dot tier=HEAVY world=0 ordinal=6 local=1 viewers=0;1 fail=0
+request 7 recipe=dot tier=HEAVY world=1 ordinal=7 local=1 viewers=0;1;2 fail=0
+request 8 recipe=dot tier=HEAVY world=2 ordinal=8 local=1 viewers=- fail=0
+request 9 recipe=dot tier=HEAVY world=0 ordinal=9 local=1 viewers=0 fail=0
+request 10 recipe=dot tier=HEAVY world=1 ordinal=10 local=1 viewers=0;1 fail=0
+request 11 recipe=dot tier=HEAVY world=2 ordinal=11 local=1 viewers=0;1;2 fail=0
+request 12 recipe=dot tier=HEAVY world=0 ordinal=12 local=1 viewers=- fail=0
+request 13 recipe=dot tier=HEAVY world=1 ordinal=13 local=1 viewers=0 fail=0
+request 14 recipe=dot tier=HEAVY world=2 ordinal=14 local=1 viewers=0;1 fail=0
+request 15 recipe=dot tier=HEAVY world=0 ordinal=15 local=1 viewers=0;1;2 fail=0
+request 16 recipe=dot tier=HEAVY world=1 ordinal=16 local=1 viewers=- fail=0
+request 17 recipe=dot tier=HEAVY world=2 ordinal=17 local=1 viewers=0 fail=0
+request 18 recipe=dot tier=HEAVY world=0 ordinal=18 local=1 viewers=0;1 fail=0
+request 19 recipe=dot tier=HEAVY world=1 ordinal=19 local=1 viewers=0;1;2 fail=0
+request 20 recipe=dot tier=HEAVY world=2 ordinal=20 local=1 viewers=- fail=0
+request 21 recipe=dot tier=HEAVY world=0 ordinal=21 local=1 viewers=0 fail=0
+request 22 recipe=dot tier=HEAVY world=1 ordinal=22 local=1 viewers=0;1 fail=0
+request 23 recipe=dot tier=HEAVY world=2 ordinal=23 local=1 viewers=0;1;2 fail=0
+request 24 recipe=dot tier=HEAVY world=0 ordinal=24 local=1 viewers=- fail=0
+request 25 recipe=dot tier=HEAVY world=1 ordinal=25 local=1 viewers=0 fail=0
+request 26 recipe=dot tier=HEAVY world=2 ordinal=26 local=1 viewers=0;1 fail=0
+request 27 recipe=dot tier=HEAVY world=0 ordinal=27 local=1 viewers=0;1;2 fail=0
+request 28 recipe=dot tier=HEAVY world=1 ordinal=28 local=1 viewers=- fail=0
+request 29 recipe=dot tier=HEAVY world=2 ordinal=29 local=1 viewers=0 fail=0
+expect 0 rank=25 outcome=SKIPPED_NO_VIEWERS tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 1 rank=26 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=4 source=4 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 2 rank=27 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=4 source=4 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 3 rank=28 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=4 source=4 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 4 rank=29 outcome=SKIPPED_NO_VIEWERS tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 5 rank=0 outcome=DELIVERED tier=HEAVY reserved=4 source=4 unsupported=0 kept=4 placements=4 batches=0:4:0:4 recipients=0:4
+expect 6 rank=1 outcome=DELIVERED tier=HEAVY reserved=4 source=4 unsupported=0 kept=4 placements=8 batches=0:4:0:4 recipients=0:4;1:4
+expect 7 rank=2 outcome=THINNED tier=HEAVY reserved=4 source=4 unsupported=0 kept=4 placements=9 batches=0:4:0:4 recipients=0:1;1:4;2:4
+expect 8 rank=3 outcome=SKIPPED_NO_VIEWERS tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 9 rank=4 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=4 source=4 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 10 rank=5 outcome=THINNED tier=HEAVY reserved=4 source=4 unsupported=0 kept=1 placements=1 batches=0:1:2:4 recipients=1:1
+expect 11 rank=6 outcome=THINNED tier=HEAVY reserved=4 source=4 unsupported=0 kept=4 placements=4 batches=0:4:0:4 recipients=2:4
+expect 12 rank=7 outcome=SKIPPED_NO_VIEWERS tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 13 rank=8 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=4 source=4 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 14 rank=9 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=4 source=4 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 15 rank=10 outcome=THINNED tier=HEAVY reserved=4 source=4 unsupported=0 kept=1 placements=1 batches=0:1:3:4 recipients=2:1
+expect 16 rank=11 outcome=SKIPPED_NO_VIEWERS tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 17 rank=12 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=4 source=4 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 18 rank=13 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=4 source=4 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 19 rank=14 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=4 source=4 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 20 rank=15 outcome=SKIPPED_NO_VIEWERS tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 21 rank=16 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=4 source=4 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 22 rank=17 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=4 source=4 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 23 rank=18 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=4 source=4 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 24 rank=19 outcome=SKIPPED_NO_VIEWERS tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 25 rank=20 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=4 source=4 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 26 rank=21 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=4 source=4 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 27 rank=22 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=4 source=4 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 28 rank=23 outcome=SKIPPED_NO_VIEWERS tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 29 rank=24 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=4 source=4 unsupported=0 kept=0 placements=0 batches=- recipients=-
+totals reserved=88 source=88 kept=18 recipients=9 placements=27 unsupported=0 counts=DELIVERED:2;SKIPPED_DELIVERY_BUDGET:16;SKIPPED_NO_VIEWERS:8;THINNED:4
+end
+case stress-exact-budget tick=0
+policy 256 1024 65536 4 0 12 0 100000 100000 64 256 1024
+styles stress:dot
+recipe dot NORMAL roles=-
+variant dot SIMPLE lifetime=1000000 layers=main:1:stress:dot:ALL:1000000
+variant dot BALANCED lifetime=1000000 layers=main:2:stress:dot:ALL:1000000
+variant dot HEAVY lifetime=1000000 layers=main:4:stress:dot:ALL:1000000
+request 1 recipe=dot tier=HEAVY world=0 ordinal=0 local=1 viewers=1;2;3 fail=0
+expect 1 rank=0 outcome=DELIVERED tier=HEAVY reserved=4 source=4 unsupported=0 kept=4 placements=12 batches=0:4:0:4 recipients=1:4;2:4;3:4
+totals reserved=4 source=4 kept=4 recipients=3 placements=12 unsupported=0 counts=DELIVERED:1
+end
+case stress-one-below tick=0
+policy 256 1024 65536 3 0 11 0 100000 100000 64 256 1024
+styles stress:dot
+recipe dot NORMAL roles=-
+variant dot SIMPLE lifetime=1000000 layers=main:1:stress:dot:ALL:1000000
+variant dot BALANCED lifetime=1000000 layers=main:2:stress:dot:ALL:1000000
+variant dot HEAVY lifetime=1000000 layers=main:4:stress:dot:ALL:1000000
+request 1 recipe=dot tier=HEAVY world=0 ordinal=0 local=1 viewers=1;2;3 fail=0
+expect 1 rank=0 outcome=DELIVERED tier=BALANCED reserved=2 source=2 unsupported=0 kept=2 placements=6 batches=0:2:0:2 recipients=1:2;2:2;3:2
+totals reserved=2 source=2 kept=2 recipients=3 placements=6 unsupported=0 counts=DELIVERED:1
+end
+case stress-full-frame-denied tick=0
+policy 256 1024 65536 1048575 1048575 100000 0 100000 100000 64 256 1024
+styles stress:dot
+recipe big AMBIENT roles=-
+variant big HEAVY lifetime=1000000 layers=all:1048576:stress:dot:ALL:1000000
+request 1 recipe=big tier=HEAVY world=0 ordinal=0 local=1 viewers=1;2 fail=0
+expect 1 rank=0 outcome=SKIPPED_GENERATION_BUDGET tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+totals reserved=0 source=0 kept=0 recipients=0 placements=0 unsupported=0 counts=SKIPPED_GENERATION_BUDGET:1
+end
+case stress-full-frame-admitted tick=0
+policy 256 1024 65536 1048576 0 1125899906842624 0 1125899906842624 1125899906842624 64 1024 1048576
+styles stress:dot
+recipe big AMBIENT roles=-
+variant big HEAVY lifetime=1000000 layers=all:1048576:stress:dot:ALL:1000000
+request 1 recipe=big tier=HEAVY world=0 ordinal=0 local=1 viewers=1;2 fail=0
+expect 1 rank=0 outcome=DELIVERED tier=HEAVY reserved=1048576 source=1048576 unsupported=0 kept=1048576 placements=2097152 batches=0:1048576:0:1048576 recipients=1:1048576;2:1048576
+totals reserved=1048576 source=1048576 kept=1048576 recipients=2 placements=2097152 unsupported=0 counts=DELIVERED:1
+end
+case stress-huge-ids tick=-9223372036854775808
+policy 256 1024 65536 10000 0 7 0 100000 100000 64 256 1024
+styles stress:dot
+recipe dot NORMAL roles=-
+variant dot SIMPLE lifetime=1000000 layers=main:1:stress:dot:ALL:1000000
+variant dot BALANCED lifetime=1000000 layers=main:2:stress:dot:ALL:1000000
+variant dot HEAVY lifetime=1000000 layers=main:4:stress:dot:ALL:1000000
+request 4611686018427387904 recipe=dot tier=HEAVY world=0 ordinal=-4611686018427387904 local=1 viewers=0 fail=0
+request 4611686018427387905 recipe=dot tier=HEAVY world=0 ordinal=-4611686018427387905 local=1 viewers=1 fail=0
+request 4611686018427387906 recipe=dot tier=HEAVY world=0 ordinal=-4611686018427387906 local=1 viewers=2 fail=0
+request 4611686018427387907 recipe=dot tier=HEAVY world=0 ordinal=-4611686018427387907 local=1 viewers=3 fail=0
+request 4611686018427387908 recipe=dot tier=HEAVY world=0 ordinal=-4611686018427387908 local=1 viewers=4 fail=0
+expect 4611686018427387904 rank=3 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=4 source=4 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 4611686018427387905 rank=4 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=4 source=4 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 4611686018427387906 rank=0 outcome=DELIVERED tier=HEAVY reserved=4 source=4 unsupported=0 kept=4 placements=4 batches=0:4:0:4 recipients=2:4
+expect 4611686018427387907 rank=1 outcome=THINNED tier=HEAVY reserved=4 source=4 unsupported=0 kept=3 placements=3 batches=0:3:1:4 recipients=3:3
+expect 4611686018427387908 rank=2 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=4 source=4 unsupported=0 kept=0 placements=0 batches=- recipients=-
+totals reserved=20 source=20 kept=7 recipients=2 placements=7 unsupported=0 counts=DELIVERED:1;SKIPPED_DELIVERY_BUDGET:3;THINNED:1
+end
+case stress-failure-isolated tick=0
+policy 256 1024 65536 10000 0 100000 0 100000 100000 64 256 1024
+styles stress:dot
+recipe dot NORMAL roles=-
+variant dot SIMPLE lifetime=1000000 layers=main:1:stress:dot:ALL:1000000
+variant dot BALANCED lifetime=1000000 layers=main:2:stress:dot:ALL:1000000
+variant dot HEAVY lifetime=1000000 layers=main:4:stress:dot:ALL:1000000
+request 1 recipe=dot tier=HEAVY world=0 ordinal=0 local=1 viewers=1 fail=1
+request 2 recipe=dot tier=HEAVY world=0 ordinal=0 local=1 viewers=- fail=0
+request 3 recipe=dot tier=HEAVY world=0 ordinal=0 local=1 viewers=1 fail=0
+expect 1 rank=0 outcome=FAILED_EVALUATION tier=HEAVY reserved=4 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 2 rank=1 outcome=SKIPPED_NO_VIEWERS tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 3 rank=2 outcome=DELIVERED tier=HEAVY reserved=4 source=4 unsupported=0 kept=4 placements=4 batches=0:4:0:4 recipients=1:4
+totals reserved=8 source=4 kept=4 recipients=1 placements=4 unsupported=0 counts=DELIVERED:1;FAILED_EVALUATION:1;SKIPPED_NO_VIEWERS:1
+end
+case stress-zero-budgets tick=0
+policy 256 1024 65536 0 0 0 0 0 0 64 256 1024
+styles stress:dot
+recipe dot NORMAL roles=-
+variant dot SIMPLE lifetime=1000000 layers=main:1:stress:dot:ALL:1000000
+variant dot BALANCED lifetime=1000000 layers=main:2:stress:dot:ALL:1000000
+variant dot HEAVY lifetime=1000000 layers=main:4:stress:dot:ALL:1000000
+request 3 recipe=dot tier=HEAVY world=0 ordinal=0 local=1 viewers=1 fail=0
+expect 3 rank=0 outcome=SKIPPED_GENERATION_BUDGET tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+totals reserved=0 source=0 kept=0 recipients=0 placements=0 unsupported=0 counts=SKIPPED_GENERATION_BUDGET:1
+end
+case stress-no-eligible-tier tick=0
+policy 256 1024 65536 10000 0 100000 0 100000 100000 64 256 1024
+styles stress:dot
+recipe upper NORMAL roles=-
+variant upper BALANCED lifetime=1000000 layers=main:5:stress:dot:ALL:1000000
+variant upper HEAVY lifetime=1000000 layers=main:9:stress:dot:ALL:1000000
+request 1 recipe=upper tier=SIMPLE world=0 ordinal=0 local=1 viewers=1 fail=1
+request 2 recipe=upper tier=BALANCED world=0 ordinal=0 local=1 viewers=1 fail=0
+request 3 recipe=upper tier=HEAVY world=0 ordinal=0 local=1 viewers=1 fail=0
+expect 1 rank=0 outcome=SKIPPED_NO_ELIGIBLE_TIER tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+expect 2 rank=1 outcome=DELIVERED tier=BALANCED reserved=5 source=5 unsupported=0 kept=5 placements=5 batches=0:5:0:5 recipients=1:5
+expect 3 rank=2 outcome=DELIVERED tier=HEAVY reserved=9 source=9 unsupported=0 kept=9 placements=9 batches=0:9:0:9 recipients=1:9
+totals reserved=14 source=14 kept=14 recipients=2 placements=14 unsupported=0 counts=DELIVERED:2;SKIPPED_NO_ELIGIBLE_TIER:1
+end
+case stress-reserve-generation-indivisible tick=0
+policy 256 1024 65536 100 30 100000 0 100000 100000 64 256 1024
+styles stress:dot
+recipe act70 ACTION roles=-
+variant act70 HEAVY lifetime=1000000 layers=main:70:stress:dot:ALL:1000000
+recipe amb20 AMBIENT roles=-
+variant amb20 HEAVY lifetime=1000000 layers=main:20:stress:dot:ALL:1000000
+request 1 recipe=act70 tier=HEAVY world=0 ordinal=0 local=1 viewers=1 fail=0
+request 2 recipe=amb20 tier=HEAVY world=0 ordinal=0 local=1 viewers=2 fail=0
+request 3 recipe=amb20 tier=HEAVY world=0 ordinal=0 local=1 viewers=3 fail=0
+expect 1 rank=0 outcome=DELIVERED tier=HEAVY reserved=70 source=70 unsupported=0 kept=70 placements=70 batches=0:70:0:70 recipients=1:70
+expect 2 rank=1 outcome=DELIVERED tier=HEAVY reserved=20 source=20 unsupported=0 kept=20 placements=20 batches=0:20:0:20 recipients=2:20
+expect 3 rank=2 outcome=SKIPPED_GENERATION_BUDGET tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+totals reserved=90 source=90 kept=90 recipients=2 placements=90 unsupported=0 counts=DELIVERED:2;SKIPPED_GENERATION_BUDGET:1
+end
+case stress-reserve-generation-too-large tick=0
+policy 256 1024 65536 100 30 100000 0 100000 100000 64 256 1024
+styles stress:dot
+recipe act70 ACTION roles=-
+variant act70 HEAVY lifetime=1000000 layers=main:70:stress:dot:ALL:1000000
+recipe amb31 AMBIENT roles=-
+variant amb31 HEAVY lifetime=1000000 layers=main:31:stress:dot:ALL:1000000
+request 1 recipe=act70 tier=HEAVY world=0 ordinal=0 local=1 viewers=1 fail=0
+request 2 recipe=amb31 tier=HEAVY world=0 ordinal=0 local=1 viewers=2 fail=0
+expect 1 rank=0 outcome=DELIVERED tier=HEAVY reserved=70 source=70 unsupported=0 kept=70 placements=70 batches=0:70:0:70 recipients=1:70
+expect 2 rank=1 outcome=SKIPPED_GENERATION_BUDGET tier=- reserved=0 source=0 unsupported=0 kept=0 placements=0 batches=- recipients=-
+totals reserved=70 source=70 kept=70 recipients=1 placements=70 unsupported=0 counts=DELIVERED:1;SKIPPED_GENERATION_BUDGET:1
+end
+case stress-reserve-placement-3-viewers tick=0
+policy 256 1024 65536 10000 0 100 5 100000 100000 64 256 1024
+styles stress:dot
+recipe act95 ACTION roles=-
+variant act95 HEAVY lifetime=1000000 layers=main:95:stress:dot:ALL:1000000
+recipe amb10 AMBIENT roles=-
+variant amb10 HEAVY lifetime=1000000 layers=main:10:stress:dot:ALL:1000000
+request 1 recipe=act95 tier=HEAVY world=0 ordinal=0 local=1 viewers=100 fail=0
+request 2 recipe=amb10 tier=HEAVY world=0 ordinal=0 local=1 viewers=0;1;2 fail=0
+expect 1 rank=0 outcome=DELIVERED tier=HEAVY reserved=95 source=95 unsupported=0 kept=95 placements=95 batches=0:95:0:95 recipients=100:95
+expect 2 rank=1 outcome=THINNED tier=HEAVY reserved=10 source=10 unsupported=0 kept=1 placements=3 batches=0:1:0:10 recipients=0:1;1:1;2:1
+totals reserved=105 source=105 kept=96 recipients=4 placements=98 unsupported=0 counts=DELIVERED:1;THINNED:1
+end
+case stress-reserve-placement-6-viewers tick=0
+policy 256 1024 65536 10000 0 100 5 100000 100000 64 256 1024
+styles stress:dot
+recipe act95 ACTION roles=-
+variant act95 HEAVY lifetime=1000000 layers=main:95:stress:dot:ALL:1000000
+recipe amb10 AMBIENT roles=-
+variant amb10 HEAVY lifetime=1000000 layers=main:10:stress:dot:ALL:1000000
+request 1 recipe=act95 tier=HEAVY world=0 ordinal=0 local=1 viewers=100 fail=0
+request 2 recipe=amb10 tier=HEAVY world=0 ordinal=0 local=1 viewers=0;1;2;3;4;5 fail=0
+expect 1 rank=0 outcome=DELIVERED tier=HEAVY reserved=95 source=95 unsupported=0 kept=95 placements=95 batches=0:95:0:95 recipients=100:95
+expect 2 rank=1 outcome=SKIPPED_DELIVERY_BUDGET tier=HEAVY reserved=10 source=10 unsupported=0 kept=0 placements=0 batches=- recipients=-
+totals reserved=105 source=105 kept=95 recipients=1 placements=95 unsupported=0 counts=DELIVERED:1;SKIPPED_DELIVERY_BUDGET:1
+end

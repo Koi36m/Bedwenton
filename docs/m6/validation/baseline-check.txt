@@ -1,0 +1,42 @@
+Baseline check (R2): git diff --name-status d4970cc23938f95d12c5b5e3c3d3b4d687f3e4eb (committed tree plus working tree), 2026-10-17T07:05Z
+Every entry must be an addition (A) under docs/m6/, src/test/java/workshop/vfx/delivery/, src/test/resources/m6/ or tools/generate_m6_reference_plans.py.
+
+A	docs/m6/M6-ARCHITECTURE.md
+A	docs/m6/M6-CONVENTIONS.md
+A	docs/m6/M6-DESIGN-DECISIONS.md
+A	docs/m6/M6-DESIGN-KICKOFF.md
+A	docs/m6/M6-IMPLEMENTATION-CONTRACT.md
+A	docs/m6/M6-R1-REPORT.md
+A	docs/m6/M6-RISKS.md
+A	docs/m6/M6-TEST-SPECIFICATION.md
+A	docs/m6/README-FOR-CODEX-M6.md
+A	docs/m6/validation/PerformanceProbe.java
+A	docs/m6/validation/README.md
+A	docs/m6/validation/baseline-check.txt
+A	docs/m6/validation/mutants-r2.py
+A	docs/m6/validation/mutants.py
+A	docs/m6/validation/mutation-results-r2.txt
+A	docs/m6/validation/mutation-results.txt
+A	docs/m6/validation/performance.txt
+A	docs/m6/validation/reference-regeneration.txt
+A	docs/m6/validation/reference-run-summary.txt
+A	src/test/java/workshop/vfx/delivery/AdmissionTest.java
+A	src/test/java/workshop/vfx/delivery/BudgetPropertyTest.java
+A	src/test/java/workshop/vfx/delivery/DeliveryReferenceTest.java
+A	src/test/java/workshop/vfx/delivery/DeliveryValidationTest.java
+A	src/test/java/workshop/vfx/delivery/FairnessTest.java
+A	src/test/java/workshop/vfx/delivery/M6BoundaryTest.java
+A	src/test/java/workshop/vfx/delivery/M6DeterminismTest.java
+A	src/test/java/workshop/vfx/delivery/M6StressTest.java
+A	src/test/java/workshop/vfx/delivery/M6TestSupport.java
+A	src/test/java/workshop/vfx/delivery/ThinningSelectionTest.java
+A	src/test/resources/m6/reference/MANIFEST.sha256
+A	src/test/resources/m6/reference/astral.txt
+A	src/test/resources/m6/reference/bloom.txt
+A	src/test/resources/m6/reference/cloudstep.txt
+A	src/test/resources/m6/reference/healer.txt
+A	src/test/resources/m6/reference/stress.txt
+A	src/test/resources/m6/reference/trident.txt
+A	tools/generate_m6_reference_plans.py
+
+RESULT: no modified, deleted or out-of-scope file; M1-M5 sources, tests, fixtures, generators and workflows unchanged.
