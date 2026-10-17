@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.delivery.ThinningSelectionTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-17T20:48:24.199Z" hostname="runnervm8k3b6" time="0.051">
+  <properties/>
+  <testcase name="Recipients receive a prefix of the selection sequence: a saturated viewer gets the essential points first" classname="workshop.vfx.delivery.ThinningSelectionTest" time="0.001"/>
+  <testcase name="Thinning does not read or copy coordinates: the frame of a delivery is the M5 frame, and selections index into it" classname="workshop.vfx.delivery.ThinningSelectionTest" time="0.0"/>
+  <testcase name="Selection formula: floorMod(ordinal, g) + floor(j n / m) with g = ceil(n / m), strictly increasing, for extreme ordinals" classname="workshop.vfx.delivery.ThinningSelectionTest" time="0.006"/>
+  <testcase name="G6 coverage: any g consecutive frame ordinals together select every point; selected points are spread with gaps &lt;= g" classname="workshop.vfx.delivery.ThinningSelectionTest" time="0.039"/>
+  <testcase name="Largest remainder: floor shares, then one point each to the largest (r n_b) mod T, ties to the earlier layer" classname="workshop.vfx.delivery.ThinningSelectionTest" time="0.001"/>
+  <testcase name="G7: essential layers complete before standard, standard before decorative, whatever the layer order" classname="workshop.vfx.delivery.ThinningSelectionTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

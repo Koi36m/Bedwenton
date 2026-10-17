@@ -1,0 +1,9 @@
+{
+  "required_inputs_complete": true,
+  "review_sha256": "9d73cc613f11ddc446b709545c023839e6bc9e15209e8cf3c8fc1f7bf85557f1",
+  "review_bytes": 6532,
+  "owner_authorization_sha256": "d22ca318e89b1b5a1af844e9459d50ba035fee5c7ace288b93e7a1b2f824d86f",
+  "archive_checksums": 67,
+  "bundle_complete_history": true,
+  "accepted_tip": "4eeb8354693463a95f7dd48cbf3891701dcc6acf"
+}

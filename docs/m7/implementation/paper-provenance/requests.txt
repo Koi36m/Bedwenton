@@ -1,0 +1,3 @@
+https://repo.papermc.io/repository/maven-public/io/papermc/paper/paper-api/maven-metadata.xml
+https://repo.papermc.io/repository/maven-public/io/papermc/paper/paper-api/26.3.build.204-stable/paper-api-26.3.build.204-stable.jar
+https://repo.papermc.io/repository/maven-public/io/papermc/paper/paper-api/26.3.build.204-stable/paper-api-26.3.build.204-stable.pom

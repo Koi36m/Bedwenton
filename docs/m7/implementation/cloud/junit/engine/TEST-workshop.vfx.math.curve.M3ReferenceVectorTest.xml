@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.curve.M3ReferenceVectorTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-17T20:48:40.814Z" hostname="runnervm8k3b6" time="0.089">
+  <properties/>
+  <testcase name="bezier.csv: 645 line, quadratic and cubic cases (point, derivative, second derivative), 189 exact, extrapolated t included (section 4)" classname="workshop.vfx.math.curve.M3ReferenceVectorTest" time="0.03"/>
+  <testcase name="easing.csv: 1,155 cases, 450 exact, the rest within 2^-50 of the exact rational value (section 6)" classname="workshop.vfx.math.curve.M3ReferenceVectorTest" time="0.006"/>
+  <testcase name="spiral.csv: 959 spiral cases against 60-digit Taylor references (549 revision 1 rows, 410 revision 2 adversarial rows: large startTurn, near seams, radius cancellation); exact quarter-turn points; bounds relative to S (sections 5, 7.2)" classname="workshop.vfx.math.curve.M3ReferenceVectorTest" time="0.027"/>
+  <testcase name="Reference files are intact: MANIFEST.sha256 matches every file" classname="workshop.vfx.math.curve.M3ReferenceVectorTest" time="0.025"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

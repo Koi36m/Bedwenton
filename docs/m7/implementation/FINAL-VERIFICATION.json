@@ -1,0 +1,33 @@
+{
+  "action_url": "https://github.com/Koi36m/Bedwenton/actions/runs/39068228019",
+  "artifact_id": 12113139938,
+  "artifact_sha256": "0e0558bd51543382be6e94e062c0ac81d311eb48be19fb23cb2b464569eccfd1",
+  "native_production_commit": "c0fa177a73c0e088fca047d606e6f00a4a45bfd7",
+  "github_source_snapshot": "ed5fc7bff548edf4b005e919495b22213a65b64e",
+  "verified_complete_source_tree": "afa33672b5850bdda3be636415659fa27ac53047",
+  "adapter_tree": "1d53ff79bb3d8113ca52149f5e7772c07cbae96b",
+  "junit": {
+    "engine": {
+      "reports": 59,
+      "tests": 415,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "adapter": {
+      "reports": 10,
+      "tests": 61,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "combined_tests": 476,
+  "plugin_sha256": "a23d857bf5a616689e33457175a75034e7bf201562ea9a7cb7947215ca5effa9",
+  "plugin_size": 151406,
+  "engine_class_count": 61,
+  "compile_warnings": 0,
+  "all_seven_datasets_byte_identical": true,
+  "server_smoke": "NOT TESTED",
+  "fresh_production_mutant_campaign": "NOT RUN"
+}

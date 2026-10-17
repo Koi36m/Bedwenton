@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.scene.DemoReferenceTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-17T20:49:13.204Z" hostname="runnervm8k3b6" time="0.021">
+  <properties/>
+  <testcase name="D. Astral Prism constellation: a spinning, tilted five-star ring and five staged pentagram links (PREFIX reveal, HOLD_AFTER); seek; the scene ends at local tick 120" classname="workshop.vfx.scene.DemoReferenceTest" time="0.01"/>
+  <testcase name="C. Moving trident: an arc-length-sampled helix drawing itself (PREFIX) and spinning, on seven trident pose snapshots; the scene ends at local tick 30" classname="workshop.vfx.scene.DemoReferenceTest" time="0.001"/>
+  <testcase name="B. Orbiting sparkles: four phase-offset sparks and a three-ghost trail on a moving, turning player anchor; COSMETIC nanoseconds across the long wrap; before the start" classname="workshop.vfx.scene.DemoReferenceTest" time="0.001"/>
+  <testcase name="MANIFEST.sha256 matches the four reference files" classname="workshop.vfx.scene.DemoReferenceTest" time="0.003"/>
+  <testcase name="A. Healing ritual: three separated expanding, rising ring pulses; forward, reversed, rotated-and-scaled anchor, paused and half-rate playback; the scene ends at local tick 60" classname="workshop.vfx.scene.DemoReferenceTest" time="0.005"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

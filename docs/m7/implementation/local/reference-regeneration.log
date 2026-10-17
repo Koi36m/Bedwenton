@@ -1,0 +1,61 @@
+wrote compose_cases.csv, pose_cases.csv, pose_large_cases.csv, rotation_cases.csv, slerp_cases.csv to /workspace/work/m7-regenerated/m1
+m1 MANIFEST.sha256 byte-identical 6055149ffc538a504bbdd7a7ac24a26e2b36b7f70d91458a92c7db5f9bdecaf4
+m1 compose_cases.csv byte-identical 25a7b60a6741948f51fc0a9782ec4801189fed75eaa753fcb0b74f06a1660968
+m1 pose_cases.csv byte-identical a6afd0965f28c8c0e57b96e4ce96831faf66238d22de5b3ba9027ce1118c4bc3
+m1 pose_large_cases.csv byte-identical ae10a0ef5079fa589938e475e5b39963426975a4ef4970dad2a4f01b7ddcd2be
+m1 rotation_cases.csv byte-identical b35b814e83589f4a560c3a09513cacb69a70e6e51487691a6bca55533c5c12f2
+m1 slerp_cases.csv byte-identical 5c5b744508ed6a8c90d0c6b7a681312cc80f25b5369f5b7c675f3f06797651c9
+{'tick_seconds.csv': 217, 'timepoint.csv': 171, 'timing.csv': 1692, 'playback.csv': 1096}
+m2 MANIFEST.sha256 byte-identical 9b53054c043955eb78e2caccc5d046b055624caa6aefbac049bd4d62d7a1f1ff
+m2 playback.csv byte-identical 98ed9d39d8aab0870949222e3b40976f347d5dade2e69e1d375b5cbb575be847
+m2 tick_seconds.csv byte-identical e4bbba464ca6396cf637af2d82d2e86722217a13d8a674443c99b7a9c0c9d59c
+m2 timepoint.csv byte-identical 4debf5c6a1b76782c5d452efc93c775a3b183a4d34769bed1ce8d06a5efa3458
+m2 timing.csv byte-identical eb8e95ad78179b7f77937eef538124443a0733cf96344cb6af44cf6f4f0205c7
+2235 rows
+m2-review MANIFEST.sha256 byte-identical 35431b9c0f12d3ad32955321df47b561736793f6b6dacb6d1cca1d7462db4fc8
+m2-review boundary_cases.csv byte-identical ba664aa101d9bbe49f580a18e7470576c638485297b2209d01a3a5fad1f88bd5
+{'easing.csv': 1155, 'bezier.csv': 645, 'spiral.csv': 959}
+m3 MANIFEST.sha256 byte-identical a0e8f162ee69dc86dd6c85d599e1cddc18ae03458ff1e7fa70a53b190897107f
+m3 bezier.csv byte-identical f57f1aabda39ef2196ac275a355635e0ff6217c173914c1bbd90ed3396f2f7a1
+m3 easing.csv byte-identical d0967102774eab4fe974b089a6e488dec28c323b279495a49f9320e050ab2e8d
+m3 spiral.csv byte-identical df6f0e5966032e209ef560c84e203bcc29f21f1007dcba2b26551c60d0cab7f1
+m3 rows {'bezier.csv': 645, 'easing.csv': 1155, 'spiral.csv': 959}
+{'arclength.csv': 336, 'inverse.csv': 216, 'uniform.csv': 2310, 'counts.csv': 202}
+m4 MANIFEST.sha256 byte-identical 5d2a46de93baeeef3285206dbabb117a44003781d23d51df454ec9e4456d8a45
+m4 arclength.csv byte-identical fa0a1725b395642ccb211d037cf43c9b5fbca9dbc06c6ca4ca1af027d7599c18
+m4 counts.csv byte-identical 110c19fd4a93fc6022e03fd79ae813f1165ccb29921b2c52a113b85f512072d8
+m4 inverse.csv byte-identical 8aa817946df4fcf764238d6996f5abd3dedec0639972de07701dc5a0bb8820a0
+m4 uniform.csv byte-identical d354f2571efd3ccb873a48e980171f9860f3a5bc33f573d36d866ac1ed929133
+m4 rows {'arclength.csv': 336, 'counts.csv': 202, 'inverse.csv': 216, 'uniform.csv': 2310}
+constellation.csv 439 rows
+healing.csv 540 rows
+orbit.csv 43 rows
+trident.csv 91 rows
+m5 MANIFEST.sha256 byte-identical 3ade33b01e0c589a65af2993ad2587f19136a6aab9c7ca0f2b940749bb6e6f25
+m5 constellation.csv byte-identical 00cac8a7b9501e35e430fc455abe32a45af4611ef89827739777c05d30b4ccf3
+m5 healing.csv byte-identical 378885c3c03fe517fc930c5fcb7ce66e4df57e363997adb5371487f17144b2c7
+m5 orbit.csv byte-identical 0f282bc71f2464b1852309b656028c8ee12967cb34d2ed0bc6321deb7135d79b
+m5 trident.csv byte-identical 2d88f875b6ad5514a4ec20137525a5c52d269c9cfc3f5925882a594cdd828556
+m5 rows {'constellation.csv': 439, 'healing.csv': 540, 'orbit.csv': 43, 'trident.csv': 91}
+bloom 6 cases
+cloudstep 3 cases
+healer 8 cases
+trident 6 cases
+astral 9 cases
+stress 13 cases
+m6 MANIFEST.sha256 byte-identical 85e8e97229dac27248f3eac4e2131dc580624f80472265834da7ae21c0a595ce
+m6 astral.txt byte-identical 635626774896b69c5911c20910773b04b81cc880f43c27bf08fdd6ee8a952769
+m6 bloom.txt byte-identical 6d4fa67dd2694480c121f81e4d2994c1927cf41755db39ae5a09a17d2b248ecd
+m6 cloudstep.txt byte-identical a53508d68ea671f2463ae911b1c9966030657a6c08f709cfe3a5c8948733c315
+m6 healer.txt byte-identical 3cbbba8194abd1224bc2ca268003471a013392b6781f83d80a52370cfeb6f791
+m6 stress.txt byte-identical d856890e8e4312f8ec9379c2f971735bb42b483ddfdeb5de0d601750c1d9863d
+m6 trident.txt byte-identical 551da6dc333bb46f1be019f1a4f665b368705ec3debc3261e7393750bb43da9c
+M6 cases/expectations: {'astral': [9, 9], 'bloom': [6, 57], 'cloudstep': [3, 23], 'healer': [8, 8], 'stress': [13, 55], 'trident': [6, 6]} total 45 / 158
+bloom 6 cases
+cloudstep 3 cases
+healer 8 cases
+trident 6 cases
+astral 9 cases
+stress 13 cases
+M6 second regeneration: byte-identical
+PASS: all seven M1-M6 golden/reference datasets and manifests regenerate byte-identically.

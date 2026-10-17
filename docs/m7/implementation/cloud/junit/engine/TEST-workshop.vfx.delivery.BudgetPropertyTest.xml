@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.delivery.BudgetPropertyTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-17T20:48:22.056Z" hostname="runnervm8k3b6" time="0.39">
+  <properties/>
+  <testcase name="G1 to G5, G7, G9 and the phase-1 decisions hold for 3,000 random scenarios with binding budgets" classname="workshop.vfx.delivery.BudgetPropertyTest" time="0.349"/>
+  <testcase name="G10: non-ambient effects never consume the placement reserve, however much they want" classname="workshop.vfx.delivery.BudgetPropertyTest" time="0.002"/>
+  <testcase name="G9: a saturated viewer does not hold back the others; k grows until the next unit of cost exceeds the budget" classname="workshop.vfx.delivery.BudgetPropertyTest" time="0.001"/>
+  <testcase name="G10 counterexample 2 (R2): placement cost is per viewer, so ambient may realize less than min(reserve, demand)" classname="workshop.vfx.delivery.BudgetPropertyTest" time="0.001"/>
+  <testcase name="G10 counterexample 1 (R2): generation reservations are indivisible, so ambient may realize less than min(reserve, demand)" classname="workshop.vfx.delivery.BudgetPropertyTest" time="0.001"/>
+  <testcase name="G3: the global, world and viewer budgets bind exactly; one viewer shared by three worlds is limited across worlds" classname="workshop.vfx.delivery.BudgetPropertyTest" time="0.001"/>
+  <testcase name="Input order is irrelevant: shuffling the request list permutes the deliveries and changes nothing else" classname="workshop.vfx.delivery.BudgetPropertyTest" time="0.035"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

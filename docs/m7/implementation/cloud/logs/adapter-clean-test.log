@@ -1,0 +1,149 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.1.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :clean UP-TO-DATE
+> Task :Bedwenton:compileJava UP-TO-DATE
+> Task :writeBuildProvenance
+> Task :Bedwenton:processResources NO-SOURCE
+> Task :Bedwenton:classes UP-TO-DATE
+> Task :processResources
+> Task :processTestResources NO-SOURCE
+> Task :Bedwenton:jar
+> Task :compileJava
+> Task :classes
+> Task :compileTestJava
+> Task :testClasses
+
+> Task :test
+
+AllocationOrderEmissionTest > Defensive caps binding (unaligned policy): the rank-0 ring is emitted first, whatever the input order; rotation alternates PASSED
+
+AllocationOrderEmissionTest > Aligned policy (placement and viewer budgets capped by the emission limits): M6 decides, the caps never bind PASSED
+
+AllocationOrderEmissionTest > Aligned policy over 300 random multi-ring scenarios: no EMISSION_LIMIT skip, attempted calls = planned placements PASSED
+
+ConfigurationAndIdentityTest > viewerInputMustBeUniqueSortedAndNonnegative() PASSED
+
+ConfigurationAndIdentityTest > threadOwnershipRefusesCrossThreadAndFalsePrimary() PASSED
+
+ConfigurationAndIdentityTest > budgetsAlignWithoutRaisingRequestedBudgets() PASSED
+
+ConfigurationAndIdentityTest > whitelistAndDustValidationAreClosedAndImmutable() PASSED
+
+ConfigurationAndIdentityTest > allIntegerBoundariesAndHardCeilings() PASSED
+
+ConfigurationAndIdentityTest > emissionReportsAreDefensiveSnapshots() PASSED
+
+ConfigurationAndIdentityTest > radiusIsFiniteAndBoundedBeforeRules() PASSED
+
+ConfigurationAndIdentityTest > invalidTypesAndCapsRefuseInsteadOfDefaulting() PASSED
+
+ConfigurationAndIdentityTest > idsUseBothUuidHalvesAndNeverReuseReleasedNumbers() PASSED
+
+DemoCommandsTest > unknownAndExtraArgumentsHaveNoSideEffects() PASSED
+
+DemoCommandsTest > adminStopAllIsSeparateFromOwnerStop() PASSED
+
+DemoCommandsTest > tiersAndDefaultRouteToProductionController() PASSED
+
+DemoCommandsTest > capsAreReportedAndRepeatedCommandsNeverAddHiddenOperations() PASSED
+
+DemoCommandsTest > suggestionsRespectGrammarAndAdminPermission() PASSED
+
+DemoCommandsTest > permissionAndPlayerBoundariesAreEnforced() PASSED
+
+OwnerAwareEmissionTest > View permission granted: B sees both rings; revoked between planning and emission: B loses ring A only PASSED
+
+OwnerAwareEmissionTest > Missing ownership context: the delivery is skipped whole and counted; the other ring is unaffected PASSED
+
+OwnerAwareEmissionTest > A planned non-owner recipient with use but without view permission is refused for the other ring only PASSED
+
+OwnerAwareEmissionTest > Viewer selection: the owner is admitted before sorting and capping; the result is strictly increasing PASSED
+
+OwnerAwareEmissionTest > Owner's use permission revoked between planning and emission: the owner receives nothing of their ring PASSED
+
+OwnerAwareEmissionTest > Coincident rings, no view permission: each owner sees exactly their own ring PASSED
+
+OwnerAwareEmissionTest > Owner A holding view permission is still authorized for ring A by use, and for ring B by view PASSED
+
+PluginPackagingTest > syntheticCleanJarPasses() PASSED
+
+PluginPackagingTest > unresolvedAndWrongPluginVersionsAreRejected() PASSED
+
+PluginPackagingTest > sourceBoundaryHasNoPlatformCallsInCoreOrBroadcastAndAsyncInPaper() PASSED
+
+PluginPackagingTest > failedGradleCannotBeMaskedByStaleSuccessfulXml() PASSED
+
+PluginPackagingTest > eachServerAndTestDependencyNamespaceIsRejected() PASSED
+
+ProductionEmissionTest > skippedPointsAreNotPromotedBeyondRecipientPrefix() PASSED
+
+ProductionEmissionTest > pointValidationRejectsEveryNonfiniteAxisAndHonorsWorldEdges() PASSED
+
+ProductionEmissionTest > demoRecipePreservesCountsRadiiLoopAndStaticAnchor() PASSED
+
+ProductionEmissionTest > recipientPrefixesMatchIndependentSelectionFormulaBitwise() PASSED
+
+ProductionEmissionTest > limitsCountFailuresAndApplyAcrossRecipients() PASSED
+
+ProductionEmissionTest > allGateReasonsSkipOnlyTheirRecipientAndPreserveAccounting() PASSED
+
+RecipientRuleRobustnessTest > Request anchor x, y or z NaN, +infinity or -infinity: denied as INVALID_REQUEST_CONTEXT PASSED
+
+RecipientRuleRobustnessTest > View radius: NaN, infinite or negative is rejected at construction; 0 is valid (exact anchor only) PASSED
+
+RecipientRuleRobustnessTest > Authorization order for normal inputs is unchanged: offline, world, permission, then range checks PASSED
+
+RecipientRuleRobustnessTest > Viewer x, y or z NaN, +infinity or -infinity: denied as VIEWER_POSITION_INVALID (owner and non-owner) PASSED
+
+RecipientRuleRobustnessTest > Normal controls: in range allowed, exactly at the radius allowed, just beyond and huge finite coordinates denied PASSED
+
+RequestContextConsistencyTest > Invalid contexts (NaN or infinite anchor, negative owner or world id): the delivery is rejected whole PASSED
+
+RequestContextConsistencyTest > A viewer with a NaN position is refused (VIEWER_POSITION_INVALID); the other viewers are unaffected PASSED
+
+RequestContextConsistencyTest > One mismatched context (ring B's slot names ring A, owner A): only ring B is rejected; ring A is unaffected PASSED
+
+RequestContextConsistencyTest > Control: valid contexts; each owner sees its own ring; non-owners without view are refused; accounting balances PASSED
+
+RequestContextConsistencyTest > Swapped contexts (key ring A holds ring B's context with owner B, and vice versa): both deliveries rejected, nothing sent PASSED
+
+RingDriverTest > cancelledCallbackAndPreviousGenerationNeverEmit() PASSED
+
+RingDriverTest > idleEnableThenOnePlannerForAllRingsAndNoDuplicateTickBudgets() PASSED
+
+RingDriverTest > unloadAndMissingWorldStopOnlyAffectedRings() PASSED
+
+RingDriverTest > expiryAndOwnerOfflineStopAndCancel() PASSED
+
+RingDriverTest > teleportWorldChangeAndInvalidAnchorsFailClosed() PASSED
+
+RingDriverTest > ownerFirstAndDuplicateEnumerationCannotReachM6() PASSED
+
+RingDriverTest > permissionAndWorldEligibilityArePerRingAndRechecked() PASSED
+
+RingDriverTest > styleFailuresPersistAcrossDriverTicksAndNextPlanExcludesStyle() PASSED
+
+RingDriverTest > falsePrimaryRefusesTickAndCommandsBeforeHostAccess() PASSED
+
+RingDriverTest > repeatedStartReplacesAndDoesNotMultiplyTasksAtCap() PASSED
+
+StyleHealthTest > Third consecutive failure disables the style at once; its remaining points in the tick are skipped PASSED
+
+StyleHealthTest > All styles disabled: the planner skips the ring as unsupported before evaluation; a new session re-enables PASSED
+
+StyleHealthTest > Successes of another style do not reset the streak; the streak spans ticks PASSED
+
+StyleHealthTest > A success of the same style resets the streak: fail, fail, succeed, fail, fail does not disable PASSED
+
+StyleHealthTest > The next planning pass excludes the disabled style: M6 reports it unsupported, nothing of it is sent PASSED
+
+[Incubating] Problems report is available at: file:///home/runner/work/Bedwenton/Bedwenton/paper-adapter/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.1.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 21s
+8 actionable tasks: 6 executed, 2 up-to-date

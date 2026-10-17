@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.paper.core.DemoCommandsTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-17T20:49:39.950Z" hostname="runnervm8k3b6" time="0.005">
+  <properties/>
+  <testcase name="unknownAndExtraArgumentsHaveNoSideEffects()" classname="workshop.vfx.paper.core.DemoCommandsTest" time="0.0"/>
+  <testcase name="adminStopAllIsSeparateFromOwnerStop()" classname="workshop.vfx.paper.core.DemoCommandsTest" time="0.001"/>
+  <testcase name="tiersAndDefaultRouteToProductionController()" classname="workshop.vfx.paper.core.DemoCommandsTest" time="0.001"/>
+  <testcase name="capsAreReportedAndRepeatedCommandsNeverAddHiddenOperations()" classname="workshop.vfx.paper.core.DemoCommandsTest" time="0.001"/>
+  <testcase name="suggestionsRespectGrammarAndAdminPermission()" classname="workshop.vfx.paper.core.DemoCommandsTest" time="0.001"/>
+  <testcase name="permissionAndPlayerBoundariesAreEnforced()" classname="workshop.vfx.paper.core.DemoCommandsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

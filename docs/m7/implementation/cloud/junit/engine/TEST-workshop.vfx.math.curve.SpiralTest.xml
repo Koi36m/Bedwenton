@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.curve.SpiralTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-17T20:48:58.613Z" hostname="runnervm8k3b6" time="0.371">
+  <properties/>
+  <testcase name="Radius accuracy relative to S near an end: very different radii and t close to the end with the small radius (contract 5, radius rule)" classname="workshop.vfx.math.curve.SpiralTest" time="0.053"/>
+  <testcase name="Derivatives agree with central finite differences, including extrapolated t (section 5)" classname="workshop.vfx.math.curve.SpiralTest" time="0.006"/>
+  <testcase name="A1: near-seam offsets (-2^-60, +-MIN_VALUE, 1 - 2^-53, ...) match the exact small-angle values within the section 7.2 bound" classname="workshop.vfx.math.curve.SpiralTest" time="0.003"/>
+  <testcase name="Factories: circle, arc, helix, planar and conical spirals, and the M1 horizontal circle factories (section 5)" classname="workshop.vfx.math.curve.SpiralTest" time="0.001"/>
+  <testcase name="Helix and spirals: radius interpolates exactly at the ends; height is rise * t; helix speed is constant sqrt((2 pi r turns)^2 + rise^2) (section 5)" classname="workshop.vfx.math.curve.SpiralTest" time="0.016"/>
+  <testcase name="Large turn counts: quarter phases stay exact after 2^20 turns, where a radian implementation is off by about 1e-9 (section 5, DM3-6)" classname="workshop.vfx.math.curve.SpiralTest" time="0.0"/>
+  <testcase name="M1 CONVENTIONS 5: starting at +X with normal +Y, counter-clockwise from above reaches -Z at +90 degrees, clockwise reaches +Z (exact)" classname="workshop.vfx.math.curve.SpiralTest" time="0.001"/>
+  <testcase name="Validation: radii finite and &gt;= 0; rise, turns, startTurn finite; parameters finite (sections 5, 8)" classname="workshop.vfx.math.curve.SpiralTest" time="0.001"/>
+  <testcase name="T4: seams are exact for every integer t (up to 2^60) and every startTurn magnitude (section 5)" classname="workshop.vfx.math.curve.SpiralTest" time="0.026"/>
+  <testcase name="Full Heal ring (r cos th, 0, r sin th) is horizontalClockwiseFromAbove; Astral Prism's +Y rotation is horizontalCounterClockwiseFromAbove (M1 CONVENTIONS 2, 5)" classname="workshop.vfx.math.curve.SpiralTest" time="0.007"/>
+  <testcase name="Exact quarter-turn points for any radius and start phase that land on quarter turns (section 5)" classname="workshop.vfx.math.curve.SpiralTest" time="0.01"/>
+  <testcase name="A1 / T5: for non-negative startTurn the result depends only on startTurn mod 1, bitwise; negative offsets agree within the bound" classname="workshop.vfx.math.curve.SpiralTest" time="0.064"/>
+  <testcase name="A2: extrapolated radius cancellation; the error is bounded relative to S = |1-t| r0 + |t| r1, not to r(t) (review counterexample: exact radius 2^-52)" classname="workshop.vfx.math.curve.SpiralTest" time="0.143"/>
+  <testcase name="A1 / T3: quarter-turn phases are exact for startTurn of any magnitude (2^52, -2^52, 2^53, 2^60, +-MAX_VALUE, 2^50 + 1/4, ...) and for negative offsets" classname="workshop.vfx.math.curve.SpiralTest" time="0.001"/>
+  <testcase name="Seams: a closed spiral (equal radii, no rise, integer non-zero turns) has point(k) == point(0) and derivative(k) == derivative(0) exactly for integer k (section 5)" classname="workshop.vfx.math.curve.SpiralTest" time="0.037"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

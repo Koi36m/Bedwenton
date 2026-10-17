@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.scene.M5AdversarialTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-17T20:49:13.362Z" hostname="runnervm8k3b6" time="0.025">
+  <properties/>
+  <testcase name="Stateless frames (cancellation is the caller's): evaluation order does not matter; a stopped effect is one the caller no longer evaluates; BEFORE, ACTIVE-but-empty and AFTER (ended) are distinct" classname="workshop.vfx.scene.M5AdversarialTest" time="0.0"/>
+  <testcase name="Signed zeros in inputs do not change positions: -0.0 anchor and point coordinates, -0.0 phase, give the same values (compared with ==) as +0.0" classname="workshop.vfx.scene.M5AdversarialTest" time="0.0"/>
+  <testcase name="Extreme magnitudes: anchors at |x| = 3e7 (world border) and 1e15, scales 1e-9 and 1e9, subnormal and huge local offsets stay finite and match the oracle within the tolerance" classname="workshop.vfx.scene.M5AdversarialTest" time="0.001"/>
+  <testcase name="Overlapping animations: 200 layers with the same timing, geometry and style but different motions are all emitted, in insertion order, each with its own pose" classname="workshop.vfx.scene.M5AdversarialTest" time="0.001"/>
+  <testcase name="0 and 1 samples: shapes from M4 sample sets of 0 and 1 points; a 0-point layer is never emitted; a 1-point layer is a single exact placement" classname="workshop.vfx.scene.M5AdversarialTest" time="0.0"/>
+  <testcase name="Inactive layers never leak: across 2,000 instants of the four example scenes, a batch exists only for ACTIVE layers or AFTER layers with HOLD_AFTER, and only inside the scene window" classname="workshop.vfx.scene.M5AdversarialTest" time="0.021"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

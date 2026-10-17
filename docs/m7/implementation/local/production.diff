@@ -1,0 +1,1258 @@
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/bukkit/VfxDemoPlugin.java b/paper-adapter/src/main/java/workshop/vfx/paper/bukkit/VfxDemoPlugin.java
+new file mode 100644
+index 0000000..7d4042d
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/bukkit/VfxDemoPlugin.java
+@@ -0,0 +1,208 @@
++package workshop.vfx.paper.bukkit;
++
++import io.papermc.paper.command.brigadier.BasicCommand;
++import io.papermc.paper.command.brigadier.CommandSourceStack;
++import java.io.IOException;
++import java.io.InputStream;
++import java.util.Collection;
++import java.util.HashMap;
++import java.util.List;
++import java.util.Map;
++import java.util.Optional;
++import java.util.Properties;
++import java.util.UUID;
++import org.bukkit.Bukkit;
++import org.bukkit.Color;
++import org.bukkit.Location;
++import org.bukkit.Particle;
++import org.bukkit.World;
++import org.bukkit.entity.Player;
++import org.bukkit.event.EventHandler;
++import org.bukkit.event.EventPriority;
++import org.bukkit.event.Listener;
++import org.bukkit.event.entity.PlayerDeathEvent;
++import org.bukkit.event.player.PlayerChangedWorldEvent;
++import org.bukkit.event.player.PlayerQuitEvent;
++import org.bukkit.event.player.PlayerTeleportEvent;
++import org.bukkit.event.world.WorldUnloadEvent;
++import org.bukkit.plugin.java.JavaPlugin;
++import org.bukkit.scheduler.BukkitTask;
++import workshop.vfx.paper.core.*;
++import workshop.vfx.scene.StyleKey;
++
++/** Ordinary Paper adapter. All platform calls run exclusively on the main thread. */
++public final class VfxDemoPlugin extends JavaPlugin implements Listener {
++    private static final String USE = "bedwenton.vfxdemo.use", VIEW = "bedwenton.vfxdemo.view", ADMIN = "bedwenton.vfxdemo.admin";
++    private final Map<StyleKey, ResolvedParticle> particles = new HashMap<>();
++    private ThreadGuard thread;
++    private DefaultSessionIds ids;
++    private DemoConfig config;
++    private RingDriver driver;
++    private SessionStyleHealth health;
++    private DemoCommands commands;
++    private final Properties provenance = new Properties();
++    private long lastDebugTick = Long.MIN_VALUE;
++    private long lastStyleReportTick = Long.MIN_VALUE;
++    private record ResolvedParticle(Particle particle, Object data) { }
++
++    @Override public void onEnable() {
++        thread = new ThreadGuard(Bukkit::isPrimaryThread); thread.check();
++        try {
++            saveDefaultConfig();
++            config = DemoConfig.from(getConfig().getValues(false));
++            try (InputStream in = getResource("META-INF/bedwenton-build.properties")) {
++                if (in == null) throw new IllegalArgumentException("Build provenance is missing");
++                provenance.load(in);
++            }
++            ids = new DefaultSessionIds(thread);
++            resolveCatalogue();
++            health = new SessionStyleHealth(particles.keySet(),thread);
++            driver = new RingDriver(thread,new PaperHost(),config,ids,health,this::validatePoint,this::send);
++            commands = new DemoCommands(thread,config.defaultTier());
++            registerCommand("vfxdemo","Opt-in static VFX ring",List.of(),new PaperCommand());
++            Bukkit.getPluginManager().registerEvents(this,this);
++            getLogger().info("Bedwenton VFX " + getPluginMeta().getVersion() + "; engine tree=" + provenance.getProperty("engineTree")
++                + "; paper-api=" + provenance.getProperty("paperApiVersion") + "; server=" + Bukkit.getVersion()
++                + "; Java=" + Runtime.version() + "; idle; /reload unsupported");
++        } catch (IllegalArgumentException | IOException error) {
++            getLogger().severe("VFX enable refused: " + error.getMessage());
++            Bukkit.getPluginManager().disablePlugin(this);
++        }
++    }
++    private void resolveCatalogue() {
++        for (var entry : DemoStyleCatalog.whitelist().entrySet()) {
++            try {
++                Particle particle; Object data;
++                if (entry.getValue() instanceof ParticleSpec.Plain) {
++                    particle = Particle.END_ROD; data = null;
++                    if (particle.getDataType() != Void.class) throw new IllegalArgumentException("Plain data type mismatch");
++                } else if (entry.getValue() instanceof ParticleSpec.Dust dust) {
++                    particle = Particle.DUST;
++                    if (particle.getDataType() != Particle.DustOptions.class) throw new IllegalArgumentException("Dust data type mismatch");
++                    data = new Particle.DustOptions(Color.fromRGB(dust.rgb()),dust.size());
++                } else throw new IllegalArgumentException("Unknown style specification");
++                particles.put(entry.getKey(),new ResolvedParticle(particle,data));
++            } catch (RuntimeException error) {
++                getLogger().warning("Particle style unavailable: " + entry.getKey());
++            }
++        }
++    }
++    @Override public void onDisable() {
++        if (thread == null) return;
++        thread.check();
++        if (driver != null) driver.close();
++        Bukkit.getScheduler().cancelTasks(this);
++        if (ids != null) ids.clear();
++        particles.clear(); health = null; commands = null;
++        long pending = Bukkit.getScheduler().getPendingTasks().stream().filter(t -> t.getOwner() == this && !t.isCancelled()).count();
++        getLogger().info("VFX disabled; remaining owned tasks=" + pending);
++    }
++    private boolean inside(World world, double x, double y, double z) {
++        return world != null && Double.isFinite(x) && Double.isFinite(y) && Double.isFinite(z)
++            && y >= world.getMinHeight() && y < world.getMaxHeight()
++            && world.getWorldBorder().isInside(new Location(world,x,y,z));
++    }
++    private Optional<SkipReason> validatePoint(int worldId, double x, double y, double z) {
++        thread.check();
++        if (!Double.isFinite(x) || !Double.isFinite(y) || !Double.isFinite(z)) return Optional.of(SkipReason.POINT_NOT_FINITE);
++        UUID uuid = ids.world(worldId); World world = uuid == null ? null : Bukkit.getWorld(uuid);
++        if (world == null) return Optional.of(SkipReason.POINT_OUTSIDE_WORLD);
++        return WorldPointRules.check(x,y,z,world.getMinHeight(),world.getMaxHeight(),
++            () -> world.getWorldBorder().isInside(new Location(world,x,y,z)));
++    }
++    private void send(long viewerId, int worldId, StyleKey style, double x, double y, double z) {
++        thread.check();
++        UUID uuid = ids.viewer(viewerId); Player player = uuid == null ? null : Bukkit.getPlayer(uuid);
++        UUID world = ids.world(worldId); ResolvedParticle resolved = particles.get(style);
++        if (player == null || !player.isOnline() || !player.isValid() || !player.getWorld().getUID().equals(world) || resolved == null)
++            throw new IllegalStateException("Particle recipient or style unavailable");
++        player.spawnParticle(resolved.particle(),x,y,z,0,0.0,0.0,0.0,0.0,resolved.data(),false);
++    }
++    private final class PaperHost implements RingDriver.Host {
++        @Override public long tick() { thread.check(); return Bukkit.getCurrentTick(); }
++        @Override public long nanoTime() { thread.check(); return System.nanoTime(); }
++        @Override public boolean worldReady(UUID uuid, double x, double y, double z) {
++            thread.check(); World world = Bukkit.getWorld(uuid);
++            if (!inside(world,x,y,z)) return false;
++            return world.isChunkLoaded(((int)Math.floor(x)) >> 4,((int)Math.floor(z)) >> 4);
++        }
++        @Override public ViewerFacts facts(UUID uuid) {
++            thread.check(); Player player = uuid == null ? null : Bukkit.getPlayer(uuid);
++            if (player == null) return null;
++            Location p = player.getLocation();
++            return new ViewerFacts(player.isOnline(),player.isValid(),ids.worldId(player.getWorld().getUID()),
++                p.getX(),p.getY(),p.getZ(),player.hasPermission(USE),player.hasPermission(VIEW));
++        }
++        @Override public List<UUID> players() {
++            thread.check(); return Bukkit.getOnlinePlayers().stream().map(Player::getUniqueId).toList();
++        }
++        @Override public Runnable schedule(Runnable body) {
++            thread.check();
++            BukkitTask task = Bukkit.getScheduler().runTaskTimer(VfxDemoPlugin.this,() -> {
++                thread.check(); body.run();
++                EmissionReport report = driver.lastReport();
++                if (report != null) {
++                    if (lastStyleReportTick != report.tickOrdinal()) {
++                        lastStyleReportTick = report.tickOrdinal();
++                        for (StyleKey style : report.stylesDisabledThisTick()) getLogger().warning("Particle style disabled for this session: " + style);
++                    }
++                    if (config.debug() && report.tickOrdinal() != lastDebugTick && Math.floorMod(report.tickOrdinal(),100) == 0) {
++                        lastDebugTick = report.tickOrdinal(); getLogger().info("VFX tick: " + report);
++                    }
++                }
++            },1L,1L);
++            return task::cancel;
++        }
++    }
++    private final class PaperCommand implements BasicCommand {
++        @Override public String permission() { return USE; }
++        @Override public void execute(CommandSourceStack source, String[] args) {
++            thread.check();
++            if (commands == null || driver == null) return;
++            Player player = source.getExecutor() instanceof Player p ? p : null;
++            commands.execute(new DemoCommands.Endpoint() {
++                @Override public boolean permitted() { return source.getSender().hasPermission(USE); }
++                @Override public boolean admin() { return source.getSender().hasPermission(ADMIN); }
++                @Override public boolean player() { return player != null; }
++                @Override public void start(workshop.vfx.delivery.QualityTier tier) {
++                    Location p = player.getLocation();
++                    driver.start(player.getUniqueId(),player.getWorld().getUID(),p.getBlockX()+0.5,p.getBlockY()+0.1,p.getBlockZ()+0.5,tier);
++                }
++                @Override public void stop() { driver.stop(player.getUniqueId()); }
++                @Override public void stopAll() { driver.stopAll(); }
++                @Override public String status() { return statusText(player,admin()); }
++                @Override public void reply(String text) { source.getSender().sendMessage(text); }
++            },args);
++        }
++        @Override public Collection<String> suggest(CommandSourceStack source, String[] args) {
++            thread.check(); return commands == null ? List.of() : commands.suggest(args,source.getSender().hasPermission(ADMIN));
++        }
++    }
++    private String statusText(Player player, boolean admin) {
++        int count = admin ? driver.activeCount() : player != null && driver.ring(player.getUniqueId()) != null ? 1 : 0;
++        return "VFX " + getPluginMeta().getVersion() + "; engine=0.1.0-m1 tree=" + provenance.getProperty("engineTree")
++            + "; paper-api=" + provenance.getProperty("paperApiVersion") + "; server=" + Bukkit.getVersion()
++            + "; rings=" + count + "; task=" + (driver.running() ? "running" : "idle")
++            + "; effective policy=" + config.policy() + "; disabled styles="
++            + particles.keySet().stream().filter(health::isDisabled).toList()
++            + "; last tick=" + driver.lastReport() + "; /reload unsupported";
++    }
++    @EventHandler public void quit(PlayerQuitEvent event) {
++        thread.check(); if (driver == null) return; driver.stop(event.getPlayer().getUniqueId()); ids.release(event.getPlayer().getUniqueId());
++    }
++    @EventHandler public void changedWorld(PlayerChangedWorldEvent event) {
++        thread.check(); if (driver != null) driver.stop(event.getPlayer().getUniqueId());
++    }
++    @EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true) public void teleport(PlayerTeleportEvent event) {
++        thread.check(); if (driver == null) return;
++        Location to=event.getTo();
++        if (to != null && to.getWorld() != null && driver.leavesAnchor(event.getPlayer().getUniqueId(),to.getWorld().getUID(),to.getX(),to.getY(),to.getZ()))
++            driver.stop(event.getPlayer().getUniqueId());
++    }
++    @EventHandler public void death(PlayerDeathEvent event) {
++        thread.check(); if (driver != null) driver.stop(event.getEntity().getUniqueId());
++    }
++    @EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true) public void unload(WorldUnloadEvent event) {
++        thread.check(); if (driver == null) return; UUID world=event.getWorld().getUID(); driver.stopWorld(world); ids.forgetWorld(world);
++    }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/DefaultPlanEmitter.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/DefaultPlanEmitter.java
+new file mode 100644
+index 0000000..32dea74
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/DefaultPlanEmitter.java
+@@ -0,0 +1,85 @@
++package workshop.vfx.paper.core;
++
++import java.util.ArrayList;
++import java.util.Comparator;
++import java.util.EnumMap;
++import java.util.HashMap;
++import java.util.LinkedHashSet;
++import java.util.List;
++import java.util.Map;
++import java.util.Optional;
++import java.util.Set;
++import workshop.vfx.delivery.DeliveryPlan;
++import workshop.vfx.delivery.EffectDelivery;
++import workshop.vfx.delivery.Outcome;
++import workshop.vfx.scene.FrameBatch;
++import workshop.vfx.scene.StyleKey;
++
++/** M7 allocation-order emitter with exact recipient-prefix accounting. */
++public final class DefaultPlanEmitter implements PlanEmitter {
++    private final ThreadGuard thread;
++    public DefaultPlanEmitter() { this(new ThreadGuard()); }
++    public DefaultPlanEmitter(ThreadGuard thread) { this.thread = java.util.Objects.requireNonNull(thread); }
++    @Override
++    public EmissionReport emit(DeliveryPlan plan, Map<Long, RequestContext> contexts, StyleHealth health, RecipientGate gate,
++            PointValidator points, ParticleSink sink, EmissionLimits limits) {
++        thread.check();
++        Map<SkipReason, Long> sd = new EnumMap<>(SkipReason.class), sr = new EnumMap<>(SkipReason.class), sp = new EnumMap<>(SkipReason.class);
++        Set<StyleKey> disabledNow = new LinkedHashSet<>();
++        long attempted = 0, succeeded = 0, failed = 0, calls = 0, inSkippedDeliveries = 0, inSkippedRecipients = 0;
++        Map<Long, Integer> perViewer = new HashMap<>();
++        List<EffectDelivery> ordered = new ArrayList<>(plan.deliveries());
++        ordered.sort(Comparator.comparingInt(EffectDelivery::allocationRank));
++        for (EffectDelivery d : ordered) {
++            if (d.outcome() != Outcome.DELIVERED && d.outcome() != Outcome.THINNED) continue;
++            RequestContext c = contexts.get(d.requestId());
++            SkipReason bad = c == null ? SkipReason.MISSING_REQUEST_CONTEXT
++                    : c.requestId() != d.requestId() ? SkipReason.MISMATCHED_REQUEST_CONTEXT
++                    : !validContext(c) ? SkipReason.INVALID_REQUEST_CONTEXT : null;
++            if (bad != null) { sd.merge(bad, 1L, Long::sum); inSkippedDeliveries += d.placements(); continue; }
++            for (int r = 0; r < d.recipientCount(); r++) {
++                long viewer = d.recipient(r);
++                Optional<SkipReason> g = gate.check(c, viewer);
++                if (g.isPresent()) { sr.merge(g.get(), 1L, Long::sum); inSkippedRecipients += d.recipientPoints(r); continue; }
++                int remaining = d.recipientPoints(r);
++                for (int pos = 0; pos < d.orderedBatchCount() && remaining > 0; pos++) {
++                    FrameBatch b = d.frame().batches().get(d.orderedBatch(pos));
++                    for (int j = 0; j < d.kept(pos) && remaining > 0; j++, remaining--) {
++                        int i = d.selectedIndex(pos, j);
++                        double x = b.x(i), y = b.y(i), z = b.z(i);
++                        StyleKey style = b.style();
++                        if (health.isDisabled(style)) { sp.merge(SkipReason.STYLE_DISABLED, 1L, Long::sum); continue; }
++                        Optional<SkipReason> pv = (Double.isFinite(x) && Double.isFinite(y) && Double.isFinite(z))
++                                ? points.check(c.worldId(), x, y, z) : Optional.of(SkipReason.POINT_NOT_FINITE);
++                        if (pv.isPresent()) { sp.merge(pv.get(), 1L, Long::sum); continue; }
++                        int pvCount = perViewer.getOrDefault(viewer, 0);
++                        if (calls >= limits.maxCallsPerTick() || pvCount >= limits.maxCallsPerViewerPerTick()) {
++                            sp.merge(SkipReason.EMISSION_LIMIT, 1L, Long::sum); continue;
++                        }
++                        calls++; perViewer.put(viewer, pvCount + 1); attempted++;
++                        try {
++                            sink.send(viewer, c.worldId(), style, x, y, z);
++                            succeeded++; health.recordSuccess(style);
++                        } catch (RuntimeException e) {
++                            failed++;
++                            if (health.recordFailure(style)) disabledNow.add(style);
++                        }
++                    }
++                }
++            }
++        }
++        return report(plan, attempted, succeeded, failed, sd, sr, sp, inSkippedDeliveries, inSkippedRecipients, disabledNow);
++    }
++
++    static boolean validContext(RequestContext c) {
++        return c.ownerViewerId() >= 0 && c.worldId() >= 0
++                && OwnerAwareRecipientRule.finite(c.anchorX(), c.anchorY(), c.anchorZ());
++    }
++
++    private static EmissionReport report(DeliveryPlan plan, long attempted, long succeeded, long failed, Map<SkipReason, Long> sd,
++            Map<SkipReason, Long> sr, Map<SkipReason, Long> sp, long inSkippedDeliveries, long inSkippedRecipients,
++            Set<StyleKey> disabledNow) {
++        return new EmissionReport(plan.tickOrdinal(), plan.placements(), attempted, succeeded, failed, sd, sr, sp,
++                inSkippedDeliveries, inSkippedRecipients, Set.copyOf(disabledNow), 0, 0);
++    }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/DefaultSessionIds.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/DefaultSessionIds.java
+new file mode 100644
+index 0000000..bb1ffd2
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/DefaultSessionIds.java
+@@ -0,0 +1,38 @@
++package workshop.vfx.paper.core;
++import java.util.HashMap;
++import java.util.Map;
++import java.util.Objects;
++import java.util.OptionalLong;
++import java.util.UUID;
++/** Sequential, collision-free identifiers. Released numbers are never reused. */
++public final class DefaultSessionIds implements SessionIds {
++    private final ThreadGuard thread;
++    private final Map<UUID, Long> players = new HashMap<>();
++    private final Map<Long, UUID> viewers = new HashMap<>();
++    private final Map<UUID, Integer> worlds = new HashMap<>();
++    private final Map<Integer, UUID> worldIds = new HashMap<>();
++    private long nextViewer;
++    private long nextWorld;
++    public DefaultSessionIds(ThreadGuard thread) { this.thread = Objects.requireNonNull(thread); }
++    @Override public long viewerId(UUID player) {
++        thread.check(); Objects.requireNonNull(player);
++        Long id = players.get(player);
++        if (id != null) return id;
++        if (nextViewer == Long.MAX_VALUE) throw new IllegalStateException("Viewer session ids exhausted");
++        long value = nextViewer++; players.put(player, value); viewers.put(value, player); return value;
++    }
++    @Override public OptionalLong existingViewerId(UUID player) {
++        thread.check(); Long id = players.get(player); return id == null ? OptionalLong.empty() : OptionalLong.of(id);
++    }
++    @Override public UUID viewer(long id) { thread.check(); return viewers.get(id); }
++    @Override public int worldId(UUID world) {
++        thread.check(); Objects.requireNonNull(world);
++        Integer id = worlds.get(world); if (id != null) return id;
++        if (nextWorld > Integer.MAX_VALUE) throw new IllegalStateException("World session ids exhausted");
++        int value = (int) nextWorld++; worlds.put(world, value); worldIds.put(value, world); return value;
++    }
++    @Override public UUID world(int id) { thread.check(); return worldIds.get(id); }
++    @Override public void release(UUID player) { thread.check(); Long id = players.remove(player); if (id != null) viewers.remove(id); }
++    public void forgetWorld(UUID world) { thread.check(); Integer id = worlds.remove(world); if (id != null) worldIds.remove(id); }
++    public void clear() { thread.check(); players.clear(); viewers.clear(); worlds.clear(); worldIds.clear(); }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/DemoCommands.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/DemoCommands.java
+new file mode 100644
+index 0000000..835913f
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/DemoCommands.java
+@@ -0,0 +1,54 @@
++package workshop.vfx.paper.core;
++import java.util.List;
++import java.util.Locale;
++import workshop.vfx.delivery.QualityTier;
++/** Testable command grammar; the Paper layer supplies permission and player context. */
++public final class DemoCommands {
++    public interface Endpoint {
++        boolean permitted();
++        boolean admin();
++        boolean player();
++        void start(QualityTier tier);
++        void stop();
++        void stopAll();
++        String status();
++        void reply(String text);
++    }
++    private final ThreadGuard thread;
++    private final QualityTier defaultTier;
++    public DemoCommands(ThreadGuard thread, QualityTier defaultTier) { this.thread=thread; this.defaultTier=defaultTier; }
++    public void execute(Endpoint e, String[] args) {
++        thread.check();
++        if (!e.permitted()) { e.reply("Permission required: bedwenton.vfxdemo.use"); return; }
++        if (args.length == 1 && args[0].equalsIgnoreCase("status")) { e.reply(e.status()); return; }
++        if (args.length >= 1 && args[0].equalsIgnoreCase("ring") && args.length <= 2) {
++            if (!e.player()) { e.reply("This command requires a player."); return; }
++            QualityTier tier = defaultTier;
++            if (args.length == 2) {
++                try { tier = QualityTier.valueOf(args[1].toUpperCase(Locale.ROOT)); }
++                catch (IllegalArgumentException bad) { usage(e); return; }
++            }
++            try { e.start(tier); e.reply("Static ring started: " + tier.name().toLowerCase(Locale.ROOT)); }
++            catch (IllegalArgumentException | IllegalStateException bad) { e.reply("Ring refused: " + bad.getMessage()); }
++            return;
++        }
++        if (args.length == 1 && args[0].equalsIgnoreCase("stop")) {
++            if (!e.player()) { e.reply("This command requires a player."); return; }
++            e.stop(); e.reply("Your ring stopped."); return;
++        }
++        if (args.length == 2 && args[0].equalsIgnoreCase("stop") && args[1].equalsIgnoreCase("all")) {
++            if (!e.admin()) { e.reply("Permission required: bedwenton.vfxdemo.admin"); return; }
++            e.stopAll(); e.reply("All rings stopped."); return;
++        }
++        usage(e);
++    }
++    private static void usage(Endpoint e) { e.reply("Usage: /vfxdemo ring [simple|balanced|heavy] | stop [all] | status"); }
++    public List<String> suggest(String[] args, boolean admin) {
++        thread.check();
++        List<String> choices = args.length == 1 ? List.of("ring","stop","status")
++            : args.length == 2 && args[0].equalsIgnoreCase("ring") ? List.of("simple","balanced","heavy")
++            : args.length == 2 && args[0].equalsIgnoreCase("stop") && admin ? List.of("all") : List.of();
++        String prefix = args.length == 0 ? "" : args[args.length-1].toLowerCase(Locale.ROOT);
++        return choices.stream().filter(s -> s.startsWith(prefix)).toList();
++    }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/DemoConfig.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/DemoConfig.java
+new file mode 100644
+index 0000000..96d27c0
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/DemoConfig.java
+@@ -0,0 +1,71 @@
++package workshop.vfx.paper.core;
++import java.util.Map;
++import java.util.LinkedHashMap;
++import java.util.Locale;
++import workshop.vfx.delivery.DeliveryPolicy;
++import workshop.vfx.delivery.QualityTier;
++/** Strict configuration parsing: invalid values never fall back to defaults. */
++public record DemoConfig(int maxActiveEffects, int maxViewersPerEffect, double viewRadius, int ringLifetimeTicks,
++        QualityTier defaultTier, int generatedPointBudget, int placementBudget, int worldPlacementBudget,
++        int viewerPlacementBudget, int simpleKeptCap, int balancedKeptCap, int heavyKeptCap,
++        int maxCallsPerTick, int maxCallsPerViewerPerTick, boolean debug) {
++    public DemoConfig {
++        bound("maxActiveEffects", maxActiveEffects, 1, 16); bound("maxViewersPerEffect", maxViewersPerEffect, 1, 16);
++        if (!Double.isFinite(viewRadius) || viewRadius < 4 || viewRadius > 64)
++            throw new IllegalArgumentException("viewRadius must be finite and within 4.0–64.0");
++        bound("ringLifetimeTicks", ringLifetimeTicks, 20, 6000);
++        if (defaultTier == null) throw new IllegalArgumentException("defaultTier must be simple, balanced or heavy");
++        bound("generatedPointBudget", generatedPointBudget, 0, 1152);
++        bound("placementBudget", placementBudget, 0, 4096); bound("worldPlacementBudget", worldPlacementBudget, 0, 4096);
++        bound("viewerPlacementBudget", viewerPlacementBudget, 0, 1024);
++        bound("simpleKeptCap", simpleKeptCap, 0, 72); bound("balancedKeptCap", balancedKeptCap, 0, 72);
++        bound("heavyKeptCap", heavyKeptCap, 0, 72);
++        if (simpleKeptCap > balancedKeptCap || balancedKeptCap > heavyKeptCap)
++            throw new IllegalArgumentException("Kept caps must be non-decreasing");
++        bound("maxCallsPerTick", maxCallsPerTick, 1, 4096);
++        bound("maxCallsPerViewerPerTick", maxCallsPerViewerPerTick, 1, 1024);
++    }
++    private static void bound(String key, int n, int min, int max) {
++        if (n < min || n > max) throw new IllegalArgumentException(key + " must be within " + min + "–" + max);
++    }
++    public static Map<String, Object> defaults() {
++        Map<String, Object> m = new LinkedHashMap<>();
++        m.put("maxActiveEffects", 4); m.put("maxViewersPerEffect", 4); m.put("viewRadius", 32.0);
++        m.put("ringLifetimeTicks", 600); m.put("defaultTier", "balanced"); m.put("generatedPointBudget", 1152);
++        m.put("placementBudget", 2048); m.put("worldPlacementBudget", 2048); m.put("viewerPlacementBudget", 256);
++        m.put("simpleKeptCap", 24); m.put("balancedKeptCap", 48); m.put("heavyKeptCap", 72);
++        m.put("maxCallsPerTick", 2048); m.put("maxCallsPerViewerPerTick", 256); m.put("debug", false);
++        return Map.copyOf(m);
++    }
++    public static DemoConfig from(Map<String, ?> raw) {
++        Map<String, Object> m = new LinkedHashMap<>(defaults()); m.putAll(raw);
++        Object radius = m.get("viewRadius");
++        if (!(radius instanceof Number n)) throw new IllegalArgumentException("viewRadius must be numeric");
++        Object tier = m.get("defaultTier");
++        if (!(tier instanceof String s)) throw new IllegalArgumentException("defaultTier must be a string");
++        QualityTier quality;
++        try { quality = QualityTier.valueOf(s.toUpperCase(Locale.ROOT)); }
++        catch (IllegalArgumentException e) { throw new IllegalArgumentException("defaultTier must be simple, balanced or heavy"); }
++        if (!(m.get("debug") instanceof Boolean debug)) throw new IllegalArgumentException("debug must be boolean");
++        return new DemoConfig(integer(m,"maxActiveEffects"), integer(m,"maxViewersPerEffect"), n.doubleValue(),
++            integer(m,"ringLifetimeTicks"), quality, integer(m,"generatedPointBudget"), integer(m,"placementBudget"),
++            integer(m,"worldPlacementBudget"), integer(m,"viewerPlacementBudget"), integer(m,"simpleKeptCap"),
++            integer(m,"balancedKeptCap"), integer(m,"heavyKeptCap"), integer(m,"maxCallsPerTick"),
++            integer(m,"maxCallsPerViewerPerTick"), debug);
++    }
++    private static int integer(Map<String,Object> m, String key) {
++        Object value = m.get(key);
++        if (!(value instanceof Byte || value instanceof Short || value instanceof Integer || value instanceof Long))
++            throw new IllegalArgumentException(key + " must be an integer");
++        long n = ((Number) value).longValue();
++        if (n < Integer.MIN_VALUE || n > Integer.MAX_VALUE) throw new IllegalArgumentException(key + " integer overflow");
++        return (int) n;
++    }
++    public DeliveryPolicy policy() {
++        return new DeliveryPolicy(maxActiveEffects, maxViewersPerEffect, (long)maxActiveEffects*maxViewersPerEffect,
++            generatedPointBudget, 0, Math.min(placementBudget, maxCallsPerTick), 0,
++            Math.min(worldPlacementBudget, maxCallsPerTick), Math.min(viewerPlacementBudget, maxCallsPerViewerPerTick),
++            simpleKeptCap, balancedKeptCap, heavyKeptCap);
++    }
++    public EmissionLimits emissionLimits() { return new EmissionLimits(maxCallsPerTick,maxCallsPerViewerPerTick); }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/DemoRecipe.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/DemoRecipe.java
+new file mode 100644
+index 0000000..0dbaa06
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/DemoRecipe.java
+@@ -0,0 +1,53 @@
++package workshop.vfx.paper.core;
++import java.util.ArrayList;
++import java.util.HashMap;
++import java.util.List;
++import java.util.Map;
++import java.util.Optional;
++import java.util.Set;
++import workshop.vfx.delivery.DeliveryPolicy;
++import workshop.vfx.delivery.DeliveryRequest;
++import workshop.vfx.delivery.EffectPriority;
++import workshop.vfx.delivery.EffectRecipe;
++import workshop.vfx.delivery.LayerRole;
++import workshop.vfx.delivery.QualityTier;
++import workshop.vfx.math.core.Pose;
++import workshop.vfx.math.core.Vec3;
++import workshop.vfx.math.curve.Spiral;
++import workshop.vfx.math.sample.Endpoints;
++import workshop.vfx.math.sample.SampleLimits;
++import workshop.vfx.math.sample.Sampler;
++import workshop.vfx.math.time.Playback;
++import workshop.vfx.math.time.TimeDomain;
++import workshop.vfx.math.time.TimePoint;
++import workshop.vfx.math.time.Timing;
++import workshop.vfx.scene.EffectScene;
++import workshop.vfx.scene.Layer;
++import workshop.vfx.scene.Motion;
++import workshop.vfx.scene.Reveal;
++import workshop.vfx.scene.SceneLimits;
++import workshop.vfx.scene.Shape;
++import workshop.vfx.scene.StyleKey;
++import workshop.vfx.scene.Visibility;
++
++/** The approved static, two-layer M5 demo; no geometry is improvised in Paper. */
++public final class DemoRecipe {
++    private DemoRecipe() { }
++    private static Layer layer(String name, double radius, int count, StyleKey style) {
++        Shape shape = Shape.of(Sampler.uniformParameter(Spiral.circle(radius), count, Endpoints.EXCLUDE_END,
++                new SampleLimits(72, 256)));
++        return new Layer(name, Timing.loop(40), Visibility.ACTIVE_ONLY, Reveal.ALL, Motion.IDENTITY, shape, style);
++    }
++    private static EffectScene tier(int ring, int accent, int lifetime) {
++        return EffectScene.of(TimeDomain.GAME, lifetime, List.of(
++                layer("ring", 2.0, ring, DemoStyleCatalog.END_ROD),
++                layer("accent", 2.25, accent, DemoStyleCatalog.DUST)), new SceneLimits(2,72));
++    }
++    public static EffectRecipe create(int lifetime) {
++        if (lifetime < 20 || lifetime > 6000) throw new IllegalArgumentException("Ring lifetime outside hard ceilings");
++        return EffectRecipe.of("bedwenton-demo-ring", EffectPriority.ACTION,
++            Map.of(QualityTier.SIMPLE,tier(16,8,lifetime), QualityTier.BALANCED,tier(32,16,lifetime),
++                   QualityTier.HEAVY,tier(48,24,lifetime)),
++            Map.of("ring",LayerRole.ESSENTIAL,"accent",LayerRole.DECORATIVE));
++    }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/DemoStyleCatalog.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/DemoStyleCatalog.java
+new file mode 100644
+index 0000000..e97fedf
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/DemoStyleCatalog.java
+@@ -0,0 +1,25 @@
++package workshop.vfx.paper.core;
++import java.util.Map;
++import java.util.Set;
++import java.util.HashMap;
++import workshop.vfx.scene.StyleKey;
++/** Two known styles, restricted to the keys that successfully resolved on this server. */
++public final class DemoStyleCatalog implements StyleCatalog {
++    public static final StyleKey END_ROD = StyleKey.of("bedwenton:demo_end_rod");
++    public static final StyleKey DUST = StyleKey.of("bedwenton:demo_dust_red");
++    private static final Map<StyleKey, ParticleSpec> WHITELIST = Map.of(
++        END_ROD, new ParticleSpec.Plain("minecraft:end_rod"), DUST, new ParticleSpec.Dust(0xFF3030, 1.0f));
++    private final Map<StyleKey, ParticleSpec> styles;
++    public DemoStyleCatalog(Set<StyleKey> resolved) {
++        Map<StyleKey, ParticleSpec> selected = new HashMap<>();
++        for (StyleKey key : resolved) {
++            if (!WHITELIST.containsKey(key)) throw new IllegalArgumentException("Style outside catalogue");
++            selected.put(key, WHITELIST.get(key));
++        }
++        styles = Map.copyOf(selected);
++    }
++    public static Map<StyleKey, ParticleSpec> whitelist() { return WHITELIST; }
++    @Override public Set<StyleKey> supportedStyles() { return styles.keySet(); }
++    @Override public ParticleSpec spec(StyleKey key) { return styles.get(key); }
++    @Override public Map<StyleKey, ParticleSpec> asMap() { return styles; }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/EmissionLimits.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/EmissionLimits.java
+new file mode 100644
+index 0000000..bb00b52
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/EmissionLimits.java
+@@ -0,0 +1,8 @@
++package workshop.vfx.paper.core;
++/** Actual call backstops. The planner policy is aligned to these bounds. */
++public record EmissionLimits(int maxCallsPerTick, int maxCallsPerViewerPerTick) {
++    public EmissionLimits {
++        if (maxCallsPerTick < 1 || maxCallsPerTick > 4096 || maxCallsPerViewerPerTick < 1 || maxCallsPerViewerPerTick > 1024)
++            throw new IllegalArgumentException("Emission limits outside hard ceilings");
++    }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/EmissionReport.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/EmissionReport.java
+new file mode 100644
+index 0000000..f0f9bce
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/EmissionReport.java
+@@ -0,0 +1,30 @@
++package workshop.vfx.paper.core;
++
++import java.util.Map;
++import java.util.Set;
++import workshop.vfx.scene.StyleKey;
++
++/**
++ * Adapter accounting for one tick, kept separate from the M6 plan's counters.
++ * Every planned placement is accounted for exactly once (contract section 7.2):
++ * {@code plannedPlacements = attemptedCalls + sum(skippedPoints) + placementsInSkippedRecipients
++ * + placementsInSkippedDeliveries}, and {@code attemptedCalls = succeededCalls + failedCalls}.
++ * {@code skippedDeliveries} counts whole deliveries skipped for a missing, mismatched or invalid context;
++ * {@code stylesDisabledThisTick} lists styles whose third consecutive failure happened in this tick.
++ */
++public record EmissionReport(long tickOrdinal, long plannedPlacements, long attemptedCalls, long succeededCalls,
++        long failedCalls, Map<SkipReason, Long> skippedDeliveries, Map<SkipReason, Long> skippedRecipients,
++        Map<SkipReason, Long> skippedPoints, long placementsInSkippedDeliveries, long placementsInSkippedRecipients,
++        Set<StyleKey> stylesDisabledThisTick, long planningNanos, long emissionNanos) {
++    public EmissionReport {
++        skippedDeliveries = Map.copyOf(skippedDeliveries);
++        skippedRecipients = Map.copyOf(skippedRecipients);
++        skippedPoints = Map.copyOf(skippedPoints);
++        stylesDisabledThisTick = Set.copyOf(stylesDisabledThisTick);
++    }
++    public EmissionReport withTimings(long planning, long emission) {
++        return new EmissionReport(tickOrdinal, plannedPlacements, attemptedCalls, succeededCalls, failedCalls,
++                skippedDeliveries, skippedRecipients, skippedPoints, placementsInSkippedDeliveries,
++                placementsInSkippedRecipients, stylesDisabledThisTick, planning, emission);
++    }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/OwnerAwareRecipientRule.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/OwnerAwareRecipientRule.java
+new file mode 100644
+index 0000000..d2f8a40
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/OwnerAwareRecipientRule.java
+@@ -0,0 +1,36 @@
++package workshop.vfx.paper.core;
++
++import java.util.Optional;
++
++/**
++ * M7 owner-aware recipient authorization. Owner-aware recipient rule, failing closed on
++ * invalid coordinates (contract section 7, step 1).
++ */
++public final class OwnerAwareRecipientRule implements RecipientRule {
++    private final double radiusSquared;
++
++    public OwnerAwareRecipientRule(double radius) {
++        if (!Double.isFinite(radius) || radius < 0) {
++            throw new IllegalArgumentException("view radius must be finite and >= 0: " + radius);
++        }
++        this.radiusSquared = radius * radius;
++    }
++
++    @Override
++    public Optional<SkipReason> decide(RequestContext c, long viewerId, ViewerFacts f) {
++        if (f == null || !f.online() || !f.valid()) return Optional.of(SkipReason.VIEWER_OFFLINE);
++        if (f.worldId() != c.worldId()) return Optional.of(SkipReason.VIEWER_WORLD_CHANGED);
++        boolean allowed = viewerId == c.ownerViewerId() ? f.hasUsePermission() : f.hasViewPermission();
++        if (!allowed) return Optional.of(SkipReason.VIEWER_PERMISSION_REVOKED);
++        if (!finite(c.anchorX(), c.anchorY(), c.anchorZ())) return Optional.of(SkipReason.INVALID_REQUEST_CONTEXT);
++        if (!finite(f.x(), f.y(), f.z())) return Optional.of(SkipReason.VIEWER_POSITION_INVALID);
++        double dx = f.x() - c.anchorX(), dy = f.y() - c.anchorY(), dz = f.z() - c.anchorZ();
++        double d2 = dx * dx + dy * dy + dz * dz;
++        if (!(d2 <= radiusSquared)) return Optional.of(SkipReason.VIEWER_OUT_OF_RANGE); // NaN denies
++        return Optional.empty();
++    }
++
++    static boolean finite(double x, double y, double z) {
++        return Double.isFinite(x) && Double.isFinite(y) && Double.isFinite(z);
++    }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/OwnerFirstViewerSelection.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/OwnerFirstViewerSelection.java
+new file mode 100644
+index 0000000..7a6a608
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/OwnerFirstViewerSelection.java
+@@ -0,0 +1,22 @@
++package workshop.vfx.paper.core;
++import java.util.Arrays;
++import java.util.Objects;
++/** Owner admission precedes capping; all other inputs must be unique and sorted. */
++public final class OwnerFirstViewerSelection implements ViewerSelection {
++    @Override public long[] select(long owner, boolean ownerEligible, long[] others, int cap) {
++        Objects.requireNonNull(others);
++        if (owner < 0 || cap < 0 || cap > 16) throw new IllegalArgumentException("Invalid owner or viewer cap");
++        long previous = -1;
++        for (long viewer : others) {
++            if (viewer < 0 || viewer <= previous) throw new IllegalArgumentException("Viewers must be unique and sorted");
++            previous = viewer;
++        }
++        long[] result = new long[cap]; int count = 0;
++        if (ownerEligible && cap > 0) result[count++] = owner;
++        for (long viewer : others) {
++            if (count == cap) break;
++            if (viewer != owner) result[count++] = viewer;
++        }
++        result = Arrays.copyOf(result, count); Arrays.sort(result); return result;
++    }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/ParticleSink.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/ParticleSink.java
+new file mode 100644
+index 0000000..11ebffe
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/ParticleSink.java
+@@ -0,0 +1,13 @@
++package workshop.vfx.paper.core;
++
++import workshop.vfx.scene.StyleKey;
++
++/**
++ * Sends one particle at an exact position to one viewer. The Paper
++ * implementation calls {@code Player.spawnParticle(particle, x, y, z, 0, 0, 0, 0, 0, data, false)}. A
++ * {@link RuntimeException} counts as a failed call and never escapes the tick.
++ */
++@FunctionalInterface
++public interface ParticleSink {
++    void send(long viewerId, int worldId, StyleKey style, double x, double y, double z);
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/ParticleSpec.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/ParticleSpec.java
+new file mode 100644
+index 0000000..b93e63b
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/ParticleSpec.java
+@@ -0,0 +1,15 @@
++package workshop.vfx.paper.core;
++/** Closed payload descriptions, validated before any Paper objects are constructed. */
++public sealed interface ParticleSpec permits ParticleSpec.Plain, ParticleSpec.Dust {
++    record Plain(String particleKey) implements ParticleSpec {
++        public Plain {
++            if (!"minecraft:end_rod".equals(particleKey)) throw new IllegalArgumentException("Unknown plain particle");
++        }
++    }
++    record Dust(int rgb, float size) implements ParticleSpec {
++        public Dust {
++            if (rgb < 0 || rgb > 0xFFFFFF || !Float.isFinite(size) || size < 0.01f || size > 4.0f)
++                throw new IllegalArgumentException("Invalid dust RGB or size");
++        }
++    }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/PlanEmitter.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/PlanEmitter.java
+new file mode 100644
+index 0000000..39b3b88
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/PlanEmitter.java
+@@ -0,0 +1,18 @@
++package workshop.vfx.paper.core;
++
++import java.util.Map;
++import workshop.vfx.delivery.DeliveryPlan;
++
++/**
++ * Walks a {@link DeliveryPlan} in M6 allocation order: deliveries sorted by
++ * {@code allocationRank()} ascending (never by list or input order), DELIVERED and THINNED only. Before any recipient
++ * of a delivery is considered, its context is validated: missing, mismatched ({@code context.requestId() !=
++ * delivery.requestId()}) or invalid (non-finite anchor, negative owner or world id) skips the whole delivery with that
++ * reason. Then, for each recipient r in recipient order, its first {@code recipientPoints(r)} selections over the
++ * ordered batches; no unsupported style, no unselected point. Sends of a disabled style are skipped
++ * ({@link SkipReason#STYLE_DISABLED}) and failures are reported to {@code health}.
++ */
++public interface PlanEmitter {
++    EmissionReport emit(DeliveryPlan plan, Map<Long, RequestContext> contexts, StyleHealth health, RecipientGate gate,
++            PointValidator points, ParticleSink sink, EmissionLimits limits);
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/PointValidator.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/PointValidator.java
+new file mode 100644
+index 0000000..b9ab67e
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/PointValidator.java
+@@ -0,0 +1,12 @@
++package workshop.vfx.paper.core;
++
++import java.util.Optional;
++
++/**
++ * Pre-send point check (contract section 7, step 3): finite coordinates, y within
++ * the world's height range, inside the world border. The Paper layer supplies world limits; tests inject a pure one.
++ */
++@FunctionalInterface
++public interface PointValidator {
++    Optional<SkipReason> check(int worldId, double x, double y, double z);
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/RecipientGate.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/RecipientGate.java
+new file mode 100644
+index 0000000..cdf8717
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/RecipientGate.java
+@@ -0,0 +1,15 @@
++package workshop.vfx.paper.core;
++
++import java.util.Optional;
++
++/**
++ * The Paper layer re-checks a planned recipient immediately before sending,
++ * on the main thread, against the request it belongs to. The rule (contract section 7) is owner-aware: the owner
++ * ({@code viewerId == context.ownerViewerId()}) needs {@code bedwenton.vfxdemo.use}; any other viewer needs
++ * {@code bedwenton.vfxdemo.view}. Both must be online, valid, in {@code context.worldId()} and within the view radius
++ * of the anchor. An empty result means the recipient may receive this request's points.
++ */
++@FunctionalInterface
++public interface RecipientGate {
++    Optional<SkipReason> check(RequestContext context, long viewerId);
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/RecipientRule.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/RecipientRule.java
+new file mode 100644
+index 0000000..cb97ba5
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/RecipientRule.java
+@@ -0,0 +1,22 @@
++package workshop.vfx.paper.core;
++
++import java.util.Optional;
++
++/**
++ * The pure, owner-aware authorization rule behind {@link RecipientGate}
++ * (contract section 7). Production: {@code OwnerAwareRecipientRule(viewRadius)}, whose constructor rejects a radius
++ * that is not finite or is negative. Checks, in order; the first failure is the result, and every failure denies:
++ * <ol>
++ *   <li>facts present, online and valid, else {@code VIEWER_OFFLINE};</li>
++ *   <li>same world as the request, else {@code VIEWER_WORLD_CHANGED};</li>
++ *   <li>permission: the owner needs the use permission, any other viewer the view permission, else
++ *       {@code VIEWER_PERMISSION_REVOKED};</li>
++ *   <li>range, failing closed: a non-finite anchor coordinate gives {@code INVALID_REQUEST_CONTEXT}; a non-finite viewer
++ *       coordinate gives {@code VIEWER_POSITION_INVALID}; otherwise the squared distance must satisfy
++ *       {@code d2 <= radius * radius} (written so that NaN denies), else {@code VIEWER_OUT_OF_RANGE}.</li>
++ * </ol>
++ */
++@FunctionalInterface
++public interface RecipientRule {
++    Optional<SkipReason> decide(RequestContext context, long viewerId, ViewerFacts facts);
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/RequestContext.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/RequestContext.java
+new file mode 100644
+index 0000000..0c6d99a
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/RequestContext.java
+@@ -0,0 +1,12 @@
++package workshop.vfx.paper.core;
++
++/**
++ * Everything the emitter and gate need to know about one planned request,
++ * captured on the main thread at planning time and keyed by {@code requestId} (= the M6 {@code DeliveryRequest.id()}).
++ * {@code ownerViewerId} is the session viewer id of the player who started the effect. The record is a plain carrier;
++ * consumers validate it (contract section 7): a delivery is never emitted when its context is missing
++ * ({@link SkipReason#MISSING_REQUEST_CONTEXT}), carries another request id ({@link SkipReason#MISMATCHED_REQUEST_CONTEXT}),
++ * or has a non-finite anchor or a negative owner or world id ({@link SkipReason#INVALID_REQUEST_CONTEXT}).
++ * Nothing is substituted, reconstructed or inferred.
++ */
++public record RequestContext(long requestId, long ownerViewerId, int worldId, double anchorX, double anchorY, double anchorZ) { }
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/RingDriver.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/RingDriver.java
+new file mode 100644
+index 0000000..f8ea66d
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/RingDriver.java
+@@ -0,0 +1,144 @@
++package workshop.vfx.paper.core;
++
++import java.util.ArrayList;
++import java.util.Comparator;
++import java.util.HashMap;
++import java.util.List;
++import java.util.Map;
++import java.util.Objects;
++import java.util.Optional;
++import java.util.Set;
++import java.util.TreeSet;
++import java.util.UUID;
++import workshop.vfx.delivery.*;
++import workshop.vfx.math.core.Pose;
++import workshop.vfx.math.core.Vec3;
++import workshop.vfx.math.time.Playback;
++import workshop.vfx.math.time.TimePoint;
++
++/** One session, one repeating task and one global planning call per server tick. */
++public final class RingDriver {
++    public interface Host {
++        long tick();
++        long nanoTime();
++        boolean worldReady(UUID world, double x, double y, double z);
++        ViewerFacts facts(UUID player);
++        List<UUID> players();
++        Runnable schedule(Runnable tickBody);
++    }
++    @FunctionalInterface public interface Planner {
++        DeliveryPlan plan(long tick, List<DeliveryRequest> requests, Set<workshop.vfx.scene.StyleKey> styles, DeliveryPolicy policy);
++    }
++    public record Ring(long id, UUID owner, long ownerId, UUID world, int worldId,
++                       double x, double y, double z, long startTick, QualityTier tier) { }
++    private final ThreadGuard thread;
++    private final Host host;
++    private final DemoConfig config;
++    private final DefaultSessionIds ids;
++    private final StyleHealth health;
++    private final RecipientRule rule;
++    private final PlanEmitter emitter;
++    private final ParticleSink sink;
++    private final PointValidator points;
++    private final Planner planner;
++    private final EffectRecipe recipe;
++    private final Map<UUID, Ring> rings = new HashMap<>();
++    private Runnable cancellation;
++    private boolean running;
++    private boolean closed;
++    private long generation;
++    private long nextRing;
++    private long lastPlannedTick = Long.MIN_VALUE;
++    private EmissionReport lastReport;
++
++    public RingDriver(ThreadGuard thread, Host host, DemoConfig config, DefaultSessionIds ids, StyleHealth health,
++                      PointValidator points, ParticleSink sink) {
++        this(thread, host, config, ids, health, points, sink, DeliveryPlanner::plan);
++    }
++    public RingDriver(ThreadGuard thread, Host host, DemoConfig config, DefaultSessionIds ids, StyleHealth health,
++                      PointValidator points, ParticleSink sink, Planner planner) {
++        this.thread = Objects.requireNonNull(thread); this.host = Objects.requireNonNull(host);
++        this.config = Objects.requireNonNull(config); this.ids = Objects.requireNonNull(ids);
++        this.health = Objects.requireNonNull(health); this.points = Objects.requireNonNull(points);
++        this.sink = Objects.requireNonNull(sink); this.planner = Objects.requireNonNull(planner);
++        // Config has already enforced a finite radius in [4,64].
++        rule = new OwnerAwareRecipientRule(config.viewRadius()); emitter = new DefaultPlanEmitter(thread);
++        recipe = DemoRecipe.create(config.ringLifetimeTicks());
++    }
++    /** Position is captured once by the caller at the approved block-centre anchor. */
++    public void start(UUID owner, UUID world, double x, double y, double z, QualityTier tier) {
++        thread.check();
++        if (closed) throw new IllegalStateException("VFX session is disabled");
++        Objects.requireNonNull(owner); Objects.requireNonNull(world); Objects.requireNonNull(tier);
++        if (!OwnerAwareRecipientRule.finite(x,y,z) || !host.worldReady(world,x,y,z))
++            throw new IllegalArgumentException("Anchor is not in a loaded, valid world location");
++        if (!rings.containsKey(owner) && rings.size() >= config.maxActiveEffects())
++            throw new IllegalArgumentException("Active ring cap reached");
++        if (nextRing == Long.MAX_VALUE) throw new IllegalStateException("Ring session ids exhausted");
++        Ring ring = new Ring(nextRing++, owner, ids.viewerId(owner), world, ids.worldId(world), x,y,z,host.tick(),tier);
++        rings.put(owner,ring);
++        if (!running) {
++            running = true; long token = ++generation;
++            try { cancellation = Objects.requireNonNull(host.schedule(() -> { thread.check(); if (running && token == generation) tick(); })); }
++            catch (RuntimeException e) { running = false; rings.remove(owner); generation++; throw e; }
++        }
++    }
++    public void stop(UUID owner) { thread.check(); rings.remove(owner); cancelIfEmpty(); }
++    public void stopAll() { thread.check(); rings.clear(); cancelIfEmpty(); }
++    public void stopWorld(UUID world) { thread.check(); rings.values().removeIf(r -> r.world().equals(world)); cancelIfEmpty(); }
++    public void close() { thread.check(); closed = true; stopAll(); }
++    private void cancelIfEmpty() {
++        if (!rings.isEmpty()) return;
++        running = false; generation++;
++        Runnable cancel = cancellation; cancellation = null;
++        if (cancel != null) cancel.run();
++    }
++    public Ring ring(UUID owner) { thread.check(); return rings.get(owner); }
++    public int activeCount() { thread.check(); return rings.size(); }
++    public boolean running() { thread.check(); return running; }
++    public EmissionReport lastReport() { thread.check(); return lastReport; }
++    public boolean leavesAnchor(UUID owner, UUID world, double x, double y, double z) {
++        thread.check(); Ring r = rings.get(owner); if (r == null) return false;
++        if (!r.world().equals(world) || !OwnerAwareRecipientRule.finite(x,y,z)) return true;
++        double dx=x-r.x(), dy=y-r.y(), dz=z-r.z();
++        return !(dx*dx+dy*dy+dz*dz <= config.viewRadius()*config.viewRadius());
++    }
++    public void tick() {
++        thread.check(); if (!running || closed) return;
++        long tick = host.tick();
++        if (tick == lastPlannedTick) return; // Even stale callbacks cannot reset this tick's budgets.
++        rings.values().removeIf(r -> {
++            ViewerFacts owner = host.facts(r.owner());
++            return owner == null || !owner.online() || owner.worldId() != r.worldId()
++                || tick-r.startTick() >= config.ringLifetimeTicks() || tick < r.startTick()
++                || !host.worldReady(r.world(),r.x(),r.y(),r.z());
++        });
++        if (rings.isEmpty()) { cancelIfEmpty(); return; }
++        List<DeliveryRequest> requests = new ArrayList<>(); Map<Long,RequestContext> contexts = new HashMap<>();
++        List<Ring> ordered = rings.values().stream().sorted(Comparator.comparingLong(Ring::id)).toList();
++        // Assign new identities once in deterministic UUID order; sort and deduplicate again by session id below.
++        List<UUID> players = host.players().stream().distinct().sorted().toList();
++        for (UUID player : players) ids.viewerId(player);
++        for (Ring r : ordered) {
++            RequestContext context = new RequestContext(r.id(),r.ownerId(),r.worldId(),r.x(),r.y(),r.z());
++            boolean ownerEligible = rule.decide(context,r.ownerId(),host.facts(r.owner())).isEmpty();
++            TreeSet<Long> others = new TreeSet<>();
++            for (UUID player : players) {
++                long id = ids.viewerId(player);
++                if (id != r.ownerId() && rule.decide(context,id,host.facts(player)).isEmpty()) others.add(id);
++            }
++            long[] selected = new OwnerFirstViewerSelection().select(r.ownerId(),ownerEligible,
++                others.stream().mapToLong(Long::longValue).toArray(),config.maxViewersPerEffect());
++            requests.add(DeliveryRequest.of(r.id(),recipe,r.tier(),r.worldId(),Pose.ofTranslation(new Vec3(r.x(),r.y(),r.z())),
++                Playback.start(TimePoint.gameTick(r.startTick())),TimePoint.gameTick(tick),tick-r.startTick(),selected));
++            contexts.put(r.id(),context);
++        }
++        lastPlannedTick = tick;
++        long start = host.nanoTime();
++        DeliveryPlan plan = planner.plan(tick,List.copyOf(requests),health.enabledStyles(),config.policy());
++        long planned = host.nanoTime()-start; start = host.nanoTime();
++        RecipientGate gate = (context,viewer) -> rule.decide(context,viewer,host.facts(ids.viewer(viewer)));
++        EmissionReport report = emitter.emit(plan,contexts,health,gate,points,sink,config.emissionLimits());
++        lastReport = report.withTimings(planned,host.nanoTime()-start);
++    }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/SessionIds.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/SessionIds.java
+new file mode 100644
+index 0000000..7c16051
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/SessionIds.java
+@@ -0,0 +1,24 @@
++package workshop.vfx.paper.core;
++
++import java.util.OptionalLong;
++import java.util.UUID;
++
++/**
++ * Collision-free session ids for M6: viewer UUIDs map to longs and world UUIDs to
++ * ints, assigned 0, 1, 2, ... in first-use order and never reused while the plugin is enabled (no hashing).
++ * Main thread only.
++ */
++public interface SessionIds {
++    long viewerId(UUID player);
++
++    OptionalLong existingViewerId(UUID player);
++
++    UUID viewer(long viewerId);
++
++    int worldId(UUID world);
++
++    UUID world(int worldId);
++
++    /** Forgets a quitting player's mapping; the number is not reused. */
++    void release(UUID player);
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/SessionStyleHealth.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/SessionStyleHealth.java
+new file mode 100644
+index 0000000..ac5a250
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/SessionStyleHealth.java
+@@ -0,0 +1,35 @@
++package workshop.vfx.paper.core;
++
++import java.util.HashMap;
++import java.util.LinkedHashSet;
++import java.util.Map;
++import java.util.Set;
++import workshop.vfx.scene.StyleKey;
++
++/** M7 allocation-order emitter with exact recipient-prefix accounting. */
++public final class SessionStyleHealth implements StyleHealth {
++    private final ThreadGuard thread;
++    private final Set<StyleKey> catalogue;
++    private final Map<StyleKey, Integer> streaks = new HashMap<>();
++    private final Set<StyleKey> disabled = new LinkedHashSet<>();
++
++    public SessionStyleHealth(Set<StyleKey> catalogue) { this(catalogue, new ThreadGuard()); }
++    public SessionStyleHealth(Set<StyleKey> catalogue, ThreadGuard thread) {
++        this.catalogue = Set.copyOf(catalogue); this.thread = java.util.Objects.requireNonNull(thread);
++    }
++
++    @Override public Set<StyleKey> enabledStyles() {
++        thread.check();
++        Set<StyleKey> s = new LinkedHashSet<>(catalogue); s.removeAll(disabled); return Set.copyOf(s);
++    }
++    @Override public boolean isDisabled(StyleKey style) { thread.check(); return disabled.contains(style); }
++    @Override public void recordSuccess(StyleKey style) { thread.check(); if (!disabled.contains(style)) streaks.put(style, 0); }
++    @Override public boolean recordFailure(StyleKey style) {
++        thread.check();
++        if (disabled.contains(style)) return false;
++        int n = streaks.merge(style, 1, Integer::sum);
++        if (n >= DISABLE_AFTER_CONSECUTIVE_FAILURES) { disabled.add(style); return true; }
++        return false;
++    }
++    @Override public int streak(StyleKey style) { thread.check(); return streaks.getOrDefault(style, 0); }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/SkipReason.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/SkipReason.java
+new file mode 100644
+index 0000000..e88701b
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/SkipReason.java
+@@ -0,0 +1,21 @@
++package workshop.vfx.paper.core;
++
++/** Why a planned delivery, recipient or point was not sent. */
++public enum SkipReason {
++    /** Delivery level: no {@link RequestContext} for the delivery's request id. */
++    MISSING_REQUEST_CONTEXT,
++    /** Delivery level: the context found under the delivery's id carries a different {@code requestId} (R3). */
++    MISMATCHED_REQUEST_CONTEXT,
++    /**
++     * Delivery level (emitter) or recipient level (rule used alone): the context has a non-finite anchor coordinate or a
++     * negative owner or world id (R3).
++     */
++    INVALID_REQUEST_CONTEXT,
++    /** Recipient level (gate). */
++    VIEWER_OFFLINE, VIEWER_WORLD_CHANGED, VIEWER_PERMISSION_REVOKED,
++    /** Recipient level: a viewer position coordinate is NaN or infinite (R3; fail closed). */
++    VIEWER_POSITION_INVALID,
++    VIEWER_OUT_OF_RANGE,
++    /** Point level. */
++    POINT_NOT_FINITE, POINT_OUTSIDE_WORLD, STYLE_DISABLED, EMISSION_LIMIT
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/StyleCatalog.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/StyleCatalog.java
+new file mode 100644
+index 0000000..dd2e015
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/StyleCatalog.java
+@@ -0,0 +1,18 @@
++package workshop.vfx.paper.core;
++
++import java.util.Map;
++import java.util.Set;
++import workshop.vfx.scene.StyleKey;
++
++/**
++ * The closed whitelist: exactly these style keys are passed to
++ * {@code DeliveryPlanner.plan} as {@code supportedStyles}; every other style is unsupported and never emitted.
++ */
++public interface StyleCatalog {
++    Set<StyleKey> supportedStyles();
++
++    /** The spec of a supported style; never a fallback for an unknown key. */
++    ParticleSpec spec(StyleKey style);
++
++    Map<StyleKey, ParticleSpec> asMap();
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/StyleHealth.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/StyleHealth.java
+new file mode 100644
+index 0000000..b410b06
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/StyleHealth.java
+@@ -0,0 +1,27 @@
++package workshop.vfx.paper.core;
++
++import java.util.Set;
++import workshop.vfx.scene.StyleKey;
++
++/**
++ * Session-wide particle-style health (contract section 7.1). A style's
++ * consecutive-failure streak counts {@link RuntimeException}s from {@link ParticleSink#send} for that style across
++ * recipients and ticks; any successful send of that style resets it to 0. The third consecutive failure disables the
++ * style for the rest of the plugin session (until disable/enable); disabling is permanent within the session.
++ * Main thread only.
++ */
++public interface StyleHealth {
++    /** The catalogue's styles minus the disabled ones: exactly what the next {@code DeliveryPlanner.plan} receives. */
++    Set<StyleKey> enabledStyles();
++
++    boolean isDisabled(StyleKey style);
++
++    void recordSuccess(StyleKey style);
++
++    /** Records a failure; returns true exactly once, when this failure disables the style. */
++    boolean recordFailure(StyleKey style);
++
++    int streak(StyleKey style);
++
++    int DISABLE_AFTER_CONSECUTIVE_FAILURES = 3;
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/ThreadGuard.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/ThreadGuard.java
+new file mode 100644
+index 0000000..81e74f3
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/ThreadGuard.java
+@@ -0,0 +1,14 @@
++package workshop.vfx.paper.core;
++import java.util.Objects;
++import java.util.function.BooleanSupplier;
++/** All mutable adapter state belongs to one server thread. */
++public final class ThreadGuard {
++    private final Thread owner = Thread.currentThread();
++    private final BooleanSupplier primary;
++    public ThreadGuard() { this(() -> true); }
++    public ThreadGuard(BooleanSupplier primary) { this.primary = Objects.requireNonNull(primary); }
++    public void check() {
++        if (Thread.currentThread() != owner || !primary.getAsBoolean())
++            throw new IllegalStateException("VFX adapter requires its primary thread");
++    }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/ViewerFacts.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/ViewerFacts.java
+new file mode 100644
+index 0000000..629f006
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/ViewerFacts.java
+@@ -0,0 +1,8 @@
++package workshop.vfx.paper.core;
++
++/**
++ * What the Paper gate observed about one viewer immediately before sending:
++ * online and valid state, current world id and position, and the two demo permissions. Gathered on the main thread.
++ */
++public record ViewerFacts(boolean online, boolean valid, int worldId, double x, double y, double z,
++        boolean hasUsePermission, boolean hasViewPermission) { }
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/ViewerSelection.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/ViewerSelection.java
+new file mode 100644
+index 0000000..75dc712
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/ViewerSelection.java
+@@ -0,0 +1,12 @@
++package workshop.vfx.paper.core;
++
++/**
++ * Snapshot viewer selection for one ring (contract section 6, step 1). The owner
++ * is admitted first when eligible; the remaining {@code cap - 1} (or {@code cap}) places go to the smallest other
++ * eligible viewer ids; only then is the chosen set sorted strictly increasing for {@code DeliveryRequest.of}. Sorting
++ * never decides whether the owner is included. Production: {@code OwnerFirstViewerSelection}.
++ */
++@FunctionalInterface
++public interface ViewerSelection {
++    long[] select(long ownerViewerId, boolean ownerEligible, long[] otherEligibleAscending, int cap);
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/core/WorldPointRules.java b/paper-adapter/src/main/java/workshop/vfx/paper/core/WorldPointRules.java
+new file mode 100644
+index 0000000..d7dbb76
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/core/WorldPointRules.java
+@@ -0,0 +1,12 @@
++package workshop.vfx.paper.core;
++import java.util.Optional;
++import java.util.function.BooleanSupplier;
++/** Testable world-boundary rule. The platform supplies a border query with no chunk loading. */
++public final class WorldPointRules {
++    private WorldPointRules() { }
++    public static Optional<SkipReason> check(double x, double y, double z, int minHeight, int maxHeight, BooleanSupplier borderInside) {
++        if (!Double.isFinite(x) || !Double.isFinite(y) || !Double.isFinite(z)) return Optional.of(SkipReason.POINT_NOT_FINITE);
++        if (y < minHeight || y >= maxHeight || !borderInside.getAsBoolean()) return Optional.of(SkipReason.POINT_OUTSIDE_WORLD);
++        return Optional.empty();
++    }
++}
+diff --git a/paper-adapter/src/main/resources/config.yml b/paper-adapter/src/main/resources/config.yml
+new file mode 100644
+index 0000000..43b7b12
+--- /dev/null
++++ b/paper-adapter/src/main/resources/config.yml
+@@ -0,0 +1,17 @@
++# Read only at enable; restart to apply changes. /reload is unsupported.
++# Hard ceilings bound work; they are not server performance guarantees.
++maxActiveEffects: 4
++maxViewersPerEffect: 4
++viewRadius: 32.0
++ringLifetimeTicks: 600
++defaultTier: balanced
++generatedPointBudget: 1152
++placementBudget: 2048
++worldPlacementBudget: 2048
++viewerPlacementBudget: 256
++simpleKeptCap: 24
++balancedKeptCap: 48
++heavyKeptCap: 72
++maxCallsPerTick: 2048
++maxCallsPerViewerPerTick: 256
++debug: false
+diff --git a/paper-adapter/src/main/resources/plugin.yml b/paper-adapter/src/main/resources/plugin.yml
+new file mode 100644
+index 0000000..640a482
+--- /dev/null
++++ b/paper-adapter/src/main/resources/plugin.yml
+@@ -0,0 +1,9 @@
++name: BedwentonVfxDemo
++version: '${version}'
++main: workshop.vfx.paper.bukkit.VfxDemoPlugin
++api-version: '26.3'
++description: Opt-in VFX engine debug demo. Particles only; no gameplay effects.
++permissions:
++  bedwenton.vfxdemo.use: {default: op, description: 'Use /vfxdemo ring, stop and status'}
++  bedwenton.vfxdemo.view: {default: op, description: 'See demo effects started by other players'}
++  bedwenton.vfxdemo.admin: {default: op, description: 'Stop all demo effects; see server-wide status'}

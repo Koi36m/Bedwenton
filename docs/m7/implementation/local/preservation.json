@@ -1,0 +1,40 @@
+{
+  "frozen_snapshot_files": 1040,
+  "approved_r3_files": 58,
+  "only_added_m7_paths": 117,
+  "engine_production_tree": "10fa150464001d617d33937f42a0c9da45ed99bb",
+  "accepted_engine_production_tree": "10fa150464001d617d33937f42a0c9da45ed99bb",
+  "accepted_tests_tree": "d91d1e983c8497980a8e6d7b0494c81926720ab7",
+  "current_tests_tree": "d91d1e983c8497980a8e6d7b0494c81926720ab7",
+  "copied_r3_test_files": [
+    {
+      "file": "RequestContextConsistencyTest.java",
+      "sha256": "927d5a440f9530c9c9af0f7fed487983a66ea4f1e57d2b70aa632d03d2533a13"
+    },
+    {
+      "file": "RecipientRuleRobustnessTest.java",
+      "sha256": "b96f09dcd57ccd41ecfcfda2a3bb9e874418e44e6c2b6b2db069053afe653628"
+    },
+    {
+      "file": "OwnerAwareEmissionTest.java",
+      "sha256": "beb8e20450769a26f1a0725b0799db9b952ccaacff9d46698c6ed217d5dfc9f2"
+    },
+    {
+      "file": "DemoFixture.java",
+      "sha256": "5e7d919d5291967dde9bac7639fc8d0049423e36aa88d9a3865c59faca07f251"
+    },
+    {
+      "file": "AllocationOrderEmissionTest.java",
+      "sha256": "8eef8d25c66fe39d8b5ef68bcf97e605806b75053ab90eeeac61dd3f56f1b6f1"
+    },
+    {
+      "file": "StyleHealthTest.java",
+      "sha256": "1953e362652c3a5a94620243b476ce466f9b390ec98695294a60e4d17d698b72"
+    }
+  ],
+  "native_implementation_commit": "c0fa177a73c0e088fca047d606e6f00a4a45bfd7",
+  "native_complete_tree": "afa33672b5850bdda3be636415659fa27ac53047",
+  "published_snapshot_commit": "ed5fc7bff548edf4b005e919495b22213a65b64e",
+  "published_complete_tree": "afa33672b5850bdda3be636415659fa27ac53047",
+  "same_complete_tree": true
+}
