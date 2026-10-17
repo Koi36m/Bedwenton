@@ -106,7 +106,9 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
         thread.check();
         if (!Double.isFinite(x) || !Double.isFinite(y) || !Double.isFinite(z)) return Optional.of(SkipReason.POINT_NOT_FINITE);
         UUID uuid = ids.world(worldId); World world = uuid == null ? null : Bukkit.getWorld(uuid);
-        return inside(world,x,y,z) ? Optional.empty() : Optional.of(SkipReason.POINT_OUTSIDE_WORLD);
+        if (world == null) return Optional.of(SkipReason.POINT_OUTSIDE_WORLD);
+        return WorldPointRules.check(x,y,z,world.getMinHeight(),world.getMaxHeight(),
+            () -> world.getWorldBorder().isInside(new Location(world,x,y,z)));
     }
     private void send(long viewerId, int worldId, StyleKey style, double x, double y, double z) {
         thread.check();

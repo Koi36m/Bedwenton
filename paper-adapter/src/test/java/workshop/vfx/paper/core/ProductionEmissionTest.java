@@ -81,4 +81,17 @@ class ProductionEmissionTest {
             }
         }
     }
+    @Test void pointValidationRejectsEveryNonfiniteAxisAndHonorsWorldEdges() {
+        java.util.concurrent.atomic.AtomicInteger borderCalls=new java.util.concurrent.atomic.AtomicInteger();
+        for(int axis=0;axis<3;axis++) for(double invalid:new double[]{Double.NaN,Double.NEGATIVE_INFINITY,Double.POSITIVE_INFINITY}) {
+            double[] xyz={0,64,0};xyz[axis]=invalid;
+            assertEquals(Optional.of(SkipReason.POINT_NOT_FINITE),WorldPointRules.check(xyz[0],xyz[1],xyz[2],-64,320,()->{borderCalls.incrementAndGet();return true;}));
+        }
+        assertEquals(0,borderCalls.get());
+        assertTrue(WorldPointRules.check(0,-64,0,-64,320,()->true).isEmpty());
+        assertTrue(WorldPointRules.check(0,Math.nextDown(320.0),0,-64,320,()->true).isEmpty());
+        assertEquals(Optional.of(SkipReason.POINT_OUTSIDE_WORLD),WorldPointRules.check(0,320,0,-64,320,()->true));
+        assertEquals(Optional.of(SkipReason.POINT_OUTSIDE_WORLD),WorldPointRules.check(0,Math.nextDown(-64.0),0,-64,320,()->true));
+        assertEquals(Optional.of(SkipReason.POINT_OUTSIDE_WORLD),WorldPointRules.check(0,64,0,-64,320,()->false));
+    }
 }

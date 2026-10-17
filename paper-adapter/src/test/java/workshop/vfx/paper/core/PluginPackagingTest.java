@@ -41,4 +41,14 @@ class PluginPackagingTest {
         assertFalse(paper.contains("world.spawnParticle"));assertFalse(paper.contains("runTaskAsynchronously"));
         assertTrue(paper.contains("registerCommand("));assertFalse(paper.contains("getCommand("));
     }
+    @Test void failedGradleCannotBeMaskedByStaleSuccessfulXml() throws Exception {
+        Path project=temp.resolve("fixture");Path tools=project.resolve("paper-adapter/tools");Files.createDirectories(tools);
+        Files.copy(root().resolve("tools/verify.sh"),tools.resolve("verify.sh"));
+        Path wrapper=project.resolve("gradlew");Files.writeString(wrapper,"#!/usr/bin/env bash\nexit 23\n");
+        assertTrue(wrapper.toFile().setExecutable(true));
+        Path reports=project.resolve("build/test-results/test");Files.createDirectories(reports);
+        Files.writeString(reports.resolve("TEST-stale.xml"),"<testsuite tests='415' failures='0' errors='0' skipped='0'/>");
+        Process process=new ProcessBuilder("bash",tools.resolve("verify.sh").toString(),temp.resolve("evidence").toString())
+            .redirectErrorStream(true).start();process.getInputStream().readAllBytes();assertEquals(23,process.waitFor());
+    }
 }

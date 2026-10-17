@@ -20,7 +20,7 @@ with JDK 25 `javap`. Successful stable-provenance run:
 https://github.com/Koi36m/Bedwenton/actions/runs/39067638639
 The earlier provenance run downloaded the metadata's prerelease latest; that artifact is not the production dependency.
 
-Local JDK 25.0.4.1 compiles the engine and core with `-Xlint:all -Werror`; 59 adapter tests pass under the actual
+Local JDK 25.0.4.1 compiles the engine and core with `-Xlint:all -Werror`; 61 adapter tests pass under the actual
 JUnit 5.12.2 launcher. Local Gradle cannot create FileLockContentionHandler (no usable wildcard IP), and local curl
 cannot connect to the configured proxy. No permission retries or Java substitution were used.
 Fresh full Gradle/Paper compilation and regression results are pending at this checkpoint.
