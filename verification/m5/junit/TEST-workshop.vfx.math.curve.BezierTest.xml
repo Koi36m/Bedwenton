@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.curve.BezierTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-17T00:30:42.466Z" hostname="vm" time="0.089">
+  <properties/>
+  <testcase name="Derivatives agree with central finite differences of the points (independent of the derivative formulas) (section 4)" classname="workshop.vfx.math.curve.BezierTest" time="0.027"/>
+  <testcase name="End derivatives: B'(0) = n (P1 - P0), B'(1) = n (Pn - Pn-1); joining with mirrored handles is C1 (section 4)" classname="workshop.vfx.math.curve.BezierTest" time="0.012"/>
+  <testcase name="Validation: null or non-finite control points and non-finite parameters are IllegalArgumentExceptions (sections 4, 8)" classname="workshop.vfx.math.curve.BezierTest" time="0.008"/>
+  <testcase name="Endpoints are exact for arbitrary control points: point(0) = first, point(1) = last (section 4)" classname="workshop.vfx.math.curve.BezierTest" time="0.017"/>
+  <testcase name="Degree elevation: a line and a quadratic written as higher-degree Beziers give the same points (section 4, metamorphic)" classname="workshop.vfx.math.curve.BezierTest" time="0.01"/>
+  <testcase name="Affine invariance and reversal: Bezier of posed control points = posed Bezier; reversed control points at 1 - t give the same point (section 4)" classname="workshop.vfx.math.curve.BezierTest" time="0.011"/>
+  <testcase name="Degenerate geometry: coincident control points give a constant point and a zero derivative, without exceptions (sections 4, 8)" classname="workshop.vfx.math.curve.BezierTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

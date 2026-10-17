@@ -1,0 +1,11 @@
+58e2ccca7ff8fa61661c629858eb2b85ca37f4709daea2680fd5d862ad2fa6af  src/main/java/workshop/vfx/scene/EffectFrame.java
+0a3148f71b52fb96bd6d29d78f43f8934bf817b9e0da120e85bdfefbba9685d3  src/main/java/workshop/vfx/scene/EffectScene.java
+6df5bb58cc6eca9c7c3bb9914ca89152fd8fbf12dce502eead20ebd9ca4f9e6d  src/main/java/workshop/vfx/scene/FrameBatch.java
+a11c83355194e765ba48198c154d6d7008a69a1b7d26cd0c318fa55bf8724ae9  src/main/java/workshop/vfx/scene/Layer.java
+b39a4e7bbffd03f71173e2e9bbc30e03a471306311a09e263a9ebf8d0d2619f4  src/main/java/workshop/vfx/scene/Motion.java
+5129143f8dc4805f47cf2a60743cabf1fdefaf3bd83a88888c45a121e7872217  src/main/java/workshop/vfx/scene/Reveal.java
+03ea04496919f64562ec4f68b11fd5015d3e04c458d0dc2fdc86b011d32df43a  src/main/java/workshop/vfx/scene/SceneChecks.java
+073b8b31f97b1bf00b7f2ea73284df9d0c21de92b928d56a9b0def1010b4c97c  src/main/java/workshop/vfx/scene/SceneLimits.java
+d8b55cb8ae40a88260ca54c86743fca12b6c9a07fa11e3d819587997b8bbf989  src/main/java/workshop/vfx/scene/Shape.java
+f8ab486af6b5861a1d4f7cd6fc7833a33e6bec9a43fa903a10a11ee2c53b74af  src/main/java/workshop/vfx/scene/StyleKey.java
+edbfe9839096d4b92945c83e34660e3935a61224e7ae4527098a895da805c47a  src/main/java/workshop/vfx/scene/Visibility.java

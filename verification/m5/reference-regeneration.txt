@@ -1,0 +1,5 @@
+Independent regeneration of all approved reference data (Python 3.13.16, python3 -I, generators unchanged) into a scratch directory, then 'diff -r' against the checked-in files:
+M3: byte-identical (2759 data rows; 4 files; MANIFEST.sha256 verifies)
+M4: byte-identical (3064 data rows; 5 files; MANIFEST.sha256 verifies)
+M5: byte-identical (1113 data rows; 5 files; MANIFEST.sha256 verifies)
+Expected: M3 2,759; M4 3,064; M5 1,113.

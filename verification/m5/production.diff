@@ -1,0 +1,646 @@
+diff --git a/src/main/java/workshop/vfx/scene/EffectFrame.java b/src/main/java/workshop/vfx/scene/EffectFrame.java
+new file mode 100644
+index 0000000..e0c7f42
+--- /dev/null
++++ b/src/main/java/workshop/vfx/scene/EffectFrame.java
+@@ -0,0 +1,40 @@
++package workshop.vfx.scene;
++
++import java.util.List;
++import workshop.vfx.math.time.TimingSample;
++
++/** An immutable frame snapshot: scene stage, local ticks and the visible batches in layer order. */
++public final class EffectFrame {
++    private final TimingSample.Stage stage;
++    private final double localTicks;
++    private final List<FrameBatch> batches;
++    private final int pointCount;
++
++    /** {@code batches} must be unmodifiable. */
++    EffectFrame(TimingSample.Stage stage, double localTicks, List<FrameBatch> batches, int pointCount) {
++        this.stage = stage;
++        this.localTicks = localTicks;
++        this.batches = batches;
++        this.pointCount = pointCount;
++    }
++
++    public TimingSample.Stage stage() {
++        return stage;
++    }
++
++    public double localTicks() {
++        return localTicks;
++    }
++
++    public List<FrameBatch> batches() {
++        return batches;
++    }
++
++    public int pointCount() {
++        return pointCount;
++    }
++
++    public boolean isEmpty() {
++        return batches.isEmpty();
++    }
++}
+diff --git a/src/main/java/workshop/vfx/scene/EffectScene.java b/src/main/java/workshop/vfx/scene/EffectScene.java
+new file mode 100644
+index 0000000..38cd062
+--- /dev/null
++++ b/src/main/java/workshop/vfx/scene/EffectScene.java
+@@ -0,0 +1,140 @@
++package workshop.vfx.scene;
++
++import java.util.ArrayList;
++import java.util.Collections;
++import java.util.HashSet;
++import java.util.List;
++import java.util.Set;
++import workshop.vfx.math.core.Pose;
++import workshop.vfx.math.core.Vec3;
++import workshop.vfx.math.time.Playback;
++import workshop.vfx.math.time.TimeDomain;
++import workshop.vfx.math.time.TimePoint;
++import workshop.vfx.math.time.TimingSample;
++
++/**
++ * An immutable, validated and preflighted effect scene (contract section 6). {@link #evaluate} is a pure function of
++ * its arguments: it reads no clock, keeps no state and calls no curve (contract sections 7 to 9).
++ */
++public final class EffectScene {
++    public static final double UNBOUNDED = Double.POSITIVE_INFINITY;
++
++    private final TimeDomain domain;
++    private final double lifetimeTicks;
++    private final List<Layer> layers;
++    private final SceneLimits limits;
++    private final int maxPointsPerFrame;
++
++    private EffectScene(TimeDomain domain, double lifetimeTicks, List<Layer> layers, SceneLimits limits, int maxPointsPerFrame) {
++        this.domain = domain;
++        this.lifetimeTicks = lifetimeTicks;
++        this.layers = layers;
++        this.limits = limits;
++        this.maxPointsPerFrame = maxPointsPerFrame;
++    }
++
++    public static EffectScene of(TimeDomain domain, double lifetimeTicks, List<Layer> layers, SceneLimits limits) {
++        SceneChecks.nonnull(domain, "EffectScene.of: domain");
++        SceneChecks.nonnull(layers, "EffectScene.of: layers");
++        SceneChecks.nonnull(limits, "EffectScene.of: limits");
++        if (!(lifetimeTicks > 0)) {
++            throw new IllegalArgumentException("EffectScene.of: lifetimeTicks must be positive (finite or UNBOUNDED)");
++        }
++        // Size before copying: the copy is proportional to the list (binding addendum, correction 5).
++        if (layers.size() > limits.maxLayers()) {
++            throw new IllegalArgumentException("EffectScene.of: more layers than limits.maxLayers()");
++        }
++        List<Layer> copy = new ArrayList<>(layers);
++        if (copy.size() > limits.maxLayers()) {
++            throw new IllegalArgumentException("EffectScene.of: more layers than limits.maxLayers()");
++        }
++        Set<String> names = new HashSet<>();
++        long points = 0;
++        for (Layer layer : copy) {
++            SceneChecks.nonnull(layer, "EffectScene.of: layer");
++            if (!names.add(layer.name())) {
++                throw new IllegalArgumentException("EffectScene.of: duplicate layer name " + layer.name());
++            }
++            points += layer.shape().size();
++        }
++        if (points > limits.maxPointsPerFrame()) {
++            throw new IllegalArgumentException("EffectScene.of: total shape points exceed limits.maxPointsPerFrame()");
++        }
++        return new EffectScene(domain, lifetimeTicks, Collections.unmodifiableList(copy), limits, (int) points);
++    }
++
++    public TimeDomain domain() {
++        return domain;
++    }
++
++    public double lifetimeTicks() {
++        return lifetimeTicks;
++    }
++
++    public List<Layer> layers() {
++        return layers;
++    }
++
++    public SceneLimits limits() {
++        return limits;
++    }
++
++    /** The sum of all shape sizes: no frame of this scene can contain more points. */
++    public int maxPointsPerFrame() {
++        return maxPointsPerFrame;
++    }
++
++    /** Contract sections 7 and 8, in their exact order. Returns a complete frame or throws. */
++    public EffectFrame evaluate(Pose anchor, Playback playback, TimePoint now) {
++        SceneChecks.nonnull(anchor, "EffectScene.evaluate: anchor");
++        SceneChecks.nonnull(playback, "EffectScene.evaluate: playback");
++        SceneChecks.nonnull(now, "EffectScene.evaluate: now");
++        if (playback.anchor().domain() != domain || now.domain() != domain) {
++            throw new IllegalArgumentException("EffectScene.evaluate: playback and instant must use the scene's time domain");
++        }
++        double local = playback.localTicks(now);
++        if (!Double.isFinite(local)) {
++            throw new ArithmeticException("EffectScene.evaluate: local ticks are not finite");
++        }
++        if (local == 0.0) {
++            local = 0.0; // -0.0 is the scene start
++        }
++        if (local < 0.0) {
++            return new EffectFrame(TimingSample.Stage.BEFORE, local, List.of(), 0);
++        }
++        if (local >= lifetimeTicks) {
++            return new EffectFrame(TimingSample.Stage.AFTER, local, List.of(), 0);
++        }
++        List<FrameBatch> batches = new ArrayList<>(layers.size());
++        int total = 0;
++        for (int index = 0; index < layers.size(); index++) {
++            Layer layer = layers.get(index);
++            TimingSample sample = layer.timing().sample(local);
++            boolean visible = sample.stage() == TimingSample.Stage.ACTIVE
++                    || (sample.stage() == TimingSample.Stage.AFTER && layer.visibility() == Visibility.HOLD_AFTER);
++            if (!visible) {
++                continue;
++            }
++            Shape shape = layer.shape();
++            int n = shape.size();
++            int k = layer.reveal() == Reveal.ALL ? n : (int) Math.floor(sample.progress() * n);
++            if (k == 0) {
++                continue;
++            }
++            Pose pose = anchor.then(layer.motion().poseAt(local));
++            double[] xyz = new double[3 * k]; // k <= n, and the shape sizes sum to at most maxPointsPerFrame
++            for (int j = 0; j < k; j++) {
++                Vec3 w = pose.toWorld(new Vec3(shape.x(j), shape.y(j), shape.z(j)));
++                if (!w.isFinite()) {
++                    throw new ArithmeticException("EffectScene.evaluate: non-finite position in layer " + layer.name());
++                }
++                xyz[3 * j] = w.x();
++                xyz[3 * j + 1] = w.y();
++                xyz[3 * j + 2] = w.z();
++            }
++            batches.add(new FrameBatch(index, layer.name(), layer.style(), sample, pose, xyz));
++            total += k;
++        }
++        return new EffectFrame(TimingSample.Stage.ACTIVE, local, Collections.unmodifiableList(batches), total);
++    }
++}
+diff --git a/src/main/java/workshop/vfx/scene/FrameBatch.java b/src/main/java/workshop/vfx/scene/FrameBatch.java
+new file mode 100644
+index 0000000..e32bd3c
+--- /dev/null
++++ b/src/main/java/workshop/vfx/scene/FrameBatch.java
+@@ -0,0 +1,78 @@
++package workshop.vfx.scene;
++
++import workshop.vfx.math.core.Pose;
++import workshop.vfx.math.core.Vec3;
++import workshop.vfx.math.time.TimingSample;
++
++/** One visible, non-empty layer of a frame: identity, style, M2 sample, world pose and packed positions. */
++public final class FrameBatch {
++    private final int layerIndex;
++    private final String layer;
++    private final StyleKey style;
++    private final TimingSample timing;
++    private final Pose pose;
++    private final double[] xyz;
++
++    /** Takes ownership of {@code xyz}, which the caller must not retain. */
++    FrameBatch(int layerIndex, String layer, StyleKey style, TimingSample timing, Pose pose, double[] xyz) {
++        this.layerIndex = layerIndex;
++        this.layer = layer;
++        this.style = style;
++        this.timing = timing;
++        this.pose = pose;
++        this.xyz = xyz;
++    }
++
++    public int layerIndex() {
++        return layerIndex;
++    }
++
++    public String layer() {
++        return layer;
++    }
++
++    public StyleKey style() {
++        return style;
++    }
++
++    public TimingSample timing() {
++        return timing;
++    }
++
++    public Pose pose() {
++        return pose;
++    }
++
++    public int size() {
++        return xyz.length / 3;
++    }
++
++    public double x(int i) {
++        return xyz[3 * checked(i)];
++    }
++
++    public double y(int i) {
++        return xyz[3 * checked(i) + 1];
++    }
++
++    public double z(int i) {
++        return xyz[3 * checked(i) + 2];
++    }
++
++    public Vec3 point(int i) {
++        int k = 3 * checked(i);
++        return new Vec3(xyz[k], xyz[k + 1], xyz[k + 2]);
++    }
++
++    /** A new copy: x0, y0, z0, x1, ... */
++    public double[] coordinates() {
++        return xyz.clone();
++    }
++
++    private int checked(int i) {
++        if (i < 0 || i >= size()) {
++            throw new IndexOutOfBoundsException("FrameBatch: index " + i + " outside [0, " + size() + ")");
++        }
++        return i;
++    }
++}
+diff --git a/src/main/java/workshop/vfx/scene/Layer.java b/src/main/java/workshop/vfx/scene/Layer.java
+new file mode 100644
+index 0000000..0dd037b
+--- /dev/null
++++ b/src/main/java/workshop/vfx/scene/Layer.java
+@@ -0,0 +1,19 @@
++package workshop.vfx.scene;
++
++import workshop.vfx.math.time.Timing;
++
++/** One clip of a scene: what is shown (shape, style), where (motion), and when (timing, visibility, reveal). */
++public record Layer(String name, Timing timing, Visibility visibility, Reveal reveal, Motion motion, Shape shape,
++        StyleKey style) {
++    public Layer {
++        if (name == null || !SceneChecks.isLayerName(name)) {
++            throw new IllegalArgumentException("Layer: name [a-z0-9_.-]{1,64} required");
++        }
++        SceneChecks.nonnull(timing, "Layer: timing");
++        SceneChecks.nonnull(visibility, "Layer: visibility");
++        SceneChecks.nonnull(reveal, "Layer: reveal");
++        SceneChecks.nonnull(motion, "Layer: motion");
++        SceneChecks.nonnull(shape, "Layer: shape");
++        SceneChecks.nonnull(style, "Layer: style");
++    }
++}
+diff --git a/src/main/java/workshop/vfx/scene/Motion.java b/src/main/java/workshop/vfx/scene/Motion.java
+new file mode 100644
+index 0000000..7fb6950
+--- /dev/null
++++ b/src/main/java/workshop/vfx/scene/Motion.java
+@@ -0,0 +1,141 @@
++package workshop.vfx.scene;
++
++import java.util.ArrayList;
++import java.util.Collections;
++import java.util.List;
++import workshop.vfx.math.core.Pose;
++import workshop.vfx.math.core.Quat;
++import workshop.vfx.math.core.Vec3;
++import workshop.vfx.math.curve.Easing;
++import workshop.vfx.math.time.Timing;
++
++/**
++ * A shareable, time-dependent local-to-parent pose: an ordered chain of at most {@link #MAX_STEPS} steps, each
++ * animated step driven by its own M2 {@link Timing} through an M3 {@link Easing} (contract section 5).
++ */
++public final class Motion {
++    public static final int MAX_STEPS = 16;
++    public static final double MAX_TURNS = 1 << 20;
++    public static final double MIN_SCALE = 1e-9;
++    public static final double MAX_SCALE = 1e9;
++    public static final Motion IDENTITY = new Motion(List.of());
++
++    private sealed interface Step permits Fixed, Spin, Scale, Translate { }
++
++    private record Fixed(Pose pose) implements Step { }
++
++    private record Spin(Vec3 unitAxis, double turns, double phaseTurns, Timing drive, Easing easing) implements Step { }
++
++    private record Scale(double from, double to, Timing drive, Easing easing) implements Step { }
++
++    private record Translate(Vec3 from, Vec3 to, Timing drive, Easing easing) implements Step { }
++
++    private final List<Step> steps;
++
++    private Motion(List<Step> steps) {
++        this.steps = steps;
++    }
++
++    public static Motion fixed(Pose pose) {
++        return new Motion(List.of(new Fixed(SceneChecks.nonnull(pose, "Motion.fixed: pose"))));
++    }
++
++    public static Motion spin(Vec3 axis, double turns, double phaseTurns, Timing drive, Easing easing) {
++        SceneChecks.nonnull(axis, "Motion.spin: axis");
++        Vec3 unit = axis.normalizedOr(null);
++        if (unit == null) {
++            throw new IllegalArgumentException("Motion.spin: finite axis with a component of magnitude at least 1e-12 required");
++        }
++        if (!Double.isFinite(turns) || Math.abs(turns) > MAX_TURNS || !Double.isFinite(phaseTurns)) {
++            throw new IllegalArgumentException("Motion.spin: finite turns with |turns| <= 2^20 and finite phase required");
++        }
++        return new Motion(List.of(new Spin(unit, turns, phaseTurns,
++                SceneChecks.nonnull(drive, "Motion.spin: drive"), SceneChecks.nonnull(easing, "Motion.spin: easing"))));
++    }
++
++    public static Motion scale(double from, double to, Timing drive, Easing easing) {
++        if (!(from >= MIN_SCALE && from <= MAX_SCALE && to >= MIN_SCALE && to <= MAX_SCALE)) {
++            throw new IllegalArgumentException("Motion.scale: scales in [1e-9, 1e9] required");
++        }
++        return new Motion(List.of(new Scale(from, to,
++                SceneChecks.nonnull(drive, "Motion.scale: drive"), SceneChecks.nonnull(easing, "Motion.scale: easing"))));
++    }
++
++    public static Motion translate(Vec3 from, Vec3 to, Timing drive, Easing easing) {
++        SceneChecks.nonnull(from, "Motion.translate: from");
++        SceneChecks.nonnull(to, "Motion.translate: to");
++        if (!from.isFinite() || !to.isFinite()) {
++            throw new IllegalArgumentException("Motion.translate: finite endpoints required");
++        }
++        return new Motion(List.of(new Translate(from, to,
++                SceneChecks.nonnull(drive, "Motion.translate: drive"), SceneChecks.nonnull(easing, "Motion.translate: easing"))));
++    }
++
++    /** The steps of this motion followed by those of {@code child}: the child acts first on a point. */
++    public Motion then(Motion child) {
++        SceneChecks.nonnull(child, "Motion.then: child");
++        if (steps.size() + child.steps.size() > MAX_STEPS) {
++            throw new IllegalArgumentException("Motion.then: more than MAX_STEPS steps");
++        }
++        List<Step> all = new ArrayList<>(steps.size() + child.steps.size());
++        all.addAll(steps);
++        all.addAll(child.steps);
++        return new Motion(Collections.unmodifiableList(all));
++    }
++
++    public int steps() {
++        return steps.size();
++    }
++
++    /** {@code P_0.then(P_1)...then(P_last)}, folded left to right; {@link Pose#IDENTITY} without steps. */
++    public Pose poseAt(double localTicks) {
++        if (!Double.isFinite(localTicks)) {
++            throw new IllegalArgumentException("Motion.poseAt: finite localTicks required");
++        }
++        Pose pose = null;
++        for (Step step : steps) {
++            Pose p = stepPose(step, localTicks);
++            pose = pose == null ? p : pose.then(p);
++        }
++        return pose == null ? Pose.IDENTITY : pose;
++    }
++
++    private static Pose stepPose(Step step, double localTicks) {
++        return switch (step) {
++            case Fixed f -> f.pose();
++            case Spin s -> spinPose(s, eased(s.drive(), s.easing(), localTicks));
++            case Scale s -> {
++                double e = eased(s.drive(), s.easing(), localTicks);
++                yield new Pose(Vec3.ZERO, Quat.IDENTITY, (1 - e) * s.from() + e * s.to());
++            }
++            case Translate t -> Pose.ofTranslation(t.from().lerp(t.to(), eased(t.drive(), t.easing(), localTicks)));
++        };
++    }
++
++    private static double eased(Timing drive, Easing easing, double localTicks) {
++        return easing.apply(drive.sample(localTicks).progress());
++    }
++
++    /** Contract 5.2: rotation by 2 pi (phase + turns e) about the unit axis, from turn-reduced StrictMath values. */
++    private static Pose spinPose(Spin s, double e) {
++        double f = fraction(fraction(s.turns() * e) + fraction(s.phaseTurns()));
++        double quarters = 2 * f; // the half angle pi f, in quarter turns: [0, 2)
++        int q = (int) Math.floor(quarters);
++        double x = (quarters - q) * (Math.PI / 2);
++        double c = StrictMath.cos(x);
++        double sin = StrictMath.sin(x);
++        double cw = q == 0 ? c : -sin;
++        double sw = q == 0 ? sin : c;
++        Vec3 u = s.unitAxis();
++        return new Pose(Vec3.ZERO, new Quat(cw, sw * u.x(), sw * u.y(), sw * u.z()), 1);
++    }
++
++    /** {@code x % 1.0}, plus 1.0 if negative, with 1.0 mapped to 0.0: a value in [0, 1). */
++    private static double fraction(double x) {
++        double f = x % 1.0;
++        if (f < 0) {
++            f += 1.0;
++        }
++        return f == 1.0 ? 0.0 : f;
++    }
++}
+diff --git a/src/main/java/workshop/vfx/scene/Reveal.java b/src/main/java/workshop/vfx/scene/Reveal.java
+new file mode 100644
+index 0000000..12f30aa
+--- /dev/null
++++ b/src/main/java/workshop/vfx/scene/Reveal.java
+@@ -0,0 +1,6 @@
++package workshop.vfx.scene;
++
++/** All points, or the first {@code floor(progress * n)} points of the shape (contract section 8). */
++public enum Reveal {
++    ALL, PREFIX
++}
+diff --git a/src/main/java/workshop/vfx/scene/SceneChecks.java b/src/main/java/workshop/vfx/scene/SceneChecks.java
+new file mode 100644
+index 0000000..654dcdf
+--- /dev/null
++++ b/src/main/java/workshop/vfx/scene/SceneChecks.java
+@@ -0,0 +1,48 @@
++package workshop.vfx.scene;
++
++/** Shared argument validation for the scene package (contract section 3). */
++final class SceneChecks {
++    private SceneChecks() { }
++
++    static <T> T nonnull(T value, String what) {
++        if (value == null) {
++            throw new IllegalArgumentException(what + " must not be null");
++        }
++        return value;
++    }
++
++    /** {@code [a-z0-9_.-]{1,32} ':' [a-z0-9_./-]{1,64}}: exactly one colon; the slash only in the path. */
++    static boolean isStyleKey(String s) {
++        int colon = s.indexOf(':');
++        if (colon < 1 || colon > 32 || s.indexOf(':', colon + 1) >= 0) {
++            return false;
++        }
++        int pathLength = s.length() - colon - 1;
++        if (pathLength < 1 || pathLength > 64) {
++            return false;
++        }
++        for (int i = 0; i < s.length(); i++) {
++            if (i != colon && !(isNameChar(s.charAt(i)) || (i > colon && s.charAt(i) == '/'))) {
++                return false;
++            }
++        }
++        return true;
++    }
++
++    /** {@code [a-z0-9_.-]{1,64}}. */
++    static boolean isLayerName(String s) {
++        if (s.isEmpty() || s.length() > 64) {
++            return false;
++        }
++        for (int i = 0; i < s.length(); i++) {
++            if (!isNameChar(s.charAt(i))) {
++                return false;
++            }
++        }
++        return true;
++    }
++
++    private static boolean isNameChar(char c) {
++        return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || c == '.' || c == '-';
++    }
++}
+diff --git a/src/main/java/workshop/vfx/scene/SceneLimits.java b/src/main/java/workshop/vfx/scene/SceneLimits.java
+new file mode 100644
+index 0000000..33ca2de
+--- /dev/null
++++ b/src/main/java/workshop/vfx/scene/SceneLimits.java
+@@ -0,0 +1,13 @@
++package workshop.vfx.scene;
++
++/** Hard per-scene ceilings, checked when the scene is built (contract sections 6 and 9). */
++public record SceneLimits(int maxLayers, int maxPointsPerFrame) {
++    public static final int MAX_LAYERS_CEILING = 4096;
++    public static final int MAX_POINTS_CEILING = 1 << 20;
++
++    public SceneLimits {
++        if (maxLayers < 1 || maxLayers > MAX_LAYERS_CEILING || maxPointsPerFrame < 1 || maxPointsPerFrame > MAX_POINTS_CEILING) {
++            throw new IllegalArgumentException("SceneLimits: 1 <= maxLayers <= 4096 and 1 <= maxPointsPerFrame <= 2^20 required");
++        }
++    }
++}
+diff --git a/src/main/java/workshop/vfx/scene/Shape.java b/src/main/java/workshop/vfx/scene/Shape.java
+new file mode 100644
+index 0000000..947efc8
+--- /dev/null
++++ b/src/main/java/workshop/vfx/scene/Shape.java
+@@ -0,0 +1,66 @@
++package workshop.vfx.scene;
++
++import java.util.List;
++import workshop.vfx.math.core.Vec3;
++import workshop.vfx.math.sample.SampleSet;
++
++/** Immutable local points, copied into a packed array when the shape is built (contract section 4). */
++public final class Shape {
++    public static final int MAX_POINTS = 1 << 20;
++
++    private final double[] xyz;
++
++    private Shape(double[] xyz) {
++        this.xyz = xyz;
++    }
++
++    public static Shape point(Vec3 point) {
++        return points(List.of(SceneChecks.nonnull(point, "Shape.point: point")));
++    }
++
++    public static Shape points(List<Vec3> points) {
++        SceneChecks.nonnull(points, "Shape.points: points");
++        int n = points.size();
++        if (n > MAX_POINTS) {
++            throw new IllegalArgumentException("Shape.points: more than MAX_POINTS points");
++        }
++        double[] xyz = new double[3 * n];
++        for (int i = 0; i < n; i++) {
++            Vec3 p = points.get(i);
++            if (p == null || !p.isFinite()) {
++                throw new IllegalArgumentException("Shape.points: nonnull points with finite components required");
++            }
++            xyz[3 * i] = p.x();
++            xyz[3 * i + 1] = p.y();
++            xyz[3 * i + 2] = p.z();
++        }
++        return new Shape(xyz);
++    }
++
++    public static Shape of(SampleSet samples) {
++        return points(SceneChecks.nonnull(samples, "Shape.of: samples").points());
++    }
++
++    public int size() {
++        return xyz.length / 3;
++    }
++
++    public Vec3 point(int index) {
++        if (index < 0 || index >= size()) {
++            throw new IndexOutOfBoundsException("Shape.point: index " + index + " outside [0, " + size() + ")");
++        }
++        return new Vec3(xyz[3 * index], xyz[3 * index + 1], xyz[3 * index + 2]);
++    }
++
++    double x(int index) {
++        return xyz[3 * index];
++    }
++
++    double y(int index) {
++        return xyz[3 * index + 1];
++    }
++
++    double z(int index) {
++        return xyz[3 * index + 2];
++    }
++}
+diff --git a/src/main/java/workshop/vfx/scene/StyleKey.java b/src/main/java/workshop/vfx/scene/StyleKey.java
+new file mode 100644
+index 0000000..01fa972
+--- /dev/null
++++ b/src/main/java/workshop/vfx/scene/StyleKey.java
+@@ -0,0 +1,23 @@
++package workshop.vfx.scene;
++
++/**
++ * An abstract visual style, {@code namespace:path}, resolved only by a platform adapter (contract section 3).
++ * {@link #toString()} returns the raw value.
++ */
++public record StyleKey(String value) {
++    public StyleKey {
++        if (value == null || !SceneChecks.isStyleKey(value)) {
++            throw new IllegalArgumentException(
++                    "StyleKey: [a-z0-9_.-]{1,32}:[a-z0-9_./-]{1,64} required");
++        }
++    }
++
++    public static StyleKey of(String value) {
++        return new StyleKey(value);
++    }
++
++    @Override
++    public String toString() {
++        return value;
++    }
++}
+diff --git a/src/main/java/workshop/vfx/scene/Visibility.java b/src/main/java/workshop/vfx/scene/Visibility.java
+new file mode 100644
+index 0000000..5aa0594
+--- /dev/null
++++ b/src/main/java/workshop/vfx/scene/Visibility.java
+@@ -0,0 +1,6 @@
++package workshop.vfx.scene;
++
++/** Whether a layer stays visible, at its final state, after its clip has ended (contract section 8). */
++public enum Visibility {
++    ACTIVE_ONLY, HOLD_AFTER
++}

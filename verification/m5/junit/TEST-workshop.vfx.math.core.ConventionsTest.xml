@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.core.ConventionsTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-17T00:30:28.895Z" hostname="vm" time="0.006">
+  <properties/>
+  <testcase name="Frame reference examples from docs/REFERENCE-VECTORS.md" classname="workshop.vfx.math.core.ConventionsTest" time="0.0"/>
+  <testcase name="+90 degrees about +Y sends +X to -Z (east to north)" classname="workshop.vfx.math.core.ConventionsTest" time="0.0"/>
+  <testcase name="+90 degrees about +Y is counter-clockwise when viewed from above" classname="workshop.vfx.math.core.ConventionsTest" time="0.001"/>
+  <testcase name="Axis rotations by +90 degrees, both directions" classname="workshop.vfx.math.core.ConventionsTest" time="0.0"/>
+  <testcase name="Pose reference example: t=(10,0,0), +90 about +Y, scale 2 maps local (1,0,0) to (10,0,-2)" classname="workshop.vfx.math.core.ConventionsTest" time="0.0"/>
+  <testcase name="Clockwise 90 degrees viewed from above sends +X to +Z (east to south)" classname="workshop.vfx.math.core.ConventionsTest" time="0.001"/>
+  <testcase name="Minecraft world axes are a right-handed basis: east x up = south" classname="workshop.vfx.math.core.ConventionsTest" time="0.0"/>
+  <testcase name="Positive rotation about +Y and clockwise-from-above are opposite senses" classname="workshop.vfx.math.core.ConventionsTest" time="0.001"/>
+  <testcase name="Full Heal 0.2.0 ring formula (cos t, 0, sin t) is clockwise from above (audit item 1)" classname="workshop.vfx.math.core.ConventionsTest" time="0.001"/>
+  <testcase name="a.mul(b) applies b first, then a" classname="workshop.vfx.math.core.ConventionsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.scene.M5DeterminismTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-17T00:31:14.508Z" hostname="vm" time="0.164">
+  <properties/>
+  <testcase name="Threads: 8 threads evaluating the same scene objects concurrently produce the single-threaded frames" classname="workshop.vfx.scene.M5DeterminismTest" time="0.152"/>
+  <testcase name="Repetition: 25 rounds over the four example scenes at 15 instants give bit-identical frames (including through JIT compilation)" classname="workshop.vfx.scene.M5DeterminismTest" time="0.011"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,6 @@
+A. healing ritual                  layers    3, max points     72: mean points/frame     19.2,      1082 ns/frame,   56.3 ns/point,      4238 bytes/frame
+B. orbiting sparkles               layers    7, max points      7: mean points/frame      7.0,      1886 ns/frame,  269.4 ns/point,      3080 bytes/frame
+C. moving trident helix            layers    1, max points     37: mean points/frame     18.0,      1091 ns/frame,   60.7 ns/point,      4045 bytes/frame
+D. Astral Prism constellation      layers    6, max points     50: mean points/frame     35.1,      1371 ns/frame,   39.1 ns/point,      3504 bytes/frame
+dense: 64 layers x 1,024 points, 4 steps layers   64, max points  65536: mean points/frame  65536.0,    595393 ns/frame,    9.1 ns/point,   1640000 bytes/frame
+(indicative only: one container, warm JIT, Java 25.0.4.1; not acceptance criteria)

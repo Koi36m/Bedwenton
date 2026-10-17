@@ -1,0 +1,21 @@
+ac3e05b7f82d59128678737cba56ce5cac481867
+working tree: committed specification + uncommitted production package (pre-commit verification)
+java version "25.0.4.1" 2026-08-18 LTS
+Java(TM) SE Runtime Environment (build 25.0.4.1+1-LTS-5)
+Java HotSpot(TM) 64-Bit Server VM (build 25.0.4.1+1-LTS-5, mixed mode, sharing)
+javac 25.0.4.1
+
+------------------------------------------------------------
+Gradle 9.1.0
+------------------------------------------------------------
+
+Build time:    2025-09-18 13:05:56 UTC
+Revision:      e45a8dbf2470c2e2474ccc25be9f49331406a07e
+
+Kotlin:        2.2.0
+Groovy:        4.0.28
+Ant:           Apache Ant(TM) version 1.10.15 compiled on August 25 2024
+Launcher JVM:  25.0.4.1 (Oracle Corporation 25.0.4.1+1-LTS-5)
+Daemon JVM:    /opt/jdk-25.0.4.1 (no JDK specified, using current Java home)
+OS:            Linux 6.18.44-fc-v139 amd64
+

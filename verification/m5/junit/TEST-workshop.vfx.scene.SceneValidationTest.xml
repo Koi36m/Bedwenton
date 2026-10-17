@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.scene.SceneValidationTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-17T00:31:14.673Z" hostname="vm" time="0.045">
+  <properties/>
+  <testcase name="Layer: name [a-z0-9_.-]{1,64}; every component nonnull" classname="workshop.vfx.scene.SceneValidationTest" time="0.003"/>
+  <testcase name="SceneLimits: 1 &lt;= maxLayers &lt;= 4096 and 1 &lt;= maxPointsPerFrame &lt;= 2^20" classname="workshop.vfx.scene.SceneValidationTest" time="0.001"/>
+  <testcase name="EffectScene.of: nonnull domain, limits and layers; lifetime &gt; 0 (finite or UNBOUNDED); unique layer names; layer and point counts within the limits; empty scenes allowed; the list is copied and unmodifiable" classname="workshop.vfx.scene.SceneValidationTest" time="0.004"/>
+  <testcase name="Shape: finite nonnull points, at most 2^20; 0 points allowed; the input list is copied" classname="workshop.vfx.scene.SceneValidationTest" time="0.02"/>
+  <testcase name="EffectScene.evaluate: null anchor, playback or instant gives IllegalArgumentException" classname="workshop.vfx.scene.SceneValidationTest" time="0.001"/>
+  <testcase name="Motion: spin axis finite with largest component &gt;= 1e-12, |turns| &lt;= 2^20, finite phase; scales in [1e-9, 1e9]; finite translations; nonnull drives and easings; at most 16 steps" classname="workshop.vfx.scene.SceneValidationTest" time="0.012"/>
+  <testcase name="StyleKey: namespace [a-z0-9_.-]{1,32}, one colon, path [a-z0-9_./-]{1,64}; anything else (null, empty parts, upper case, spaces, two colons, slash in the namespace, overlong parts) is rejected" classname="workshop.vfx.scene.SceneValidationTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

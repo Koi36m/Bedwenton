@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.sample.M4BoundaryTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-17T00:31:04.823Z" hostname="vm" time="0.036">
+  <properties/>
+  <testcase name="Purity: no mutable static state (every static field is final and of an immutable type)" classname="workshop.vfx.math.sample.M4BoundaryTest" time="0.001"/>
+  <testcase name="Dependencies and calls: imports only java.*, workshop.vfx.math.core and workshop.vfx.math.curve (never time); no trigonometry, pow, exp, log, fma, random, clocks, threads, synchronization or I/O" classname="workshop.vfx.math.sample.M4BoundaryTest" time="0.024"/>
+  <testcase name="API shape (contract section 2): exactly the six public types with exactly the specified public members; no public constructors on ArcLengthTable, SampleSet, Sampler" classname="workshop.vfx.math.sample.M4BoundaryTest" time="0.011"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

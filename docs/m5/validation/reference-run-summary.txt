@@ -1,0 +1,62 @@
+M5 tests against a THROWAWAY reference implementation of the M5 contract, revision 1 (kept outside the repository, not delivered, not committed).
+Base: kickoff 6ada39e3a383f6b2df60e6744a39d37d9f24eb13 (accepted M4 snapshot e3bf5578c126a7d3498be0b30fb431d9ec9a3099, 313 tests) plus the M5 tests and reference data of this proposal.
+java version "25.0.4.1" 2026-08-18 LTS
+Gradle 9.1.0
+Fresh copy, clean run: ./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test, then check
+test: BUILD SUCCESSFUL in 51s
+check: BUILD SUCCESSFUL in 4s
+
+workshop.vfx.math.core.Amendment3AcceptanceTest         tests= 10 not-passed=0 time=0.413
+workshop.vfx.math.core.BoundaryTest                     tests=  2 not-passed=0 time=0.002
+workshop.vfx.math.core.ConventionsTest                  tests= 10 not-passed=0 time=0.006
+workshop.vfx.math.core.FrameTest                        tests= 11 not-passed=0 time=0.051
+workshop.vfx.math.core.JomlOracleTest                   tests=  4 not-passed=0 time=0.03
+workshop.vfx.math.core.M0RegressionTest                 tests=  6 not-passed=0 time=0.009
+workshop.vfx.math.core.MathUtilTest                     tests=  4 not-passed=0 time=0.002
+workshop.vfx.math.core.NumericPolicyTest                tests= 13 not-passed=0 time=0.135
+workshop.vfx.math.core.PolicyClarificationTest          tests=  9 not-passed=0 time=0.06
+workshop.vfx.math.core.PoseTest                         tests= 12 not-passed=0 time=0.13
+workshop.vfx.math.core.QuatTest                         tests= 17 not-passed=0 time=0.131
+workshop.vfx.math.core.ReviewAdversarialTest            tests= 18 not-passed=0 time=12.285
+workshop.vfx.math.core.Vec3Test                         tests=  9 not-passed=0 time=0.013
+workshop.vfx.math.curve.BezierTest                      tests=  7 not-passed=0 time=0.09
+workshop.vfx.math.curve.EasingTest                      tests=  8 not-passed=0 time=1.61
+workshop.vfx.math.curve.M3BoundaryTest                  tests=  3 not-passed=0 time=0.007
+workshop.vfx.math.curve.M3DeterminismTest               tests=  2 not-passed=0 time=0.146
+workshop.vfx.math.curve.M3ReferenceVectorTest           tests=  4 not-passed=0 time=0.055
+workshop.vfx.math.curve.M3ReviewAdversarialTest         tests= 12 not-passed=0 time=15.116
+workshop.vfx.math.curve.M3UnderflowTest                 tests=  7 not-passed=0 time=3.055
+workshop.vfx.math.curve.PosedCurveTest                  tests=  5 not-passed=0 time=0.032
+workshop.vfx.math.curve.SpiralTest                      tests= 15 not-passed=0 time=0.35
+workshop.vfx.math.sample.ArcLengthTableTest             tests=  9 not-passed=0 time=0.266
+workshop.vfx.math.sample.EqualDistanceTest              tests=  8 not-passed=0 time=0.924
+workshop.vfx.math.sample.M4AdversarialTest              tests=  8 not-passed=0 time=0.282
+workshop.vfx.math.sample.M4BoundaryTest                 tests=  3 not-passed=0 time=0.022
+workshop.vfx.math.sample.M4DeterminismTest              tests=  2 not-passed=0 time=1.405
+workshop.vfx.math.sample.M4R21RegressionTest            tests=  5 not-passed=0 time=0.18
+workshop.vfx.math.sample.M4R2RegressionTest             tests= 10 not-passed=0 time=0.022
+workshop.vfx.math.sample.M4ReferenceVectorTest          tests=  5 not-passed=0 time=3.157
+workshop.vfx.math.sample.SampleSetTest                  tests=  3 not-passed=0 time=0.974
+workshop.vfx.math.sample.UniformParameterTest           tests=  6 not-passed=0 time=0.145
+workshop.vfx.math.time.M2BoundaryTest                   tests=  3 not-passed=0 time=0.007
+workshop.vfx.math.time.M2DeterminismTest                tests=  8 not-passed=0 time=0.135
+workshop.vfx.math.time.M2GoldenVectorTest               tests=  5 not-passed=0 time=0.016
+workshop.vfx.math.time.M2ReviewAdversarialTest          tests= 13 not-passed=0 time=1.203
+workshop.vfx.math.time.M2Revision2Test                  tests=  9 not-passed=0 time=0.027
+workshop.vfx.math.time.PlaybackTest                     tests=  9 not-passed=0 time=0.081
+workshop.vfx.math.time.TickTimeTest                     tests=  4 not-passed=0 time=0.036
+workshop.vfx.math.time.TimePointTest                    tests=  4 not-passed=0 time=0.082
+workshop.vfx.math.time.TimingTest                       tests= 11 not-passed=0 time=0.266
+workshop.vfx.scene.BudgetTest                           tests=  4 not-passed=0 time=0.251
+workshop.vfx.scene.CompositionTest                      tests=  8 not-passed=0 time=0.048
+workshop.vfx.scene.DemoReferenceTest                    tests=  5 not-passed=0 time=0.016
+workshop.vfx.scene.FrameContractTest                    tests=  7 not-passed=0 time=0.042
+workshop.vfx.scene.M5AdversarialTest                    tests=  6 not-passed=0 time=0.017
+workshop.vfx.scene.M5BoundaryTest                       tests=  3 not-passed=0 time=0.017
+workshop.vfx.scene.M5DeterminismTest                    tests=  2 not-passed=0 time=0.113
+workshop.vfx.scene.SceneValidationTest                  tests=  7 not-passed=0 time=0.027
+workshop.vfx.scene.TimeSemanticsTest                    tests=  8 not-passed=0 time=0.003
+TOTAL 363 not passed 0
+
+JUnit XML totals: tests 363, failures 0, errors 0, skipped 0.
+By package: M1 core 125, M2 time 66, M3 curve 51 + M3 review 12 = 63, M4 sample 59, M5 scene 50. Total 363, passed 363.

@@ -1,0 +1,5 @@
+JUnit XML reports: 50
+Milestone counts: {'core': 125, 'time': 66, 'curve': 63, 'sample': 59, 'scene': 50} (M1 core, M2 time, M3 curve incl. review, M4 sample, M5 scene)
+Totals: {'tests': 363, 'failures': 0, 'errors': 0, 'skipped': 0}
+Production compiler warnings: 0
+Test compiler warnings: 5 (the JOML test-only jar class-file notices; identical at the accepted baseline e3bf557)

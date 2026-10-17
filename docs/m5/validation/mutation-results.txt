@@ -1,0 +1,67 @@
+M5 R1 mutation analysis against the THROWAWAY reference implementation of the M5 contract (not delivered); Java 25.0.4.1.
+Each mutant is one textual change of the reference (harness patterns in review scratch), run against all 50 M5 tests.
+
+Result (final contract): 33 mutants, 33 killed, 0 survivors.
+
+History (the analysis changed the contract, not the tests):
+- Run 1 (35 mutants): 34 killed. S31 (reveal count without the min(n - 1, ...) clamp) survived. It was proven
+  equivalent: floor(p n) < n for every double p < 1 and n <= 2^53, checked exhaustively for n <= 2^20. The clamp was
+  removed from contract 8.3.
+- Run 2 (34 mutants): 33 killed. S15 (no "progress >= 1 -> n" branch) then survived: M2 progress is at most 1 and
+  floor(1.0 n) = n exactly. The branch, and the "n == 0" branch (floor(p 0) = 0), were removed from contract 8.3,
+  leaving k = (int) Math.floor(progress n).
+- Final run (33 mutants): all killed (below).
+
+What the mutants cover:
+- spin: half angle, direction, phase, easing, axis normalisation, turns limit;
+- scale and translate endpoints;
+- composition order of steps and of the anchor;
+- visibility (HOLD_AFTER ignored, AFTER always visible, BEFORE visible);
+- scene window (both ends);
+- reveal (ceil, ignored, empty batches);
+- layer order;
+- finite-position and non-finite-ticks checks;
+- domain check;
+- -0.0 normalisation;
+- duplicate names;
+- point, layer and shape limits (off by one, removed);
+- coordinate copy;
+- batch pose;
+- step limit;
+- scale range;
+- lifetime > 0.
+
+== Final run
+S01 (spin: full angle in place of the half angle) failing=8 CompositionTest.Composition order: m.then(child) applies; CompositionTest.Random compositions of up to 6 steps (fi; CompositionTest.Spin: right-handed about the axis by 2 p; DemoReferenceTest.B. Orbiting sparkles: four phase-offset ; DemoReferenceTest.C. Moving trident: an arc-length-sampled; DemoReferenceTest.D. Astral Prism constellation: a spinnin; M5AdversarialTest.Extreme magnitudes: anchors at |x| = 3e7; M5AdversarialTest.Overlapping animations: 200 layers with 
+S02 (spin: opposite direction) failing=8 CompositionTest.Composition order: m.then(child) applies; CompositionTest.Random compositions of up to 6 steps (fi; CompositionTest.Spin: right-handed about the axis by 2 p; DemoReferenceTest.B. Orbiting sparkles: four phase-offset ; DemoReferenceTest.C. Moving trident: an arc-length-sampled; DemoReferenceTest.D. Astral Prism constellation: a spinnin; M5AdversarialTest.Extreme magnitudes: anchors at |x| = 3e7; M5AdversarialTest.Overlapping animations: 200 layers with 
+S03 (spin: phase ignored) failing=5 CompositionTest.Random compositions of up to 6 steps (fi; CompositionTest.Spin: right-handed about the axis by 2 p; DemoReferenceTest.B. Orbiting sparkles: four phase-offset ; M5AdversarialTest.Extreme magnitudes: anchors at |x| = 3e7; M5AdversarialTest.Overlapping animations: 200 layers with 
+S04 (spin: easing ignored) failing=2 CompositionTest.Random compositions of up to 6 steps (fi; CompositionTest.Spin: right-handed about the axis by 2 p
+S05 (scale: from and to swapped) failing=4 CompositionTest.Random compositions of up to 6 steps (fi; CompositionTest.Scale and translate: exact 'from' at pro; DemoReferenceTest.A. Healing ritual: three separated expan; M5AdversarialTest.Extreme magnitudes: anchors at |x| = 3e7
+S06 (translate: reversed progress) failing=8 CompositionTest.Composition order: m.then(child) applies; CompositionTest.Random compositions of up to 6 steps (fi; CompositionTest.Scale and translate: exact 'from' at pro; DemoReferenceTest.A. Healing ritual: three separated expan; FrameContractTest.Easing applies only to motions; batch ti; TimeSemanticsTest.Layer passes are half-open (M2): visible; TimeSemanticsTest.Ping-pong and loops: cycle and progress ; TimeSemanticsTest.Playback controls are M2's: paused frame
+S07 (motion: child-first composition) failing=4 CompositionTest.Composition order: m.then(child) applies; CompositionTest.Random compositions of up to 6 steps (fi; DemoReferenceTest.A. Healing ritual: three separated expan; DemoReferenceTest.D. Astral Prism constellation: a spinnin
+S08 (anchor applied inside the motion) failing=8 CompositionTest.Composition order: m.then(child) applies; CompositionTest.Random compositions of up to 6 steps (fi; CompositionTest.The frame's pose is anchor.then(motion.p; DemoReferenceTest.A. Healing ritual: three separated expan; DemoReferenceTest.B. Orbiting sparkles: four phase-offset ; DemoReferenceTest.C. Moving trident: an arc-length-sampled; DemoReferenceTest.D. Astral Prism constellation: a spinnin; M5AdversarialTest.Extreme magnitudes: anchors at |x| = 3e7
+S09 (HOLD_AFTER ignored) failing=6 CompositionTest.Shared motions: one Motion value reused ; DemoReferenceTest.D. Astral Prism constellation: a spinnin; FrameContractTest.Reveal PREFIX: k = n at progress >= 1, e; TimeSemanticsTest.Layer passes are half-open (M2): visible; TimeSemanticsTest.Ping-pong and loops: cycle and progress ; TimeSemanticsTest.Scene window: local < 0 is BEFORE (empty
+S10 (AFTER always visible) failing=6 DemoReferenceTest.A. Healing ritual: three separated expan; FrameContractTest.Omission: hidden layers (BEFORE, AFTER w; M5AdversarialTest.Inactive layers never leak: across 2,000; M5AdversarialTest.Stateless frames (cancellation is the ca; TimeSemanticsTest.Extreme instants: GAME tick differences ; TimeSemanticsTest.Layer passes are half-open (M2): visible
+S11 (BEFORE visible) failing=5 DemoReferenceTest.A. Healing ritual: three separated expan; FrameContractTest.Omission: hidden layers (BEFORE, AFTER w; M5AdversarialTest.Inactive layers never leak: across 2,000; M5AdversarialTest.Stateless frames (cancellation is the ca; TimeSemanticsTest.Layer passes are half-open (M2): visible
+S12 (scene window closed at the end) failing=6 DemoReferenceTest.A. Healing ritual: three separated expan; DemoReferenceTest.C. Moving trident: an arc-length-sampled; DemoReferenceTest.D. Astral Prism constellation: a spinnin; M5AdversarialTest.Inactive layers never leak: across 2,000; M5AdversarialTest.Stateless frames (cancellation is the ca; TimeSemanticsTest.Scene window: local < 0 is BEFORE (empty
+S13 (scene window open at the start) failing=14 CompositionTest.Composition order: m.then(child) applies; CompositionTest.Finite results: an unrepresentable compo; CompositionTest.Inverted transforms: fixed(p).then(fixed; CompositionTest.Scale and translate: exact 'from' at pro; DemoReferenceTest.A. Healing ritual: three separated expan; DemoReferenceTest.B. Orbiting sparkles: four phase-offset ; DemoReferenceTest.C. Moving trident: an arc-length-sampled; DemoReferenceTest.D. Astral Prism constellation: a spinnin; FrameContractTest.Exact single-point placement: with the i; M5AdversarialTest.Extreme magnitudes: anchors at |x| = 3e7; M5AdversarialTest.Inactive layers never leak: across 2,000; M5AdversarialTest.Signed zeros in inputs do not change pos; TimeSemanticsTest.Scene window: local < 0 is BEFORE (empty; TimeSemanticsTest.Signed zero: local ticks of -0.0 are rep
+S14 (reveal: ceil) failing=4 DemoReferenceTest.C. Moving trident: an arc-length-sampled; DemoReferenceTest.D. Astral Prism constellation: a spinnin; FrameContractTest.Omission: hidden layers (BEFORE, AFTER w; FrameContractTest.Reveal PREFIX: k = n at progress >= 1, e
+S16 (reveal ignored) failing=5 DemoReferenceTest.C. Moving trident: an arc-length-sampled; DemoReferenceTest.D. Astral Prism constellation: a spinnin; FrameContractTest.Easing applies only to motions; batch ti; FrameContractTest.Omission: hidden layers (BEFORE, AFTER w; FrameContractTest.Reveal PREFIX: k = n at progress >= 1, e
+S17 (empty batches emitted) failing=3 FrameContractTest.Omission: hidden layers (BEFORE, AFTER w; FrameContractTest.Point counts: pointCount is the sum of b; M5AdversarialTest.0 and 1 samples: shapes from M4 sample s
+S18 (layers in reverse order) failing=5 DemoReferenceTest.B. Orbiting sparkles: four phase-offset ; DemoReferenceTest.D. Astral Prism constellation: a spinnin; FrameContractTest.Order: batches follow layer insertion or; M5AdversarialTest.Overlapping animations: 200 layers with ; TimeSemanticsTest.Ping-pong and loops: cycle and progress 
+S19 (no finite-position check) failing=1 CompositionTest.Finite results: an unrepresentable compo
+S20 (scene domain not checked) failing=1 TimeSemanticsTest.Domains: the playback anchor and the ins
+S21 (-0.0 local ticks kept) failing=1 TimeSemanticsTest.Signed zero: local ticks of -0.0 are rep
+S22 (duplicate names allowed) failing=1 SceneValidationTest.EffectScene.of: nonnull domain, limits a
+S23 (point limit off by one) failing=3 BudgetTest.Largest frame: one layer of 2^20 points ; BudgetTest.Preflight: the scene is rejected at cons; SceneValidationTest.EffectScene.of: nonnull domain, limits a
+S24 (no point preflight) failing=2 BudgetTest.Preflight: the scene is rejected at cons; SceneValidationTest.EffectScene.of: nonnull domain, limits a
+S25 (coordinates() exposes the array) failing=1 FrameContractTest.Immutability: batches and layers are unm
+S26 (batch pose without the anchor) failing=2 BudgetTest.Largest frame: one layer of 2^20 points ; CompositionTest.The frame's pose is anchor.then(motion.p
+S27 (17 steps allowed) failing=2 BudgetTest.Motion depth: at most 16 steps per motio; SceneValidationTest.Motion: spin axis finite with largest co
+S28 (spin axis not normalised) failing=3 CompositionTest.Random compositions of up to 6 steps (fi; CompositionTest.Spin: right-handed about the axis by 2 p; M5AdversarialTest.Extreme magnitudes: anchors at |x| = 3e7
+S29 (scale range not enforced) failing=1 SceneValidationTest.Motion: spin axis finite with largest co
+S30 (non-finite local ticks not checked) failing=1 TimeSemanticsTest.Extreme instants: GAME tick differences 
+S32 (layer limit off by one) failing=1 SceneValidationTest.EffectScene.of: nonnull domain, limits a
+S33 (shape size limit off by one) failing=1 SceneValidationTest.Shape: finite nonnull points, at most 2^
+S34 (turns limit not enforced) failing=1 SceneValidationTest.Motion: spin axis finite with largest co
+S35 (zero lifetime allowed) failing=1 SceneValidationTest.EffectScene.of: nonnull domain, limits a

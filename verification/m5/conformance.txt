@@ -1,0 +1,4 @@
+production (src/main/java/workshop/vfx/scene, m5-implementation):
+frames 32004, points 255747, SHA-256 of all frame bits 6533146ff9716894c4ce0a8133daef86d6c2a99e11f44abb26b032b467a88be2
+throwaway R1 reference implementation used to validate the approved tests (not delivered):
+frames 32004, points 255747, SHA-256 of all frame bits 6533146ff9716894c4ce0a8133daef86d6c2a99e11f44abb26b032b467a88be2
