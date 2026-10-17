@@ -4,6 +4,7 @@ This is provenance collection, not permission to use a floating build dependency
 """
 import hashlib
 import json
+import re
 import sys
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -30,9 +31,9 @@ def fetch(path):
 
 metadata = fetch(base+'maven-metadata.xml'); (out/'maven-metadata.xml').write_bytes(metadata)
 versions = [e.text for e in ET.fromstring(metadata).findall('./versioning/versions/version')]
-matching = [v for v in versions if v == '26.3' or v.startswith(('26.3-', '26.3.'))]
-if not matching: raise RuntimeError('Official metadata lists no Paper 26.3 API version')
-version = matching[-1]; directory = version
+matching = [(int(m.group(1)), v) for v in versions if (m := re.fullmatch(r'26\.3\.build\.(\d+)-stable', v))]
+if not matching: raise RuntimeError('Official metadata lists no stable Paper 26.3 API version')
+version = max(matching)[1]; directory = version
 if version.endswith('-SNAPSHOT'):
     snapshot = fetch(base+version+'/maven-metadata.xml'); (out/'snapshot-metadata.xml').write_bytes(snapshot)
     values = [e.findtext('value') for e in ET.fromstring(snapshot).findall('./versioning/snapshotVersions/snapshotVersion')
