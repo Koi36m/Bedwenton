@@ -1,0 +1,37 @@
+M7 R2 proposed-test run (scratch), 2026-10-17T09:30Z, Java 25.0.4.1, Gradle 9.1.0
+Setup: the isolated paper-adapter spike build (includeBuild('..') on branch m7-spec-r2), main = docs/m7/spi (15 files) +
+the THROWAWAY reference in validation/r2-reference (4 classes, not production), test = docs/m7/tests (4 files).
+The real accepted DeliveryPlanner and demo recipe are used; no Paper classes are involved.
+
+javac -Xlint:all: 0 warnings in main and test.
+AllocationOrderEmissionTest      3 tests, 0 not passed
+    PASS  Defensive caps binding (unaligned policy): the rank-0 ring is emitted first, whatever the input order; rotation alternates
+    PASS  Aligned policy (placement and viewer budgets capped by the emission limits): M6 decides, the caps never bind
+    PASS  Aligned policy over 300 random multi-ring scenarios: no EMISSION_LIMIT skip, attempted calls = planned placements
+OwnerAwareEmissionTest           7 tests, 0 not passed
+    PASS  View permission granted: B sees both rings; revoked between planning and emission: B loses ring A only
+    PASS  Missing ownership context: the delivery is skipped whole and counted; the other ring is unaffected
+    PASS  A planned non-owner recipient with use but without view permission is refused for the other ring only
+    PASS  Viewer selection: the owner is admitted before sorting and capping; the result is strictly increasing
+    PASS  Owner's use permission revoked between planning and emission: the owner receives nothing of their ring
+    PASS  Coincident rings, no view permission: each owner sees exactly their own ring
+    PASS  Owner A holding view permission is still authorized for ring A by use, and for ring B by view
+StyleHealthTest                  5 tests, 0 not passed
+    PASS  Third consecutive failure disables the style at once; its remaining points in the tick are skipped
+    PASS  All styles disabled: the planner skips the ring as unsupported before evaluation; a new session re-enables
+    PASS  Successes of another style do not reset the streak; the streak spans ticks
+    PASS  A success of the same style resets the streak: fail, fail, succeed, fail, fail does not disable
+    PASS  The next planning pass excludes the disabled style: M6 reports it unsupported, nothing of it is sent
+TOTAL 15 tests, 0 not passed
+
+(Clean run after restoring the unmutated reference; the mutant runs below were made separately.)
+
+Targeted mutants of the reference (each applied alone; definitions in r2-mutants.py): 6 of 6 caught
+E1 (R1 F2 defect: emit in plan (input) order) failing=1 AllocationOrderEmissionTest.Defensive caps binding (unaligned policy): the rank-0 ring i
+E2 (R1 F1 defect: owner-blind rule (use OR view)) failing=2 OwnerAwareEmissionTest.A planned non-owner recipient with use but without view perm; OwnerAwareEmissionTest.View permission granted: B sees both rings; revoked between 
+E3 (missing context replaced by a guessed owner) failing=1 OwnerAwareEmissionTest.Missing ownership context: the delivery is skipped whole and
+E4 (any style's success resets every streak) failing=1 StyleHealthTest.Successes of another style do not reset the streak; the stre
+E5 (R1 wording: streak reset at each tick) failing=1 StyleHealthTest.Successes of another style do not reset the streak; the stre
+E6 (owner not admitted before capping) failing=1 OwnerAwareEmissionTest.Viewer selection: the owner is admitted before sorting and c
+
+Plugin jar from the spike build (engine + SPI + reference only; no Paper): entries under org/bukkit, io/papermc, org/junit: 0

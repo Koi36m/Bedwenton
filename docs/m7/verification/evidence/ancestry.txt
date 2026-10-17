@@ -1,0 +1,16 @@
+Ancestry of the R3 content commit c57c1b0612663e2296aa5cf5828708f64467f279
+
+c57c1b0612663e2296aa5cf5828708f64467f279 15aa210ddcab79de6180df9bfa45a3ba17e1bcf7 | M7 R3: fail-closed coordinates, request-context consistency, placement accounting, runnable verification
+15aa210ddcab79de6180df9bfa45a3ba17e1bcf7 f72179d917623b5286bc6b52f6e8e982d3ad0d2d | M7 R2: owner-aware authorization, allocation-order emission, session-wide style disabling
+f72179d917623b5286bc6b52f6e8e982d3ad0d2d 74fefd3dae0ba9d8002907513c838fbf417ffa2b | M7 R1: Paper 26.3 adapter architecture, implementation/test contract and review evidence (design only)
+74fefd3dae0ba9d8002907513c838fbf417ffa2b c43a66e656a77aa82bd72d8ffe27f1a037240e99 | docs(m7): start Paper 26.3 adapter kickoff from accepted M6
+c43a66e656a77aa82bd72d8ffe27f1a037240e99 d4970cc23938f95d12c5b5e3c3d3b4d687f3e4eb | Verify approved M6 R2 production on Java 25 [m6-release-verification]
+d4970cc23938f95d12c5b5e3c3d3b4d687f3e4eb 6ada39e3a383f6b2df60e6744a39d37d9f24eb13 | Verify recovered M5 release-preparation snapshot on Java 25 [m5-release-verification]
+
+is-ancestor 15aa210ddcab79de6180df9bfa45a3ba17e1bcf7: yes
+is-ancestor f72179d917623b5286bc6b52f6e8e982d3ad0d2d: yes
+is-ancestor 74fefd3dae0ba9d8002907513c838fbf417ffa2b: yes
+is-ancestor c43a66e656a77aa82bd72d8ffe27f1a037240e99: yes
+first parent of c57c1b0612663e2296aa5cf5828708f64467f279: 15aa210ddcab79de6180df9bfa45a3ba17e1bcf7
+tree of c57c1b0612663e2296aa5cf5828708f64467f279: 732e38db2bb760401b35e21b013a8b03dcb76124
+tree of accepted M6 c43a66e656a77aa82bd72d8ffe27f1a037240e99: ef496f7b0c34796cdd30fe35d79cfd4e0c071ece

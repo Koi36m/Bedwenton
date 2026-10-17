@@ -1,0 +1,94 @@
+Paper API signatures read from source, PaperMC/Paper commit 09ee222482646f8ed84413aea89d0108653af938 (2026-10-16 16:26:16 +0200),
+branch main; gradle.properties: mcVersion=26.3, apiVersion=26.3, channel=STABLE. Obtained with git (sparse clone of paper-api).
+This is SOURCE, not the published paper-api jar: the exact Maven build must be pinned and re-checked (contract section 2).
+
+paper-api/src/main/java/org/bukkit/entity/Player.java:3368
+    default <T> void spawnParticle(Particle particle, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ, double speed, @Nullable T data, boolean force) {
+paper-api/src/main/java/org/bukkit/entity/Player.java:3398
+    <T> void spawnParticle(Particle particle, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ, double speedX, double speedY, double speedZ, @Nullable T data, boolean force, Particle.RandomizationType randomizationType);
+paper-api/src/main/java/org/bukkit/Particle.java:12
+    public enum Particle implements Keyed {
+paper-api/src/main/java/org/bukkit/Particle.java:52
+    DUST("dust", DustOptions.class),
+paper-api/src/main/java/org/bukkit/Particle.java:70
+    END_ROD("end_rod"),
+paper-api/src/main/java/org/bukkit/Particle.java:235
+    public Class<?> getDataType() {
+paper-api/src/main/java/org/bukkit/Particle.java:262
+    public enum RandomizationType {
+paper-api/src/main/java/org/bukkit/Particle.java:291
+    public DustOptions(@NotNull Color color, float size) {
+paper-api/src/main/java/org/bukkit/Particle.java:294
+    this.size = requireRange(size, "size", 0.01F, 4.0F);
+paper-api/src/main/java/org/bukkit/Color.java:167
+    public static Color fromRGB(int rgb) throws IllegalArgumentException {
+paper-api/src/main/java/org/bukkit/scheduler/BukkitScheduler.java:381
+    public BukkitTask runTaskTimer(@NotNull Plugin plugin, @NotNull Runnable task, long delay, long period) throws IllegalArgumentException;
+paper-api/src/main/java/org/bukkit/scheduler/BukkitScheduler.java:159
+    public void cancelTasks(@NotNull Plugin plugin);
+paper-api/src/main/java/org/bukkit/scheduler/BukkitScheduler.java:208
+    public List<BukkitTask> getPendingTasks();
+paper-api/src/main/java/org/bukkit/scheduler/BukkitTask.java:43
+    public void cancel();
+paper-api/src/main/java/org/bukkit/scheduler/BukkitTask.java:38
+    public boolean isCancelled();
+paper-api/src/main/java/org/bukkit/Bukkit.java:2126
+    public static boolean isPrimaryThread() {
+paper-api/src/main/java/org/bukkit/Bukkit.java:2839
+    public static int getCurrentTick() {
+paper-api/src/main/java/org/bukkit/plugin/java/JavaPlugin.java:447
+    public void registerCommand(final String label, final @Nullable String description, final Collection<String> aliases, final BasicCommand basicCommand) {
+paper-api/src/main/java/org/bukkit/plugin/java/JavaPlugin.java:449
+    event.registrar().register(label, description, aliases, basicCommand);
+paper-api/src/main/java/org/bukkit/plugin/java/JavaPlugin.java:319
+    @ApiStatus.Obsolete(since = "26.3")
+paper-api/src/main/java/org/bukkit/command/CommandExecutor.java:13
+    @ApiStatus.Obsolete(since = "26.3")
+paper-api/src/main/java/io/papermc/paper/command/brigadier/BasicCommand.java:24
+    void execute(CommandSourceStack commandSourceStack, String[] args) throws CommandSyntaxException;
+paper-api/src/main/java/io/papermc/paper/command/brigadier/BasicCommand.java:57
+    default @Nullable String permission() {
+paper-api/src/main/java/io/papermc/paper/command/brigadier/BasicCommand.java:46
+    default boolean canUse(final CommandSender sender) {
+paper-api/src/main/java/io/papermc/paper/command/brigadier/BasicCommand.java:34
+    default Collection<String> suggest(final CommandSourceStack commandSourceStack, final String[] args) {
+paper-api/src/main/java/io/papermc/paper/command/brigadier/CommandSourceStack.java:42
+    CommandSender getSender();
+paper-api/src/main/java/io/papermc/paper/command/brigadier/CommandSourceStack.java:51
+    @Nullable Entity getExecutor();
+paper-api/src/main/java/org/bukkit/Server.java:681
+    public Player getPlayer(@NotNull UUID id);
+paper-api/src/main/java/org/bukkit/Server.java:2634
+    int getCurrentTick();
+paper-api/src/main/java/org/bukkit/World.java:388
+    public boolean isChunkLoaded(int x, int z);
+paper-api/src/main/java/org/bukkit/World.java:3925
+    public WorldBorder getWorldBorder();
+paper-api/src/main/java/org/bukkit/generator/WorldInfo.java:33
+    UUID getUID();
+paper-api/src/main/java/org/bukkit/generator/WorldInfo.java:57
+    int getMinHeight();
+paper-api/src/main/java/org/bukkit/generator/WorldInfo.java:66
+    int getMaxHeight();
+paper-api/src/main/java/org/bukkit/WorldBorder.java:199
+    boolean isInside(@NotNull Location location);
+paper-api/src/main/java/org/bukkit/OfflinePlayer.java:35
+    public boolean isOnline();
+paper-api/src/main/java/org/bukkit/entity/Entity.java:529
+    public boolean isValid();
+paper-api/src/main/java/org/bukkit/entity/Entity.java:134
+    public World getWorld();
+paper-api/src/main/java/org/bukkit/entity/Entity.java:691
+    public UUID getUniqueId();
+paper-api/src/main/java/org/bukkit/permissions/Permissible.java:40
+    public boolean hasPermission(@NotNull String name);
+paper-api/src/main/java/org/bukkit/event/player/PlayerQuitEvent.java:14
+    public class PlayerQuitEvent extends PlayerEvent {
+paper-api/src/main/java/org/bukkit/event/player/PlayerChangedWorldEvent.java:12
+    public class PlayerChangedWorldEvent extends PlayerEvent {
+paper-api/src/main/java/org/bukkit/event/player/PlayerTeleportEvent.java:19
+    public class PlayerTeleportEvent extends PlayerMoveEvent {
+paper-api/src/main/java/org/bukkit/event/entity/PlayerDeathEvent.java:17
+    public class PlayerDeathEvent extends EntityDeathEvent {
+paper-api/src/main/java/org/bukkit/event/world/WorldUnloadEvent.java:12
+    public class WorldUnloadEvent extends WorldEvent implements Cancellable {

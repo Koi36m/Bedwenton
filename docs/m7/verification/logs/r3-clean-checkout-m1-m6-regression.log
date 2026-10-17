@@ -1,0 +1,7 @@
+M1-M6 regression in the clean checkout at c57c1b0612663e2296aa5cf5828708f64467f279, 2026-10-17T10:19:15Z
+java version "25.0.4.1" 2026-08-18 LTS
+Command: ./gradlew --no-daemon clean test check
+gradle exit: 0
+TOTAL 415 tests, 415 passed, 0 not passed, in 59 report files
+Command: python3 verification/m6/regenerate_all.py <scratch dir>
+PASS: all seven M1-M6 golden/reference datasets and manifests regenerate byte-identically.

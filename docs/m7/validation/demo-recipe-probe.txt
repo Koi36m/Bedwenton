@@ -1,0 +1,8 @@
+DemoRecipeProbe output (Java 25.0.4.1, accepted engine built from tree f1f604b21d53cc73087b6eb9882ad33afa98a5cc, 2026-10-17T08:58Z)
+SIMPLE   outcome=DELIVERED tier=SIMPLE reserved=24 source=24 kept=24 placements=48 recipients=2 batches=2
+         first ring point (102.5000, 64.1000, -20.5000), style bedwenton:demo_end_rod
+BALANCED outcome=DELIVERED tier=BALANCED reserved=48 source=48 kept=48 placements=96 recipients=2 batches=2
+         first ring point (102.5000, 64.1000, -20.5000), style bedwenton:demo_end_rod
+HEAVY    outcome=DELIVERED tier=HEAVY reserved=72 source=72 kept=72 placements=144 recipients=2 batches=2
+         first ring point (102.5000, 64.1000, -20.5000), style bedwenton:demo_end_rod
+ceiling: delivered=3 thinned=1 skippedBudget=12 generated=1152 placements=4096 (<= 4096)

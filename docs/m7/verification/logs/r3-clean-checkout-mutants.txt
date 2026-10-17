@@ -1,0 +1,43 @@
+Clean-checkout mutation run: git clone of the repository, checkout c57c1b0612663e2296aa5cf5828708f64467f279 (0 uncommitted files), 2026-10-17T10:16Z
+Command: python3 docs/m7/verification/run_mutants.py <log>
+
+E1 (R1 F2 defect: emit in plan (input) order): CAUGHT, 1 failing test(s)
+    AllocationOrderEmissionTest.Defensive caps binding (unaligned policy): the rank-0 ring is emitted first, whatever the input order; rotation alternates
+E2 (R1 F1 defect: owner-blind rule (use OR view)): CAUGHT, 7 failing test(s)
+    OwnerAwareEmissionTest.A planned non-owner recipient with use but without view permission is refused for the other ring only
+    OwnerAwareEmissionTest.View permission granted: B sees both rings; revoked between planning and emission: B loses ring A only
+    RecipientRuleRobustnessTest.Authorization order for normal inputs is unchanged: offline, world, permission, then range checks
+    RequestContextConsistencyTest.A viewer with a NaN position is refused (VIEWER_POSITION_INVALID); the other viewers are unaffected
+    RequestContextConsistencyTest.Control: valid contexts; each owner sees its own ring; non-owners without view are refused; accounting balances
+    RequestContextConsistencyTest.Invalid contexts (NaN or infinite anchor, negative owner or world id): the delivery is rejected whole
+    RequestContextConsistencyTest.One mismatched context (ring B's slot names ring A, owner A): only ring B is rejected; ring A is unaffected
+E3 (missing context replaced by a guessed owner (R2 mutant, pattern updated for the R3 code)): CAUGHT, 1 failing test(s)
+    OwnerAwareEmissionTest.Missing ownership context: the delivery is skipped whole and counted; the other ring is unaffected
+E4 (any style's success resets every streak): CAUGHT, 1 failing test(s)
+    StyleHealthTest.Successes of another style do not reset the streak; the streak spans ticks
+E5 (R1 wording: streak reset at each tick): CAUGHT, 1 failing test(s)
+    StyleHealthTest.Successes of another style do not reset the streak; the streak spans ticks
+E6 (owner not admitted before capping): CAUGHT, 1 failing test(s)
+    OwnerAwareEmissionTest.Viewer selection: the owner is admitted before sorting and capping; the result is strictly increasing
+E7 (R3: viewer position not validated (the reviewed NaN fail-open)): CAUGHT, 2 failing test(s)
+    RecipientRuleRobustnessTest.Viewer x, y or z NaN, +infinity or -infinity: denied as VIEWER_POSITION_INVALID (owner and non-owner)
+    RequestContextConsistencyTest.A viewer with a NaN position is refused (VIEWER_POSITION_INVALID); the other viewers are unaffected
+E8 (R3: anchor not validated in the rule): CAUGHT, 1 failing test(s)
+    RecipientRuleRobustnessTest.Request anchor x, y or z NaN, +infinity or -infinity: denied as INVALID_REQUEST_CONTEXT
+E10 (R3: view radius not validated): CAUGHT, 1 failing test(s)
+    RecipientRuleRobustnessTest.View radius: NaN, infinite or negative is rejected at construction; 0 is valid (exact anchor only)
+E11 (R3: mismatched context accepted): CAUGHT, 2 failing test(s)
+    RequestContextConsistencyTest.One mismatched context (ring B's slot names ring A, owner A): only ring B is rejected; ring A is unaffected
+    RequestContextConsistencyTest.Swapped contexts (key ring A holds ring B's context with owner B, and vice versa): both deliveries rejected, nothing sent
+E12 (R3: invalid context not rejected at delivery level): CAUGHT, 1 failing test(s)
+    RequestContextConsistencyTest.Invalid contexts (NaN or infinite anchor, negative owner or world id): the delivery is rejected whole
+E13 (R3: skipped-delivery placements not accounted): CAUGHT, 3 failing test(s)
+    RequestContextConsistencyTest.Invalid contexts (NaN or infinite anchor, negative owner or world id): the delivery is rejected whole
+    RequestContextConsistencyTest.One mismatched context (ring B's slot names ring A, owner A): only ring B is rejected; ring A is unaffected
+    RequestContextConsistencyTest.Swapped contexts (key ring A holds ring B's context with owner B, and vice versa): both deliveries rejected, nothing sent
+E14 (R3: skipped-recipient placements not accounted): CAUGHT, 4 failing test(s)
+    RequestContextConsistencyTest.A viewer with a NaN position is refused (VIEWER_POSITION_INVALID); the other viewers are unaffected
+    RequestContextConsistencyTest.Control: valid contexts; each owner sees its own ring; non-owners without view are refused; accounting balances
+    RequestContextConsistencyTest.Invalid contexts (NaN or infinite anchor, negative owner or world id): the delivery is rejected whole
+    RequestContextConsistencyTest.One mismatched context (ring B's slot names ring A, owner A): only ring B is rejected; ring A is unaffected
+MUTANTS: 13 caught of 13

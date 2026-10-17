@@ -1,0 +1,21 @@
+name: M7 exact Paper API provenance
+on:
+  push:
+    branches: [m7-api-provenance]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Read official PaperMC repository metadata and download exact API
+        run: python3 paper-adapter/tools/resolve_paper.py paper-provenance
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: m7-paper-provenance-${{ github.run_id }}
+          path: paper-provenance/
+          if-no-files-found: warn

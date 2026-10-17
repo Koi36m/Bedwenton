@@ -1,0 +1,282 @@
+Bedwenton M7 — Paper 26.3 Adapter Implementation
+
+Repository: Koi36m/Bedwenton
+Milestone: M7 — Paper Rendering Adapter
+Accepted design: R3, commit 4eeb8354693463a95f7dd48cbf3891701dcc6acf
+Accepted M6: c43a66e656a77aa82bd72d8ffe27f1a037240e99
+
+Assignment and authorization
+
+By submitting this prompt, the project owner authorizes implementation of the M7 Paper Rendering Adapter only, in an isolated development branch.
+
+This does not authorize merging into main, production SMP deployment, release acceptance, or unrelated development.
+
+ChatGPT independently accepted the R3 design after reviewing its Git history, implementation contract, source, tests and verification evidence.
+
+Your task is to implement the approved design faithfully, produce a working testable Paper plugin, and supply sufficient evidence for an independent implementation review.
+
+1. Recover the authoritative source
+
+The accepted R3 commit may not exist on GitHub because Claude's push was rejected with HTTP 403.
+
+I will supply:
+
+bedwenton-m7-r3-docs.zip, including m7-spec-r3.bundle
+
+M7-R3-INDEPENDENT-DESIGN-REVIEW.md
+
+Use the bundle to recover the exact accepted R3 tip and commit history.
+
+Verify:
+
+Git bundle integrity and ancestry.
+
+Exact R3 tip SHA.
+
+The accepted M6 commit and tree.
+
+No changes to accepted M1–M6 files.
+
+Create a new implementation branch named m7-paper-adapter-implementation from the accepted R3 tip.
+
+Do not restart M1–M6 development or recreate the accepted engine.
+
+2. Normative contract
+
+Implement the accepted documents:
+
+docs/m7/M7-ARCHITECTURE-AND-CONTRACT.md
+
+docs/m7/M7-TEST-AND-SMOKE-PLAN.md
+
+docs/m7/M7-R3-CHANGES.md
+
+Use:
+
+docs/m7/spi/ for interface definitions
+
+docs/m7/reference/ for scratch implementation guidance
+
+docs/m7/tests/ for required behavioral tests
+
+The reference implementation is not production code. Integrate, refactor and adapt it as needed while preserving the accepted behavior.
+
+Do not silently change normative requirements. If a requirement is blocked or contradictory, document the issue rather than inventing substitute behavior.
+
+3. Production implementation
+
+Create an isolated paper-adapter/ Gradle project with its own build configuration.
+
+Preserve the root engine's source, tests, build files, verification datasets and zero-runtime-dependency requirement byte-for-byte.
+
+Implement the two-layer architecture:
+
+Core layer
+
+Session-safe, collision-free player and world ID mapping
+
+Owner-first viewer selection
+
+Owner-aware authorization
+
+Correct allocation-rank emission order
+
+Exact M6 recipient-prefix semantics
+
+Finite-coordinate and request-context validation
+
+Placement accounting and emission limits
+
+Persistent session-wide particle-style failure handling
+
+Paper layer
+
+JavaPlugin lifecycle
+
+Main-thread-only planning and particle emission
+
+Paper-native command registration
+
+Bukkit event listeners
+
+World, chunk, player and permission checks
+
+Validated particle catalogue
+
+Safe cancellation and shutdown
+
+Use one DeliveryPlanner.plan() call per server tick covering all active rings.
+
+Never independently reset budgets per ring.
+
+4. Paper API verification
+
+Use Java 25 and Gradle 9.1.0.
+
+Resolve and pin an exact verified Paper 26.3 API version from PaperMC's repository metadata. Record the version and dependency JAR SHA-256.
+
+Do not guess the build version or use floating dependencies.
+
+Verify the chosen API actually provides the required command registration, scheduler, lifecycle and particle methods.
+
+If Paper dependencies cannot be resolved, report the blocker honestly and complete only the independently verifiable portions. Do not claim Paper compilation succeeded.
+
+Do not use NMS, CraftBukkit internals, reflection-based compatibility hacks or unapproved plugin dependencies.
+
+5. First visual demonstration
+
+Implement the opt-in static ring:
+
+/vfxdemo ring simple
+
+/vfxdemo ring balanced
+
+/vfxdemo ring heavy
+
+/vfxdemo stop
+
+/vfxdemo stop all
+
+/vfxdemo status
+
+The ring uses the approved M5 scene and M6 planner, not manually improvised particle geometry.
+
+Visual styles:
+
+White END_ROD particle ring
+
+Red DUST accent ring
+
+Preserve the accepted per-tier point counts, circle radii, loop timing, placement semantics and static-anchor behavior.
+
+Use per-player particle spawning only, with force=false.
+
+No global particle broadcasting and no automatic startup effects.
+
+6. Mandatory safeguards
+
+Preserve all five accepted R2/R3 correction areas:
+
+Owner-aware authorization.
+
+Allocation-rank fairness.
+
+Session-wide consecutive style-failure tracking.
+
+Fail-closed NaN/infinity coordinate handling.
+
+Fail-closed mismatched or invalid request contexts.
+
+Also incorporate ChatGPT's implementation review notes:
+
+Validate viewRadius as finite and within 4.0–64.0 before constructing recipient rules. Prevent unsafe range arithmetic.
+
+Ensure Gradle/test scripts propagate failure status even when stale test reports exist.
+
+Enforce strictly unique, sorted eligible nonowner viewer IDs before passing them to M6.
+
+Preserve accurate placement accounting.
+
+No M6 planner modifications are permitted.
+
+7. Tests and verification
+
+Run the complete accepted M1–M6 Java 25 regression suite and regenerate all seven reference datasets.
+
+Port the accepted R3 behavioral tests into the production adapter test suite.
+
+Add production-specific tests covering:
+
+Config validation and hard limits
+
+Session ID uniqueness
+
+Viewer permissions and owner isolation
+
+Point and style validation
+
+Correct recipient selection
+
+Thread ownership
+
+Cancellation and lifecycle
+
+Repeated command execution
+
+Emission failure handling
+
+Plugin JAR integrity
+
+Report exact test totals.
+
+Ensure the final plugin JAR contains the accepted engine classes, but does not bundle Paper API, JUnit or other server-owned libraries.
+
+8. Real-server testing
+
+If an ordinary Paper 26.3 server and suitable Java clients are available, execute smoke tests S1–S17 in the accepted smoke plan.
+
+Record exact server and client versions, logs, outcomes and visual evidence.
+
+Pay particular attention to:
+
+Particle visibility and accurate circle geometry
+
+Exact-position behavior using particle count 0
+
+Red DUST data
+
+Two-player owner/view permission isolation
+
+Ring cancellation and task cleanup
+
+Config rejection and style failure behavior
+
+Measure planning and emission durations separately.
+
+Do not claim performance guarantees from a single measurement.
+
+If the environment cannot run Minecraft or supply two clients, clearly mark smoke tests NOT TESTED and provide a practical checklist for the project owner to execute later.
+
+Note that the contract permits one ring per player. Do not claim 16 simultaneous rings were tested using only two players.
+
+9. Deliverables
+
+Provide:
+
+Compiled M7 plugin JAR, if compilation succeeds.
+
+Complete production source ZIP.
+
+Git branch, full commit SHA and recoverable Git bundle if pushing is unavailable.
+
+Updated plugin metadata and default configuration.
+
+Complete test results and logs.
+
+M1–M6 preservation evidence.
+
+Paper dependency and JAR provenance.
+
+SHA-256 manifest.
+
+Installation, verification and rollback guide.
+
+Smoke-test evidence or a clearly identified manual testing checklist.
+
+M7-IMPLEMENTATION-REPORT.md explaining implemented functionality, limitations, blockers and remaining acceptance gates.
+
+Make sure the implementation is reproducible from the supplied source.
+
+10. Stop conditions and ownership boundaries
+
+Do not merge into main, release or deploy to the live SMP.
+
+Do not start M8 or implement particle wings, BlockDisplay ghost blocks, Celestial Arsenal, Phase Cocoon, custom enchant integrations, Folia or Bedrock compatibility.
+
+Do not conceal failed builds, unresolved dependencies or missing smoke evidence.
+
+Once implementation and available verification steps are complete, stop.
+
+Report whether M7 is READY FOR INDEPENDENT IMPLEMENTATION REVIEW or BLOCKED, and hand the results back to ChatGPT.
+
+The project owner and ChatGPT will decide acceptance separately.

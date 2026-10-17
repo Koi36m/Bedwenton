@@ -1,0 +1,19 @@
+{
+  "zip_sha256": "f911f7ce65cb4afa6867531d18937e28e6f3ab966a05a880701af54c8145c431",
+  "identical_zip_uploads": true,
+  "crc_pass": true,
+  "internal_manifest_entries": 67,
+  "bundle_sha256": "b4740454b50206ba9e4c65af3e0898f1ed782b7ef2737b31b69047e34578fa1c",
+  "bundle_complete_history": true,
+  "git_fsck_pass": true,
+  "branch": "m7-paper-adapter-implementation",
+  "head": "4eeb8354693463a95f7dd48cbf3891701dcc6acf",
+  "accepted_m6_commit": "c43a66e656a77aa82bd72d8ffe27f1a037240e99",
+  "accepted_m6_tree": "ef496f7b0c34796cdd30fe35d79cfd4e0c071ece",
+  "frozen_m6_snapshot_files_verified": 1040,
+  "only_added_docs_m7_paths": 58,
+  "archive_docs_byte_identical": 58,
+  "working_tree_status": "",
+  "missing_required_input": "M7-R3-INDEPENDENT-DESIGN-REVIEW.md",
+  "production_implementation_started": false
+}

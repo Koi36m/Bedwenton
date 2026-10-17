@@ -1,0 +1,75 @@
+plugins { id 'java' }
+group = 'workshop.vfx'
+version = providers.gradleProperty('version').get()
+def pinnedPaper = providers.gradleProperty('paperApiVersion').get()
+if (!(pinnedPaper ==~ /26\.3\.build\.[0-9]+-stable/)) throw new GradleException('Paper must be an exact stable metadata-verified build')
+repositories {
+    mavenCentral()
+    maven { url = uri('https://repo.papermc.io/repository/maven-public/') }
+}
+dependencies {
+    implementation 'workshop.vfx:minecraft-vfx-math:0.1.0-m1'
+    compileOnly "io.papermc.paper:paper-api:${pinnedPaper}"
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.12.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+java { toolchain.languageVersion = JavaLanguageVersion.of(25) }
+tasks.withType(JavaCompile).configureEach {
+    options.release = 25
+    options.encoding = 'UTF-8'
+    options.compilerArgs += ['-Xlint:all', '-Werror']
+}
+test {
+    useJUnitPlatform()
+    testLogging { events 'passed', 'failed', 'skipped'; exceptionFormat 'full' }
+    systemProperty 'adapter.root', projectDir.absolutePath
+}
+def generated = layout.buildDirectory.dir('generated/provenance')
+tasks.register('writeBuildProvenance') {
+    outputs.dir(generated)
+    outputs.upToDateWhen { false }
+    doLast {
+        def commit = providers.exec { commandLine 'git','rev-parse','HEAD' }.standardOutput.asText.get().trim()
+        def target = generated.get().file('META-INF/bedwenton-build.properties').asFile
+        target.parentFile.mkdirs()
+        target.text = "adapterCommit=${commit}\nengineTree=ef496f7b0c34796cdd30fe35d79cfd4e0c071ece\npaperApiVersion=${pinnedPaper}\njavaVersion=${System.getProperty('java.version')}\n"
+    }
+}
+processResources {
+    dependsOn 'writeBuildProvenance'
+    from(generated)
+    filesMatching('plugin.yml') { expand(version: project.version) }
+}
+jar {
+    duplicatesStrategy = DuplicatesStrategy.FAIL
+    from({ configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }) {
+        exclude 'META-INF/MANIFEST.MF'
+    }
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+tasks.register('verifyPluginJar', Exec) {
+    dependsOn jar
+    doFirst {
+        if (configurations.runtimeClasspath.files.size() != 1) throw new GradleException('Adapter runtime must contain only the accepted engine')
+        commandLine 'python3', 'tools/verify_plugin_jar.py', tasks.jar.archiveFile.get().asFile, project.version.toString(), configurations.runtimeClasspath.singleFile
+    }
+}
+tasks.register('recordPaperApi') {
+    doLast {
+        def api = configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.find {
+            it.moduleVersion.id.group == 'io.papermc.paper' && it.name == 'paper-api'
+        }
+        if (api == null || api.moduleVersion.id.version != pinnedPaper) throw new GradleException('Unexpected Paper API artifact')
+        def sha = java.security.MessageDigest.getInstance('SHA-256').digest(api.file.bytes).encodeHex().toString()
+        def expected = file('paper-api-provenance.json')
+        if (!expected.exists()) throw new GradleException('Missing approved API provenance')
+        def provenance = new groovy.json.JsonSlurper().parse(expected)
+        if (sha != provenance.jarSha256 || pinnedPaper != provenance.paperApiVersion) throw new GradleException('Paper API checksum mismatch')
+        def output = layout.buildDirectory.file('paper-api-provenance.txt').get().asFile
+        output.parentFile.mkdirs()
+        output.text = "paperApiVersion=${pinnedPaper}\nsha256=${sha}\nartifact=${api.file}\n"
+        println output.text
+    }
+}
+check.dependsOn 'verifyPluginJar', 'recordPaperApi'

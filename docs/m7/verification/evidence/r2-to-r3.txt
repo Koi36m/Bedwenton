@@ -1,0 +1,74 @@
+git diff --stat 15aa210ddcab79de6180df9bfa45a3ba17e1bcf7 c57c1b0612663e2296aa5cf5828708f64467f279   (R2 -> R3 content commit)
+ docs/m7/M7-ARCHITECTURE-AND-CONTRACT.md            |  59 +++++++--
+ docs/m7/M7-R3-CHANGES.md                           | 111 ++++++++++++++++
+ docs/m7/M7-TEST-AND-SMOKE-PLAN.md                  |  19 +--
+ .../vfx/paper/core}/DefaultPlanEmitter.java        |  24 +++-
+ .../vfx/paper/core/OwnerAwareRecipientRule.java    |  36 ++++++
+ .../vfx/paper/core}/OwnerFirstViewerSelection.java |   2 +-
+ .../vfx/paper/core}/SessionStyleHealth.java        |   2 +-
+ .../workshop/vfx/paper/core/EmissionLimits.java    |   2 +-
+ .../workshop/vfx/paper/core/EmissionReport.java    |  13 +-
+ .../spi/workshop/vfx/paper/core/PlanEmitter.java   |  13 +-
+ .../workshop/vfx/paper/core/PointValidator.java    |   2 +-
+ .../spi/workshop/vfx/paper/core/RecipientGate.java |   2 +-
+ .../spi/workshop/vfx/paper/core/RecipientRule.java |  17 ++-
+ .../workshop/vfx/paper/core/RequestContext.java    |   9 +-
+ .../m7/spi/workshop/vfx/paper/core/SkipReason.java |  14 ++-
+ .../spi/workshop/vfx/paper/core/StyleHealth.java   |   2 +-
+ .../spi/workshop/vfx/paper/core/ViewerFacts.java   |   2 +-
+ .../workshop/vfx/paper/core/ViewerSelection.java   |   2 +-
+ .../paper/core/RecipientRuleRobustnessTest.java    |  94 ++++++++++++++
+ .../paper/core/RequestContextConsistencyTest.java  | 139 +++++++++++++++++++++
+ docs/m7/validation/r2-mutants.py                   |   8 --
+ .../r2-reference/OwnerAwareRecipientRule.java      |  18 ---
+ docs/m7/verification/README.md                     |  54 ++++++++
+ docs/m7/verification/build.gradle                  |  29 +++++
+ docs/m7/verification/logs/r2-state-mutants.txt     |  14 +++
+ docs/m7/verification/logs/r2-state-tests.log       |  24 ++++
+ docs/m7/verification/logs/r3-m1-m6-regression.log  |  11 ++
+ docs/m7/verification/logs/r3-mutants.txt           |  43 +++++++
+ docs/m7/verification/logs/r3-tests-before-fix.log  |  44 +++++++
+ docs/m7/verification/logs/r3-tests.log             |  36 ++++++
+ docs/m7/verification/mutants.py                    |  21 ++++
+ docs/m7/verification/run-tests.sh                  |  23 ++++
+ docs/m7/verification/run_mutants.py                |  81 ++++++++++++
+ docs/m7/verification/settings.gradle               |   5 +
+ docs/m7/verification/summarize.py                  |  31 +++++
+ 35 files changed, 927 insertions(+), 79 deletions(-)
+
+git diff --name-status -M 15aa210ddcab79de6180df9bfa45a3ba17e1bcf7 c57c1b0612663e2296aa5cf5828708f64467f279
+M	docs/m7/M7-ARCHITECTURE-AND-CONTRACT.md
+A	docs/m7/M7-R3-CHANGES.md
+M	docs/m7/M7-TEST-AND-SMOKE-PLAN.md
+R072	docs/m7/validation/r2-reference/DefaultPlanEmitter.java	docs/m7/reference/workshop/vfx/paper/core/DefaultPlanEmitter.java
+A	docs/m7/reference/workshop/vfx/paper/core/OwnerAwareRecipientRule.java
+R082	docs/m7/validation/r2-reference/OwnerFirstViewerSelection.java	docs/m7/reference/workshop/vfx/paper/core/OwnerFirstViewerSelection.java
+R091	docs/m7/validation/r2-reference/SessionStyleHealth.java	docs/m7/reference/workshop/vfx/paper/core/SessionStyleHealth.java
+M	docs/m7/spi/workshop/vfx/paper/core/EmissionLimits.java
+M	docs/m7/spi/workshop/vfx/paper/core/EmissionReport.java
+M	docs/m7/spi/workshop/vfx/paper/core/PlanEmitter.java
+M	docs/m7/spi/workshop/vfx/paper/core/PointValidator.java
+M	docs/m7/spi/workshop/vfx/paper/core/RecipientGate.java
+M	docs/m7/spi/workshop/vfx/paper/core/RecipientRule.java
+M	docs/m7/spi/workshop/vfx/paper/core/RequestContext.java
+M	docs/m7/spi/workshop/vfx/paper/core/SkipReason.java
+M	docs/m7/spi/workshop/vfx/paper/core/StyleHealth.java
+M	docs/m7/spi/workshop/vfx/paper/core/ViewerFacts.java
+M	docs/m7/spi/workshop/vfx/paper/core/ViewerSelection.java
+A	docs/m7/tests/workshop/vfx/paper/core/RecipientRuleRobustnessTest.java
+A	docs/m7/tests/workshop/vfx/paper/core/RequestContextConsistencyTest.java
+D	docs/m7/validation/r2-mutants.py
+D	docs/m7/validation/r2-reference/OwnerAwareRecipientRule.java
+A	docs/m7/verification/README.md
+A	docs/m7/verification/build.gradle
+A	docs/m7/verification/logs/r2-state-mutants.txt
+A	docs/m7/verification/logs/r2-state-tests.log
+A	docs/m7/verification/logs/r3-m1-m6-regression.log
+A	docs/m7/verification/logs/r3-mutants.txt
+A	docs/m7/verification/logs/r3-tests-before-fix.log
+A	docs/m7/verification/logs/r3-tests.log
+A	docs/m7/verification/mutants.py
+A	docs/m7/verification/run-tests.sh
+A	docs/m7/verification/run_mutants.py
+A	docs/m7/verification/settings.gradle
+A	docs/m7/verification/summarize.py

@@ -1,0 +1,5 @@
+// M7 design verification build (not the production adapter). Compiles the SPI proposal (../spi), the THROWAWAY
+// scratch reference (../reference, or -Pm7RefDir=<dir> for mutation runs) and the proposed tests (../tests) against the
+// real accepted M1-M6 engine, which includeBuild substitutes from the repository root (unchanged).
+rootProject.name = 'bedwenton-m7-design-verification'
+includeBuild('../../..')

@@ -1,0 +1,1384 @@
+diff --git a/docs/m7/M7-ARCHITECTURE-AND-CONTRACT.md b/docs/m7/M7-ARCHITECTURE-AND-CONTRACT.md
+index 91de570..0f72109 100644
+--- a/docs/m7/M7-ARCHITECTURE-AND-CONTRACT.md
++++ b/docs/m7/M7-ARCHITECTURE-AND-CONTRACT.md
+@@ -1,7 +1,8 @@
+-# M7 architecture and implementation contract: Paper 26.3 adapter and opt-in demo plugin (R2)
++# M7 architecture and implementation contract: Paper 26.3 adapter and opt-in demo plugin (R3)
+ 
+-Status: **PROPOSED, revision 2. Not authorized for implementation.** R2 corrects owner-aware authorization,
+-emission order and style disabling, and settles three clarifications (`M7-R2-CHANGES.md`). This document does not claim Paper, Folia or
++Status: **PROPOSED, revision 3. Not authorized for implementation.** R2 corrected owner-aware authorization,
++emission order and style disabling (`M7-R2-CHANGES.md`). R3 makes coordinate handling fail closed, rejects
++inconsistent request contexts, and adds placement accounting (`M7-R3-CHANGES.md`). This document does not claim Paper, Folia or
+ Geyser runtime compatibility. Compatibility is established only by the real-server smoke test in
+ `M7-TEST-AND-SMOKE-PLAN.md`.
+ 
+@@ -37,7 +38,8 @@ Koi36m/Bedwenton
+ - **Two layers:**
+   - `core`: everything that can be tested offline, namely id mapping, style catalogue, plan walking, validation,
+     limits and accounting. It follows the SPI proposal in `docs/m7/spi/`, which compiles against the accepted engine.
+-    The proposed tests in `docs/m7/tests/` pass against a scratch reference of that SPI (`validation/r2-tests.txt`).
++    The proposed tests in `docs/m7/tests/` run against a scratch reference of that SPI (`docs/m7/reference/`) with
++    the runnable build in `docs/m7/verification/` (`M7-R3-VERIFICATION.md`).
+   - `bukkit`: thin and verified on a real server.
+ - **No NMS**, no CraftBukkit, no `paper-plugin.yml`, no reflection, no other plugin dependencies.
+ 
+@@ -177,8 +179,18 @@ point asserts `Bukkit.isPrimaryThread()` and refuses otherwise. There is no asyn
+ priority and tick rotation. **Never iterate `plan.deliveries()` in list order**: that is the request input order.
+ For each delivery:
+ - skip it unless the outcome is `DELIVERED` or `THINNED`;
+-- **context:** `contexts.get(requestId())`. If it is absent, skip the whole delivery and count
+-  `skippedDeliveries[MISSING_REQUEST_CONTEXT]`. Nothing of it is sent; there is no guessed owner or world;
++- **context validation (R3), before any recipient is considered**, with `c = contexts.get(requestId())`. The first
++  failure applies:
++
++  | Condition | Skip reason |
++  |---|---|
++  | `c == null` | `MISSING_REQUEST_CONTEXT` |
++  | `c.requestId() != requestId()` | `MISMATCHED_REQUEST_CONTEXT` |
++  | any anchor coordinate is not finite, or `c.ownerViewerId() < 0`, or `c.worldId() < 0` | `INVALID_REQUEST_CONTEXT` |
++
++  On failure, skip the whole delivery: count `skippedDeliveries[reason]` once and add `placements()` to
++  `placementsInSkippedDeliveries`. Nothing of it is sent. No owner, world or anchor is substituted, reconstructed or
++  inferred, and a rejected context never affects other deliveries;
+ - iterate the recipients `r = 0 .. recipientCount() - 1` in order (ascending viewer id).
+ 
+ For each recipient:
+@@ -197,9 +209,23 @@ For each recipient:
+    | online and valid | `VIEWER_OFFLINE` |
+    | same world as `context.worldId()` | `VIEWER_WORLD_CHANGED` |
+    | `viewerId == context.ownerViewerId()` ? has `bedwenton.vfxdemo.use` : has `bedwenton.vfxdemo.view` | `VIEWER_PERMISSION_REVOKED` |
+-   | within `viewRadius` of the context's anchor | `VIEWER_OUT_OF_RANGE` |
+-
+-   On failure, count `skippedRecipients[reason]`; the recipient receives nothing of **this** delivery this tick. A
++   | anchor coordinates all finite (R3; the rule checks this itself, even when used without the emitter) | `INVALID_REQUEST_CONTEXT` |
++   | viewer coordinates all finite (R3) | `VIEWER_POSITION_INVALID` |
++   | `d2 <= radius * radius`, with `d2` the squared distance from the anchor, written as `!(d2 <= r2)` → deny, so NaN can never allow | `VIEWER_OUT_OF_RANGE` |
++
++   **Fail closed (R3).** Every non-finite coordinate denies. NaN, +infinity and -infinity are all classified by the
++   two validity rows above, never as allowed and never by an accidental comparison. Finite but huge coordinates whose
++   squared distance overflows to +infinity are `VIEWER_OUT_OF_RANGE`. For normal (finite) inputs the order is
++   unchanged from R2: online and valid, world, permission, range.
++
++   **Radius policy (R3).** `OwnerAwareRecipientRule(radius)` throws `IllegalArgumentException` unless the radius is
++   finite and >= 0. A radius of 0 admits only viewers exactly at the anchor. Config validation (section 9) additionally
++   requires `viewRadius` to be finite and within [4.0, 64.0]. A NaN, infinite or out-of-range value (YAML `.nan` and
++   `.inf` included) refuses enable with a clear message. The plugin never starts with a default substituted for an
++   invalid radius.
++
++   On failure, count `skippedRecipients[reason]` and add `recipientPoints(r)` to `placementsInSkippedRecipients`; the
++   recipient receives nothing of **this** delivery this tick. A
+    player who is the owner of one ring and a plain viewer of another, coincident ring is judged separately for each
+    ring.
+ 2. **Points.** The recipient receives exactly the **first `recipientPoints(r)` selections** of the sequence:
+@@ -227,10 +253,19 @@ For each recipient:
+    - On normal return: `succeededCalls++` and `styleHealth.recordSuccess(style)`.
+    - On a `RuntimeException`: `failedCalls++` and `styleHealth.recordFailure(style)`. The exception never leaves the
+      tick.
+-5. **Accounting.** `attemptedCalls` counts every call made, and `attemptedCalls = succeededCalls + failedCalls`.
+-   `plannedPlacements = plan.placements()`. M6 counters are never altered. **Calls are not packets:** no packet or
++5. **Accounting.** See section 7.2. M6 counters are never altered. **Calls are not packets:** no packet or
+    client-render claim is made.
+ 
++### 7.2 Placement accounting (normative, R3)
++
++Every placement M6 planned for an emitted outcome is accounted for exactly once:
++- `plannedPlacements = plan.placements()`;
++- `plannedPlacements = attemptedCalls + sum(skippedPoints) + placementsInSkippedRecipients + placementsInSkippedDeliveries`;
++- `attemptedCalls = succeededCalls + failedCalls`.
++
++M6 places no points for SKIPPED and FAILED outcomes, so they contribute nothing. The tests assert both identities in
++the context and coordinate cases.
++
+ ### 7.1 Session-wide style disabling (normative)
+ 
+ `StyleHealth` (production `SessionStyleHealth`) holds one consecutive-failure **streak** per style for the plugin
+@@ -270,7 +305,7 @@ values**.
+ |---|---|---|---|
+ | `maxActiveEffects` | 4 | 1-16 | ring cap; `DeliveryPolicy.maxRequests` |
+ | `maxViewersPerEffect` | 4 | 1-16 | viewer cap; `maxViewersPerRequest`; `maxViewerEntries = maxActiveEffects x maxViewersPerEffect` |
+-| `viewRadius` | 32.0 | 4.0-64.0 | viewer filter and gate |
++| `viewRadius` | 32.0 | 4.0-64.0, and finite (NaN and infinity refuse enable) | viewer filter and `OwnerAwareRecipientRule` |
+ | `ringLifetimeTicks` | 600 | 20-6000 | scene lifetime and expiry |
+ | `defaultTier` | `balanced` | `simple`, `balanced`, `heavy` | requested tier (a strict ceiling, per M6 G11) |
+ | `generatedPointBudget` | 1152 | 0-1152 | M6 (`16 x 72`: every ring at HEAVY) |
+diff --git a/docs/m7/M7-R3-CHANGES.md b/docs/m7/M7-R3-CHANGES.md
+new file mode 100644
+index 0000000..99565d0
+--- /dev/null
++++ b/docs/m7/M7-R3-CHANGES.md
+@@ -0,0 +1,111 @@
++# M7 R3: design corrections (change log)
++
++Status: **design proposal, revision 3, for ChatGPT's independent review.** This is not an accepted milestone. There
++is no production Paper adapter, no plugin deployment or release, nothing merged into `main`, and no new effect
++features.
++
++| Item | Value |
++|---|---|
++| R3 branch | `m7-spec-r3`, created from the R2 commit `15aa210ddcab79de6180df9bfa45a3ba17e1bcf7` |
++| Ancestry | `15aa210` (R2) ← `f72179d` (R1) ← `74fefd3` (kickoff) ← `c43a66e` (accepted M6), preserved unchanged |
++| Accepted M6 baseline | `c43a66e656a77aa82bd72d8ffe27f1a037240e99`; every changed path relative to it is under `docs/m7/` (`M7-R3-VERIFICATION.md`) |
++
++## 1. F1 robustness: invalid coordinates fail closed
++
++**Defect (reproduced by ChatGPT, and again here).** `OwnerAwareRecipientRule` computed `d2 > r*r` to deny. With a
++NaN viewer coordinate or anchor coordinate the comparison is false, so the recipient was **allowed**. With the R2 logic
++and the new tests, a viewer at `x = NaN` received 96 particles (`verification/logs/r3-tests-before-fix.log`).
++
++**Correction** (contract section 7 step 1; SPI `RecipientRule`, `SkipReason`; reference `OwnerAwareRecipientRule`):
++- After the permission check, the rule validates finiteness:
++  - an anchor coordinate that is not finite gives **`INVALID_REQUEST_CONTEXT`**;
++  - a viewer coordinate that is not finite gives **`VIEWER_POSITION_INVALID`** (new).
++- The range test is written as `!(d2 <= r2)` → deny, so a NaN can never allow. This is defence in depth: with the
++  checks above, `d2` cannot be NaN.
++- **Order for normal inputs is unchanged:** online and valid, world, permission, range. Invalid coordinates of a viewer
++  who is offline, in another world or lacking permission are reported as that earlier reason. Either way the viewer is
++  denied.
++- **Classification:** NaN, +infinity and -infinity are all *invalid*. +infinity was previously
++  `VIEWER_OUT_OF_RANGE`; it is now `VIEWER_POSITION_INVALID`. Finite coordinates whose squared distance overflows to
++  +infinity remain `VIEWER_OUT_OF_RANGE`.
++- **Radius policy:** the rule's constructor throws `IllegalArgumentException` unless the radius is finite and >= 0;
++  0 means exact anchor only. Config validation refuses enable for a NaN or infinite `viewRadius`, or one outside
++  [4, 64]. No default is substituted.
++
++**Tests:** `RecipientRuleRobustnessTest` (5 tests) covers:
++- NaN, +infinity and -infinity on each viewer axis, for the owner and a non-owner;
++- the same three values on each anchor axis;
++- normal controls: in range, exactly at the radius, just beyond, and huge finite coordinates;
++- order preservation;
++- the radius policy.
++
++## 2. Request-context consistency
++
++**Defect.** R2 skipped a delivery whose context was missing, but accepted a present context whose embedded
++`requestId` differed from the delivery's. With swapped contexts, ring A would be judged with ring B's owner.
++
++**Correction** (contract section 7; SPI `PlanEmitter`, `RequestContext`, `SkipReason`; reference
++`DefaultPlanEmitter`). Before any recipient of a delivery is considered, the emitter checks in order:
++1. missing context: `MISSING_REQUEST_CONTEXT`;
++2. `context.requestId() != delivery.requestId()`: **`MISMATCHED_REQUEST_CONTEXT`** (new);
++3. a non-finite anchor, or a negative owner or world id: **`INVALID_REQUEST_CONTEXT`** (new).
++
++A failure skips the whole delivery deterministically, counted once in `skippedDeliveries`. Nothing is sent, and
++nothing is substituted, reconstructed or inferred. Other deliveries are unaffected.
++
++**Tests:** `RequestContextConsistencyTest` (5 tests) covers:
++- a valid control;
++- swapped contexts for two requests with different owners (both rejected, zero sends);
++- one mismatch (only that delivery is rejected);
++- five invalid-context variants;
++- a NaN viewer at the emitter.
++
++## 3. Accounting (new contract section 7.2)
++
++`EmissionReport` gains `placementsInSkippedDeliveries` and `placementsInSkippedRecipients`, so that every planned
++placement is accounted for exactly once:
++- `plannedPlacements = attemptedCalls + sum(skippedPoints) + placementsInSkippedRecipients + placementsInSkippedDeliveries`;
++- `attemptedCalls = succeededCalls + failedCalls`.
++
++The R3 tests assert both identities.
++
++## 4. F1–F3 preserved
++
++| R2 correction | Status in R3 |
++|---|---|
++| F1 owner-aware rule | unchanged logic for valid inputs. The 7 `OwnerAwareEmissionTest` tests pass, and mutant E2 (owner-blind rule) is still caught |
++| F2 allocation order | unchanged. The 3 `AllocationOrderEmissionTest` tests pass; E1 is caught |
++| F3 style health | unchanged. The 5 `StyleHealthTest` tests pass; E4 and E5 are caught |
++
++The R2 mutant E3 needed a new pattern, because the context code changed; its intent is the same, a guessed owner for
++a missing context.
++
++## 5. Reproducible verification (new `docs/m7/verification/`)
++
++- **Build:** a Gradle build compiles the SPI, the scratch reference and the tests against the real accepted engine
++  (`includeBuild('../../..')`), with `-Xlint:all -Werror`.
++- **Runners:** `run-tests.sh` and `summarize.py` give one line per test plus totals; `run_mutants.py` and `mutants.py`
++  run the 13 mutants. There is a README with exact commands and dependency versions.
++- **R2 reproduced first:** the R2 results were reproduced on the unchanged R2 code before any R3 edit: 15/15 tests and
++  6 of 6 mutants (`logs/r2-state-*`).
++- **Moved files:** the scratch reference moved from `docs/m7/validation/r2-reference/` to
++  `docs/m7/reference/workshop/vfx/paper/core/`, and is now a real build input. `validation/r2-mutants.py` became
++  `verification/mutants.py`.
++- **Historical files:** the historical R2 logs in `validation/r2-tests.txt` keep their old paths.
++
++## 6. Counts
++
++| | R2 (reported) | R2 (reproduced in R3) | R3 |
++|---|---|---|---|
++| Proposed tests | 15 | 15/15 | **25/25** (`RecipientRuleRobustnessTest` 5, `RequestContextConsistencyTest` 5, plus the 15) |
++| Targeted mutants | 6 caught of 6 | 6 caught of 6 | **13 caught of 13** (E1-E8, E10-E14; E9 omitted as equivalent by construction) |
++| `SkipReason` constants | 9 | — | 12 |
++| SPI files | 15 | — | 15 |
++| M1-M6 regression on this branch | — | — | 415/415; the seven datasets PASS (newly executed, `logs/r3-m1-m6-regression.log`) |
++
++## 7. Not done (separate production gates)
++
++- **No Paper compile:** nothing was compiled against `paper-api` 26.3. `repo.papermc.io` is blocked in this
++  environment, and no exact build is pinned.
++- **No server:** there was no Paper server run, no in-game smoke test and no client observation.
++- **No GitHub:** nothing was pushed to GitHub (HTTP 403 from this environment), so there is no CI run for R3.
+diff --git a/docs/m7/M7-TEST-AND-SMOKE-PLAN.md b/docs/m7/M7-TEST-AND-SMOKE-PLAN.md
+index 34119b5..b361453 100644
+--- a/docs/m7/M7-TEST-AND-SMOKE-PLAN.md
++++ b/docs/m7/M7-TEST-AND-SMOKE-PLAN.md
+@@ -1,6 +1,6 @@
+-# M7 test plan, disposable-server smoke procedure and acceptance matrix (R2)
++# M7 test plan, disposable-server smoke procedure and acceptance matrix (R3)
+ 
+-Status: **PROPOSED, revision 2.** Nothing here has been run against Paper. Every smoke row is NOT TESTED until it has
++Status: **PROPOSED, revision 3.** Nothing here has been run against Paper. Every smoke row is NOT TESTED until it has
+ real-server evidence. CI compilation alone is never a real-server PASS.
+ 
+ ## 1. Preservation gate (every build)
+@@ -22,10 +22,13 @@ Fakes:
+ Plans come from the real accepted `DeliveryPlanner`, using the demo recipe and synthetic recipes. The exact test count
+ is reported at implementation; none is guessed here.
+ 
+-**R2 evidence:** the proposed tests for the four R2 rows are in `docs/m7/tests/` (15 tests). They pass against a
+-scratch reference of the SPI and the real accepted `DeliveryPlanner`. Six targeted mutants of that reference, including
+-the three R1 defects, are each caught (`validation/r2-tests.txt`). Production must keep these tests, or equivalent ones,
+-in `paper-adapter/src/test`.
++**R3 evidence:**
++- **Proposed tests:** the proposed tests for the R2 and R3 rows are in `docs/m7/tests/`: 25 tests in 5 classes.
++- **How they run:** `docs/m7/verification/run-tests.sh` runs them against the scratch reference in
++  `docs/m7/reference/` and the real accepted `DeliveryPlanner`.
++- **Mutation:** `docs/m7/verification/run_mutants.py` runs 13 targeted mutants.
++- **Logs and commands:** in `M7-R3-VERIFICATION.md` and `docs/m7/verification/logs/`.
++- **Production:** must keep these tests, or equivalent ones, in `paper-adapter/src/test`.
+ 
+ | Area | Required cases |
+ |---|---|
+@@ -38,6 +41,8 @@ in `paper-adapter/src/test`.
+ | **Viewer selection (R2)** | the owner is admitted before capping and sorting (owner id larger than the capped others is kept); an ineligible owner is not admitted; the owner listed among the others counts once; cap 1 keeps only the owner; the output is strictly increasing |
+ | **Allocation order (R2 F2)** | with the limits forced to bind (unaligned policy), the emitted ring is the rank-0 ring for both input orders, and it alternates with the tick rotation; with the aligned policy (contract 9.1), no `EMISSION_LIMIT` skip occurs and attempted calls equal planned placements, over fixed and 300 random multi-ring scenarios |
+ | **Style health (R2 F3)** | the third consecutive failure disables a style at once, and its remaining points in the tick are `STYLE_DISABLED`; a success of the same style resets the streak (fail, fail, success, fail, fail: not disabled); successes of another style do not reset it; the streak spans ticks; the next plan excludes the style (M6 reports it unsupported; no send of it); all styles disabled gives `SKIPPED_UNSUPPORTED` before evaluation; a new session re-enables |
++| **Coordinate robustness (R3)** | the rule denies a viewer whose x, y or z is NaN, +infinity or -infinity (`VIEWER_POSITION_INVALID`, owner and non-owner) and a request whose anchor x, y or z is NaN or infinite (`INVALID_REQUEST_CONTEXT`). In range, exactly at the radius: allowed. Just beyond, or finite-but-overflowing coordinates: `VIEWER_OUT_OF_RANGE`. The R2 order holds (offline, world and permission are reported before coordinate problems). A radius that is NaN, infinite or negative is rejected at construction; a radius of 0 is exact-anchor only |
++| **Context consistency (R3)** | two requests with different owners and swapped contexts: both deliveries are rejected (`MISMATCHED_REQUEST_CONTEXT`) and nothing is sent. One mismatched context rejects only that delivery. An invalid context (non-finite anchor, negative owner or world id) is rejected whole (`INVALID_REQUEST_CONTEXT`). Valid contexts are unaffected. A NaN viewer at the emitter is refused for each delivery while other viewers are served. The section 7.2 accounting identities hold in every case |
+ | Point validation | NaN and infinite coordinates and outside-world points are skipped and counted; finite in-world points are sent (the world-limit predicate is injected as a pure function) |
+ | Limits | `maxCallsPerTick` and `maxCallsPerViewerPerTick` are never exceeded, including at exactly the limit and one over; excess points are counted as `EMISSION_LIMIT` |
+ | Accounting | `plannedPlacements = plan.placements()`; `attempted = succeeded + failed`; `attempted + skippedPoints = planned placements of gated-in recipients`; M6 plan objects are unchanged after emission |
+@@ -94,7 +99,7 @@ or video where the result is visual.
+ | G-A Preservation | 415/415, 7 datasets byte-identical, diff limited to M7 paths | NOT RUN (implementation) |
+ | G-B Exact Paper pin | `paperApiVersion` exact, with the `maven-metadata.xml` excerpt and the paper-api jar SHA-256 | NOT DONE (repository blocked in R1) |
+ | G-C Plugin jar | `verifyPluginJar` green; `plugin.yml` inspected; jar, source ZIP and SHA-256 | NOT RUN |
+-| G-D Offline tests | exact count, all passing (section 2) | NOT RUN in production; R2 proposed tests 15/15 against the scratch reference |
++| G-D Offline tests | exact count, all passing (section 2) | NOT RUN in production. R3 proposed tests: 25/25 against the scratch reference; 13 of 13 mutants caught (`M7-R3-VERIFICATION.md`) |
+ | G-E Real-server smoke | S1-S17 with server build, Java version, logs, screenshots or video | NOT TESTED |
+ | G-F Worst-case run | S14 measurements, separated planning and emission timings | NOT TESTED |
+ | G-G Declared limits and rollback | install/rollback guide; limits listed (section 5) | NOT WRITTEN |
+diff --git a/docs/m7/validation/r2-reference/DefaultPlanEmitter.java b/docs/m7/reference/workshop/vfx/paper/core/DefaultPlanEmitter.java
+similarity index 72%
+rename from docs/m7/validation/r2-reference/DefaultPlanEmitter.java
+rename to docs/m7/reference/workshop/vfx/paper/core/DefaultPlanEmitter.java
+index 2b007fd..958d1d8 100644
+--- a/docs/m7/validation/r2-reference/DefaultPlanEmitter.java
++++ b/docs/m7/reference/workshop/vfx/paper/core/DefaultPlanEmitter.java
+@@ -15,25 +15,28 @@ import workshop.vfx.delivery.Outcome;
+ import workshop.vfx.scene.FrameBatch;
+ import workshop.vfx.scene.StyleKey;
+ 
+-/** M7 R2 THROWAWAY REFERENCE (validation evidence only; not production, not a build input). */
++/** M7 R3 THROWAWAY REFERENCE (design verification only; compiled by docs/m7/verification, never production). */
+ public final class DefaultPlanEmitter implements PlanEmitter {
+     @Override
+     public EmissionReport emit(DeliveryPlan plan, Map<Long, RequestContext> contexts, StyleHealth health, RecipientGate gate,
+             PointValidator points, ParticleSink sink, EmissionLimits limits) {
+         Map<SkipReason, Long> sd = new EnumMap<>(SkipReason.class), sr = new EnumMap<>(SkipReason.class), sp = new EnumMap<>(SkipReason.class);
+         Set<StyleKey> disabledNow = new LinkedHashSet<>();
+-        long attempted = 0, succeeded = 0, failed = 0, calls = 0;
++        long attempted = 0, succeeded = 0, failed = 0, calls = 0, inSkippedDeliveries = 0, inSkippedRecipients = 0;
+         Map<Long, Integer> perViewer = new HashMap<>();
+         List<EffectDelivery> ordered = new ArrayList<>(plan.deliveries());
+         ordered.sort(Comparator.comparingInt(EffectDelivery::allocationRank));
+         for (EffectDelivery d : ordered) {
+             if (d.outcome() != Outcome.DELIVERED && d.outcome() != Outcome.THINNED) continue;
+             RequestContext c = contexts.get(d.requestId());
+-            if (c == null) { sd.merge(SkipReason.MISSING_REQUEST_CONTEXT, 1L, Long::sum); continue; }
++            SkipReason bad = c == null ? SkipReason.MISSING_REQUEST_CONTEXT
++                    : c.requestId() != d.requestId() ? SkipReason.MISMATCHED_REQUEST_CONTEXT
++                    : !validContext(c) ? SkipReason.INVALID_REQUEST_CONTEXT : null;
++            if (bad != null) { sd.merge(bad, 1L, Long::sum); inSkippedDeliveries += d.placements(); continue; }
+             for (int r = 0; r < d.recipientCount(); r++) {
+                 long viewer = d.recipient(r);
+                 Optional<SkipReason> g = gate.check(c, viewer);
+-                if (g.isPresent()) { sr.merge(g.get(), 1L, Long::sum); continue; }
++                if (g.isPresent()) { sr.merge(g.get(), 1L, Long::sum); inSkippedRecipients += d.recipientPoints(r); continue; }
+                 int remaining = d.recipientPoints(r);
+                 for (int pos = 0; pos < d.orderedBatchCount() && remaining > 0; pos++) {
+                     FrameBatch b = d.frame().batches().get(d.orderedBatch(pos));
+@@ -61,7 +64,18 @@ public final class DefaultPlanEmitter implements PlanEmitter {
+                 }
+             }
+         }
++        return report(plan, attempted, succeeded, failed, sd, sr, sp, inSkippedDeliveries, inSkippedRecipients, disabledNow);
++    }
++
++    static boolean validContext(RequestContext c) {
++        return c.ownerViewerId() >= 0 && c.worldId() >= 0
++                && OwnerAwareRecipientRule.finite(c.anchorX(), c.anchorY(), c.anchorZ());
++    }
++
++    private static EmissionReport report(DeliveryPlan plan, long attempted, long succeeded, long failed, Map<SkipReason, Long> sd,
++            Map<SkipReason, Long> sr, Map<SkipReason, Long> sp, long inSkippedDeliveries, long inSkippedRecipients,
++            Set<StyleKey> disabledNow) {
+         return new EmissionReport(plan.tickOrdinal(), plan.placements(), attempted, succeeded, failed, sd, sr, sp,
+-                Set.copyOf(disabledNow), 0, 0);
++                inSkippedDeliveries, inSkippedRecipients, Set.copyOf(disabledNow), 0, 0);
+     }
+ }
+diff --git a/docs/m7/reference/workshop/vfx/paper/core/OwnerAwareRecipientRule.java b/docs/m7/reference/workshop/vfx/paper/core/OwnerAwareRecipientRule.java
+new file mode 100644
+index 0000000..a048282
+--- /dev/null
++++ b/docs/m7/reference/workshop/vfx/paper/core/OwnerAwareRecipientRule.java
+@@ -0,0 +1,36 @@
++package workshop.vfx.paper.core;
++
++import java.util.Optional;
++
++/**
++ * M7 R3 THROWAWAY REFERENCE (design verification only; not production). Owner-aware recipient rule, failing closed on
++ * invalid coordinates (contract section 7, step 1).
++ */
++public final class OwnerAwareRecipientRule implements RecipientRule {
++    private final double radiusSquared;
++
++    public OwnerAwareRecipientRule(double radius) {
++        if (!Double.isFinite(radius) || radius < 0) {
++            throw new IllegalArgumentException("view radius must be finite and >= 0: " + radius);
++        }
++        this.radiusSquared = radius * radius;
++    }
++
++    @Override
++    public Optional<SkipReason> decide(RequestContext c, long viewerId, ViewerFacts f) {
++        if (f == null || !f.online() || !f.valid()) return Optional.of(SkipReason.VIEWER_OFFLINE);
++        if (f.worldId() != c.worldId()) return Optional.of(SkipReason.VIEWER_WORLD_CHANGED);
++        boolean allowed = viewerId == c.ownerViewerId() ? f.hasUsePermission() : f.hasViewPermission();
++        if (!allowed) return Optional.of(SkipReason.VIEWER_PERMISSION_REVOKED);
++        if (!finite(c.anchorX(), c.anchorY(), c.anchorZ())) return Optional.of(SkipReason.INVALID_REQUEST_CONTEXT);
++        if (!finite(f.x(), f.y(), f.z())) return Optional.of(SkipReason.VIEWER_POSITION_INVALID);
++        double dx = f.x() - c.anchorX(), dy = f.y() - c.anchorY(), dz = f.z() - c.anchorZ();
++        double d2 = dx * dx + dy * dy + dz * dz;
++        if (!(d2 <= radiusSquared)) return Optional.of(SkipReason.VIEWER_OUT_OF_RANGE); // NaN denies
++        return Optional.empty();
++    }
++
++    static boolean finite(double x, double y, double z) {
++        return Double.isFinite(x) && Double.isFinite(y) && Double.isFinite(z);
++    }
++}
+diff --git a/docs/m7/validation/r2-reference/OwnerFirstViewerSelection.java b/docs/m7/reference/workshop/vfx/paper/core/OwnerFirstViewerSelection.java
+similarity index 82%
+rename from docs/m7/validation/r2-reference/OwnerFirstViewerSelection.java
+rename to docs/m7/reference/workshop/vfx/paper/core/OwnerFirstViewerSelection.java
+index 444b48e..1f8a2a6 100644
+--- a/docs/m7/validation/r2-reference/OwnerFirstViewerSelection.java
++++ b/docs/m7/reference/workshop/vfx/paper/core/OwnerFirstViewerSelection.java
+@@ -2,7 +2,7 @@ package workshop.vfx.paper.core;
+ 
+ import java.util.Arrays;
+ 
+-/** M7 R2 THROWAWAY REFERENCE (validation evidence only; not production, not a build input). */
++/** M7 R3 THROWAWAY REFERENCE (design verification only; compiled by docs/m7/verification, never production). */
+ public final class OwnerFirstViewerSelection implements ViewerSelection {
+     @Override public long[] select(long owner, boolean ownerEligible, long[] others, int cap) {
+         long[] out = new long[cap];
+diff --git a/docs/m7/validation/r2-reference/SessionStyleHealth.java b/docs/m7/reference/workshop/vfx/paper/core/SessionStyleHealth.java
+similarity index 91%
+rename from docs/m7/validation/r2-reference/SessionStyleHealth.java
+rename to docs/m7/reference/workshop/vfx/paper/core/SessionStyleHealth.java
+index 55050a9..bf2b215 100644
+--- a/docs/m7/validation/r2-reference/SessionStyleHealth.java
++++ b/docs/m7/reference/workshop/vfx/paper/core/SessionStyleHealth.java
+@@ -6,7 +6,7 @@ import java.util.Map;
+ import java.util.Set;
+ import workshop.vfx.scene.StyleKey;
+ 
+-/** M7 R2 THROWAWAY REFERENCE (validation evidence only; not production, not a build input). */
++/** M7 R3 THROWAWAY REFERENCE (design verification only; compiled by docs/m7/verification, never production). */
+ public final class SessionStyleHealth implements StyleHealth {
+     private final Set<StyleKey> catalogue;
+     private final Map<StyleKey, Integer> streaks = new HashMap<>();
+diff --git a/docs/m7/spi/workshop/vfx/paper/core/EmissionLimits.java b/docs/m7/spi/workshop/vfx/paper/core/EmissionLimits.java
+index 3460518..922ebb0 100644
+--- a/docs/m7/spi/workshop/vfx/paper/core/EmissionLimits.java
++++ b/docs/m7/spi/workshop/vfx/paper/core/EmissionLimits.java
+@@ -1,7 +1,7 @@
+ package workshop.vfx.paper.core;
+ 
+ /**
+- * M7 R2 SPI PROPOSAL (not production). Defensive per-tick ceilings on actual adapter calls, checked before each call.
++ * M7 R3 SPI PROPOSAL (not production). Defensive per-tick ceilings on actual adapter calls, checked before each call.
+  * The M6 policy is aligned so that they never bind when nothing else is skipped (contract section 9.1); they remain a
+  * backstop. When they do bind, the points not sent are those latest in allocation order.
+  */
+diff --git a/docs/m7/spi/workshop/vfx/paper/core/EmissionReport.java b/docs/m7/spi/workshop/vfx/paper/core/EmissionReport.java
+index b3d051d..cafc574 100644
+--- a/docs/m7/spi/workshop/vfx/paper/core/EmissionReport.java
++++ b/docs/m7/spi/workshop/vfx/paper/core/EmissionReport.java
+@@ -5,11 +5,14 @@ import java.util.Set;
+ import workshop.vfx.scene.StyleKey;
+ 
+ /**
+- * M7 R2 SPI PROPOSAL (not production). Adapter accounting for one tick, kept separate from the M6 plan's counters:
+- * planned placements come from the plan; attempts, successes, failures and skips are what the adapter did.
+- * {@code skippedDeliveries} counts whole deliveries skipped (missing context); {@code stylesDisabledThisTick} lists
+- * styles whose third consecutive failure happened in this tick.
++ * M7 R3 SPI PROPOSAL (not production). Adapter accounting for one tick, kept separate from the M6 plan's counters.
++ * Every planned placement is accounted for exactly once (contract section 7.2):
++ * {@code plannedPlacements = attemptedCalls + sum(skippedPoints) + placementsInSkippedRecipients
++ * + placementsInSkippedDeliveries}, and {@code attemptedCalls = succeededCalls + failedCalls}.
++ * {@code skippedDeliveries} counts whole deliveries skipped for a missing, mismatched or invalid context;
++ * {@code stylesDisabledThisTick} lists styles whose third consecutive failure happened in this tick.
+  */
+ public record EmissionReport(long tickOrdinal, long plannedPlacements, long attemptedCalls, long succeededCalls,
+         long failedCalls, Map<SkipReason, Long> skippedDeliveries, Map<SkipReason, Long> skippedRecipients,
+-        Map<SkipReason, Long> skippedPoints, Set<StyleKey> stylesDisabledThisTick, long planningNanos, long emissionNanos) { }
++        Map<SkipReason, Long> skippedPoints, long placementsInSkippedDeliveries, long placementsInSkippedRecipients,
++        Set<StyleKey> stylesDisabledThisTick, long planningNanos, long emissionNanos) { }
+diff --git a/docs/m7/spi/workshop/vfx/paper/core/PlanEmitter.java b/docs/m7/spi/workshop/vfx/paper/core/PlanEmitter.java
+index af7d0b0..108ae32 100644
+--- a/docs/m7/spi/workshop/vfx/paper/core/PlanEmitter.java
++++ b/docs/m7/spi/workshop/vfx/paper/core/PlanEmitter.java
+@@ -4,12 +4,13 @@ import java.util.Map;
+ import workshop.vfx.delivery.DeliveryPlan;
+ 
+ /**
+- * M7 R2 SPI PROPOSAL (not production). Walks a {@link DeliveryPlan} in M6 allocation order: deliveries sorted by
+- * {@code allocationRank()} ascending (never by list or input order), DELIVERED and THINNED only; for each recipient r
+- * in recipient order, its first {@code recipientPoints(r)} selections over the ordered batches; no unsupported style,
+- * no unselected point. {@code contexts} maps each request id to its {@link RequestContext}; a delivery without one is
+- * skipped whole. Sends of a disabled style are skipped ({@link SkipReason#STYLE_DISABLED}) and failures are reported to
+- * {@code health}.
++ * M7 R3 SPI PROPOSAL (not production). Walks a {@link DeliveryPlan} in M6 allocation order: deliveries sorted by
++ * {@code allocationRank()} ascending (never by list or input order), DELIVERED and THINNED only. Before any recipient
++ * of a delivery is considered, its context is validated: missing, mismatched ({@code context.requestId() !=
++ * delivery.requestId()}) or invalid (non-finite anchor, negative owner or world id) skips the whole delivery with that
++ * reason. Then, for each recipient r in recipient order, its first {@code recipientPoints(r)} selections over the
++ * ordered batches; no unsupported style, no unselected point. Sends of a disabled style are skipped
++ * ({@link SkipReason#STYLE_DISABLED}) and failures are reported to {@code health}.
+  */
+ public interface PlanEmitter {
+     EmissionReport emit(DeliveryPlan plan, Map<Long, RequestContext> contexts, StyleHealth health, RecipientGate gate,
+diff --git a/docs/m7/spi/workshop/vfx/paper/core/PointValidator.java b/docs/m7/spi/workshop/vfx/paper/core/PointValidator.java
+index 2bc6b20..14e555a 100644
+--- a/docs/m7/spi/workshop/vfx/paper/core/PointValidator.java
++++ b/docs/m7/spi/workshop/vfx/paper/core/PointValidator.java
+@@ -3,7 +3,7 @@ package workshop.vfx.paper.core;
+ import java.util.Optional;
+ 
+ /**
+- * M7 R2 SPI PROPOSAL (not production). Pre-send point check (contract section 7, step 3): finite coordinates, y within
++ * M7 R3 SPI PROPOSAL (not production). Pre-send point check (contract section 7, step 3): finite coordinates, y within
+  * the world's height range, inside the world border. The Paper layer supplies world limits; tests inject a pure one.
+  */
+ @FunctionalInterface
+diff --git a/docs/m7/spi/workshop/vfx/paper/core/RecipientGate.java b/docs/m7/spi/workshop/vfx/paper/core/RecipientGate.java
+index 0aefcc0..d539276 100644
+--- a/docs/m7/spi/workshop/vfx/paper/core/RecipientGate.java
++++ b/docs/m7/spi/workshop/vfx/paper/core/RecipientGate.java
+@@ -3,7 +3,7 @@ package workshop.vfx.paper.core;
+ import java.util.Optional;
+ 
+ /**
+- * M7 R2 SPI PROPOSAL (not production). The Paper layer re-checks a planned recipient immediately before sending,
++ * M7 R3 SPI PROPOSAL (not production). The Paper layer re-checks a planned recipient immediately before sending,
+  * on the main thread, against the request it belongs to. The rule (contract section 7) is owner-aware: the owner
+  * ({@code viewerId == context.ownerViewerId()}) needs {@code bedwenton.vfxdemo.use}; any other viewer needs
+  * {@code bedwenton.vfxdemo.view}. Both must be online, valid, in {@code context.worldId()} and within the view radius
+diff --git a/docs/m7/spi/workshop/vfx/paper/core/RecipientRule.java b/docs/m7/spi/workshop/vfx/paper/core/RecipientRule.java
+index 5198a58..4e95bf2 100644
+--- a/docs/m7/spi/workshop/vfx/paper/core/RecipientRule.java
++++ b/docs/m7/spi/workshop/vfx/paper/core/RecipientRule.java
+@@ -3,11 +3,18 @@ package workshop.vfx.paper.core;
+ import java.util.Optional;
+ 
+ /**
+- * M7 R2 SPI PROPOSAL (not production). The pure, owner-aware authorization rule behind {@link RecipientGate}
+- * (contract section 7). Production: {@code OwnerAwareRecipientRule(viewRadius)}. Checks, in order: online and valid
+- * (else {@code VIEWER_OFFLINE}); same world as the request (else {@code VIEWER_WORLD_CHANGED}); permission: the owner
+- * needs the use permission, any other viewer the view permission (else {@code VIEWER_PERMISSION_REVOKED}); within the
+- * view radius of the anchor (else {@code VIEWER_OUT_OF_RANGE}).
++ * M7 R3 SPI PROPOSAL (not production). The pure, owner-aware authorization rule behind {@link RecipientGate}
++ * (contract section 7). Production: {@code OwnerAwareRecipientRule(viewRadius)}, whose constructor rejects a radius
++ * that is not finite or is negative. Checks, in order; the first failure is the result, and every failure denies:
++ * <ol>
++ *   <li>facts present, online and valid, else {@code VIEWER_OFFLINE};</li>
++ *   <li>same world as the request, else {@code VIEWER_WORLD_CHANGED};</li>
++ *   <li>permission: the owner needs the use permission, any other viewer the view permission, else
++ *       {@code VIEWER_PERMISSION_REVOKED};</li>
++ *   <li>range, failing closed: a non-finite anchor coordinate gives {@code INVALID_REQUEST_CONTEXT}; a non-finite viewer
++ *       coordinate gives {@code VIEWER_POSITION_INVALID}; otherwise the squared distance must satisfy
++ *       {@code d2 <= radius * radius} (written so that NaN denies), else {@code VIEWER_OUT_OF_RANGE}.</li>
++ * </ol>
+  */
+ @FunctionalInterface
+ public interface RecipientRule {
+diff --git a/docs/m7/spi/workshop/vfx/paper/core/RequestContext.java b/docs/m7/spi/workshop/vfx/paper/core/RequestContext.java
+index 0e30d20..efb6a63 100644
+--- a/docs/m7/spi/workshop/vfx/paper/core/RequestContext.java
++++ b/docs/m7/spi/workshop/vfx/paper/core/RequestContext.java
+@@ -1,9 +1,12 @@
+ package workshop.vfx.paper.core;
+ 
+ /**
+- * M7 R2 SPI PROPOSAL (not production). Everything the emitter and gate need to know about one planned request,
++ * M7 R3 SPI PROPOSAL (not production). Everything the emitter and gate need to know about one planned request,
+  * captured on the main thread at planning time and keyed by {@code requestId} (= the M6 {@code DeliveryRequest.id()}).
+- * {@code ownerViewerId} is the session viewer id of the player who started the effect; a request without a context
+- * is never emitted ({@link SkipReason#MISSING_REQUEST_CONTEXT}).
++ * {@code ownerViewerId} is the session viewer id of the player who started the effect. The record is a plain carrier;
++ * consumers validate it (contract section 7): a delivery is never emitted when its context is missing
++ * ({@link SkipReason#MISSING_REQUEST_CONTEXT}), carries another request id ({@link SkipReason#MISMATCHED_REQUEST_CONTEXT}),
++ * or has a non-finite anchor or a negative owner or world id ({@link SkipReason#INVALID_REQUEST_CONTEXT}).
++ * Nothing is substituted, reconstructed or inferred.
+  */
+ public record RequestContext(long requestId, long ownerViewerId, int worldId, double anchorX, double anchorY, double anchorZ) { }
+diff --git a/docs/m7/spi/workshop/vfx/paper/core/SkipReason.java b/docs/m7/spi/workshop/vfx/paper/core/SkipReason.java
+index 4497936..a698391 100644
+--- a/docs/m7/spi/workshop/vfx/paper/core/SkipReason.java
++++ b/docs/m7/spi/workshop/vfx/paper/core/SkipReason.java
+@@ -1,11 +1,21 @@
+ package workshop.vfx.paper.core;
+ 
+-/** M7 R2 SPI PROPOSAL (not production). Why a planned delivery, recipient or point was not sent. */
++/** M7 R3 SPI PROPOSAL (not production). Why a planned delivery, recipient or point was not sent. */
+ public enum SkipReason {
+     /** Delivery level: no {@link RequestContext} for the delivery's request id. */
+     MISSING_REQUEST_CONTEXT,
++    /** Delivery level: the context found under the delivery's id carries a different {@code requestId} (R3). */
++    MISMATCHED_REQUEST_CONTEXT,
++    /**
++     * Delivery level (emitter) or recipient level (rule used alone): the context has a non-finite anchor coordinate or a
++     * negative owner or world id (R3).
++     */
++    INVALID_REQUEST_CONTEXT,
+     /** Recipient level (gate). */
+-    VIEWER_OFFLINE, VIEWER_WORLD_CHANGED, VIEWER_PERMISSION_REVOKED, VIEWER_OUT_OF_RANGE,
++    VIEWER_OFFLINE, VIEWER_WORLD_CHANGED, VIEWER_PERMISSION_REVOKED,
++    /** Recipient level: a viewer position coordinate is NaN or infinite (R3; fail closed). */
++    VIEWER_POSITION_INVALID,
++    VIEWER_OUT_OF_RANGE,
+     /** Point level. */
+     POINT_NOT_FINITE, POINT_OUTSIDE_WORLD, STYLE_DISABLED, EMISSION_LIMIT
+ }
+diff --git a/docs/m7/spi/workshop/vfx/paper/core/StyleHealth.java b/docs/m7/spi/workshop/vfx/paper/core/StyleHealth.java
+index f21ff98..d33e6bd 100644
+--- a/docs/m7/spi/workshop/vfx/paper/core/StyleHealth.java
++++ b/docs/m7/spi/workshop/vfx/paper/core/StyleHealth.java
+@@ -4,7 +4,7 @@ import java.util.Set;
+ import workshop.vfx.scene.StyleKey;
+ 
+ /**
+- * M7 R2 SPI PROPOSAL (not production). Session-wide particle-style health (contract section 7.1). A style's
++ * M7 R3 SPI PROPOSAL (not production). Session-wide particle-style health (contract section 7.1). A style's
+  * consecutive-failure streak counts {@link RuntimeException}s from {@link ParticleSink#send} for that style across
+  * recipients and ticks; any successful send of that style resets it to 0. The third consecutive failure disables the
+  * style for the rest of the plugin session (until disable/enable); disabling is permanent within the session.
+diff --git a/docs/m7/spi/workshop/vfx/paper/core/ViewerFacts.java b/docs/m7/spi/workshop/vfx/paper/core/ViewerFacts.java
+index 5d8bdc9..a5e0039 100644
+--- a/docs/m7/spi/workshop/vfx/paper/core/ViewerFacts.java
++++ b/docs/m7/spi/workshop/vfx/paper/core/ViewerFacts.java
+@@ -1,7 +1,7 @@
+ package workshop.vfx.paper.core;
+ 
+ /**
+- * M7 R2 SPI PROPOSAL (not production). What the Paper gate observed about one viewer immediately before sending:
++ * M7 R3 SPI PROPOSAL (not production). What the Paper gate observed about one viewer immediately before sending:
+  * online and valid state, current world id and position, and the two demo permissions. Gathered on the main thread.
+  */
+ public record ViewerFacts(boolean online, boolean valid, int worldId, double x, double y, double z,
+diff --git a/docs/m7/spi/workshop/vfx/paper/core/ViewerSelection.java b/docs/m7/spi/workshop/vfx/paper/core/ViewerSelection.java
+index a95a4f7..0b1eccf 100644
+--- a/docs/m7/spi/workshop/vfx/paper/core/ViewerSelection.java
++++ b/docs/m7/spi/workshop/vfx/paper/core/ViewerSelection.java
+@@ -1,7 +1,7 @@
+ package workshop.vfx.paper.core;
+ 
+ /**
+- * M7 R2 SPI PROPOSAL (not production). Snapshot viewer selection for one ring (contract section 6, step 1). The owner
++ * M7 R3 SPI PROPOSAL (not production). Snapshot viewer selection for one ring (contract section 6, step 1). The owner
+  * is admitted first when eligible; the remaining {@code cap - 1} (or {@code cap}) places go to the smallest other
+  * eligible viewer ids; only then is the chosen set sorted strictly increasing for {@code DeliveryRequest.of}. Sorting
+  * never decides whether the owner is included. Production: {@code OwnerFirstViewerSelection}.
+diff --git a/docs/m7/tests/workshop/vfx/paper/core/RecipientRuleRobustnessTest.java b/docs/m7/tests/workshop/vfx/paper/core/RecipientRuleRobustnessTest.java
+new file mode 100644
+index 0000000..76e7c02
+--- /dev/null
++++ b/docs/m7/tests/workshop/vfx/paper/core/RecipientRuleRobustnessTest.java
+@@ -0,0 +1,94 @@
++package workshop.vfx.paper.core;
++
++import static org.junit.jupiter.api.Assertions.assertEquals;
++import static org.junit.jupiter.api.Assertions.assertThrows;
++
++import java.util.Optional;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++
++/**
++ * R3 F1: the owner-aware rule fails closed on invalid coordinates (contract section 7, step 1). Pure unit tests of the
++ * scratch reference OwnerAwareRecipientRule; no planner involved.
++ */
++class RecipientRuleRobustnessTest {
++    private static final long OWNER = 0, OTHER = 1;
++    private static final double R = 32.0;
++    private static final RecipientRule RULE = new OwnerAwareRecipientRule(R);
++    private static final double[] BAD = {Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY};
++
++    private static RequestContext ctx(double ax, double ay, double az) {
++        return new RequestContext(10, OWNER, 0, ax, ay, az);
++    }
++
++    private static ViewerFacts at(double x, double y, double z) {
++        return new ViewerFacts(true, true, 0, x, y, z, true, true);
++    }
++
++    private static final RequestContext GOOD = ctx(0.5, 64.0, 0.5);
++
++    @Test
++    @DisplayName("Viewer x, y or z NaN, +infinity or -infinity: denied as VIEWER_POSITION_INVALID (owner and non-owner)")
++    void invalidViewerPosition() {
++        for (double bad : BAD) {
++            for (long viewer : new long[] {OWNER, OTHER}) {
++                assertEquals(Optional.of(SkipReason.VIEWER_POSITION_INVALID), RULE.decide(GOOD, viewer, at(bad, 64, 0.5)), "x=" + bad);
++                assertEquals(Optional.of(SkipReason.VIEWER_POSITION_INVALID), RULE.decide(GOOD, viewer, at(0.5, bad, 0.5)), "y=" + bad);
++                assertEquals(Optional.of(SkipReason.VIEWER_POSITION_INVALID), RULE.decide(GOOD, viewer, at(0.5, 64, bad)), "z=" + bad);
++            }
++        }
++    }
++
++    @Test
++    @DisplayName("Request anchor x, y or z NaN, +infinity or -infinity: denied as INVALID_REQUEST_CONTEXT")
++    void invalidAnchor() {
++        ViewerFacts near = at(0.5, 64, 0.5);
++        for (double bad : BAD) {
++            assertEquals(Optional.of(SkipReason.INVALID_REQUEST_CONTEXT), RULE.decide(ctx(bad, 64, 0.5), OWNER, near), "ax=" + bad);
++            assertEquals(Optional.of(SkipReason.INVALID_REQUEST_CONTEXT), RULE.decide(ctx(0.5, bad, 0.5), OTHER, near), "ay=" + bad);
++            assertEquals(Optional.of(SkipReason.INVALID_REQUEST_CONTEXT), RULE.decide(ctx(0.5, 64, bad), OWNER, near), "az=" + bad);
++        }
++        // both invalid: the context is reported (anchor checked before viewer position)
++        assertEquals(Optional.of(SkipReason.INVALID_REQUEST_CONTEXT), RULE.decide(ctx(Double.NaN, 64, 0.5), OWNER, at(Double.NaN, 64, 0.5)));
++    }
++
++    @Test
++    @DisplayName("Normal controls: in range allowed, exactly at the radius allowed, just beyond and huge finite coordinates denied")
++    void normalControls() {
++        assertEquals(Optional.empty(), RULE.decide(GOOD, OWNER, at(0.5, 64, 0.5)));
++        assertEquals(Optional.empty(), RULE.decide(GOOD, OTHER, at(0.5 + 31.9, 64, 0.5)));
++        assertEquals(Optional.empty(), RULE.decide(GOOD, OTHER, at(0.5 + 32.0, 64, 0.5)), "d = radius is in range");
++        assertEquals(Optional.of(SkipReason.VIEWER_OUT_OF_RANGE), RULE.decide(GOOD, OTHER, at(0.5 + 32.001, 64, 0.5)));
++        assertEquals(Optional.of(SkipReason.VIEWER_OUT_OF_RANGE), RULE.decide(GOOD, OTHER, at(0.5, 64 - 40, 0.5)));
++        // finite but huge: the squared distance overflows to +infinity, which is still out of range
++        assertEquals(Optional.of(SkipReason.VIEWER_OUT_OF_RANGE), RULE.decide(GOOD, OWNER, at(1e200, 64, 0.5)));
++        assertEquals(Optional.of(SkipReason.VIEWER_OUT_OF_RANGE), RULE.decide(GOOD, OWNER, at(-Double.MAX_VALUE, 64, 0.5)));
++    }
++
++    @Test
++    @DisplayName("Authorization order for normal inputs is unchanged: offline, world, permission, then range checks")
++    void order() {
++        ViewerFacts offlineNaN = new ViewerFacts(false, true, 0, Double.NaN, 64, 0.5, true, true);
++        assertEquals(Optional.of(SkipReason.VIEWER_OFFLINE), RULE.decide(GOOD, OWNER, offlineNaN));
++        assertEquals(Optional.of(SkipReason.VIEWER_OFFLINE), RULE.decide(GOOD, OWNER, null), "missing facts deny");
++        ViewerFacts invalidEntity = new ViewerFacts(true, false, 0, 0.5, 64, 0.5, true, true);
++        assertEquals(Optional.of(SkipReason.VIEWER_OFFLINE), RULE.decide(GOOD, OWNER, invalidEntity));
++        ViewerFacts otherWorldNaN = new ViewerFacts(true, true, 1, Double.NaN, 64, 0.5, true, true);
++        assertEquals(Optional.of(SkipReason.VIEWER_WORLD_CHANGED), RULE.decide(GOOD, OWNER, otherWorldNaN));
++        ViewerFacts noViewNaN = new ViewerFacts(true, true, 0, Double.NaN, 64, 0.5, true, false);
++        assertEquals(Optional.of(SkipReason.VIEWER_PERMISSION_REVOKED), RULE.decide(GOOD, OTHER, noViewNaN));
++        ViewerFacts noUseFar = new ViewerFacts(true, true, 0, 500, 64, 0.5, false, true);
++        assertEquals(Optional.of(SkipReason.VIEWER_PERMISSION_REVOKED), RULE.decide(GOOD, OWNER, noUseFar), "permission before range");
++    }
++
++    @Test
++    @DisplayName("View radius: NaN, infinite or negative is rejected at construction; 0 is valid (exact anchor only)")
++    void radiusPolicy() {
++        for (double bad : new double[] {Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, -1e-9, -32}) {
++            assertThrows(IllegalArgumentException.class, () -> new OwnerAwareRecipientRule(bad), "radius " + bad);
++        }
++        RecipientRule zero = new OwnerAwareRecipientRule(0);
++        assertEquals(Optional.empty(), zero.decide(GOOD, OWNER, at(0.5, 64, 0.5)));
++        assertEquals(Optional.of(SkipReason.VIEWER_OUT_OF_RANGE), zero.decide(GOOD, OWNER, at(0.5, 64, 0.5001)));
++    }
++}
+diff --git a/docs/m7/tests/workshop/vfx/paper/core/RequestContextConsistencyTest.java b/docs/m7/tests/workshop/vfx/paper/core/RequestContextConsistencyTest.java
+new file mode 100644
+index 0000000..47cd360
+--- /dev/null
++++ b/docs/m7/tests/workshop/vfx/paper/core/RequestContextConsistencyTest.java
+@@ -0,0 +1,139 @@
++package workshop.vfx.paper.core;
++
++import static org.junit.jupiter.api.Assertions.assertEquals;
++import static org.junit.jupiter.api.Assertions.assertNull;
++import static workshop.vfx.paper.core.DemoFixture.ANY_POINT;
++import static workshop.vfx.paper.core.DemoFixture.CATALOGUE;
++import static workshop.vfx.paper.core.DemoFixture.context;
++import static workshop.vfx.paper.core.DemoFixture.ring;
++import static workshop.vfx.paper.core.DemoFixture.roomy;
++
++import java.util.HashMap;
++import java.util.List;
++import java.util.Map;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import workshop.vfx.delivery.DeliveryPlan;
++import workshop.vfx.delivery.DeliveryPlanner;
++import workshop.vfx.delivery.QualityTier;
++
++/**
++ * R3: request-context consistency and fail-closed coordinates at the emitter (contract section 7). Plans come from the
++ * real accepted DeliveryPlanner; the emitter, rule and style health are the scratch reference.
++ */
++class RequestContextConsistencyTest {
++    private static final long A = 0, B = 1;
++    private static final long RING_A = 10, RING_B = 11;
++    private static final EmissionLimits LIMITS = new EmissionLimits(4096, 1024);
++
++    /** Ring A (owner A, SIMPLE: 24 points) and ring B (owner B, HEAVY: 72 points); both visible to A and B. */
++    private static DeliveryPlan plan() {
++        return DeliveryPlanner.plan(0, List.of(ring(RING_A, QualityTier.SIMPLE, 0, 0.5, 0, A, B),
++                ring(RING_B, QualityTier.HEAVY, 0, 0.5, 0, A, B)), CATALOGUE, roomy());
++    }
++
++    private static Map<Long, RequestContext> valid() {
++        Map<Long, RequestContext> m = new HashMap<>();
++        m.put(RING_A, context(RING_A, A, 0, 0.5));
++        m.put(RING_B, context(RING_B, B, 0, 0.5));
++        return m;
++    }
++
++    private static DemoFixture.Viewers viewers() {
++        return new DemoFixture.Viewers().put(A, true, false).put(B, true, false);
++    }
++
++    private static EmissionReport emit(DeliveryPlan p, Map<Long, RequestContext> ctx, DemoFixture.Viewers v, DemoFixture.Sink sink) {
++        return new DefaultPlanEmitter().emit(p, ctx, new SessionStyleHealth(CATALOGUE), v.gate(), ANY_POINT, sink, LIMITS);
++    }
++
++    /** Every planned placement is accounted for exactly once (contract section 7.2). */
++    private static void assertAccounting(DeliveryPlan p, EmissionReport r) {
++        long skippedPoints = r.skippedPoints().values().stream().mapToLong(Long::longValue).sum();
++        assertEquals(p.placements(), r.plannedPlacements());
++        assertEquals(r.plannedPlacements(),
++                r.attemptedCalls() + skippedPoints + r.placementsInSkippedRecipients() + r.placementsInSkippedDeliveries());
++        assertEquals(r.attemptedCalls(), r.succeededCalls() + r.failedCalls());
++    }
++
++    @Test
++    @DisplayName("Control: valid contexts; each owner sees its own ring; non-owners without view are refused; accounting balances")
++    void validContextsUnaffected() {
++        DemoFixture.Sink sink = new DemoFixture.Sink();
++        DeliveryPlan p = plan();
++        EmissionReport r = emit(p, valid(), viewers(), sink);
++        assertEquals(24, sink.count(A));
++        assertEquals(72, sink.count(B));
++        assertEquals(2L, r.skippedRecipients().get(SkipReason.VIEWER_PERMISSION_REVOKED));
++        assertEquals(72 + 24, r.placementsInSkippedRecipients());
++        assertEquals(0, r.placementsInSkippedDeliveries());
++        assertAccounting(p, r);
++    }
++
++    @Test
++    @DisplayName("Swapped contexts (key ring A holds ring B's context with owner B, and vice versa): both deliveries rejected, nothing sent")
++    void swappedContexts() {
++        Map<Long, RequestContext> swapped = Map.of(RING_A, context(RING_B, B, 0, 0.5), RING_B, context(RING_A, A, 0, 0.5));
++        DemoFixture.Sink sink = new DemoFixture.Sink();
++        DeliveryPlan p = plan();
++        EmissionReport r = emit(p, swapped, viewers(), sink);
++        assertEquals(0, sink.sends.size(), "a swapped owner would otherwise authorize B for ring A");
++        assertEquals(2L, r.skippedDeliveries().get(SkipReason.MISMATCHED_REQUEST_CONTEXT));
++        assertEquals(0, r.attemptedCalls());
++        assertEquals(p.placements(), r.placementsInSkippedDeliveries());
++        assertNull(r.skippedRecipients().get(SkipReason.VIEWER_PERMISSION_REVOKED), "rejected before any recipient check");
++        assertAccounting(p, r);
++    }
++
++    @Test
++    @DisplayName("One mismatched context (ring B's slot names ring A, owner A): only ring B is rejected; ring A is unaffected")
++    void oneMismatch() {
++        Map<Long, RequestContext> ctx = valid();
++        ctx.put(RING_B, context(RING_A, A, 0, 0.5));
++        DemoFixture.Sink sink = new DemoFixture.Sink();
++        DeliveryPlan p = plan();
++        EmissionReport r = emit(p, ctx, viewers(), sink);
++        assertEquals(24, sink.count(A), "ring A to its owner");
++        assertEquals(0, sink.count(B), "B receives nothing: its ring was rejected, and it may not view ring A");
++        assertEquals(1L, r.skippedDeliveries().get(SkipReason.MISMATCHED_REQUEST_CONTEXT));
++        assertEquals(72 * 2, r.placementsInSkippedDeliveries());
++        assertAccounting(p, r);
++    }
++
++    @Test
++    @DisplayName("Invalid contexts (NaN or infinite anchor, negative owner or world id): the delivery is rejected whole")
++    void invalidContexts() {
++        RequestContext[] bad = {
++            new RequestContext(RING_B, B, 0, Double.NaN, 64.1, 0.5),
++            new RequestContext(RING_B, B, 0, 0.5, Double.POSITIVE_INFINITY, 0.5),
++            new RequestContext(RING_B, B, 0, 0.5, 64.1, Double.NEGATIVE_INFINITY),
++            new RequestContext(RING_B, -1, 0, 0.5, 64.1, 0.5),
++            new RequestContext(RING_B, B, -1, 0.5, 64.1, 0.5),
++        };
++        for (RequestContext c : bad) {
++            Map<Long, RequestContext> ctx = valid();
++            ctx.put(RING_B, c);
++            DemoFixture.Sink sink = new DemoFixture.Sink();
++            DeliveryPlan p = plan();
++            EmissionReport r = emit(p, ctx, viewers(), sink);
++            assertEquals(24, sink.count(A), c.toString());
++            assertEquals(0, sink.count(B), c.toString());
++            assertEquals(1L, r.skippedDeliveries().get(SkipReason.INVALID_REQUEST_CONTEXT), c.toString());
++            assertAccounting(p, r);
++        }
++    }
++
++    @Test
++    @DisplayName("A viewer with a NaN position is refused (VIEWER_POSITION_INVALID); the other viewers are unaffected")
++    void nanViewerAtEmitter() {
++        DemoFixture.Viewers v = viewers();
++        v.facts.put(B, new ViewerFacts(true, true, 0, Double.NaN, 64.0, 0.5, true, true));
++        DemoFixture.Sink sink = new DemoFixture.Sink();
++        DeliveryPlan p = plan();
++        EmissionReport r = emit(p, valid(), v, sink);
++        assertEquals(0, sink.count(B));
++        assertEquals(24, sink.count(A));
++        assertEquals(2L, r.skippedRecipients().get(SkipReason.VIEWER_POSITION_INVALID), "B in ring A and in ring B");
++        assertAccounting(p, r);
++    }
++}
+diff --git a/docs/m7/validation/r2-mutants.py b/docs/m7/validation/r2-mutants.py
+deleted file mode 100644
+index 30a9dcc..0000000
+--- a/docs/m7/validation/r2-mutants.py
++++ /dev/null
+@@ -1,8 +0,0 @@
+-M = [
+-("E1","DefaultPlanEmitter.java","        ordered.sort(Comparator.comparingInt(EffectDelivery::allocationRank));\n","","R1 F2 defect: emit in plan (input) order"),
+-("E2","OwnerAwareRecipientRule.java","boolean allowed = viewerId == c.ownerViewerId() ? f.hasUsePermission() : f.hasViewPermission();","boolean allowed = f.hasUsePermission() || f.hasViewPermission();","R1 F1 defect: owner-blind rule (use OR view)"),
+-("E3","DefaultPlanEmitter.java","if (c == null) { sd.merge(SkipReason.MISSING_REQUEST_CONTEXT, 1L, Long::sum); continue; }","if (c == null) { c = new RequestContext(d.requestId(), d.recipient(0), 0, 0.5, 64.1, 0.5); }","missing context replaced by a guessed owner"),
+-("E4","SessionStyleHealth.java","@Override public void recordSuccess(StyleKey style) { streaks.put(style, 0); }","@Override public void recordSuccess(StyleKey style) { streaks.clear(); }","any style's success resets every streak"),
+-("E5","DefaultPlanEmitter.java","        Set<StyleKey> disabledNow = new LinkedHashSet<>();\n","        Set<StyleKey> disabledNow = new LinkedHashSet<>();\n        for (StyleKey k : java.util.List.of(workshop.vfx.scene.StyleKey.of(\"bedwenton:demo_dust_red\"), workshop.vfx.scene.StyleKey.of(\"bedwenton:demo_end_rod\"))) if (!health.isDisabled(k)) health.recordSuccess(k);\n","R1 wording: streak reset at each tick"),
+-("E6","OwnerFirstViewerSelection.java","        if (ownerEligible && cap > 0) out[n++] = owner;\n","","owner not admitted before capping"),
+-]
+diff --git a/docs/m7/validation/r2-reference/OwnerAwareRecipientRule.java b/docs/m7/validation/r2-reference/OwnerAwareRecipientRule.java
+deleted file mode 100644
+index 4e36cb4..0000000
+--- a/docs/m7/validation/r2-reference/OwnerAwareRecipientRule.java
++++ /dev/null
+@@ -1,18 +0,0 @@
+-package workshop.vfx.paper.core;
+-
+-import java.util.Optional;
+-
+-/** M7 R2 THROWAWAY REFERENCE (validation evidence only; not production, not a build input). */
+-public final class OwnerAwareRecipientRule implements RecipientRule {
+-    private final double radius;
+-    public OwnerAwareRecipientRule(double radius) { this.radius = radius; }
+-    @Override public Optional<SkipReason> decide(RequestContext c, long viewerId, ViewerFacts f) {
+-        if (f == null || !f.online() || !f.valid()) return Optional.of(SkipReason.VIEWER_OFFLINE);
+-        if (f.worldId() != c.worldId()) return Optional.of(SkipReason.VIEWER_WORLD_CHANGED);
+-        boolean allowed = viewerId == c.ownerViewerId() ? f.hasUsePermission() : f.hasViewPermission();
+-        if (!allowed) return Optional.of(SkipReason.VIEWER_PERMISSION_REVOKED);
+-        double dx = f.x() - c.anchorX(), dy = f.y() - c.anchorY(), dz = f.z() - c.anchorZ();
+-        if (dx * dx + dy * dy + dz * dz > radius * radius) return Optional.of(SkipReason.VIEWER_OUT_OF_RANGE);
+-        return Optional.empty();
+-    }
+-}
+diff --git a/docs/m7/verification/README.md b/docs/m7/verification/README.md
+new file mode 100644
+index 0000000..6b86274
+--- /dev/null
++++ b/docs/m7/verification/README.md
+@@ -0,0 +1,54 @@
++# M7 design verification build (R3)
++
++This build is **not** the production Paper adapter. It compiles and tests three things against the **real, accepted
++M1–M6 engine** of this repository, without changing it:
++- the M7 SPI proposal (`docs/m7/spi/`);
++- a **throwaway scratch reference** of that SPI (`docs/m7/reference/`);
++- the proposed offline tests (`docs/m7/tests/`).
++
++No Paper or Bukkit class is involved anywhere.
++
++| Part | What it is | Real or scratch |
++|---|---|---|
++| `workshop.vfx.delivery.DeliveryPlanner`, the M5 scene classes, the demo recipe | the accepted engine, built from the repository root through `includeBuild('../../..')` | **real accepted code** (unchanged since `c43a66e`) |
++| `docs/m7/spi/` | SPI interfaces and records proposed for the adapter | proposal |
++| `docs/m7/reference/` | `DefaultPlanEmitter`, `OwnerAwareRecipientRule`, `OwnerFirstViewerSelection`, `SessionStyleHealth` | **scratch reference**, written only to show the contract is implementable and the tests are meaningful; it is never production |
++| `docs/m7/tests/` | 25 JUnit 5 tests in 5 classes, plus the `DemoFixture` helper | proposed tests (production must carry them or equivalents) |
++
++## Requirements
++
++- A JDK 25 (tested with 25.0.4.1) on `JAVA_HOME`, or one Gradle can detect.
++- Python 3 (standard library only; tested with 3.13).
++- Git.
++- First run only: network access to `services.gradle.org` (the root's Gradle 9.1.0 wrapper) and Maven Central
++  (`org.junit.jupiter:junit-jupiter:5.12.2`, `org.junit.platform:junit-platform-launcher`). The engine itself has no
++  runtime dependencies.
++
++## From a clean checkout or the bundle
++
++```sh
++git clone -b m7-spec-r3 m7-spec-r3.bundle bedwenton-m7 && cd bedwenton-m7   # or: git checkout m7-spec-r3
++export JAVA_HOME=/path/to/jdk-25 PATH="$JAVA_HOME/bin:$PATH"
++
++docs/m7/verification/run-tests.sh /tmp/m7-tests.log            # expect: TOTAL 25 tests, 25 passed, 0 not passed
++python3 docs/m7/verification/run_mutants.py /tmp/m7-mutants.txt # expect: MUTANTS: 13 caught of 13 (about 5 minutes)
++
++# M1-M6 regression (accepted build and script, unchanged)
++./gradlew --no-daemon clean test check                           # expect 415 tests, 415 passed
++python3 verification/m6/regenerate_all.py /tmp/m6-regenerated    # expect: PASS: all seven ... byte-identically
++```
++
++**What the scripts do:**
++- `run-tests.sh` runs `../../../gradlew -p docs/m7/verification clean test`, then `summarize.py`, which prints one
++  `PASS`/`FAIL` line per test and the totals from the JUnit XML. It writes the same output to the log file given.
++- `run_mutants.py` copies `docs/m7/reference/` to a temporary directory for each mutant in `mutants.py`, applies one
++  exact textual replacement (it must occur exactly once), and runs the build with `-Pm7RefDir=<copy>`. It then lists
++  the failing tests. The committed reference is never edited.
++- Compilation uses `-Xlint:all -Werror`.
++
++**Logs** of the runs made for R3 are in `logs/`:
++- `r2-state-*`: the unchanged R2 code, reproduced with this build;
++- `r3-tests-before-fix.log`: the new R3 tests against the R2 logic (7 failures, which reproduce the reviewed
++  defects);
++- `r3-tests.log`, `r3-mutants.txt`: the final R3 results;
++- `r3-m1-m6-regression.log`: the 415 tests and the seven datasets.
+diff --git a/docs/m7/verification/build.gradle b/docs/m7/verification/build.gradle
+new file mode 100644
+index 0000000..523c9ba
+--- /dev/null
++++ b/docs/m7/verification/build.gradle
+@@ -0,0 +1,29 @@
++plugins { id 'java' }
++
++repositories { mavenCentral() }
++
++dependencies {
++    implementation 'workshop.vfx:minecraft-vfx-math:0.1.0-m1'          // the accepted engine, from includeBuild('../../..')
++    testImplementation 'org.junit.jupiter:junit-jupiter:5.12.2'
++    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
++}
++
++java { toolchain.languageVersion = JavaLanguageVersion.of(25) }
++
++def refDir = providers.gradleProperty('m7RefDir').getOrElse(file('../reference').path)
++
++sourceSets {
++    main { java { srcDirs = ['../spi', refDir] } }
++    test { java { srcDirs = ['../tests'] } }
++}
++
++tasks.withType(JavaCompile).configureEach {
++    options.release = 25
++    options.encoding = 'UTF-8'
++    options.compilerArgs += ['-Xlint:all', '-Werror']
++}
++
++test {
++    useJUnitPlatform()
++    testLogging { events 'passed', 'failed', 'skipped'; exceptionFormat 'full' }
++}
+diff --git a/docs/m7/verification/logs/r2-state-mutants.txt b/docs/m7/verification/logs/r2-state-mutants.txt
+new file mode 100644
+index 0000000..bf5fb5a
+--- /dev/null
++++ b/docs/m7/verification/logs/r2-state-mutants.txt
+@@ -0,0 +1,14 @@
++E1 (R1 F2 defect: emit in plan (input) order): CAUGHT, 1 failing test(s)
++    AllocationOrderEmissionTest.Defensive caps binding (unaligned policy): the rank-0 ring is emitted first, whatever the input order; rotation alternates
++E2 (R1 F1 defect: owner-blind rule (use OR view)): CAUGHT, 2 failing test(s)
++    OwnerAwareEmissionTest.A planned non-owner recipient with use but without view permission is refused for the other ring only
++    OwnerAwareEmissionTest.View permission granted: B sees both rings; revoked between planning and emission: B loses ring A only
++E3 (missing context replaced by a guessed owner): CAUGHT, 1 failing test(s)
++    OwnerAwareEmissionTest.Missing ownership context: the delivery is skipped whole and counted; the other ring is unaffected
++E4 (any style's success resets every streak): CAUGHT, 1 failing test(s)
++    StyleHealthTest.Successes of another style do not reset the streak; the streak spans ticks
++E5 (R1 wording: streak reset at each tick): CAUGHT, 1 failing test(s)
++    StyleHealthTest.Successes of another style do not reset the streak; the streak spans ticks
++E6 (owner not admitted before capping): CAUGHT, 1 failing test(s)
++    OwnerAwareEmissionTest.Viewer selection: the owner is admitted before sorting and capping; the result is strictly increasing
++MUTANTS: 6 caught of 6
+diff --git a/docs/m7/verification/logs/r2-state-tests.log b/docs/m7/verification/logs/r2-state-tests.log
+new file mode 100644
+index 0000000..4e79b74
+--- /dev/null
++++ b/docs/m7/verification/logs/r2-state-tests.log
+@@ -0,0 +1,24 @@
++M7 design verification run: 2026-10-17T10:02:46Z
++commit: 15aa210ddcab79de6180df9bfa45a3ba17e1bcf7
++java version "25.0.4.1" 2026-08-18 LTS
++Gradle 9.1.0
++gradle exit: 0
++workshop.vfx.paper.core.AllocationOrderEmissionTest  3 tests, 0 not passed
++    PASS  Defensive caps binding (unaligned policy): the rank-0 ring is emitted first, whatever the input order; rotation alternates
++    PASS  Aligned policy (placement and viewer budgets capped by the emission limits): M6 decides, the caps never bind
++    PASS  Aligned policy over 300 random multi-ring scenarios: no EMISSION_LIMIT skip, attempted calls = planned placements
++workshop.vfx.paper.core.OwnerAwareEmissionTest  7 tests, 0 not passed
++    PASS  View permission granted: B sees both rings; revoked between planning and emission: B loses ring A only
++    PASS  Missing ownership context: the delivery is skipped whole and counted; the other ring is unaffected
++    PASS  A planned non-owner recipient with use but without view permission is refused for the other ring only
++    PASS  Viewer selection: the owner is admitted before sorting and capping; the result is strictly increasing
++    PASS  Owner's use permission revoked between planning and emission: the owner receives nothing of their ring
++    PASS  Coincident rings, no view permission: each owner sees exactly their own ring
++    PASS  Owner A holding view permission is still authorized for ring A by use, and for ring B by view
++workshop.vfx.paper.core.StyleHealthTest  5 tests, 0 not passed
++    PASS  Third consecutive failure disables the style at once; its remaining points in the tick are skipped
++    PASS  All styles disabled: the planner skips the ring as unsupported before evaluation; a new session re-enables
++    PASS  Successes of another style do not reset the streak; the streak spans ticks
++    PASS  A success of the same style resets the streak: fail, fail, succeed, fail, fail does not disable
++    PASS  The next planning pass excludes the disabled style: M6 reports it unsupported, nothing of it is sent
++TOTAL 15 tests, 15 passed, 0 not passed, in 3 report files
+diff --git a/docs/m7/verification/logs/r3-m1-m6-regression.log b/docs/m7/verification/logs/r3-m1-m6-regression.log
+new file mode 100644
+index 0000000..ddaaa2a
+--- /dev/null
++++ b/docs/m7/verification/logs/r3-m1-m6-regression.log
+@@ -0,0 +1,11 @@
++M1-M6 regression on branch m7-spec-r3 (working tree based on 15aa210 + R3 edits under docs/m7 only), 2026-10-17T10:10:41Z
++java version "25.0.4.1" 2026-08-18 LTS
++Gradle 9.1.0
++Command: ./gradlew --no-daemon clean test check (repository root, unchanged build)
++gradle exit: 0
++TOTAL 415 tests, 415 passed, 0 not passed, in 59 report files
++
++Command: python3 verification/m6/regenerate_all.py <new scratch dir> (accepted script, unchanged)
++stress 13 cases
++M6 second regeneration: byte-identical
++PASS: all seven M1-M6 golden/reference datasets and manifests regenerate byte-identically.
+diff --git a/docs/m7/verification/logs/r3-mutants.txt b/docs/m7/verification/logs/r3-mutants.txt
+new file mode 100644
+index 0000000..d66a9b4
+--- /dev/null
++++ b/docs/m7/verification/logs/r3-mutants.txt
+@@ -0,0 +1,43 @@
++M7 R3 mutation run: python3 docs/m7/verification/run_mutants.py (13 mutants of docs/m7/reference, each applied alone to a temporary copy)
++Run on branch m7-spec-r3 working tree (final R3 reference and tests), 2026-10-17T10:14Z, Java 25.0.4.1, Gradle 9.1.0
++
++E1 (R1 F2 defect: emit in plan (input) order): CAUGHT, 1 failing test(s)
++    AllocationOrderEmissionTest.Defensive caps binding (unaligned policy): the rank-0 ring is emitted first, whatever the input order; rotation alternates
++E2 (R1 F1 defect: owner-blind rule (use OR view)): CAUGHT, 7 failing test(s)
++    OwnerAwareEmissionTest.A planned non-owner recipient with use but without view permission is refused for the other ring only
++    OwnerAwareEmissionTest.View permission granted: B sees both rings; revoked between planning and emission: B loses ring A only
++    RecipientRuleRobustnessTest.Authorization order for normal inputs is unchanged: offline, world, permission, then range checks
++    RequestContextConsistencyTest.A viewer with a NaN position is refused (VIEWER_POSITION_INVALID); the other viewers are unaffected
++    RequestContextConsistencyTest.Control: valid contexts; each owner sees its own ring; non-owners without view are refused; accounting balances
++    RequestContextConsistencyTest.Invalid contexts (NaN or infinite anchor, negative owner or world id): the delivery is rejected whole
++    RequestContextConsistencyTest.One mismatched context (ring B's slot names ring A, owner A): only ring B is rejected; ring A is unaffected
++E3 (missing context replaced by a guessed owner (R2 mutant, pattern updated for the R3 code)): CAUGHT, 1 failing test(s)
++    OwnerAwareEmissionTest.Missing ownership context: the delivery is skipped whole and counted; the other ring is unaffected
++E4 (any style's success resets every streak): CAUGHT, 1 failing test(s)
++    StyleHealthTest.Successes of another style do not reset the streak; the streak spans ticks
++E5 (R1 wording: streak reset at each tick): CAUGHT, 1 failing test(s)
++    StyleHealthTest.Successes of another style do not reset the streak; the streak spans ticks
++E6 (owner not admitted before capping): CAUGHT, 1 failing test(s)
++    OwnerAwareEmissionTest.Viewer selection: the owner is admitted before sorting and capping; the result is strictly increasing
++E7 (R3: viewer position not validated (the reviewed NaN fail-open)): CAUGHT, 2 failing test(s)
++    RecipientRuleRobustnessTest.Viewer x, y or z NaN, +infinity or -infinity: denied as VIEWER_POSITION_INVALID (owner and non-owner)
++    RequestContextConsistencyTest.A viewer with a NaN position is refused (VIEWER_POSITION_INVALID); the other viewers are unaffected
++E8 (R3: anchor not validated in the rule): CAUGHT, 1 failing test(s)
++    RecipientRuleRobustnessTest.Request anchor x, y or z NaN, +infinity or -infinity: denied as INVALID_REQUEST_CONTEXT
++E10 (R3: view radius not validated): CAUGHT, 1 failing test(s)
++    RecipientRuleRobustnessTest.View radius: NaN, infinite or negative is rejected at construction; 0 is valid (exact anchor only)
++E11 (R3: mismatched context accepted): CAUGHT, 2 failing test(s)
++    RequestContextConsistencyTest.One mismatched context (ring B's slot names ring A, owner A): only ring B is rejected; ring A is unaffected
++    RequestContextConsistencyTest.Swapped contexts (key ring A holds ring B's context with owner B, and vice versa): both deliveries rejected, nothing sent
++E12 (R3: invalid context not rejected at delivery level): CAUGHT, 1 failing test(s)
++    RequestContextConsistencyTest.Invalid contexts (NaN or infinite anchor, negative owner or world id): the delivery is rejected whole
++E13 (R3: skipped-delivery placements not accounted): CAUGHT, 3 failing test(s)
++    RequestContextConsistencyTest.Invalid contexts (NaN or infinite anchor, negative owner or world id): the delivery is rejected whole
++    RequestContextConsistencyTest.One mismatched context (ring B's slot names ring A, owner A): only ring B is rejected; ring A is unaffected
++    RequestContextConsistencyTest.Swapped contexts (key ring A holds ring B's context with owner B, and vice versa): both deliveries rejected, nothing sent
++E14 (R3: skipped-recipient placements not accounted): CAUGHT, 4 failing test(s)
++    RequestContextConsistencyTest.A viewer with a NaN position is refused (VIEWER_POSITION_INVALID); the other viewers are unaffected
++    RequestContextConsistencyTest.Control: valid contexts; each owner sees its own ring; non-owners without view are refused; accounting balances
++    RequestContextConsistencyTest.Invalid contexts (NaN or infinite anchor, negative owner or world id): the delivery is rejected whole
++    RequestContextConsistencyTest.One mismatched context (ring B's slot names ring A, owner A): only ring B is rejected; ring A is unaffected
++MUTANTS: 13 caught of 13
+diff --git a/docs/m7/verification/logs/r3-tests-before-fix.log b/docs/m7/verification/logs/r3-tests-before-fix.log
+new file mode 100644
+index 0000000..9d79626
+--- /dev/null
++++ b/docs/m7/verification/logs/r3-tests-before-fix.log
+@@ -0,0 +1,44 @@
++M7 design verification run: 2026-10-17T10:06:21Z
++commit: 15aa210ddcab79de6180df9bfa45a3ba17e1bcf7
++java version "25.0.4.1" 2026-08-18 LTS
++Gradle 9.1.0
++25 tests completed, 7 failed
++FAILURE: Build failed with an exception.
++* What went wrong:
++Execution failed for task ':test'.
++> There were failing tests. See the report at: file:///home/user/bedwenton/docs/m7/verification/build/reports/tests/test/index.html
++* Try:
++> Run with --scan to generate a Build Scan (Powered by Develocity).
++BUILD FAILED in 13s
++gradle exit: 1
++workshop.vfx.paper.core.AllocationOrderEmissionTest  3 tests, 0 not passed
++    PASS  Defensive caps binding (unaligned policy): the rank-0 ring is emitted first, whatever the input order; rotation alternates
++    PASS  Aligned policy (placement and viewer budgets capped by the emission limits): M6 decides, the caps never bind
++    PASS  Aligned policy over 300 random multi-ring scenarios: no EMISSION_LIMIT skip, attempted calls = planned placements
++workshop.vfx.paper.core.OwnerAwareEmissionTest  7 tests, 0 not passed
++    PASS  View permission granted: B sees both rings; revoked between planning and emission: B loses ring A only
++    PASS  Missing ownership context: the delivery is skipped whole and counted; the other ring is unaffected
++    PASS  A planned non-owner recipient with use but without view permission is refused for the other ring only
++    PASS  Viewer selection: the owner is admitted before sorting and capping; the result is strictly increasing
++    PASS  Owner's use permission revoked between planning and emission: the owner receives nothing of their ring
++    PASS  Coincident rings, no view permission: each owner sees exactly their own ring
++    PASS  Owner A holding view permission is still authorized for ring A by use, and for ring B by view
++workshop.vfx.paper.core.RecipientRuleRobustnessTest  5 tests, 3 not passed
++    FAIL  Request anchor x, y or z NaN, +infinity or -infinity: denied as INVALID_REQUEST_CONTEXT  :: org.opentest4j.AssertionFailedError: ax=NaN ==> expected: <Optional[INVALID_REQUEST_CONTEXT]> but was: <Optional.empty>
++    FAIL  View radius: NaN, infinite or negative is rejected at construction; 0 is valid (exact anchor only)  :: org.opentest4j.AssertionFailedError: radius NaN ==> Expected java.lang.IllegalArgumentException to be thrown, but nothing was thrown.
++    PASS  Authorization order for normal inputs is unchanged: offline, world, permission, then range checks
++    FAIL  Viewer x, y or z NaN, +infinity or -infinity: denied as VIEWER_POSITION_INVALID (owner and non-owner)  :: org.opentest4j.AssertionFailedError: x=NaN ==> expected: <Optional[VIEWER_POSITION_INVALID]> but was: <Optional.empty>
++    PASS  Normal controls: in range allowed, exactly at the radius allowed, just beyond and huge finite coordinates denied
++workshop.vfx.paper.core.RequestContextConsistencyTest  5 tests, 4 not passed
++    FAIL  Invalid contexts (NaN or infinite anchor, negative owner or world id): the delivery is rejected whole  :: org.opentest4j.AssertionFailedError: RequestContext[requestId=11, ownerViewerId=1, worldId=0, anchorX=NaN, anchorY=64.1, anchorZ=0.5] ==> expected: <0> but was: <72>
++    FAIL  A viewer with a NaN position is refused (VIEWER_POSITION_INVALID); the other viewers are unaffected  :: org.opentest4j.AssertionFailedError: expected: <0> but was: <96>
++    FAIL  One mismatched context (ring B's slot names ring A, owner A): only ring B is rejected; ring A is unaffected  :: org.opentest4j.AssertionFailedError: ring A to its owner ==> expected: <24> but was: <96>
++    PASS  Control: valid contexts; each owner sees its own ring; non-owners without view are refused; accounting balances
++    FAIL  Swapped contexts (key ring A holds ring B's context with owner B, and vice versa): both deliveries rejected, nothing sent  :: org.opentest4j.AssertionFailedError: a swapped owner would otherwise authorize B for ring A ==> expected: <0> but was: <96>
++workshop.vfx.paper.core.StyleHealthTest  5 tests, 0 not passed
++    PASS  Third consecutive failure disables the style at once; its remaining points in the tick are skipped
++    PASS  All styles disabled: the planner skips the ring as unsupported before evaluation; a new session re-enables
++    PASS  Successes of another style do not reset the streak; the streak spans ticks
++    PASS  A success of the same style resets the streak: fail, fail, succeed, fail, fail does not disable
++    PASS  The next planning pass excludes the disabled style: M6 reports it unsupported, nothing of it is sent
++TOTAL 25 tests, 18 passed, 7 not passed, in 5 report files
+diff --git a/docs/m7/verification/logs/r3-tests.log b/docs/m7/verification/logs/r3-tests.log
+new file mode 100644
+index 0000000..532b763
+--- /dev/null
++++ b/docs/m7/verification/logs/r3-tests.log
+@@ -0,0 +1,36 @@
++M7 design verification run: 2026-10-17T10:14:52Z
++commit: 15aa210ddcab79de6180df9bfa45a3ba17e1bcf7
++java version "25.0.4.1" 2026-08-18 LTS
++Gradle 9.1.0
++gradle exit: 0
++workshop.vfx.paper.core.AllocationOrderEmissionTest  3 tests, 0 not passed
++    PASS  Defensive caps binding (unaligned policy): the rank-0 ring is emitted first, whatever the input order; rotation alternates
++    PASS  Aligned policy (placement and viewer budgets capped by the emission limits): M6 decides, the caps never bind
++    PASS  Aligned policy over 300 random multi-ring scenarios: no EMISSION_LIMIT skip, attempted calls = planned placements
++workshop.vfx.paper.core.OwnerAwareEmissionTest  7 tests, 0 not passed
++    PASS  View permission granted: B sees both rings; revoked between planning and emission: B loses ring A only
++    PASS  Missing ownership context: the delivery is skipped whole and counted; the other ring is unaffected
++    PASS  A planned non-owner recipient with use but without view permission is refused for the other ring only
++    PASS  Viewer selection: the owner is admitted before sorting and capping; the result is strictly increasing
++    PASS  Owner's use permission revoked between planning and emission: the owner receives nothing of their ring
++    PASS  Coincident rings, no view permission: each owner sees exactly their own ring
++    PASS  Owner A holding view permission is still authorized for ring A by use, and for ring B by view
++workshop.vfx.paper.core.RecipientRuleRobustnessTest  5 tests, 0 not passed
++    PASS  Request anchor x, y or z NaN, +infinity or -infinity: denied as INVALID_REQUEST_CONTEXT
++    PASS  View radius: NaN, infinite or negative is rejected at construction; 0 is valid (exact anchor only)
++    PASS  Authorization order for normal inputs is unchanged: offline, world, permission, then range checks
++    PASS  Viewer x, y or z NaN, +infinity or -infinity: denied as VIEWER_POSITION_INVALID (owner and non-owner)
++    PASS  Normal controls: in range allowed, exactly at the radius allowed, just beyond and huge finite coordinates denied
++workshop.vfx.paper.core.RequestContextConsistencyTest  5 tests, 0 not passed
++    PASS  Invalid contexts (NaN or infinite anchor, negative owner or world id): the delivery is rejected whole
++    PASS  A viewer with a NaN position is refused (VIEWER_POSITION_INVALID); the other viewers are unaffected
++    PASS  One mismatched context (ring B's slot names ring A, owner A): only ring B is rejected; ring A is unaffected
++    PASS  Control: valid contexts; each owner sees its own ring; non-owners without view are refused; accounting balances
++    PASS  Swapped contexts (key ring A holds ring B's context with owner B, and vice versa): both deliveries rejected, nothing sent
++workshop.vfx.paper.core.StyleHealthTest  5 tests, 0 not passed
++    PASS  Third consecutive failure disables the style at once; its remaining points in the tick are skipped
++    PASS  All styles disabled: the planner skips the ring as unsupported before evaluation; a new session re-enables
++    PASS  Successes of another style do not reset the streak; the streak spans ticks
++    PASS  A success of the same style resets the streak: fail, fail, succeed, fail, fail does not disable
++    PASS  The next planning pass excludes the disabled style: M6 reports it unsupported, nothing of it is sent
++TOTAL 25 tests, 25 passed, 0 not passed, in 5 report files
+diff --git a/docs/m7/verification/mutants.py b/docs/m7/verification/mutants.py
+new file mode 100644
+index 0000000..d22e652
+--- /dev/null
++++ b/docs/m7/verification/mutants.py
+@@ -0,0 +1,21 @@
++"""M7 targeted mutants of the THROWAWAY reference (docs/m7/reference). Each entry: (id, file, exact old text, new text,
++description). Applied one at a time by run_mutants.py to a temporary copy; the reference itself is never edited.
++
++E9 (range test written as d2 > r2 instead of !(d2 <= r2)) is deliberately absent: with the finiteness checks in place
++d2 can never be NaN (finite inputs overflow only to +infinity), so it is equivalent by construction; the negated form is
++kept as defence in depth (see M7-R3-VERIFICATION.md)."""
++M = [
++("E1","DefaultPlanEmitter.java","        ordered.sort(Comparator.comparingInt(EffectDelivery::allocationRank));\n","","R1 F2 defect: emit in plan (input) order"),
++("E2","OwnerAwareRecipientRule.java","boolean allowed = viewerId == c.ownerViewerId() ? f.hasUsePermission() : f.hasViewPermission();","boolean allowed = f.hasUsePermission() || f.hasViewPermission();","R1 F1 defect: owner-blind rule (use OR view)"),
++("E3","DefaultPlanEmitter.java","            SkipReason bad = c == null ? SkipReason.MISSING_REQUEST_CONTEXT","            if (c == null) c = new RequestContext(d.requestId(), d.recipient(0), 0, 0.5, 64.1, 0.5);\n            SkipReason bad = c == null ? SkipReason.MISSING_REQUEST_CONTEXT","missing context replaced by a guessed owner (R2 mutant, pattern updated for the R3 code)"),
++("E4","SessionStyleHealth.java","@Override public void recordSuccess(StyleKey style) { streaks.put(style, 0); }","@Override public void recordSuccess(StyleKey style) { streaks.clear(); }","any style's success resets every streak"),
++("E5","DefaultPlanEmitter.java","        Set<StyleKey> disabledNow = new LinkedHashSet<>();\n","        Set<StyleKey> disabledNow = new LinkedHashSet<>();\n        for (StyleKey k : java.util.List.of(workshop.vfx.scene.StyleKey.of(\"bedwenton:demo_dust_red\"), workshop.vfx.scene.StyleKey.of(\"bedwenton:demo_end_rod\"))) if (!health.isDisabled(k)) health.recordSuccess(k);\n","R1 wording: streak reset at each tick"),
++("E6","OwnerFirstViewerSelection.java","        if (ownerEligible && cap > 0) out[n++] = owner;\n","","owner not admitted before capping"),
++("E7","OwnerAwareRecipientRule.java","        if (!finite(f.x(), f.y(), f.z())) return Optional.of(SkipReason.VIEWER_POSITION_INVALID);\n","","R3: viewer position not validated (the reviewed NaN fail-open)"),
++("E8","OwnerAwareRecipientRule.java","        if (!finite(c.anchorX(), c.anchorY(), c.anchorZ())) return Optional.of(SkipReason.INVALID_REQUEST_CONTEXT);\n","","R3: anchor not validated in the rule"),
++("E10","OwnerAwareRecipientRule.java","if (!Double.isFinite(radius) || radius < 0) {","if (false) {","R3: view radius not validated"),
++("E11","DefaultPlanEmitter.java","                    : c.requestId() != d.requestId() ? SkipReason.MISMATCHED_REQUEST_CONTEXT\n","","R3: mismatched context accepted"),
++("E12","DefaultPlanEmitter.java","                    : !validContext(c) ? SkipReason.INVALID_REQUEST_CONTEXT : null;","                    : null;","R3: invalid context not rejected at delivery level"),
++("E13","DefaultPlanEmitter.java","inSkippedDeliveries += d.placements();","","R3: skipped-delivery placements not accounted"),
++("E14","DefaultPlanEmitter.java","inSkippedRecipients += d.recipientPoints(r);","","R3: skipped-recipient placements not accounted"),
++]
+diff --git a/docs/m7/verification/run-tests.sh b/docs/m7/verification/run-tests.sh
+new file mode 100755
+index 0000000..5310bdc
+--- /dev/null
++++ b/docs/m7/verification/run-tests.sh
+@@ -0,0 +1,23 @@
++#!/usr/bin/env bash
++# M7 design verification: compile the SPI, the scratch reference and the proposed tests against the accepted engine,
++# run the tests, and print a per-test summary. Usage (from anywhere): docs/m7/verification/run-tests.sh [log file]
++# Requires: JDK 25 on JAVA_HOME (or a Gradle-detectable toolchain), Python 3, and network access to Maven Central and
++# services.gradle.org on first run (Gradle 9.1.0 wrapper of the repository root, JUnit 5.12.2).
++set -euo pipefail
++here="$(cd "$(dirname "$0")" && pwd)"
++root="$(cd "$here/../../.." && pwd)"
++log="${1:-$here/build/m7-test-run.log}"
++mkdir -p "$(dirname "$log")"
++{
++  echo "M7 design verification run: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
++  echo "commit: $(git -C "$root" rev-parse HEAD 2>/dev/null || echo unknown)"
++  echo "uncommitted changes in checkout: $(git -C "$root" status --porcelain 2>/dev/null | grep -v '^??' | wc -l | tr -d ' ') tracked file(s)"
++  java -version 2>&1 | grep -v JAVA_TOOL_OPTIONS | head -1
++  "$root/gradlew" --version 2>/dev/null | grep -E '^Gradle '
++  set +e
++  "$root/gradlew" -p "$here" --no-daemon -q -Porg.gradle.java.installations.auto-download=false clean test 2>&1 | grep -v -E 'JAVA_TOOL_OPTIONS|^\s*$'
++  status=${PIPESTATUS[0]}
++  set -e
++  echo "gradle exit: $status"
++  python3 -I "$here/summarize.py" "$here/build/test-results/test"
++} 2>&1 | tee "$log"
+diff --git a/docs/m7/verification/run_mutants.py b/docs/m7/verification/run_mutants.py
+new file mode 100755
+index 0000000..6b402c6
+--- /dev/null
++++ b/docs/m7/verification/run_mutants.py
+@@ -0,0 +1,81 @@
++#!/usr/bin/env python3
++"""M7 targeted mutation runner. For each mutant in mutants.py: copy ../reference to a temporary directory, apply the
++single textual replacement (it must occur exactly once), run the verification build with -Pm7RefDir=<copy>, and record
++the failing tests. A mutant is CAUGHT when at least one test fails (or compilation fails). The unmutated reference is
++never modified. Usage: python3 run_mutants.py [output file] [mutant ids...]"""
++import glob
++import os
++import shutil
++import subprocess
++import sys
++import tempfile
++import xml.etree.ElementTree as ET
++
++HERE = os.path.dirname(os.path.abspath(__file__))
++ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
++REF = os.path.join(HERE, '..', 'reference')
++PKG = os.path.join('workshop', 'vfx', 'paper', 'core')
++
++def load():
++    scope = {}
++    with open(os.path.join(HERE, 'mutants.py')) as f:
++        exec(f.read(), scope)
++    return scope['M']
++
++def failing_tests():
++    names = []
++    for path in glob.glob(os.path.join(HERE, 'build', 'test-results', 'test', '*.xml')):
++        suite = ET.parse(path).getroot()
++        for case in suite.findall('testcase'):
++            if case.find('failure') is not None or case.find('error') is not None:
++                names.append(suite.get('name').split('.')[-1] + '.' + case.get('name'))
++    return sorted(names)
++
++def run(mutant):
++    mid, filename, old, new, description = mutant
++    tmp = tempfile.mkdtemp(prefix='m7-mutant-' + mid + '-')
++    try:
++        shutil.copytree(REF, os.path.join(tmp, 'ref'))
++        target = os.path.join(tmp, 'ref', PKG, filename)
++        with open(target) as f:
++            text = f.read()
++        if text.count(old) != 1:
++            return mid, description, 'PATTERN-ERROR', ['pattern occurs %d times' % text.count(old)]
++        with open(target, 'w') as f:
++            f.write(text.replace(old, new))
++        shutil.rmtree(os.path.join(HERE, 'build', 'test-results'), ignore_errors=True)
++        proc = subprocess.run([os.path.join(ROOT, 'gradlew'), '-p', HERE, '--no-daemon', '-q',
++                               '-Porg.gradle.java.installations.auto-download=false',
++                               '-Pm7RefDir=' + os.path.join(tmp, 'ref'), 'test'],
++                              capture_output=True, text=True)
++        out = proc.stdout + proc.stderr
++        if 'error:' in out and not glob.glob(os.path.join(HERE, 'build', 'test-results', 'test', '*.xml')):
++            return mid, description, 'CAUGHT (compile error)', []
++        fails = failing_tests()
++        return mid, description, ('CAUGHT' if fails else 'SURVIVED'), fails
++    finally:
++        shutil.rmtree(tmp, ignore_errors=True)
++
++def main():
++    out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, 'build', 'm7-mutation-run.txt')
++    wanted = set(sys.argv[2:])
++    mutants = [m for m in load() if not wanted or m[0] in wanted]
++    os.makedirs(os.path.dirname(out), exist_ok=True)
++    lines = []
++    caught = 0
++    for m in mutants:
++        mid, description, verdict, fails = run(m)
++        caught += verdict.startswith('CAUGHT')
++        line = '%s (%s): %s, %d failing test(s)' % (mid, description, verdict, len(fails))
++        print(line, flush=True)
++        lines.append(line)
++        lines.extend('    ' + f for f in fails)
++    summary = 'MUTANTS: %d caught of %d' % (caught, len(mutants))
++    print(summary)
++    lines.append(summary)
++    with open(out, 'w') as f:
++        f.write('\n'.join(lines) + '\n')
++    return 0 if caught == len(mutants) else 1
++
++if __name__ == '__main__':
++    sys.exit(main())
+diff --git a/docs/m7/verification/settings.gradle b/docs/m7/verification/settings.gradle
+new file mode 100644
+index 0000000..0743375
+--- /dev/null
++++ b/docs/m7/verification/settings.gradle
+@@ -0,0 +1,5 @@
++// M7 design verification build (not the production adapter). Compiles the SPI proposal (../spi), the THROWAWAY
++// scratch reference (../reference, or -Pm7RefDir=<dir> for mutation runs) and the proposed tests (../tests) against the
++// real accepted M1-M6 engine, which includeBuild substitutes from the repository root (unchanged).
++rootProject.name = 'bedwenton-m7-design-verification'
++includeBuild('../../..')
+diff --git a/docs/m7/verification/summarize.py b/docs/m7/verification/summarize.py
+new file mode 100755
+index 0000000..e975c82
+--- /dev/null
++++ b/docs/m7/verification/summarize.py
+@@ -0,0 +1,31 @@
++#!/usr/bin/env python3
++"""Summarize JUnit XML reports: one line per test (PASS/FAIL), per-class totals and the grand total."""
++import glob
++import sys
++import xml.etree.ElementTree as ET
++
++def main(results_dir):
++    total = failed = 0
++    files = sorted(glob.glob(results_dir + '/*.xml'))
++    for path in files:
++        suite = ET.parse(path).getroot()
++        tests = int(suite.get('tests'))
++        bad = int(suite.get('failures')) + int(suite.get('errors')) + int(suite.get('skipped'))
++        total += tests
++        failed += bad
++        print('%s  %d tests, %d not passed' % (suite.get('name'), tests, bad))
++        for case in suite.findall('testcase'):
++            problem = case.find('failure')
++            if problem is None:
++                problem = case.find('error')
++            if problem is None and case.find('skipped') is not None:
++                print('    SKIP  ' + case.get('name'))
++            elif problem is None:
++                print('    PASS  ' + case.get('name'))
++            else:
++                print('    FAIL  ' + case.get('name') + '  :: ' + (problem.get('message') or '')[:300])
++    print('TOTAL %d tests, %d passed, %d not passed, in %d report files' % (total, total - failed, failed, len(files)))
++    return 0 if files and failed == 0 else 1
++
++if __name__ == '__main__':
++    sys.exit(main(sys.argv[1]))

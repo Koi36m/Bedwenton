@@ -1,0 +1,14 @@
+E1 (R1 F2 defect: emit in plan (input) order): CAUGHT, 1 failing test(s)
+    AllocationOrderEmissionTest.Defensive caps binding (unaligned policy): the rank-0 ring is emitted first, whatever the input order; rotation alternates
+E2 (R1 F1 defect: owner-blind rule (use OR view)): CAUGHT, 2 failing test(s)
+    OwnerAwareEmissionTest.A planned non-owner recipient with use but without view permission is refused for the other ring only
+    OwnerAwareEmissionTest.View permission granted: B sees both rings; revoked between planning and emission: B loses ring A only
+E3 (missing context replaced by a guessed owner): CAUGHT, 1 failing test(s)
+    OwnerAwareEmissionTest.Missing ownership context: the delivery is skipped whole and counted; the other ring is unaffected
+E4 (any style's success resets every streak): CAUGHT, 1 failing test(s)
+    StyleHealthTest.Successes of another style do not reset the streak; the streak spans ticks
+E5 (R1 wording: streak reset at each tick): CAUGHT, 1 failing test(s)
+    StyleHealthTest.Successes of another style do not reset the streak; the streak spans ticks
+E6 (owner not admitted before capping): CAUGHT, 1 failing test(s)
+    OwnerAwareEmissionTest.Viewer selection: the owner is admitted before sorting and capping; the result is strictly increasing
+MUTANTS: 6 caught of 6

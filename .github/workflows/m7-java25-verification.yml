@@ -1,0 +1,70 @@
+name: M7 Java 25 Adapter Verification
+on:
+  push:
+    branches: [m7-paper-adapter-implementation, m7-actions-verification]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Source identity, toolchain and frozen file integrity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/m7-evidence"
+          {
+            git rev-parse HEAD
+            git rev-parse HEAD^{tree}
+            java -version
+            javac -version
+            ./gradlew --version
+            sha256sum -c docs/m7/implementation/FROZEN-M1-M6-SHA256SUMS.txt
+            sha256sum -c docs/m7/implementation/APPROVED-R3-SHA256SUMS.txt
+            sha256sum -c docs/m7/implementation/ADAPTER-SOURCE-SHA256SUMS.txt
+          } > "$RUNNER_TEMP/m7-evidence/identity-and-integrity.log" 2>&1
+          cat "$RUNNER_TEMP/m7-evidence/identity-and-integrity.log"
+      - name: Clean engine and adapter tests, check, dependencies and all seven reference datasets
+        shell: bash
+        run: bash paper-adapter/tools/verify.sh "$RUNNER_TEMP/m7-evidence"
+      - name: Inspect verified API signatures and package contents
+        shell: bash
+        run: |
+          set -euo pipefail
+          API=$(find "$HOME/.gradle/caches/modules-2/files-2.1/io.papermc.paper/paper-api/26.3.build.204-stable" -name '*.jar' -print -quit)
+          javap -classpath "$API" org.bukkit.plugin.java.JavaPlugin org.bukkit.entity.Player org.bukkit.Particle io.papermc.paper.command.brigadier.BasicCommand org.bukkit.scheduler.BukkitScheduler org.bukkit.scheduler.BukkitTask > "$RUNNER_TEMP/m7-evidence/paper-api-signatures.txt"
+          jar tf paper-adapter/build/libs/*.jar > "$RUNNER_TEMP/m7-evidence/plugin-contents.txt"
+          cp paper-adapter/build/paper-api-provenance.txt "$RUNNER_TEMP/m7-evidence/"
+          sha256sum paper-adapter/build/libs/*.jar > "$RUNNER_TEMP/m7-evidence/plugin-SHA256SUMS.txt"
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          evidence=Path(os.environ['RUNNER_TEMP'])/'m7-evidence'
+          for name in ['engine-clean-test.log','adapter-clean-test.log']:
+              text=(evidence/name).read_text()
+              if name.startswith('adapter'): assert 'warning:' not in text, text
+              else:
+                  production=text.split('> Task :compileJava',1)[1].split('> Task :',1)[0]
+                  assert 'warning:' not in production, production
+          print('Production compiler warnings: 0; adapter compile uses -Werror')
+          PY
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: m7-java25-verification-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 90
+          path: |
+            ${{ runner.temp }}/m7-evidence/
+            build/test-results/test/
+            build/reports/tests/test/
+            paper-adapter/build/test-results/test/
+            paper-adapter/build/reports/tests/test/
+            paper-adapter/build/libs/*.jar

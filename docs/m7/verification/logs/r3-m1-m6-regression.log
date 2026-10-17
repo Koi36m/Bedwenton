@@ -1,0 +1,11 @@
+M1-M6 regression on branch m7-spec-r3 (working tree based on 15aa210 + R3 edits under docs/m7 only), 2026-10-17T10:10:41Z
+java version "25.0.4.1" 2026-08-18 LTS
+Gradle 9.1.0
+Command: ./gradlew --no-daemon clean test check (repository root, unchanged build)
+gradle exit: 0
+TOTAL 415 tests, 415 passed, 0 not passed, in 59 report files
+
+Command: python3 verification/m6/regenerate_all.py <new scratch dir> (accepted script, unchanged)
+stress 13 cases
+M6 second regeneration: byte-identical
+PASS: all seven M1-M6 golden/reference datasets and manifests regenerate byte-identically.

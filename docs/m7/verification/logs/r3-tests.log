@@ -1,0 +1,36 @@
+M7 design verification run: 2026-10-17T10:14:52Z
+commit: 15aa210ddcab79de6180df9bfa45a3ba17e1bcf7
+java version "25.0.4.1" 2026-08-18 LTS
+Gradle 9.1.0
+gradle exit: 0
+workshop.vfx.paper.core.AllocationOrderEmissionTest  3 tests, 0 not passed
+    PASS  Defensive caps binding (unaligned policy): the rank-0 ring is emitted first, whatever the input order; rotation alternates
+    PASS  Aligned policy (placement and viewer budgets capped by the emission limits): M6 decides, the caps never bind
+    PASS  Aligned policy over 300 random multi-ring scenarios: no EMISSION_LIMIT skip, attempted calls = planned placements
+workshop.vfx.paper.core.OwnerAwareEmissionTest  7 tests, 0 not passed
+    PASS  View permission granted: B sees both rings; revoked between planning and emission: B loses ring A only
+    PASS  Missing ownership context: the delivery is skipped whole and counted; the other ring is unaffected
+    PASS  A planned non-owner recipient with use but without view permission is refused for the other ring only
+    PASS  Viewer selection: the owner is admitted before sorting and capping; the result is strictly increasing
+    PASS  Owner's use permission revoked between planning and emission: the owner receives nothing of their ring
+    PASS  Coincident rings, no view permission: each owner sees exactly their own ring
+    PASS  Owner A holding view permission is still authorized for ring A by use, and for ring B by view
+workshop.vfx.paper.core.RecipientRuleRobustnessTest  5 tests, 0 not passed
+    PASS  Request anchor x, y or z NaN, +infinity or -infinity: denied as INVALID_REQUEST_CONTEXT
+    PASS  View radius: NaN, infinite or negative is rejected at construction; 0 is valid (exact anchor only)
+    PASS  Authorization order for normal inputs is unchanged: offline, world, permission, then range checks
+    PASS  Viewer x, y or z NaN, +infinity or -infinity: denied as VIEWER_POSITION_INVALID (owner and non-owner)
+    PASS  Normal controls: in range allowed, exactly at the radius allowed, just beyond and huge finite coordinates denied
+workshop.vfx.paper.core.RequestContextConsistencyTest  5 tests, 0 not passed
+    PASS  Invalid contexts (NaN or infinite anchor, negative owner or world id): the delivery is rejected whole
+    PASS  A viewer with a NaN position is refused (VIEWER_POSITION_INVALID); the other viewers are unaffected
+    PASS  One mismatched context (ring B's slot names ring A, owner A): only ring B is rejected; ring A is unaffected
+    PASS  Control: valid contexts; each owner sees its own ring; non-owners without view are refused; accounting balances
+    PASS  Swapped contexts (key ring A holds ring B's context with owner B, and vice versa): both deliveries rejected, nothing sent
+workshop.vfx.paper.core.StyleHealthTest  5 tests, 0 not passed
+    PASS  Third consecutive failure disables the style at once; its remaining points in the tick are skipped
+    PASS  All styles disabled: the planner skips the ring as unsupported before evaluation; a new session re-enables
+    PASS  Successes of another style do not reset the streak; the streak spans ticks
+    PASS  A success of the same style resets the streak: fail, fail, succeed, fail, fail does not disable
+    PASS  The next planning pass excludes the disabled style: M6 reports it unsupported, nothing of it is sent
+TOTAL 25 tests, 25 passed, 0 not passed, in 5 report files

@@ -1,0 +1,29 @@
+plugins { id 'java' }
+
+repositories { mavenCentral() }
+
+dependencies {
+    implementation 'workshop.vfx:minecraft-vfx-math:0.1.0-m1'          // the accepted engine, from includeBuild('../../..')
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.12.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+java { toolchain.languageVersion = JavaLanguageVersion.of(25) }
+
+def refDir = providers.gradleProperty('m7RefDir').getOrElse(file('../reference').path)
+
+sourceSets {
+    main { java { srcDirs = ['../spi', refDir] } }
+    test { java { srcDirs = ['../tests'] } }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 25
+    options.encoding = 'UTF-8'
+    options.compilerArgs += ['-Xlint:all', '-Werror']
+}
+
+test {
+    useJUnitPlatform()
+    testLogging { events 'passed', 'failed', 'skipped'; exceptionFormat 'full' }
+}

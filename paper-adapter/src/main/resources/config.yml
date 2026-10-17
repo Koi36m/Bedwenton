@@ -1,0 +1,17 @@
+# Read only at enable; restart to apply changes. /reload is unsupported.
+# Hard ceilings bound work; they are not server performance guarantees.
+maxActiveEffects: 4
+maxViewersPerEffect: 4
+viewRadius: 32.0
+ringLifetimeTicks: 600
+defaultTier: balanced
+generatedPointBudget: 1152
+placementBudget: 2048
+worldPlacementBudget: 2048
+viewerPlacementBudget: 256
+simpleKeptCap: 24
+balancedKeptCap: 48
+heavyKeptCap: 72
+maxCallsPerTick: 2048
+maxCallsPerViewerPerTick: 256
+debug: false

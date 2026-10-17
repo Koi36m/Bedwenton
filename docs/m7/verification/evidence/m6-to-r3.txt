@@ -1,0 +1,57 @@
+git diff --stat c43a66e656a77aa82bd72d8ffe27f1a037240e99 c57c1b0612663e2296aa5cf5828708f64467f279   (accepted M6 -> R3 content commit)
+ 50 files changed, 2704 insertions(+)
+
+git diff --name-status c43a66e656a77aa82bd72d8ffe27f1a037240e99 c57c1b0612663e2296aa5cf5828708f64467f279
+A	docs/m7/M7-ARCHITECTURE-AND-CONTRACT.md
+A	docs/m7/M7-KICKOFF.md
+A	docs/m7/M7-R1-REPORT.md
+A	docs/m7/M7-R2-CHANGES.md
+A	docs/m7/M7-R3-CHANGES.md
+A	docs/m7/M7-TEST-AND-SMOKE-PLAN.md
+A	docs/m7/reference/workshop/vfx/paper/core/DefaultPlanEmitter.java
+A	docs/m7/reference/workshop/vfx/paper/core/OwnerAwareRecipientRule.java
+A	docs/m7/reference/workshop/vfx/paper/core/OwnerFirstViewerSelection.java
+A	docs/m7/reference/workshop/vfx/paper/core/SessionStyleHealth.java
+A	docs/m7/spi/workshop/vfx/paper/core/EmissionLimits.java
+A	docs/m7/spi/workshop/vfx/paper/core/EmissionReport.java
+A	docs/m7/spi/workshop/vfx/paper/core/ParticleSink.java
+A	docs/m7/spi/workshop/vfx/paper/core/ParticleSpec.java
+A	docs/m7/spi/workshop/vfx/paper/core/PlanEmitter.java
+A	docs/m7/spi/workshop/vfx/paper/core/PointValidator.java
+A	docs/m7/spi/workshop/vfx/paper/core/RecipientGate.java
+A	docs/m7/spi/workshop/vfx/paper/core/RecipientRule.java
+A	docs/m7/spi/workshop/vfx/paper/core/RequestContext.java
+A	docs/m7/spi/workshop/vfx/paper/core/SessionIds.java
+A	docs/m7/spi/workshop/vfx/paper/core/SkipReason.java
+A	docs/m7/spi/workshop/vfx/paper/core/StyleCatalog.java
+A	docs/m7/spi/workshop/vfx/paper/core/StyleHealth.java
+A	docs/m7/spi/workshop/vfx/paper/core/ViewerFacts.java
+A	docs/m7/spi/workshop/vfx/paper/core/ViewerSelection.java
+A	docs/m7/tests/workshop/vfx/paper/core/AllocationOrderEmissionTest.java
+A	docs/m7/tests/workshop/vfx/paper/core/DemoFixture.java
+A	docs/m7/tests/workshop/vfx/paper/core/OwnerAwareEmissionTest.java
+A	docs/m7/tests/workshop/vfx/paper/core/RecipientRuleRobustnessTest.java
+A	docs/m7/tests/workshop/vfx/paper/core/RequestContextConsistencyTest.java
+A	docs/m7/tests/workshop/vfx/paper/core/StyleHealthTest.java
+A	docs/m7/validation/DemoRecipeProbe.java
+A	docs/m7/validation/build-spike.txt
+A	docs/m7/validation/demo-recipe-probe.txt
+A	docs/m7/validation/paper-api-signatures.txt
+A	docs/m7/validation/preservation.txt
+A	docs/m7/validation/r2-tests.txt
+A	docs/m7/verification/README.md
+A	docs/m7/verification/build.gradle
+A	docs/m7/verification/logs/r2-state-mutants.txt
+A	docs/m7/verification/logs/r2-state-tests.log
+A	docs/m7/verification/logs/r3-m1-m6-regression.log
+A	docs/m7/verification/logs/r3-mutants.txt
+A	docs/m7/verification/logs/r3-tests-before-fix.log
+A	docs/m7/verification/logs/r3-tests.log
+A	docs/m7/verification/mutants.py
+A	docs/m7/verification/run-tests.sh
+A	docs/m7/verification/run_mutants.py
+A	docs/m7/verification/settings.gradle
+A	docs/m7/verification/summarize.py
+
+changed paths: 50; outside docs/m7/: 0; non-addition entries: 0
+RESULT: every path changed relative to accepted M6 is under docs/m7/ (all additions).

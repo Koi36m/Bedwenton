@@ -1,0 +1,39 @@
+Isolated-build spike (scratch, not delivered as source): paper-adapter/ standalone Gradle build with includeBuild('..'),
+engine as implementation 'workshop.vfx:minecraft-vfx-math:0.1.0-m1', fat jar via runtimeClasspath zipTree, duplicatesStrategy FAIL.
+Java 25.0.4.1, Gradle 9.1.0 (root wrapper). Paper API not included (repo.papermc.io blocked).
+
+settings.gradle:
+    rootProject.name = 'bedwenton-vfx-paper'
+    includeBuild('..')
+build.gradle:
+    plugins { id 'java' }
+    group = 'workshop.vfx'
+    version = '0.7.0-spike'
+    repositories { mavenCentral() }
+    dependencies {
+        implementation 'workshop.vfx:minecraft-vfx-math:0.1.0-m1'
+        testImplementation 'org.junit.jupiter:junit-jupiter:5.12.2'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+    java { toolchain.languageVersion = JavaLanguageVersion.of(25) }
+    tasks.withType(JavaCompile).configureEach { options.release = 25; options.compilerArgs << '-Xlint:all' }
+    test { useJUnitPlatform() }
+    jar {
+        dependsOn configurations.runtimeClasspath
+        from { configurations.runtimeClasspath.collect { zipTree(it) } }
+        duplicatesStrategy = DuplicatesStrategy.FAIL
+    }
+
+Result: clean test jar -> exit 0; 1 probe test passed.
+Jar class packages:
+         14 workshop/vfx/delivery
+          5 workshop/vfx/math/core
+          9 workshop/vfx/math/curve
+          9 workshop/vfx/math/sample
+          8 workshop/vfx/math/time
+          1 workshop/vfx/paper/core
+         16 workshop/vfx/scene
+Entries under org/bukkit, io/papermc, org/junit: 0
+Root project files changed by the spike: none (the spike copy came from git archive of the branch; only paper-adapter/ was added).
+
+SPI proposal docs/m7/spi (9 files): javac --release 25 -Xlint:all against the accepted engine classes -> exit 0, 12 classes, 0 warnings.
