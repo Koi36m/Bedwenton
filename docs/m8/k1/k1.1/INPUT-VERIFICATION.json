@@ -1,0 +1,23 @@
+{
+  "native_k1_implementation": "632e3564420db67209cc1babc8b2039c80badd6f",
+  "native_k1_evidence": "738dbd3d449d2f15c2a524793d447b11e3184211",
+  "k1_tested_source_tree": "c06b957fc5adbdf308c627c9d1ac23ae182cb28c",
+  "k1_final_evidence_tree": "2b2dd310ce99c1fdc492217284fd8d6b5238e6f2",
+  "github_k1_evidence": "daa77be08734fcab6e92a794aa68e6502be1d079",
+  "native_recovery": "Exact local clone, strict git fsck PASS; native K0/R3/M7 ancestry preserved",
+  "owner_authorization_sha256": "8b8a6d483c7334dcf01ed5b70607dfddf6362a282d05026a268df4a0d3e6caee",
+  "baseline_tracked_files": 1695,
+  "unchanged_baseline_files": 1686,
+  "authorized_changed_existing_files": [
+    "paper-adapter/gradle.properties",
+    "paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java",
+    "paper-adapter/src/main/java/workshop/vfx/paper/m8/M8StyleCatalog.java",
+    "paper-adapter/src/test/java/workshop/vfx/paper/m8/K1BudgetAndSchedulingTest.java",
+    "paper-adapter/src/test/java/workshop/vfx/paper/m8/K1CommandsAndSafetyTest.java",
+    "paper-adapter/src/test/java/workshop/vfx/paper/m8/K1GeometryTest.java",
+    "paper-adapter/src/test/java/workshop/vfx/paper/m8/K1IdentityAndPermissionsTest.java",
+    "paper-adapter/src/test/java/workshop/vfx/paper/m8/K1LifecycleTest.java",
+    "paper-adapter/src/test/java/workshop/vfx/paper/m8/K1SyntheticMeasurementsTest.java"
+  ],
+  "main_before": "870c9fd75bf9a7a9d619179993d37f2b6487b081"
+}

@@ -20,6 +20,18 @@ import workshop.vfx.scene.*;
 public final class AuraRecipe {
     private AuraRecipe() { }
 
+    private static Layer rearArc(int points, double degrees) {
+        // Local -Z is behind the player. Include both ends of a constant-radius planar arc.
+        double sweep = degrees / 360;
+        Shape shape = Shape.of(Sampler.uniformParameter(Spiral.arc(0.9, 0.25 - sweep / 2, sweep), points,
+            Endpoints.INCLUDE_END, new SampleLimits(36, 256)));
+        // A full revolution would carry the crescent into the front. Sway +/-8 degrees instead,
+        // with zero velocity at each turnaround and the original deterministic 60-tick period.
+        Motion motion = Motion.fixed(Pose.ofTranslation(new Vec3(0, 1.0, 0)))
+            .then(Motion.spin(Vec3.Y, 16.0 / 360, -8.0 / 360, Timing.pingPong(30), Easing.SMOOTHSTEP));
+        return new Layer("orbit", Timing.loop(60), Visibility.ACTIVE_ONLY, Reveal.ALL, motion, shape, DemoStyleCatalog.END_ROD);
+    }
+
     private static Layer ring(String name, double radius, double height, int points, int period,
                               double turns, StyleKey style) {
         Shape shape = Shape.of(Sampler.uniformParameter(Spiral.circle(radius), points,
@@ -29,18 +41,18 @@ public final class AuraRecipe {
         return new Layer(name, Timing.loop(period), Visibility.ACTIVE_ONLY, Reveal.ALL, motion, shape, style);
     }
 
-    private static EffectScene scene(int orbit, int halo, int lifetime) {
+    private static EffectScene scene(int orbit, double arcDegrees, int halo, int lifetime) {
         List<Layer> layers = new ArrayList<>();
-        layers.add(ring("orbit", 0.9, 1.0, orbit, 60, 1, DemoStyleCatalog.END_ROD));
+        layers.add(rearArc(orbit, arcDegrees));
         if (halo > 0) layers.add(ring("halo", 0.45, 2.15, halo, 80, -1, M8StyleCatalog.CYAN_HALO));
-        return EffectScene.of(TimeDomain.GAME, lifetime, layers, new SceneLimits(2, 36));
+        return EffectScene.of(TimeDomain.GAME, lifetime, layers, new SceneLimits(2, 24));
     }
 
     public static EffectRecipe create(int lifetime) {
         if (lifetime < 20 || lifetime > 12000) throw new IllegalArgumentException("Aura lifetime outside approved bounds");
         return EffectRecipe.of("bedwenton-m8-aura", EffectPriority.NORMAL,
-            Map.of(QualityTier.SIMPLE, scene(12, 0, lifetime),
-                QualityTier.BALANCED, scene(18, 9, lifetime), QualityTier.HEAVY, scene(24, 12, lifetime)),
+            Map.of(QualityTier.SIMPLE, scene(8, 120, 0, lifetime),
+                QualityTier.BALANCED, scene(12, 160, 6, lifetime), QualityTier.HEAVY, scene(16, 200, 8, lifetime)),
             Map.of("orbit", LayerRole.ESSENTIAL, "halo", LayerRole.STANDARD));
     }
 }

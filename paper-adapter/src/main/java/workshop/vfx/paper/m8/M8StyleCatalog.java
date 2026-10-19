@@ -15,7 +15,7 @@ public final class M8StyleCatalog implements StyleCatalog {
 
     public static Map<StyleKey, ParticleSpec> whitelist() {
         Map<StyleKey, ParticleSpec> all = new HashMap<>(DemoStyleCatalog.whitelist());
-        all.put(CYAN_HALO, new ParticleSpec.Dust(0x5CE1FF, 0.7f));
+        all.put(CYAN_HALO, new ParticleSpec.Dust(0x5CE1FF, 0.55f));
         return Map.copyOf(all);
     }
 

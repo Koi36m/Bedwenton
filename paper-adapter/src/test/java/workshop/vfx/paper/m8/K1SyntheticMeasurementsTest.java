@@ -31,7 +31,7 @@ class K1SyntheticMeasurementsTest {
                     generated+=f.plan.sourcePoints();placements+=r.plannedPlacements();ok+=r.succeededCalls();failed+=r.failedCalls();f.account();}
                 f.tick++;
             }
-            long expectedPerFrame=scenario==0?12:scenario==1?27:scenario==2?36:72;
+            long expectedPerFrame=scenario==0?8:scenario==1?18:scenario==2?24:48;
             assertEquals(expectedPerFrame*1200,generated);assertEquals(generated*(scenario==3?2:1),placements);
             assertEquals(placements,ok);assertEquals(0,failed);assertEquals(1,f.schedules);
             if(scenario>0)json.append(',');

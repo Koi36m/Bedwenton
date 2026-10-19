@@ -1,0 +1,38 @@
+{
+  "paper-adapter/gradle.properties": {
+    "old_sha256": "1724365c0a42c544a59ed1c512520ccc9f25150954cfcde8fceb0b699657cfd4",
+    "new_sha256": "21d4510ea686d1738ccf3be2233c52e71829849840f70cc0d90116f973f30103"
+  },
+  "paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java": {
+    "old_sha256": "4483ec4b33df0edb884213b82d744ea1fe9fafe417043200972927d51e4156e5",
+    "new_sha256": "da5be74eba110eafc352cd7b4ac64813e6203f5df7b41bba294623ef5a91ec9a"
+  },
+  "paper-adapter/src/main/java/workshop/vfx/paper/m8/M8StyleCatalog.java": {
+    "old_sha256": "209494b4ac1e7462270526921164ad937b03ff90746d7d4dceedd5361606218b",
+    "new_sha256": "333d6393d20e68ce2ebc2be6075f7d10304aa9bfe12251919a18d928427969f3"
+  },
+  "paper-adapter/src/test/java/workshop/vfx/paper/m8/K1BudgetAndSchedulingTest.java": {
+    "old_sha256": "741a76fa801ce4dbd5796ba7e874956471f99a6cb5b7b51914f2c3b9de9c3e2c",
+    "new_sha256": "46e98e305797baac0bd75b538fcfd19514315acd630660c2a3334d431dd8dcbb"
+  },
+  "paper-adapter/src/test/java/workshop/vfx/paper/m8/K1CommandsAndSafetyTest.java": {
+    "old_sha256": "bd7f04c1f55e6a70e35e131c08e49f1a1ae6c503aa550cc206665d154b6c745f",
+    "new_sha256": "34d04d93bbe978dc6731f89cd460abd07495e2a96bd6f794624006e21c8e82d7"
+  },
+  "paper-adapter/src/test/java/workshop/vfx/paper/m8/K1GeometryTest.java": {
+    "old_sha256": "aa7974bd2b727bdb4a5000809f81a2bf7078c22eb4d98f70ca5f43ca41d429d2",
+    "new_sha256": "cc9055c75697e9bc37ea7551e74f8e9f199a381861e239e206419da4339220e3"
+  },
+  "paper-adapter/src/test/java/workshop/vfx/paper/m8/K1IdentityAndPermissionsTest.java": {
+    "old_sha256": "f139018dfdc0a3e1d36ef72dd2f6fd58ff49ae998f4a14263d0fdb993e9d0f4c",
+    "new_sha256": "0375c7c647ef86694fbb1169d54a8768765abbb21804d95282fe5d920507f0c1"
+  },
+  "paper-adapter/src/test/java/workshop/vfx/paper/m8/K1LifecycleTest.java": {
+    "old_sha256": "9700cab56e61065abf2aa4a30ca0007dcaabef03c6f76a67f0d755558d31012c",
+    "new_sha256": "bc431c1558321ee6ad415593e07fe086b427112db90d36ee3ff4102d9db5b06e"
+  },
+  "paper-adapter/src/test/java/workshop/vfx/paper/m8/K1SyntheticMeasurementsTest.java": {
+    "old_sha256": "f04de48f4e288a4fc4c86bd521090d20f6fe0b53ba4801cc8c336de078bbc4ba",
+    "new_sha256": "292a030529fd23d52e20654673f7c9f200e6b910604774095d5891b9996778e6"
+  }
+}

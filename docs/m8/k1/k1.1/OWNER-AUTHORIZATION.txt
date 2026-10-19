@@ -1,0 +1,223 @@
+Begin **Bedwenton M8 K1.1 — Arcane Halo visual polish ONLY**.
+
+Read and preserve the accepted K1 implementation baseline before making changes.
+
+## Project context
+
+Repository: `Koi36m/Bedwenton`
+
+Accepted foundations:
+- M1–M6 accepted and frozen
+- M7 accepted prototype
+- M8 R3 design accepted
+- M8 K0 implementation passed review
+- M8 K1 Arcane Halo implementation passed independent implementation review and has now been tested in Minecraft
+
+Relevant K1 baseline:
+- Native implementation: `632e3564420db67209cc1babc8b2039c80badd6f`
+- Native evidence checkpoint: `738dbd3d449d2f15c2a524793d447b11e3184211`
+- GitHub tested snapshot: `ca4e8170aa2c3d9a47802f145938834eb0cc7d42`
+- Identical tested source tree: `c06b957fc5adbdf308c627c9d1ac23ae182cb28c`
+
+Do not restart K1 from scratch.
+Work from the verified K1 implementation.
+
+## Why this K1.1 pass is requested
+
+The current Arcane Halo works correctly in-game:
+- aura follows the player
+- tier switching works
+- stop works
+- death cleanup works
+- teleport and dimension-follow behavior works
+- perceived performance is acceptable
+
+However, the current full white waist circle looks too heavy / bulky.
+The owner wants the effect to feel **more elegant**.
+
+## K1.1 objective
+
+Implement a **visual polish pass only** for Arcane Halo.
+
+Keep the current effect family, commands, permissions, and lifecycle behavior.
+
+Do NOT redesign the architecture.
+
+## Required visual changes
+
+### 1. Replace the full waist ring with a rear-biased arc
+
+The current bright white waist ring should no longer be a full 360° circle.
+
+Change it into a **rear-weighted arc / crescent** that sits behind the player and follows the player's body yaw.
+
+Requirements:
+- keep the bright white END_ROD aesthetic
+- the brightest / most visible part should be behind the player
+- reduce the “solid glowing donut around the whole body” feeling
+- the front of the player should be visually cleaner
+- the arc should still read as a magical aura attached to the waist/back area
+- it must rotate / animate consistently with the current aura timing model
+
+Design guidance:
+- Simple: clearly rear-biased, elegant, minimal
+- Balanced: stronger rear arc with slightly fuller side presence
+- Heavy: richer rear arc, possibly extending farther around the sides, but do NOT return to a full blunt 360° ring unless there is a very subtle front continuation
+
+The result should feel like a magical support aura behind the player, not a thick circle surrounding them equally.
+
+### 2. Refine the cyan halo to be cleaner and more elegant
+
+The current cyan halo works, but should feel a little more refined.
+
+Requirements:
+- keep cyan DUST
+- reduce cloud-like visual crowding
+- if needed, slightly reduce density
+- if needed, slightly raise the halo so it reads more cleanly
+- avoid making it clash excessively with the player nameplate
+- preserve the current concept of a small rotating halo above the head
+
+### 3. Do not add new visual layers
+
+For this polish pass:
+- do NOT add orbiting spark nodes
+- do NOT add trails
+- do NOT add spiral behavior
+- do NOT add new particle families
+- do NOT add gyroscope / multi-ring complexity
+
+This is a refinement pass, not a feature expansion.
+
+## Behavior that must remain unchanged
+
+Keep all existing K1 functional behavior unless a bug fix is required:
+
+- `/vfxdemo aura`
+- `/vfxdemo aura simple`
+- `/vfxdemo aura balanced`
+- `/vfxdemo aura heavy`
+- `/vfxdemo aura off`
+- `/vfxdemo stop`
+- `/vfxdemo stop all`
+- `/vfxdemo status`
+
+The aura must still:
+- follow walking
+- follow sprinting
+- follow jumping / falling
+- follow teleports
+- continue correctly across dimension changes if that is the current K1 behavior
+- stop on death
+- stop on disconnect
+- stop on explicit cancellation
+- stop on shutdown
+- share the K0 scheduler and global planning path
+- remain subject to all identity, permission, and lifecycle protections
+
+Do not loosen any fail-closed validation.
+
+## Performance / safety constraints
+
+This is still a conservative visual effect.
+
+Do not:
+- add new scheduled tasks
+- increase effect counts or capacities
+- add unbounded state
+- load chunks for effects
+- broadcast particles globally
+- introduce NMS
+- introduce reflection-based hacks
+- introduce any new dependency
+
+Keep particle counts bounded and performance-conscious.
+
+A small reduction in total particle density is acceptable if it produces a more elegant result.
+
+## Tier guidance
+
+You may adjust the per-tier geometry and point distribution if needed for elegance, but document it clearly.
+
+Target intent:
+- Simple = subtle rear arc, minimal and clean
+- Balanced = the best default presentation
+- Heavy = fuller, richer, still elegant
+
+Avoid making Heavy look messy.
+
+If you adjust point counts, keep them conservative and document the new totals.
+
+## Documentation requirements
+
+Add a concise K1.1 polish note under `docs/m8/k1/`, for example:
+
+- `M8-K1.1-VISUAL-POLISH.md`
+
+Document:
+- what changed visually
+- whether point counts changed
+- whether halo height changed
+- whether rotation or tier presentation changed
+- why the change was made
+
+## Testing requirements
+
+Preserve the full existing baseline.
+Run all relevant tests again.
+
+At minimum:
+- existing baseline regressions
+- K0 tests
+- K1 tests
+- any updated K1 geometry / tier tests
+- any tests affected by changed point counts or placement expectations
+
+If K1 geometry tests hard-code the old full ring, update them to validate the new rear-biased arc shape instead of the previous 360° ring.
+
+Do not remove meaningful assertions just to get a passing result.
+
+## Deliverables
+
+Provide:
+1. updated source
+2. compiled plugin JAR if build succeeds
+3. Git provenance
+4. SHA-256 manifest
+5. implementation report
+6. updated K1.1 visual polish document
+7. test summary
+8. smoke-test checklist focused on:
+   - visual appearance
+   - rear arc readability
+   - halo clarity
+   - movement following
+   - stop / death / teleport / dimension behavior
+   - performance observation
+
+## Scope boundary
+
+Authorized:
+- Arcane Halo visual polish only
+
+Not authorized:
+- K2 Movement Trail
+- K3 Animated Activation
+- K4 Combined Showcase
+- global cinematic summoning
+- dragon event work
+- new effect families
+- multiplayer redesign
+- major refactors unrelated to K1.1
+
+## Completion requirement
+
+Stop after K1.1 implementation and verification.
+
+Report either:
+
+READY FOR INDEPENDENT K1.1 IMPLEMENTATION REVIEW
+
+or
+
+BLOCKED
