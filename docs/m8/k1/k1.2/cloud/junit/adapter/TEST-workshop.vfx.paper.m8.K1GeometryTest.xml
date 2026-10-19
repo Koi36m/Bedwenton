@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.paper.m8.K1GeometryTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-19T15:14:18.097Z" hostname="runnervm8k3b6" time="0.023">
+  <properties/>
+  <testcase name="bothLayersMatchIndependentFormulaAtAllTiersAndBoundaryTicks()" classname="workshop.vfx.paper.m8.K1GeometryTest" time="0.008"/>
+  <testcase name="waistAndHaloRadiiHeightsAndNoSeamDuplicate()" classname="workshop.vfx.paper.m8.K1GeometryTest" time="0.001"/>
+  <testcase name="recipeLifetimeBoundsRejectWithoutClamping()" classname="workshop.vfx.paper.m8.K1GeometryTest" time="0.002"/>
+  <testcase name="deterministicFrameHasNoHiddenClockOrRandomInput()" classname="workshop.vfx.paper.m8.K1GeometryTest" time="0.001"/>
+  <testcase name="rearSwayAndHaloSpinKeepTheirIndependentPeriods()" classname="workshop.vfx.paper.m8.K1GeometryTest" time="0.0"/>
+  <testcase name="worldChangeContinuesWithSameRecipeClockAndNoInterpolatedPoints()" classname="workshop.vfx.paper.m8.K1GeometryTest" time="0.0"/>
+  <testcase name="walkingSprintingJumpingAndFallingHaveExactCentres()" classname="workshop.vfx.paper.m8.K1GeometryTest" time="0.003"/>
+  <testcase name="exactTierTotalsAndReservations()" classname="workshop.vfx.paper.m8.K1GeometryTest" time="0.0"/>
+  <testcase name="headYawAndPitchDoNotTiltOrRotateAttachment()" classname="workshop.vfx.paper.m8.K1GeometryTest" time="0.0"/>
+  <testcase name="yawMapsForwardLeftAndUp()" classname="workshop.vfx.paper.m8.K1GeometryTest" time="0.001"/>
+  <testcase name="sceneAndShapesAreReusedAcrossFramesOwnersAndReplacement()" classname="workshop.vfx.paper.m8.K1GeometryTest" time="0.002"/>
+  <testcase name="paletteAndRolesAreExact()" classname="workshop.vfx.paper.m8.K1GeometryTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.paper.m8.K0M8OnlySchedulingTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-19T15:14:15.829Z" hostname="runnervm8k3b6" time="0.041">
+  <properties/>
+  <testcase name="Stale callbacks: a callback from a cancelled generation never plans, also after an M8-only restart" classname="workshop.vfx.paper.m8.K0M8OnlySchedulingTest" time="0.001"/>
+  <testcase name="Shutdown: close disposes M8 effects and rings, cancels the task, refuses later starts, and stale ticks do nothing" classname="workshop.vfx.paper.m8.K0M8OnlySchedulingTest" time="0.003"/>
+  <testcase name="Natural end and termination: finished effects are disposed in the tick, and the task is cancelled when nothing remains" classname="workshop.vfx.paper.m8.K0M8OnlySchedulingTest" time="0.026"/>
+  <testcase name="Ring and M8 together: exactly one planning call per tick containing both requests; one task" classname="workshop.vfx.paper.m8.K0M8OnlySchedulingTest" time="0.003"/>
+  <testcase name="Aura only: first M8 start schedules the one task; each tick plans once with the aura request; stop cancels" classname="workshop.vfx.paper.m8.K0M8OnlySchedulingTest" time="0.002"/>
+  <testcase name="Stationary trail with no live samples: task keeps lightweight ticks, planner is skipped, zero report; moving resumes planning" classname="workshop.vfx.paper.m8.K0M8OnlySchedulingTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.paper.core.RequestContextConsistencyTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-19T15:14:15.705Z" hostname="runnervm8k3b6" time="0.024">
+  <properties/>
+  <testcase name="Invalid contexts (NaN or infinite anchor, negative owner or world id): the delivery is rejected whole" classname="workshop.vfx.paper.core.RequestContextConsistencyTest" time="0.015"/>
+  <testcase name="A viewer with a NaN position is refused (VIEWER_POSITION_INVALID); the other viewers are unaffected" classname="workshop.vfx.paper.core.RequestContextConsistencyTest" time="0.001"/>
+  <testcase name="One mismatched context (ring B's slot names ring A, owner A): only ring B is rejected; ring A is unaffected" classname="workshop.vfx.paper.core.RequestContextConsistencyTest" time="0.001"/>
+  <testcase name="Control: valid contexts; each owner sees its own ring; non-owners without view are refused; accounting balances" classname="workshop.vfx.paper.core.RequestContextConsistencyTest" time="0.002"/>
+  <testcase name="Swapped contexts (key ring A holds ring B's context with owner B, and vice versa): both deliveries rejected, nothing sent" classname="workshop.vfx.paper.core.RequestContextConsistencyTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

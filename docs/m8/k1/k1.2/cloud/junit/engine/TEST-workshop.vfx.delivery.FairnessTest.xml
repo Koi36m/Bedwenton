@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.delivery.FairnessTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-19T15:12:56.134Z" hostname="runnervm8k3b6" time="0.006">
+  <properties/>
+  <testcase name="Generation and placement are both decided in allocation order: a lower group never displaces a higher one" classname="workshop.vfx.delivery.FairnessTest" time="0.001"/>
+  <testcase name="Rotation: with the same m requests for m consecutive ticks, each is first in its group exactly once and served once" classname="workshop.vfx.delivery.FairnessTest" time="0.003"/>
+  <testcase name="Allocation order: ACTION, NORMAL, AMBIENT; ids ascending, rotated by floorMod(tick, m) within each group" classname="workshop.vfx.delivery.FairnessTest" time="0.001"/>
+  <testcase name="Strict priority: ACTION is served before NORMAL whatever the ids, input order or tick; NORMAL has no reserve" classname="workshop.vfx.delivery.FairnessTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

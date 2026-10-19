@@ -1,0 +1,56 @@
+{
+  "status": "READY FOR INDEPENDENT K1.2 IMPLEMENTATION REVIEW",
+  "native_implementation": "22e6926af55e928fea4f3894b85ff5c23a034e63",
+  "native_parent": "d5a1fa2b59662af98d228f1f63fc6e87af5e9105",
+  "github_snapshot": "0b95b61299243b119adc4147b3f3a0dccbfb4db4",
+  "tested_tree": "1ad4e8c25aa2de697b53119f6ceff0f44363cd9e",
+  "counts": {
+    "tests": 603,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "groups": {
+    "M1-M6": 415,
+    "M7": 61,
+    "K0": 50,
+    "K1": 57,
+    "K1.1": 6,
+    "K1.2": 14
+  },
+  "xml": {
+    "engine": {
+      "tests": 415,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_files": 59
+    },
+    "adapter": {
+      "tests": 188,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_files": 24
+    }
+  },
+  "jar_name": "bedwenton-vfx-paper-0.8.0-k1.2.jar",
+  "jar_sha256": "7d475208bea9a2debac87dec58c9f1db94e7aeaea743f1e8b12b882775e6a96b",
+  "jar_size": 196498,
+  "production_changed_java": [
+    "AuraRecipe.java"
+  ],
+  "prior_tests_preserved": 526,
+  "k1_tests_updated_for_authorized_visuals": 57,
+  "existing_polish_tests": 6,
+  "new_sigil_tests": 14,
+  "unchanged_baseline_files": 1913,
+  "reference_datasets": "7/7 byte-identical, M6 regenerated twice",
+  "production_warnings": 0,
+  "engine_runtime_dependencies": "empty",
+  "adapter_runtime": "only accepted engine; Paper compileOnly",
+  "real_k1_2_smoke": "NOT RUN",
+  "k1_historical_smoke": "Historical original K1 observations do not establish K1.2 in-game success",
+  "acceptance": "PENDING OWNER AND INDEPENDENT REVIEW",
+  "baseline_test_cases_preserved": 589
+}

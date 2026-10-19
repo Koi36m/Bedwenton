@@ -1,0 +1,93 @@
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java b/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java
+index 81297ac..30bacad 100644
+--- a/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java
+@@ -5,7 +5,9 @@ import java.util.List;
+ import java.util.Map;
+ import workshop.vfx.delivery.*;
+ import workshop.vfx.math.core.Pose;
++import workshop.vfx.math.core.Quat;
+ import workshop.vfx.math.core.Vec3;
++import workshop.vfx.math.curve.CubicBezier;
+ import workshop.vfx.math.curve.Easing;
+ import workshop.vfx.math.curve.Spiral;
+ import workshop.vfx.math.sample.Endpoints;
+@@ -20,39 +22,54 @@ import workshop.vfx.scene.*;
+ public final class AuraRecipe {
+     private AuraRecipe() { }
+ 
+-    private static Layer rearArc(int points, double degrees) {
+-        // Local -Z is behind the player. Include both ends of a constant-radius planar arc.
+-        double sweep = degrees / 360;
+-        Shape shape = Shape.of(Sampler.uniformParameter(Spiral.arc(0.9, 0.25 - sweep / 2, sweep), points,
+-            Endpoints.INCLUDE_END, new SampleLimits(36, 256)));
+-        // A full revolution would carry the crescent into the front. Sway +/-8 degrees instead,
+-        // with zero velocity at each turnaround and the original deterministic 60-tick period.
+-        Motion motion = Motion.fixed(Pose.ofTranslation(new Vec3(0, 1.0, 0)))
+-            .then(Motion.spin(Vec3.Y, 16.0 / 360, -8.0 / 360, Timing.pingPong(30), Easing.SMOOTHSTEP));
+-        return new Layer("orbit", Timing.loop(60), Visibility.ACTIVE_ONLY, Reveal.ALL, motion, shape, DemoStyleCatalog.END_ROD);
++    private static Layer outline(int points) {
++        Shape shape = Shape.of(Sampler.uniformParameter(Spiral.circle(0.78), points,
++            Endpoints.EXCLUDE_END, new SampleLimits(44, 256)));
++        // The existing circle is XZ. Rotate +90 degrees about X into XY, then place behind the torso.
++        double half = Math.PI / 4;
++        Pose placement = new Pose(new Vec3(0, 1.25, -0.65),
++            new Quat(StrictMath.cos(half), StrictMath.sin(half), 0, 0), 1);
++        return new Layer("orbit", Timing.loop(80), Visibility.ACTIVE_ONLY, Reveal.ALL,
++            Motion.fixed(placement), shape, DemoStyleCatalog.END_ROD);
+     }
+ 
+-    private static Layer ring(String name, double radius, double height, int points, int period,
+-                              double turns, StyleKey style) {
+-        Shape shape = Shape.of(Sampler.uniformParameter(Spiral.circle(radius), points,
+-            Endpoints.EXCLUDE_END, new SampleLimits(36, 256)));
+-        Motion motion = Motion.fixed(Pose.ofTranslation(new Vec3(0, height, 0)))
+-            .then(Motion.spin(Vec3.Y, turns, 0, Timing.loop(period), Easing.LINEAR));
+-        return new Layer(name, Timing.loop(period), Visibility.ACTIVE_ONLY, Reveal.ALL, motion, shape, style);
++    private static Layer stroke(String name, CubicBezier curve, int points, boolean skipStart) {
++        // The second stroke starts after the shared junction: never emit it twice in one frame.
++        Shape shape = Shape.of(Sampler.uniformParameter(curve, skipStart ? 1.0 / points : 0, 1, points,
++            Endpoints.INCLUDE_END, new SampleLimits(44, 256)));
++        Motion motion = Motion.fixed(Pose.ofTranslation(new Vec3(0, 1.25, -0.65)))
++            .then(Motion.spin(Vec3.Z, 1, 0, Timing.loop(80), Easing.LINEAR));
++        return new Layer(name, Timing.loop(80), Visibility.ACTIVE_ONLY, Reveal.ALL, motion, shape, DemoStyleCatalog.END_ROD);
+     }
+ 
+-    private static EffectScene scene(int orbit, double arcDegrees, int halo, int lifetime) {
++    private static Layer halo(int points) {
++        // K1.1 cyan geometry, payload and clock are deliberately unchanged.
++        Shape shape = Shape.of(Sampler.uniformParameter(Spiral.circle(0.45), points,
++            Endpoints.EXCLUDE_END, new SampleLimits(44, 256)));
++        Motion motion = Motion.fixed(Pose.ofTranslation(new Vec3(0, 2.15, 0)))
++            .then(Motion.spin(Vec3.Y, -1, 0, Timing.loop(80), Easing.LINEAR));
++        return new Layer("halo", Timing.loop(80), Visibility.ACTIVE_ONLY, Reveal.ALL, motion, shape, M8StyleCatalog.CYAN_HALO);
++    }
++
++    private static EffectScene scene(int outer, int innerPerStroke, int halo, int lifetime) {
+         List<Layer> layers = new ArrayList<>();
+-        layers.add(rearArc(orbit, arcDegrees));
+-        if (halo > 0) layers.add(ring("halo", 0.45, 2.15, halo, 80, -1, M8StyleCatalog.CYAN_HALO));
+-        return EffectScene.of(TimeDomain.GAME, lifetime, layers, new SceneLimits(2, 24));
++        layers.add(outline(outer));
++        // Two joined, tangent-aligned cubic sweeps form an asymmetric flowing S inside the outline.
++        // Every control point is within radius 0.665, so the convex hull stays strictly inside radius 0.78.
++        layers.add(stroke("stroke-a", new CubicBezier(new Vec3(-0.62, -0.24, 0), new Vec3(-0.18, -0.38, 0),
++            new Vec3(-0.06, -0.16, 0), new Vec3(-0.08, 0.02, 0)), innerPerStroke, false));
++        layers.add(stroke("stroke-b", new CubicBezier(new Vec3(-0.08, 0.02, 0), new Vec3(-0.12, 0.38, 0),
++            new Vec3(0.28, 0.32, 0), new Vec3(0.56, 0.30, 0)), innerPerStroke, true));
++        if (halo > 0) layers.add(halo(halo));
++        return EffectScene.of(TimeDomain.GAME, lifetime, layers, new SceneLimits(4, 44));
+     }
+ 
+     public static EffectRecipe create(int lifetime) {
+         if (lifetime < 20 || lifetime > 12000) throw new IllegalArgumentException("Aura lifetime outside approved bounds");
+         return EffectRecipe.of("bedwenton-m8-aura", EffectPriority.NORMAL,
+-            Map.of(QualityTier.SIMPLE, scene(8, 120, 0, lifetime),
+-                QualityTier.BALANCED, scene(12, 160, 6, lifetime), QualityTier.HEAVY, scene(16, 200, 8, lifetime)),
+-            Map.of("orbit", LayerRole.ESSENTIAL, "halo", LayerRole.STANDARD));
++            Map.of(QualityTier.SIMPLE, scene(12, 4, 0, lifetime),
++                QualityTier.BALANCED, scene(16, 6, 6, lifetime), QualityTier.HEAVY, scene(20, 8, 8, lifetime)),
++            Map.of("orbit", LayerRole.ESSENTIAL, "stroke-a", LayerRole.STANDARD,
++                "stroke-b", LayerRole.STANDARD, "halo", LayerRole.STANDARD));
+     }
+ }

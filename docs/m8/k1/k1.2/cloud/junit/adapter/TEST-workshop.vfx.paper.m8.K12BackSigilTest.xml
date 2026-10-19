@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.paper.m8.K12BackSigilTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-10-19T15:14:16.077Z" hostname="runnervm8k3b6" time="0.081">
+  <properties/>
+  <testcase name="targetTierAllocationsFitExistingCapsAndAccountingWithOneGlobalPlan()" classname="workshop.vfx.paper.m8.K12BackSigilTest" time="0.002"/>
+  <testcase name="teleportAndNewWorldUseFreshRearPoseWithoutRestartingPatternClock()" classname="workshop.vfx.paper.m8.K12BackSigilTest" time="0.001"/>
+  <testcase name="strokesAreCurvedRatherThanStraightSpokes()" classname="workshop.vfx.paper.m8.K12BackSigilTest" time="0.001"/>
+  <testcase name="haloCoordinatesAreBitIdenticalToCapturedVerifiedK11Baseline()" classname="workshop.vfx.paper.m8.K12BackSigilTest" time="0.031"/>
+  <testcase name="rotationWrapIsContinuousAndRepeatsExactlyAfter80Ticks()" classname="workshop.vfx.paper.m8.K12BackSigilTest" time="0.001"/>
+  <testcase name="backwardOffsetRotatesWithBodyYawRatherThanWorldDirections()" classname="workshop.vfx.paper.m8.K12BackSigilTest" time="0.003"/>
+  <testcase name="joinedStrokesNeverDuplicateParticlesAtTheirSharedJunction()" classname="workshop.vfx.paper.m8.K12BackSigilTest" time="0.003"/>
+  <testcase name="innerStrokesRotateOneQuarterTurnAroundLocalNormal()" classname="workshop.vfx.paper.m8.K12BackSigilTest" time="0.001"/>
+  <testcase name="bothStrokesRemainStrictlyContainedThroughoutCompleteRotations()" classname="workshop.vfx.paper.m8.K12BackSigilTest" time="0.008"/>
+  <testcase name="discNeverTurnsEdgeOnWhenInnerPatternRotates()" classname="workshop.vfx.paper.m8.K12BackSigilTest" time="0.002"/>
+  <testcase name="stableOutlineRemainsCompleteAndCircularWhilePatternTurns()" classname="workshop.vfx.paper.m8.K12BackSigilTest" time="0.007"/>
+  <testcase name="entireWhiteFormationIsInVerticalXYPlaneBehindTorsoAtEveryTier()" classname="workshop.vfx.paper.m8.K12BackSigilTest" time="0.01"/>
+  <testcase name="allGeometryIsReusedAcrossTicksOwnersAndReplacement()" classname="workshop.vfx.paper.m8.K12BackSigilTest" time="0.002"/>
+  <testcase name="asymmetricPatternCannotHideRotationThroughHalfTurnSymmetry()" classname="workshop.vfx.paper.m8.K12BackSigilTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

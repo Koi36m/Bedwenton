@@ -1,0 +1,753 @@
+diff --git a/.github/workflows/m8-k1-2-java25-verification.yml b/.github/workflows/m8-k1-2-java25-verification.yml
+new file mode 100644
+index 0000000..92d49ff
+--- /dev/null
++++ b/.github/workflows/m8-k1-2-java25-verification.yml
+@@ -0,0 +1,86 @@
++name: M8 K1.2 Java 25 Verification
++on:
++  push:
++    branches: [m8-k1-2-visual-correction, m8-k1-2-actions-verification]
++  workflow_dispatch:
++permissions:
++  contents: read
++jobs:
++  verify:
++    runs-on: ubuntu-latest
++    timeout-minutes: 30
++    steps:
++      - uses: actions/checkout@v5
++      - uses: actions/setup-java@v5
++        with:
++          distribution: temurin
++          java-version: '25'
++      - name: Verify exact source, frozen engine and accepted M7 tests
++        shell: bash
++        run: |
++          set -euo pipefail
++          mkdir -p "$RUNNER_TEMP/m8-k1-2-evidence"
++          {
++            git rev-parse HEAD
++            git rev-parse HEAD^{tree}
++            java -version
++            javac -version
++            ./gradlew --version
++            sha256sum -c docs/m8/k0/FROZEN-M1-M6-SHA256SUMS.txt
++            sha256sum -c docs/m8/k1/k1.2/FROZEN-K11-SHA256SUMS.txt
++            sha256sum -c docs/m8/k0/APPROVED-R3-SHA256SUMS.txt
++            sha256sum -c docs/m8/k1/k1.2/IMPLEMENTATION-SHA256SUMS.txt
++          } > "$RUNNER_TEMP/m8-k1-2-evidence/source-and-toolchain.log" 2>&1
++          cat "$RUNNER_TEMP/m8-k1-2-evidence/source-and-toolchain.log"
++      - name: Clean Java 25 regression, production K1.2 tests and Paper JAR checks
++        shell: bash
++        run: bash paper-adapter/tools/m8-k1-2/verify.sh "$RUNNER_TEMP/m8-k1-2-evidence"
++      - name: Verify API signatures, scope exclusions and production compiler warnings
++        shell: bash
++        run: |
++          set -euo pipefail
++          API=$(find "$HOME/.gradle/caches/modules-2/files-2.1/io.papermc.paper/paper-api/26.3.build.204-stable" -name '*.jar' -print -quit)
++          javap -classpath "$API" org.bukkit.Bukkit org.bukkit.Server org.bukkit.entity.Player org.bukkit.entity.Entity org.bukkit.entity.LivingEntity org.bukkit.Location org.bukkit.World org.bukkit.generator.WorldInfo org.bukkit.Particle 'org.bukkit.Particle$DustOptions' org.bukkit.Color org.bukkit.plugin.java.JavaPlugin io.papermc.paper.command.brigadier.BasicCommand org.bukkit.scheduler.BukkitScheduler > "$RUNNER_TEMP/m8-k1-2-evidence/paper-api-signatures.txt"
++          cp paper-adapter/build/paper-api-provenance.txt "$RUNNER_TEMP/m8-k1-2-evidence/"
++          sha256sum paper-adapter/build/libs/*.jar > "$RUNNER_TEMP/m8-k1-2-evidence/plugin-SHA256SUMS.txt"
++          python3 - <<'PY'
++          import os,zipfile
++          from pathlib import Path
++          evidence=Path(os.environ['RUNNER_TEMP'])/'m8-k1-2-evidence'
++          for name in ['engine-clean-test.log','adapter-clean-test.log']:
++              text=(evidence/name).read_text()
++              if name.startswith('adapter'): assert 'warning:' not in text,text
++              else:
++                  production=text.split('> Task :compileJava',1)[1].split('> Task :',1)[0]
++                  assert 'warning:' not in production,production
++          api=(evidence/'paper-api-signatures.txt').read_text()
++          for signature in ['getBodyYaw()', 'getYaw()', 'getPitch()', 'getLocation()', 'isDead()', 'getUniqueId()', 'getPlayer(java.util.UUID)', 'getMinHeight()', 'getMaxHeight()', 'isChunkLoaded(int, int)', 'getCurrentTick()', 'registerCommand(', 'runTaskTimer(', 'org.bukkit.Particle$DustOptions(org.bukkit.Color, float)']:
++              assert signature in api,signature
++          jar=next(Path('paper-adapter/build/libs').glob('*.jar'))
++          with zipfile.ZipFile(jar) as z:
++              names=z.namelist()
++              for deferred in ['TrailEffect','ActivationEffect','M8Recipes','RingBufferTrailHistory']:
++                  assert not any(n.endswith('/'+deferred+'.class') for n in names),deferred
++              (evidence/'plugin-contents.txt').write_text('\n'.join(names)+'\n')
++          print('PASS: exact pinned API methods; no K2–K4 visual implementations; zero production compiler warnings')
++          PY
++      - uses: actions/upload-artifact@v6
++        if: always()
++        with:
++          name: m8-k1-2-java25-verification-${{ github.run_id }}
++          if-no-files-found: error
++          retention-days: 90
++          path: |
++            ${{ runner.temp }}/m8-k1-2-evidence/
++            build/test-results/test/
++            build/reports/tests/test/
++            paper-adapter/build/test-results/test/
++            paper-adapter/build/reports/tests/test/
++            paper-adapter/build/libs/*.jar
++      - uses: actions/upload-artifact@v6
++        if: success()
++        with:
++          name: bedwenton-vfx-paper-0.8.0-k1.2
++          if-no-files-found: error
++          retention-days: 90
++          path: paper-adapter/build/libs/bedwenton-vfx-paper-0.8.0-k1.2.jar
+diff --git a/paper-adapter/gradle.properties b/paper-adapter/gradle.properties
+index 4fa101b..13c64af 100644
+--- a/paper-adapter/gradle.properties
++++ b/paper-adapter/gradle.properties
+@@ -1,2 +1,2 @@
+-version=0.8.0-k1.1
++version=0.8.0-k1.2
+ paperApiVersion=26.3.build.204-stable
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java b/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java
+index 81297ac..30bacad 100644
+--- a/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java
+@@ -5,7 +5,9 @@ import java.util.List;
+ import java.util.Map;
+ import workshop.vfx.delivery.*;
+ import workshop.vfx.math.core.Pose;
++import workshop.vfx.math.core.Quat;
+ import workshop.vfx.math.core.Vec3;
++import workshop.vfx.math.curve.CubicBezier;
+ import workshop.vfx.math.curve.Easing;
+ import workshop.vfx.math.curve.Spiral;
+ import workshop.vfx.math.sample.Endpoints;
+@@ -20,39 +22,54 @@ import workshop.vfx.scene.*;
+ public final class AuraRecipe {
+     private AuraRecipe() { }
+ 
+-    private static Layer rearArc(int points, double degrees) {
+-        // Local -Z is behind the player. Include both ends of a constant-radius planar arc.
+-        double sweep = degrees / 360;
+-        Shape shape = Shape.of(Sampler.uniformParameter(Spiral.arc(0.9, 0.25 - sweep / 2, sweep), points,
+-            Endpoints.INCLUDE_END, new SampleLimits(36, 256)));
+-        // A full revolution would carry the crescent into the front. Sway +/-8 degrees instead,
+-        // with zero velocity at each turnaround and the original deterministic 60-tick period.
+-        Motion motion = Motion.fixed(Pose.ofTranslation(new Vec3(0, 1.0, 0)))
+-            .then(Motion.spin(Vec3.Y, 16.0 / 360, -8.0 / 360, Timing.pingPong(30), Easing.SMOOTHSTEP));
+-        return new Layer("orbit", Timing.loop(60), Visibility.ACTIVE_ONLY, Reveal.ALL, motion, shape, DemoStyleCatalog.END_ROD);
++    private static Layer outline(int points) {
++        Shape shape = Shape.of(Sampler.uniformParameter(Spiral.circle(0.78), points,
++            Endpoints.EXCLUDE_END, new SampleLimits(44, 256)));
++        // The existing circle is XZ. Rotate +90 degrees about X into XY, then place behind the torso.
++        double half = Math.PI / 4;
++        Pose placement = new Pose(new Vec3(0, 1.25, -0.65),
++            new Quat(StrictMath.cos(half), StrictMath.sin(half), 0, 0), 1);
++        return new Layer("orbit", Timing.loop(80), Visibility.ACTIVE_ONLY, Reveal.ALL,
++            Motion.fixed(placement), shape, DemoStyleCatalog.END_ROD);
+     }
+ 
+-    private static Layer ring(String name, double radius, double height, int points, int period,
+-                              double turns, StyleKey style) {
+-        Shape shape = Shape.of(Sampler.uniformParameter(Spiral.circle(radius), points,
+-            Endpoints.EXCLUDE_END, new SampleLimits(36, 256)));
+-        Motion motion = Motion.fixed(Pose.ofTranslation(new Vec3(0, height, 0)))
+-            .then(Motion.spin(Vec3.Y, turns, 0, Timing.loop(period), Easing.LINEAR));
+-        return new Layer(name, Timing.loop(period), Visibility.ACTIVE_ONLY, Reveal.ALL, motion, shape, style);
++    private static Layer stroke(String name, CubicBezier curve, int points, boolean skipStart) {
++        // The second stroke starts after the shared junction: never emit it twice in one frame.
++        Shape shape = Shape.of(Sampler.uniformParameter(curve, skipStart ? 1.0 / points : 0, 1, points,
++            Endpoints.INCLUDE_END, new SampleLimits(44, 256)));
++        Motion motion = Motion.fixed(Pose.ofTranslation(new Vec3(0, 1.25, -0.65)))
++            .then(Motion.spin(Vec3.Z, 1, 0, Timing.loop(80), Easing.LINEAR));
++        return new Layer(name, Timing.loop(80), Visibility.ACTIVE_ONLY, Reveal.ALL, motion, shape, DemoStyleCatalog.END_ROD);
+     }
+ 
+-    private static EffectScene scene(int orbit, double arcDegrees, int halo, int lifetime) {
++    private static Layer halo(int points) {
++        // K1.1 cyan geometry, payload and clock are deliberately unchanged.
++        Shape shape = Shape.of(Sampler.uniformParameter(Spiral.circle(0.45), points,
++            Endpoints.EXCLUDE_END, new SampleLimits(44, 256)));
++        Motion motion = Motion.fixed(Pose.ofTranslation(new Vec3(0, 2.15, 0)))
++            .then(Motion.spin(Vec3.Y, -1, 0, Timing.loop(80), Easing.LINEAR));
++        return new Layer("halo", Timing.loop(80), Visibility.ACTIVE_ONLY, Reveal.ALL, motion, shape, M8StyleCatalog.CYAN_HALO);
++    }
++
++    private static EffectScene scene(int outer, int innerPerStroke, int halo, int lifetime) {
+         List<Layer> layers = new ArrayList<>();
+-        layers.add(rearArc(orbit, arcDegrees));
+-        if (halo > 0) layers.add(ring("halo", 0.45, 2.15, halo, 80, -1, M8StyleCatalog.CYAN_HALO));
+-        return EffectScene.of(TimeDomain.GAME, lifetime, layers, new SceneLimits(2, 24));
++        layers.add(outline(outer));
++        // Two joined, tangent-aligned cubic sweeps form an asymmetric flowing S inside the outline.
++        // Every control point is within radius 0.665, so the convex hull stays strictly inside radius 0.78.
++        layers.add(stroke("stroke-a", new CubicBezier(new Vec3(-0.62, -0.24, 0), new Vec3(-0.18, -0.38, 0),
++            new Vec3(-0.06, -0.16, 0), new Vec3(-0.08, 0.02, 0)), innerPerStroke, false));
++        layers.add(stroke("stroke-b", new CubicBezier(new Vec3(-0.08, 0.02, 0), new Vec3(-0.12, 0.38, 0),
++            new Vec3(0.28, 0.32, 0), new Vec3(0.56, 0.30, 0)), innerPerStroke, true));
++        if (halo > 0) layers.add(halo(halo));
++        return EffectScene.of(TimeDomain.GAME, lifetime, layers, new SceneLimits(4, 44));
+     }
+ 
+     public static EffectRecipe create(int lifetime) {
+         if (lifetime < 20 || lifetime > 12000) throw new IllegalArgumentException("Aura lifetime outside approved bounds");
+         return EffectRecipe.of("bedwenton-m8-aura", EffectPriority.NORMAL,
+-            Map.of(QualityTier.SIMPLE, scene(8, 120, 0, lifetime),
+-                QualityTier.BALANCED, scene(12, 160, 6, lifetime), QualityTier.HEAVY, scene(16, 200, 8, lifetime)),
+-            Map.of("orbit", LayerRole.ESSENTIAL, "halo", LayerRole.STANDARD));
++            Map.of(QualityTier.SIMPLE, scene(12, 4, 0, lifetime),
++                QualityTier.BALANCED, scene(16, 6, 6, lifetime), QualityTier.HEAVY, scene(20, 8, 8, lifetime)),
++            Map.of("orbit", LayerRole.ESSENTIAL, "stroke-a", LayerRole.STANDARD,
++                "stroke-b", LayerRole.STANDARD, "halo", LayerRole.STANDARD));
+     }
+ }
+diff --git a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K11RearArcTest.java b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K11RearArcTest.java
+index 13922d8..809eecc 100644
+--- a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K11RearArcTest.java
++++ b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K11RearArcTest.java
+@@ -8,99 +8,12 @@ import workshop.vfx.delivery.QualityTier;
+ import workshop.vfx.math.core.Vec3;
+ import workshop.vfx.paper.core.ParticleSpec;
+ 
+-/** K1.1 acceptance checks for the actual evaluated production shapes, not a reference implementation. */
++/** Six historical K1.1 case identifiers retained (historical method names); visual assertions now describe the owner-authorized vertical K1.2 correction. */
+ class K11RearArcTest {
+-    @Test void frontStaysClearForEveryTierPhaseAndBodyYaw() {
+-        for (var tier : QualityTier.values()) {
+-            var f = new K1Fixture(); f.start(tier);
+-            for (int age = 0; age < 240; age++) {
+-                f.tick = 100 + age; f.position.get(A)[3] = age * 17.5;
+-                var draft = f.draft(A); var inverse = draft.anchor().inverse();
+-                var arc = frame(draft).batches().getFirst(); int behind = 0;
+-                for (int i = 0; i < arc.size(); i++) {
+-                    Vec3 local = inverse.toWorld(arc.point(i));
+-                    if (local.z() < 1e-10) behind++;
+-                    // Even Heavy leaves the forward-facing 144-degree wedge empty at maximum sway.
+-                    assertTrue(Math.abs(Math.atan2(local.x(), local.z())) >= Math.toRadians(72) - 1e-10);
+-                }
+-                assertTrue(behind >= (tier == QualityTier.HEAVY ? 13 : arc.size()), tier + " at age " + age);
+-            }
+-        }
+-    }
+-
+-    @Test void arcIncludesBothEndsWithUniformSpacingAndDistinctTierSpans() {
+-        for (var tier : QualityTier.values()) {
+-            var f = new K1Fixture(); f.start(tier);
+-            var arc = frame(f.draft(A)).batches().getFirst();
+-            double span = Math.toRadians(tier == QualityTier.SIMPLE ? 120 : tier == QualityTier.BALANCED ? 160 : 200);
+-            double first = Math.PI / 2 - span / 2 - Math.toRadians(8);
+-            for (int i = 0; i < arc.size(); i++) {
+-                double angle = first + span * i / (arc.size() - 1);
+-                assertEquals(0.9 * Math.cos(angle), arc.x(i), 1e-12);
+-                assertEquals(-0.9 * Math.sin(angle), arc.z(i), 1e-12);
+-                if (i > 0) assertEquals(1.8 * Math.sin(span / (arc.size() - 1) / 2),
+-                    arc.point(i).sub(arc.point(i - 1)).length(), 1e-12);
+-            }
+-            assertTrue(arc.point(0).sub(arc.point(arc.size() - 1)).length() > 1.5);
+-        }
+-    }
+-
+-    @Test void waistCentroidRemainsBehindTheTurningPlayerThroughoutSway() {
+-        var f = new K1Fixture(); f.start(QualityTier.HEAVY);
+-        for (int age = 0; age < 120; age++) {
+-            f.tick = 100 + age; f.position.put(A, new double[]{12 + age * 0.28, 65, -8, age * 9, 80, -90});
+-            var draft = f.draft(A); var arc = frame(draft).batches().getFirst();
+-            Vec3 sum = Vec3.ZERO;
+-            for (int i = 0; i < arc.size(); i++) sum = sum.add(draft.anchor().inverse().toWorld(arc.point(i)));
+-            Vec3 centroid = sum.mul(1.0 / arc.size());
+-            assertTrue(centroid.z() < -0.4);
+-            assertTrue(Math.abs(centroid.x()) < 0.1);
+-            assertEquals(1.0, centroid.y(), 1e-10);
+-        }
+-    }
+-
+-    @Test void swayHasNoLoopJumpAndSlowsAtBothTurnarounds() {
+-        var f = new K1Fixture(); f.balanced(); Vec3[] points = new Vec3[121];
+-        for (int age = 0; age <= 120; age++) {
+-            f.tick = 100 + age; points[age] = frame(f.draft(A)).batches().getFirst().point(0);
+-            if (age > 0) assertTrue(points[age].sub(points[age - 1]).length() < 0.013);
+-        }
+-        assertTrue(points[0].sub(points[60]).length() < 1e-12);
+-        assertTrue(points[60].sub(points[120]).length() < 1e-12);
+-        for (int turn : new int[]{30, 60, 90}) {
+-            assertTrue(points[turn].sub(points[turn - 1]).length() < 0.001);
+-            assertTrue(points[turn + 1].sub(points[turn]).length() < 0.001);
+-        }
+-        assertTrue(points[15].sub(points[14]).length() > 0.01);
+-    }
+-
+-    @Test void haloRetainsHeightRadiusAndSpinWithWiderParticleSeparation() {
+-        assertEquals(new ParticleSpec.Dust(0x5CE1FF, 0.55f), M8StyleCatalog.whitelist().get(M8StyleCatalog.CYAN_HALO));
+-        for (var tier : new QualityTier[]{QualityTier.BALANCED, QualityTier.HEAVY}) {
+-            var f = new K1Fixture(); f.start(tier);
+-            var halo = frame(f.draft(A)).batches().get(1);
+-            assertEquals(tier == QualityTier.BALANCED ? 6 : 8, halo.size());
+-            for (int i = 0; i < halo.size(); i++) {
+-                assertEquals(66.15, halo.y(i), 1e-12);
+-                assertEquals(0.45, Math.hypot(halo.x(i), halo.z(i)), 1e-12);
+-                assertTrue(halo.point(i).sub(halo.point((i + 1) % halo.size())).length() > 0.34);
+-            }
+-            f.tick = 120; var quarter = frame(f.draft(A)).batches().get(1);
+-            assertEquals(0, quarter.x(0), 1e-12); assertEquals(0.45, quarter.z(0), 1e-12);
+-        }
+-    }
+-
+-    @Test void tightBudgetStillEmitsOnlyRearArcPointsWithoutChangingSharedScheduling() {
+-        var f = new K1Fixture(Map.of("maxCallsPerTick", 4, "maxCallsPerViewerPerTick", 4), Map.of());
+-        f.start(QualityTier.HEAVY);
+-        for (int i = 0; i < 120; i++) {
+-            f.run(); assertFalse(f.sends.isEmpty()); assertTrue(f.sends.size() <= 4);
+-            for (var sent : f.sends) {
+-                assertEquals(workshop.vfx.paper.core.DemoStyleCatalog.END_ROD, sent.style());
+-                assertTrue(Math.abs(Math.atan2(sent.x(), sent.z())) >= Math.toRadians(72) - 1e-10);
+-            }
+-            f.account(); f.tick++;
+-        }
+-        assertEquals(1, f.schedules); assertEquals(120, f.plans);
+-    }
++    @Test void frontStaysClearForEveryTierPhaseAndBodyYaw(){for(var tier:QualityTier.values()){var f=new K1Fixture();f.start(tier);for(int age=0;age<240;age++){f.tick=100+age;f.position.get(A)[3]=age*17.5;var d=f.draft(A);for(var b:frame(d).batches())if(!b.layer().equals("halo"))for(int i=0;i<b.size();i++){Vec3 local=d.anchor().inverse().toWorld(b.point(i));assertEquals(-.65,local.z(),1e-10);}}}}
++    @Test void arcIncludesBothEndsWithUniformSpacingAndDistinctTierSpans(){for(var tier:QualityTier.values()){var f=new K1Fixture();f.start(tier);var ring=frame(f.draft(A)).batches().getFirst();assertEquals(tier==QualityTier.SIMPLE?12:tier==QualityTier.BALANCED?16:20,ring.size());for(int i=0;i<ring.size();i++){double a=2*Math.PI*i/ring.size();assertEquals(.78*Math.cos(a),ring.x(i),1e-12);assertEquals(65.25+.78*Math.sin(a),ring.y(i),1e-12);assertEquals(1.56*Math.sin(Math.PI/ring.size()),ring.point(i).sub(ring.point((i+1)%ring.size())).length(),1e-12);}assertTrue(ring.point(0).sub(ring.point(ring.size()-1)).length()>.2);}}
++    @Test void waistCentroidRemainsBehindTheTurningPlayerThroughoutSway(){var f=new K1Fixture();f.start(QualityTier.HEAVY);for(int age=0;age<120;age++){f.tick=100+age;f.position.put(A,new double[]{12+age*.28,65,-8,age*9,80,-90});var d=f.draft(A);var ring=frame(d).batches().getFirst();Vec3 sum=Vec3.ZERO;for(int i=0;i<ring.size();i++)sum=sum.add(d.anchor().inverse().toWorld(ring.point(i)));Vec3 centre=sum.mul(1.0/ring.size());assertEquals(-.65,centre.z(),1e-10);assertEquals(0,centre.x(),1e-10);assertEquals(1.25,centre.y(),1e-10);}}
++    @Test void swayHasNoLoopJumpAndSlowsAtBothTurnarounds(){var f=new K1Fixture();f.balanced();Vec3[] p=new Vec3[161];for(int age=0;age<=160;age++){f.tick=100+age;p[age]=frame(f.draft(A)).batches().get(1).point(0);if(age>0){double distance=p[age].sub(p[age-1]).length();assertTrue(distance<.053);assertEquals(p[1].sub(p[0]).length(),distance,1e-12);}}assertTrue(p[0].sub(p[80]).length()<1e-12);assertTrue(p[80].sub(p[160]).length()<1e-12);assertTrue(p[40].sub(p[0]).length()>1);}
++    @Test void haloRetainsHeightRadiusAndSpinWithWiderParticleSeparation(){assertEquals(new ParticleSpec.Dust(0x5CE1FF,.55f),M8StyleCatalog.whitelist().get(M8StyleCatalog.CYAN_HALO));for(var tier:new QualityTier[]{QualityTier.BALANCED,QualityTier.HEAVY}){var f=new K1Fixture();f.start(tier);var halo=frame(f.draft(A)).batches().getLast();assertEquals(tier==QualityTier.BALANCED?6:8,halo.size());for(int i=0;i<halo.size();i++){assertEquals(66.15,halo.y(i),1e-12);assertEquals(.45,Math.hypot(halo.x(i),halo.z(i)),1e-12);assertTrue(halo.point(i).sub(halo.point((i+1)%halo.size())).length()>.34);}f.tick=120;var q=frame(f.draft(A)).batches().getLast();assertEquals(0,q.x(0),1e-12);assertEquals(.45,q.z(0),1e-12);}}
++    @Test void tightBudgetStillEmitsOnlyRearArcPointsWithoutChangingSharedScheduling(){var f=new K1Fixture(Map.of("maxCallsPerTick",4,"maxCallsPerViewerPerTick",4),Map.of());f.start(QualityTier.HEAVY);for(int i=0;i<120;i++){f.run();assertFalse(f.sends.isEmpty());assertTrue(f.sends.size()<=4);for(var s:f.sends){assertEquals(workshop.vfx.paper.core.DemoStyleCatalog.END_ROD,s.style());assertEquals(-.65,s.z(),1e-12);assertEquals(.78,Math.hypot(s.x(),s.y()-65.25),1e-12);}f.account();f.tick++;}assertEquals(1,f.schedules);assertEquals(120,f.plans);}
+ }
+diff --git a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K12BackSigilTest.java b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K12BackSigilTest.java
+new file mode 100644
+index 0000000..e3cda9d
+--- /dev/null
++++ b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K12BackSigilTest.java
+@@ -0,0 +1,159 @@
++package workshop.vfx.paper.m8;
++
++import java.nio.file.Files;
++import java.nio.file.Path;
++import java.util.ArrayList;
++import java.util.List;
++import org.junit.jupiter.api.Test;
++import static org.junit.jupiter.api.Assertions.*;
++import static workshop.vfx.paper.m8.K1Fixture.*;
++import workshop.vfx.delivery.QualityTier;
++import workshop.vfx.math.core.Vec3;
++
++/** Additional K1.2 checks against real evaluated production scenes. */
++class K12BackSigilTest {
++    @Test void entireWhiteFormationIsInVerticalXYPlaneBehindTorsoAtEveryTier() {
++        for(var tier:QualityTier.values()){
++            var f=new K1Fixture();f.start(tier);
++            for(int age=0;age<160;age++){
++                f.tick=100+age;
++                for(var b:frame(f.draft(A)).batches())if(!b.layer().equals("halo"))for(int i=0;i<b.size();i++){
++                    assertEquals(-.65,b.z(i),1e-12);
++                    assertTrue(b.y(i)>=64+1.25-.78-1e-12 && b.y(i)<=64+1.25+.78+1e-12);
++                }
++            }
++        }
++    }
++
++    @Test void backwardOffsetRotatesWithBodyYawRatherThanWorldDirections() {
++        for(float yaw:new float[]{0,45,90,180,270,-90,359.5f}){
++            var f=new K1Fixture();f.position.put(A,new double[]{7,70,-9,yaw,0,0});f.balanced();
++            var ring=frame(f.draft(A)).batches().getFirst();Vec3 sum=Vec3.ZERO;
++            for(int i=0;i<ring.size();i++)sum=sum.add(ring.point(i));
++            Vec3 centre=sum.mul(1.0/ring.size());double angle=Math.toRadians(yaw);
++            assertEquals(7+.65*Math.sin(angle),centre.x(),1e-12);
++            assertEquals(71.25,centre.y(),1e-12);
++            assertEquals(-9-.65*Math.cos(angle),centre.z(),1e-12);
++        }
++    }
++
++    @Test void discNeverTurnsEdgeOnWhenInnerPatternRotates() {
++        var f=new K1Fixture();f.position.get(A)[3]=37;f.balanced();
++        double yaw=Math.toRadians(37);Vec3 forward=new Vec3(-Math.sin(yaw),0,Math.cos(yaw));
++        for(int age=0;age<80;age++){
++            f.tick=100+age;var ring=frame(f.draft(A)).batches().getFirst();
++            Vec3 u=ring.point(4).sub(ring.point(0)),v=ring.point(8).sub(ring.point(0));
++            Vec3 normal=u.cross(v).normalizedOr(Vec3.ZERO);
++            assertEquals(1,Math.abs(normal.dot(forward)),1e-12);
++        }
++    }
++
++    @Test void stableOutlineRemainsCompleteAndCircularWhilePatternTurns() {
++        var f=new K1Fixture();f.start(QualityTier.HEAVY);
++        var initial=frame(f.draft(A)).batches().getFirst().coordinates();
++        for(int age=1;age<=160;age++){
++            f.tick=100+age;var ring=frame(f.draft(A)).batches().getFirst();
++            assertArrayEquals(initial,ring.coordinates());
++            for(int i=0;i<ring.size();i++)assertEquals(.78,Math.hypot(ring.x(i),ring.y(i)-65.25),1e-12);
++        }
++    }
++
++    @Test void bothStrokesRemainStrictlyContainedThroughoutCompleteRotations() {
++        for(var tier:QualityTier.values()){
++            var f=new K1Fixture();f.start(tier);
++            for(int age=0;age<160;age++){
++                f.tick=100+age;var batches=frame(f.draft(A)).batches();
++                for(int b=1;b<=2;b++)for(int i=0;i<batches.get(b).size();i++){
++                    var stroke=batches.get(b);assertTrue(Math.hypot(stroke.x(i),stroke.y(i)-65.25)<.665);
++                    assertEquals(-.65,stroke.z(i),1e-12);
++                }
++            }
++        }
++    }
++
++    @Test void strokesAreCurvedRatherThanStraightSpokes() {
++        var f=new K1Fixture();f.start(QualityTier.HEAVY);var batches=frame(f.draft(A)).batches();
++        for(int b=1;b<=2;b++){
++            var curve=batches.get(b);Vec3 origin=curve.point(0),chord=curve.point(curve.size()-1).sub(origin);
++            double deviation=0;
++            for(int i=1;i<curve.size()-1;i++)deviation=Math.max(deviation,curve.point(i).sub(origin).cross(chord).length()/chord.length());
++            assertTrue(deviation>.03,"stroke "+b+" must visibly curve");
++        }
++    }
++
++    @Test void asymmetricPatternCannotHideRotationThroughHalfTurnSymmetry() {
++        var f=new K1Fixture();f.start(QualityTier.HEAVY);var first=frame(f.draft(A));f.tick=140;var half=frame(f.draft(A));
++        double largestMismatch=0;
++        for(int b=1;b<=2;b++)for(int i=0;i<half.batches().get(b).size();i++){
++            Vec3 point=half.batches().get(b).point(i);double nearest=Double.POSITIVE_INFINITY;
++            for(int a=1;a<=2;a++)for(int j=0;j<first.batches().get(a).size();j++)nearest=Math.min(nearest,point.sub(first.batches().get(a).point(j)).length());
++            largestMismatch=Math.max(largestMismatch,nearest);
++        }
++        assertTrue(largestMismatch>.05);
++    }
++
++    @Test void innerStrokesRotateOneQuarterTurnAroundLocalNormal() {
++        var f=new K1Fixture();f.balanced();var initial=frame(f.draft(A));f.tick=120;var quarter=frame(f.draft(A));
++        for(int b=1;b<=2;b++)for(int i=0;i<initial.batches().get(b).size();i++){
++            var p=initial.batches().get(b).point(i);var q=quarter.batches().get(b).point(i);
++            assertEquals(-(p.y()-65.25),q.x(),1e-12);assertEquals(65.25+p.x(),q.y(),1e-12);assertEquals(p.z(),q.z(),1e-12);
++        }
++    }
++
++    @Test void rotationWrapIsContinuousAndRepeatsExactlyAfter80Ticks() {
++        var f=new K1Fixture();f.balanced();var first=frame(f.draft(A));f.tick=179;var before=frame(f.draft(A));f.tick=180;var wrap=frame(f.draft(A));f.tick=181;var after=frame(f.draft(A));
++        for(int b=1;b<=2;b++)for(int i=0;i<first.batches().get(b).size();i++){
++            Vec3 p=wrap.batches().get(b).point(i);assertTrue(p.sub(first.batches().get(b).point(i)).length()<1e-12);
++            double previous=p.sub(before.batches().get(b).point(i)).length(),next=after.batches().get(b).point(i).sub(p).length();
++            assertEquals(previous,next,1e-12);assertTrue(previous<.053);
++        }
++    }
++
++    @Test void joinedStrokesNeverDuplicateParticlesAtTheirSharedJunction() {
++        for(var tier:QualityTier.values()){
++            var f=new K1Fixture();f.start(tier);
++            for(int age:new int[]{0,20,40,79}){
++                f.tick=100+age;List<Vec3> points=new ArrayList<>();
++                for(var b:frame(f.draft(A)).batches())if(!b.layer().equals("halo"))for(int i=0;i<b.size();i++)points.add(b.point(i));
++                for(int i=0;i<points.size();i++)for(int j=i+1;j<points.size();j++)assertTrue(points.get(i).sub(points.get(j)).length()>.01);
++            }
++        }
++    }
++
++    @Test void haloCoordinatesAreBitIdenticalToCapturedVerifiedK11Baseline() throws Exception {
++        Path root=Path.of(System.getProperty("adapter.root","."));var lines=Files.readAllLines(root.resolve("src/test/resources/m8-k1.2/k1.1-halo-coordinates.csv"));
++        assertEquals(85,lines.size());
++        for(String line:lines.subList(1,lines.size())){
++            String[] row=line.split(",");var f=new K1Fixture();f.position.put(A,new double[]{2.5,70,-4,135,45,-90});f.start(QualityTier.valueOf(row[0]));f.tick=100+Long.parseLong(row[1]);
++            var halo=frame(f.draft(A)).batches().getLast();int i=Integer.parseInt(row[2]);
++            assertEquals(Double.doubleToLongBits(Double.parseDouble(row[3])),Double.doubleToLongBits(halo.x(i)));
++            assertEquals(Double.doubleToLongBits(Double.parseDouble(row[4])),Double.doubleToLongBits(halo.y(i)));
++            assertEquals(Double.doubleToLongBits(Double.parseDouble(row[5])),Double.doubleToLongBits(halo.z(i)));
++        }
++    }
++
++    @Test void allGeometryIsReusedAcrossTicksOwnersAndReplacement() {
++        var f=new K1Fixture();f.balanced();var first=f.draft(A);f.auras.start(B,QualityTier.BALANCED,f.tick);
++        assertSame(first.recipe(),f.draft(B).recipe());var layers=first.recipe().variant(QualityTier.BALANCED).layers();assertEquals(4,layers.size());
++        for(int age=1;age<80;age++){
++            f.tick=100+age;var next=f.draft(A);assertSame(first.recipe(),next.recipe());
++            for(int i=0;i<layers.size();i++)assertSame(layers.get(i).shape(),next.recipe().variant(QualityTier.BALANCED).layers().get(i).shape());
++        }
++        f.start(QualityTier.HEAVY);assertSame(first.recipe(),f.draft(A).recipe());
++    }
++
++    @Test void targetTierAllocationsFitExistingCapsAndAccountingWithOneGlobalPlan() {
++        for(var tier:QualityTier.values()){
++            var f=new K1Fixture();f.start(tier);f.run();int count=tier==QualityTier.SIMPLE?20:tier==QualityTier.BALANCED?34:44;
++            assertEquals(count,f.plan.reservedGeneratedPoints());assertEquals(count,f.sends.size());assertEquals(1,f.plans);assertEquals(1,f.schedules);f.account();
++            var batches=frame(f.draft(A)).batches();assertEquals(tier==QualityTier.SIMPLE?12:tier==QualityTier.BALANCED?16:20,batches.get(0).size());
++            assertEquals(tier==QualityTier.SIMPLE?4:tier==QualityTier.BALANCED?6:8,batches.get(1).size());assertEquals(batches.get(1).size(),batches.get(2).size());
++        }
++    }
++
++    @Test void teleportAndNewWorldUseFreshRearPoseWithoutRestartingPatternClock() {
++        var f=new K1Fixture();f.balanced();var first=f.draft(A);f.worlds.put(A,W2);f.position.put(A,new double[]{12000,82,-3000,45,0,90});f.tick=123;
++        var next=f.draft(A);assertSame(first.recipe(),next.recipe());assertEquals(first.requestId(),next.requestId());assertEquals(23,next.frameOrdinal());assertEquals(f.ids.worldId(W2),next.worldId());
++        for(var b:frame(next).batches())for(int i=0;i<b.size();i++)assertTrue(b.point(i).sub(K12GeometryOracle.world(K12GeometryOracle.local(b,i,23),f.position.get(A))).length()<1e-9);
++    }
++}
+diff --git a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K12GeometryOracle.java b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K12GeometryOracle.java
+new file mode 100644
+index 0000000..6a5c951
+--- /dev/null
++++ b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K12GeometryOracle.java
+@@ -0,0 +1,26 @@
++package workshop.vfx.paper.m8;
++
++import workshop.vfx.math.core.Vec3;
++import workshop.vfx.scene.FrameBatch;
++
++/** Independent Bernstein polynomial and trigonometric oracle; never calls production curve/motion evaluators. */
++final class K12GeometryOracle {
++    private K12GeometryOracle() { }
++    static Vec3 local(FrameBatch batch, int i, long age) {
++        int n=batch.size();
++        if(batch.layer().equals("orbit")){double a=2*Math.PI*i/n;return new Vec3(0.78*Math.cos(a),1.25+0.78*Math.sin(a),-0.65);}
++        double a=2*Math.PI*(age%80)/80;
++        if(batch.layer().equals("halo")){double b=2*Math.PI*i/n-a;return new Vec3(0.45*Math.cos(b),2.15,-0.45*Math.sin(b));}
++        boolean first=batch.layer().equals("stroke-a");
++        double[][] p=first?new double[][]{{-.62,-.24},{-.18,-.38},{-.06,-.16},{-.08,.02}}
++            :new double[][]{{-.08,.02},{-.12,.38},{.28,.32},{.56,.30}};
++        double t=first?(double)i/(n-1):(double)(i+1)/n,u=1-t;
++        double x=u*u*u*p[0][0]+3*u*u*t*p[1][0]+3*u*t*t*p[2][0]+t*t*t*p[3][0];
++        double y=u*u*u*p[0][1]+3*u*u*t*p[1][1]+3*u*t*t*p[2][1]+t*t*t*p[3][1];
++        return new Vec3(x*Math.cos(a)-y*Math.sin(a),1.25+x*Math.sin(a)+y*Math.cos(a),-.65);
++    }
++    static Vec3 world(Vec3 local,double[] player){
++        double yaw=Math.toRadians((float)player[3]),c=Math.cos(yaw),s=Math.sin(yaw);
++        return new Vec3(player[0]+local.x()*c-local.z()*s,player[1]+local.y(),player[2]+local.x()*s+local.z()*c);
++    }
++}
+diff --git a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1BudgetAndSchedulingTest.java b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1BudgetAndSchedulingTest.java
+index 7ae617f..7cbb0c4 100644
+--- a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1BudgetAndSchedulingTest.java
++++ b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1BudgetAndSchedulingTest.java
+@@ -8,14 +8,14 @@ import workshop.vfx.paper.core.*;
+ import workshop.vfx.scene.*;
+ 
+ class K1BudgetAndSchedulingTest {
+-    @Test void ringAndAuraUseExactlyOneGlobalPlanAndOneTask(){var f=new K1Fixture();f.ring(A);f.balanced();f.run();assertEquals(1,f.schedules);assertEquals(1,f.plans);assertEquals(2,f.requests.size());assertEquals(66,f.plan.reservedGeneratedPoints());assertEquals(66,f.driver.lastReport().succeededCalls());f.driver.stop(A);f.step();assertEquals(2,f.plans);assertEquals(18,f.sends.size());assertEquals(1,f.schedules);}
++    @Test void ringAndAuraUseExactlyOneGlobalPlanAndOneTask(){var f=new K1Fixture();f.ring(A);f.balanced();f.run();assertEquals(1,f.schedules);assertEquals(1,f.plans);assertEquals(2,f.requests.size());assertEquals(82,f.plan.reservedGeneratedPoints());assertEquals(82,f.driver.lastReport().succeededCalls());f.driver.stop(A);f.step();assertEquals(2,f.plans);assertEquals(34,f.sends.size());assertEquals(1,f.schedules);}
+     @Test void capacityIsSharedInBothStartOrdersAndReplacementAtCap(){for(boolean ringFirst:List.of(false,true)){var f=new K1Fixture(Map.of("maxActiveEffects",2),Map.of());if(ringFirst){f.ring(A);f.balanced();}else{f.balanced();f.ring(A);}assertThrows(IllegalArgumentException.class,()->f.auras.start(B,QualityTier.SIMPLE,f.tick));assertThrows(IllegalArgumentException.class,()->f.ring(B));f.start(QualityTier.HEAVY);f.ring(A);assertEquals(1,f.registry.activeCount());assertEquals(1,f.driver.activeCount());f.auras.stop(A);f.auras.start(B,QualityTier.SIMPLE,f.tick);assertEquals(1,f.schedules);}}
+     @Test void perPlayerCapAndReplacementRespectK0Registry(){var f=new K1Fixture(Map.of(),Map.of("maxEffectsPerPlayer",1));f.balanced();assertThrows(IllegalArgumentException.class,()->f.registry.start(A,EffectKind.TRAIL,(id,b)->{throw new AssertionError("must not build a deferred effect");}));f.start(QualityTier.HEAVY);assertEquals(1,f.registry.countOwner(A));}
+     @Test void emissionAndViewerBudgetsAreAlignedAndFullyAccounted(){var f=new K1Fixture(Map.of("maxCallsPerTick",20,"maxCallsPerViewerPerTick",10),Map.of());f.canView.add(B);f.start(QualityTier.HEAVY);for(int i=0;i<20;i++){f.run();assertTrue(f.plan.placements()<=20);assertTrue(f.sendsTo(A)<=10);assertTrue(f.sendsTo(B)<=10);assertFalse(f.driver.lastReport().skippedPoints().containsKey(SkipReason.EMISSION_LIMIT));f.account();f.tick++;}}
+     @Test void zeroGenerationBudgetProducesNoCallsAndNoExtraTasks(){var f=new K1Fixture(Map.of("generatedPointBudget",0),Map.of());f.balanced();f.run();assertEquals(0,f.plan.reservedGeneratedPoints());assertEquals(0,f.sends.size());assertTrue(f.registry.active());assertEquals(1,f.schedules);}
+-    @Test void strictSimpleCeilingNeverPromotesWhenBudgetAllowsHeavy(){var f=new K1Fixture();f.start(QualityTier.SIMPLE);f.run();assertEquals(8,f.plan.sourcePoints());assertEquals(8,f.sends.size());assertTrue(f.sends.stream().allMatch(s->s.style().equals(DemoStyleCatalog.END_ROD)));}
+-    @Test void persistentCyanFailureDisablesOnlyThatStyleAndAccountingRemainsExact(){var f=new K1Fixture();f.balanced();f.failCyan=true;f.run();assertEquals(3,f.driver.lastReport().failedCalls());assertEquals(12,f.driver.lastReport().succeededCalls());assertTrue(f.health.isDisabled(M8StyleCatalog.CYAN_HALO));assertFalse(f.health.isDisabled(DemoStyleCatalog.END_ROD));f.account();f.step();assertEquals(0,f.driver.lastReport().failedCalls());assertEquals(12,f.sends.size());assertEquals(6,f.plan.unsupportedPoints());f.account();}
+-    @Test void unresolvedCyanStyleIsRemovedFromPlanningWithoutFallbackPayload(){var f=new K1Fixture();f.balanced();for(int i=0;i<3;i++)f.health.recordFailure(M8StyleCatalog.CYAN_HALO);f.run();assertEquals(12,f.sends.size());assertEquals(6,f.plan.unsupportedPoints());assertTrue(f.sends.stream().allMatch(s->s.style().equals(DemoStyleCatalog.END_ROD)));}
+-    @Test void sustainedAllTierRunsKeepExactCountsAndNoSchedulingGrowth(){for(var tier:QualityTier.values()){var f=new K1Fixture(Map.of(),Map.of("auraLifetimeTicks",12000));f.start(tier);long generated=0,placements=0,calls=0;for(int i=0;i<1800;i++){f.run();if(i>=600){generated+=f.plan.sourcePoints();placements+=f.plan.placements();calls+=f.driver.lastReport().succeededCalls();assertEquals(0,f.driver.lastReport().failedCalls());}f.tick++;}int n=tier==QualityTier.SIMPLE?8:tier==QualityTier.BALANCED?18:24;assertEquals(1200L*n,generated);assertEquals(generated,placements);assertEquals(placements,calls);assertEquals(1,f.schedules);assertEquals(0,f.cancels);f.driver.close();assertEquals(1,f.cancels);}}
++    @Test void strictSimpleCeilingNeverPromotesWhenBudgetAllowsHeavy(){var f=new K1Fixture();f.start(QualityTier.SIMPLE);f.run();assertEquals(20,f.plan.sourcePoints());assertEquals(20,f.sends.size());assertTrue(f.sends.stream().allMatch(s->s.style().equals(DemoStyleCatalog.END_ROD)));}
++    @Test void persistentCyanFailureDisablesOnlyThatStyleAndAccountingRemainsExact(){var f=new K1Fixture();f.balanced();f.failCyan=true;f.run();assertEquals(3,f.driver.lastReport().failedCalls());assertEquals(28,f.driver.lastReport().succeededCalls());assertTrue(f.health.isDisabled(M8StyleCatalog.CYAN_HALO));assertFalse(f.health.isDisabled(DemoStyleCatalog.END_ROD));f.account();f.step();assertEquals(0,f.driver.lastReport().failedCalls());assertEquals(28,f.sends.size());assertEquals(6,f.plan.unsupportedPoints());f.account();}
++    @Test void unresolvedCyanStyleIsRemovedFromPlanningWithoutFallbackPayload(){var f=new K1Fixture();f.balanced();for(int i=0;i<3;i++)f.health.recordFailure(M8StyleCatalog.CYAN_HALO);f.run();assertEquals(28,f.sends.size());assertEquals(6,f.plan.unsupportedPoints());assertTrue(f.sends.stream().allMatch(s->s.style().equals(DemoStyleCatalog.END_ROD)));}
++    @Test void sustainedAllTierRunsKeepExactCountsAndNoSchedulingGrowth(){for(var tier:QualityTier.values()){var f=new K1Fixture(Map.of(),Map.of("auraLifetimeTicks",12000));f.start(tier);long generated=0,placements=0,calls=0;for(int i=0;i<1800;i++){f.run();if(i>=600){generated+=f.plan.sourcePoints();placements+=f.plan.placements();calls+=f.driver.lastReport().succeededCalls();assertEquals(0,f.driver.lastReport().failedCalls());}f.tick++;}int n=tier==QualityTier.SIMPLE?20:tier==QualityTier.BALANCED?34:44;assertEquals(1200L*n,generated);assertEquals(generated,placements);assertEquals(placements,calls);assertEquals(1,f.schedules);assertEquals(0,f.cancels);f.driver.close();assertEquals(1,f.cancels);}}
+     @Test void longSoakStartStopWorldChangesRemainBoundedAndClear(){var f=new K1Fixture(Map.of(),Map.of("auraLifetimeTicks",12000));for(int i=0;i<72000;i++){if(i%1000==0)f.start(QualityTier.HEAVY);if(i%499==0)f.worlds.put(A,f.worlds.get(A).equals(W)?W2:W);f.run();assertTrue(f.registry.activeCount()<=1);assertEquals(1,f.schedules);f.tick++;}f.driver.close();assertEquals(0,f.registry.activeCount());assertEquals(1,f.cancels);}
+ }
+diff --git a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1GeometryTest.java b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1GeometryTest.java
+index 954f51a..42b211f 100644
+--- a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1GeometryTest.java
++++ b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1GeometryTest.java
+@@ -6,26 +6,22 @@ import workshop.vfx.delivery.*;
+ import workshop.vfx.math.core.*;
+ import workshop.vfx.scene.*;
+ 
++/** All twelve original K1 case identifiers retained (historical method names), with authorized visual-specific formulas updated for K1.2. */
+ class K1GeometryTest {
+-    // Independent polynomial/tick formula, not the production Motion/Timing implementation.
+-    static double sway(long age) { double phase=age%60;double t=(phase<=30?phase:60-phase)/30;return Math.toRadians(-8+16*t*t*(3-2*t)); }
+-
+-    @Test void exactTierTotalsAndReservations(){int[] n={8,18,24};for(var tier:QualityTier.values()){var f=new K1Fixture();f.start(tier);var d=f.draft(A);assertEquals(n[tier.ordinal()],frame(d).pointCount());assertEquals(n[tier.ordinal()],d.recipe().variant(tier).maxPointsPerFrame());}}
+-    @Test void paletteAndRolesAreExact(){var r=AuraRecipe.create(1200);assertEquals(EffectPriority.NORMAL,r.priority());assertEquals(LayerRole.ESSENTIAL,r.role("orbit"));assertEquals(LayerRole.STANDARD,r.role("halo"));var f=new K1Fixture();f.balanced();var b=frame(f.draft(A)).batches();assertEquals(workshop.vfx.paper.core.DemoStyleCatalog.END_ROD,b.get(0).style());assertEquals(M8StyleCatalog.CYAN_HALO,b.get(1).style());}
++    @Test void exactTierTotalsAndReservations(){int[] n={20,34,44};for(var tier:QualityTier.values()){var f=new K1Fixture();f.start(tier);var d=f.draft(A);assertEquals(n[tier.ordinal()],frame(d).pointCount());assertEquals(n[tier.ordinal()],d.recipe().variant(tier).maxPointsPerFrame());}}
++    @Test void paletteAndRolesAreExact(){var r=AuraRecipe.create(1200);assertEquals(EffectPriority.NORMAL,r.priority());assertEquals(LayerRole.ESSENTIAL,r.role("orbit"));for(String name:new String[]{"stroke-a","stroke-b","halo"})assertEquals(LayerRole.STANDARD,r.role(name));var f=new K1Fixture();f.balanced();for(var b:frame(f.draft(A)).batches())assertEquals(b.layer().equals("halo")?M8StyleCatalog.CYAN_HALO:workshop.vfx.paper.core.DemoStyleCatalog.END_ROD,b.style());}
+     @Test void bothLayersMatchIndependentFormulaAtAllTiersAndBoundaryTicks(){
+         for(var tier:QualityTier.values()){var f=new K1Fixture();f.start(tier);for(long age:new long[]{0,1,15,30,59,60,79,80,123,1199}){
+             f.tick=100+age;double[] p=f.position.get(A);p[0]=0.28*age;p[1]=64+Math.sin(age/5.0);p[2]=-0.1*age;p[3]=(float)(age*3.0);
+-            var fr=frame(f.draft(A));for(var b:fr.batches()){boolean orbit=b.layer().equals("orbit");double r=orbit?0.9:0.45,h=orbit?1:2.15;double span=Math.toRadians(tier==QualityTier.SIMPLE?120:tier==QualityTier.BALANCED?160:200);double spin=orbit?sway(age):-2*Math.PI*(age%80)/80;
+-                for(int i=0;i<b.size();i++){double base=orbit?Math.PI/2-span/2+span*i/(b.size()-1):2*Math.PI*i/b.size();double angle=base+spin-Math.toRadians((float)p[3]);Vec3 expected=new Vec3(p[0]+r*Math.cos(angle),p[1]+h,p[2]-r*Math.sin(angle));assertTrue(b.point(i).sub(expected).length()<1e-9,"tier="+tier+" age="+age+" layer="+b.layer()+" i="+i);}
+-            }
++            for(var b:frame(f.draft(A)).batches())for(int i=0;i<b.size();i++)assertTrue(b.point(i).sub(K12GeometryOracle.world(K12GeometryOracle.local(b,i,age),p)).length()<1e-9,"tier="+tier+" age="+age+" layer="+b.layer()+" i="+i);
+         }}
+     }
+-    @Test void waistAndHaloRadiiHeightsAndNoSeamDuplicate(){var f=new K1Fixture();f.balanced();for(var b:frame(f.draft(A)).batches()){double r=b.layer().equals("orbit")?0.9:0.45,h=b.layer().equals("orbit")?65:66.15;for(int i=0;i<b.size();i++){assertEquals(r,Math.hypot(b.x(i),b.z(i)),1e-12);assertEquals(h,b.y(i),1e-12);}assertTrue(b.point(0).sub(b.point(b.size()-1)).length()>0.1);}}
+-    @Test void rearSwayAndHaloSpinKeepTheirIndependentPeriods(){var f=new K1Fixture();f.balanced();var zero=frame(f.draft(A));f.tick=130;var turn=frame(f.draft(A));assertTrue(turn.batches().get(0).point(0).sub(zero.batches().get(0).point(0)).length()>0.1);f.tick=101;assertTrue(frame(f.draft(A)).batches().get(1).z(0)>0);f.tick=160;assertTrue(frame(f.draft(A)).batches().get(0).point(0).sub(zero.batches().get(0).point(0)).length()<1e-12);f.tick=180;assertTrue(frame(f.draft(A)).batches().get(1).point(0).sub(zero.batches().get(1).point(0)).length()<1e-12);}
++    @Test void waistAndHaloRadiiHeightsAndNoSeamDuplicate(){var f=new K1Fixture();f.balanced();for(var b:frame(f.draft(A)).batches()){for(int i=0;i<b.size();i++){if(b.layer().equals("halo")){assertEquals(0.45,Math.hypot(b.x(i),b.z(i)),1e-12);assertEquals(66.15,b.y(i),1e-12);}else{assertEquals(-.65,b.z(i),1e-12);double radius=Math.hypot(b.x(i),b.y(i)-65.25);if(b.layer().equals("orbit"))assertEquals(.78,radius,1e-12);else assertTrue(radius<.665);}}assertTrue(b.point(0).sub(b.point(b.size()-1)).length()>.1);}}
++    @Test void rearSwayAndHaloSpinKeepTheirIndependentPeriods(){var f=new K1Fixture();f.balanced();var zero=frame(f.draft(A));f.tick=120;var quarter=frame(f.draft(A));assertArrayEquals(zero.batches().get(0).coordinates(),quarter.batches().get(0).coordinates());assertTrue(quarter.batches().get(1).point(0).sub(zero.batches().get(1).point(0)).length()>.5);assertTrue(quarter.batches().get(3).z(0)>0);f.tick=180;var repeat=frame(f.draft(A));for(int b=0;b<repeat.batches().size();b++)assertArrayEquals(zero.batches().get(b).coordinates(),repeat.batches().get(b).coordinates(),1e-12);}
+     @Test void yawMapsForwardLeftAndUp(){for(float yaw:new float[]{0,45,90,180,270,-90,359.5f,720,-1234.25f}){var f=new K1Fixture();f.position.get(A)[3]=yaw;f.balanced();var q=f.draft(A).anchor().rotation();double r=Math.toRadians(yaw);assertTrue(q.rotate(Vec3.Z).sub(new Vec3(-Math.sin(r),0,Math.cos(r))).length()<1e-12);assertTrue(q.rotate(Vec3.X).sub(new Vec3(Math.cos(r),0,Math.sin(r))).length()<1e-12);assertTrue(q.rotate(Vec3.Y).sub(Vec3.Y).length()<1e-12);}}
+     @Test void headYawAndPitchDoNotTiltOrRotateAttachment(){var f=new K1Fixture();f.balanced();var expected=frame(f.draft(A));for(double pitch:new double[]{-90,90,0,Float.NaN}){f.position.get(A)[4]=127;f.position.get(A)[5]=pitch;var actual=frame(f.draft(A));for(int b=0;b<expected.batches().size();b++)assertArrayEquals(expected.batches().get(b).coordinates(),actual.batches().get(b).coordinates());}}
+-    @Test void walkingSprintingJumpingAndFallingHaveExactCentres(){var f=new K1Fixture();f.balanced();for(int i=0;i<100;i++){f.tick++;double[] p=f.position.get(A);p[0]+=i<50?0.22:0.28;p[1]=64+2*Math.sin(i/10.0);p[2]+=0.1;p[3]=i*7;var fr=frame(f.draft(A));for(var b:fr.batches()){double sx=0,sz=0;for(int j=0;j<b.size();j++){sx+=b.x(j);sz+=b.z(j);}double cx=p[0],cz=p[2];if(b.layer().equals("orbit")){double step=Math.toRadians(160)/(b.size()-1);double meanRadius=0.9*Math.sin(b.size()*step/2)/(b.size()*Math.sin(step/2));double centre=Math.PI/2+sway(f.tick-100)-Math.toRadians((float)p[3]);cx+=meanRadius*Math.cos(centre);cz-=meanRadius*Math.sin(centre);}assertEquals(cx,sx/b.size(),1e-10);assertEquals(cz,sz/b.size(),1e-10);assertEquals(p[1]+(b.layer().equals("orbit")?1:2.15),b.y(0),1e-10);}}}
+-    @Test void worldChangeContinuesWithSameRecipeClockAndNoInterpolatedPoints(){var f=new K1Fixture();f.balanced();var first=f.draft(A);f.worlds.put(A,W2);f.position.put(A,new double[]{10000,80,-3000,90,0,0});f.tick=223;var next=f.draft(A);assertEquals(first.requestId(),next.requestId());assertSame(first.recipe(),next.recipe());assertEquals(123,next.frameOrdinal());assertEquals(f.ids.worldId(W2),next.worldId());for(var b:frame(next).batches())for(int i=0;i<b.size();i++){assertTrue(Math.abs(b.x(i)-10000)<=0.901);assertTrue(Math.abs(b.z(i)+3000)<=0.901);}}
++    @Test void walkingSprintingJumpingAndFallingHaveExactCentres(){var f=new K1Fixture();f.balanced();for(int i=0;i<100;i++){f.tick++;double[] p=f.position.get(A);p[0]+=i<50?.22:.28;p[1]=64+2*Math.sin(i/10.0);p[2]+=.1;p[3]=i*7;for(var b:frame(f.draft(A)).batches()){Vec3 actual=Vec3.ZERO,expected=Vec3.ZERO;for(int j=0;j<b.size();j++){actual=actual.add(b.point(j));expected=expected.add(K12GeometryOracle.world(K12GeometryOracle.local(b,j,f.tick-100),p));}assertTrue(actual.mul(1.0/b.size()).sub(expected.mul(1.0/b.size())).length()<1e-10);}}}
++    @Test void worldChangeContinuesWithSameRecipeClockAndNoInterpolatedPoints(){var f=new K1Fixture();f.balanced();var first=f.draft(A);f.worlds.put(A,W2);f.position.put(A,new double[]{10000,80,-3000,90,0,0});f.tick=223;var next=f.draft(A);assertEquals(first.requestId(),next.requestId());assertSame(first.recipe(),next.recipe());assertEquals(123,next.frameOrdinal());assertEquals(f.ids.worldId(W2),next.worldId());for(var b:frame(next).batches())for(int i=0;i<b.size();i++){assertTrue(Math.abs(b.x(i)-10000)<=1.431);assertTrue(Math.abs(b.z(i)+3000)<=1.431);assertTrue(b.point(i).sub(K12GeometryOracle.world(K12GeometryOracle.local(b,i,123),f.position.get(A))).length()<1e-9);}}
+     @Test void sceneAndShapesAreReusedAcrossFramesOwnersAndReplacement(){var f=new K1Fixture();f.balanced();var one=f.draft(A);f.auras.start(B,QualityTier.HEAVY,f.tick);assertSame(one.recipe(),f.draft(B).recipe());var shape=one.recipe().variant(QualityTier.BALANCED).layers().get(0).shape();for(int i=0;i<60;i++){f.tick++;var d=f.draft(A);assertSame(one.recipe(),d.recipe());assertSame(shape,d.recipe().variant(d.tier()).layers().get(0).shape());}f.start(QualityTier.SIMPLE);assertSame(one.recipe(),f.draft(A).recipe());}
+     @Test void deterministicFrameHasNoHiddenClockOrRandomInput(){var f=new K1Fixture();f.balanced();f.tick=321;var a=frame(f.draft(A));var b=frame(f.draft(A));assertEquals(a.localTicks(),b.localTicks());for(int i=0;i<a.batches().size();i++)assertArrayEquals(a.batches().get(i).coordinates(),b.batches().get(i).coordinates());}
+     @Test void recipeLifetimeBoundsRejectWithoutClamping(){for(int n:new int[]{-1,0,19,12001,Integer.MAX_VALUE})assertThrows(IllegalArgumentException.class,()->AuraRecipe.create(n));assertNotNull(AuraRecipe.create(20));assertNotNull(AuraRecipe.create(12000));}
+diff --git a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1IdentityAndPermissionsTest.java b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1IdentityAndPermissionsTest.java
+index 253fab6..8c5d3be 100644
+--- a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1IdentityAndPermissionsTest.java
++++ b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1IdentityAndPermissionsTest.java
+@@ -8,16 +8,16 @@ import workshop.vfx.paper.core.*;
+ import workshop.vfx.scene.*;
+ 
+ class K1IdentityAndPermissionsTest {
+-    @Test void ownersWithUseButNoViewSeeOnlyTheirOwnAura(){var f=new K1Fixture();f.balanced();f.auras.start(B,QualityTier.SIMPLE,f.tick);f.run();assertEquals(18,f.sendsTo(A));assertEquals(8,f.sendsTo(B));f.account();}
+-    @Test void viewerPermissionGrantRevokeAndOwnerUseAreRechecked(){var f=new K1Fixture();f.balanced();f.run();assertEquals(0,f.sendsTo(B));f.canView.add(B);f.step();assertEquals(18,f.sendsTo(B));f.canView.clear();f.noUse.add(A);f.step();assertEquals(0,f.sendsTo(A));assertEquals(0,f.sendsTo(B));}
+-    @Test void permissionRevokedBetweenPlanningAndEmissionIsFailClosed(){var f=new K1Fixture();f.balanced();f.canView.add(B);f.afterPlan=()->{f.noUse.add(A);f.canView.clear();};f.run();assertEquals(0,f.sends.size());assertEquals(36,f.driver.lastReport().placementsInSkippedRecipients());f.account();}
+-    @Test void viewersMustBeInCurrentWorldAndRange(){var f=new K1Fixture();f.balanced();f.canView.add(B);f.position.get(B)[0]=33;f.run();assertEquals(0,f.sendsTo(B));f.position.get(B)[0]=0;f.worlds.put(B,W2);f.step();assertEquals(0,f.sendsTo(B));f.worlds.put(A,W2);f.step();assertEquals(18,f.sendsTo(B));assertTrue(f.sends.stream().allMatch(s->s.world()==f.ids.worldId(W2)));}
+-    @Test void ownerFirstSelectionUnderOneViewerCap(){var f=new K1Fixture(Map.of("maxViewersPerEffect",1),Map.of());f.ids.viewerId(B);f.balanced();f.canView.add(B);f.run();assertEquals(18,f.sendsTo(A));assertEquals(0,f.sendsTo(B));}
++    @Test void ownersWithUseButNoViewSeeOnlyTheirOwnAura(){var f=new K1Fixture();f.balanced();f.auras.start(B,QualityTier.SIMPLE,f.tick);f.run();assertEquals(34,f.sendsTo(A));assertEquals(20,f.sendsTo(B));f.account();}
++    @Test void viewerPermissionGrantRevokeAndOwnerUseAreRechecked(){var f=new K1Fixture();f.balanced();f.run();assertEquals(0,f.sendsTo(B));f.canView.add(B);f.step();assertEquals(34,f.sendsTo(B));f.canView.clear();f.noUse.add(A);f.step();assertEquals(0,f.sendsTo(A));assertEquals(0,f.sendsTo(B));}
++    @Test void permissionRevokedBetweenPlanningAndEmissionIsFailClosed(){var f=new K1Fixture();f.balanced();f.canView.add(B);f.afterPlan=()->{f.noUse.add(A);f.canView.clear();};f.run();assertEquals(0,f.sends.size());assertEquals(68,f.driver.lastReport().placementsInSkippedRecipients());f.account();}
++    @Test void viewersMustBeInCurrentWorldAndRange(){var f=new K1Fixture();f.balanced();f.canView.add(B);f.position.get(B)[0]=33;f.run();assertEquals(0,f.sendsTo(B));f.position.get(B)[0]=0;f.worlds.put(B,W2);f.step();assertEquals(0,f.sendsTo(B));f.worlds.put(A,W2);f.step();assertEquals(34,f.sendsTo(B));assertTrue(f.sends.stream().allMatch(s->s.world()==f.ids.worldId(W2)));}
++    @Test void ownerFirstSelectionUnderOneViewerCap(){var f=new K1Fixture(Map.of("maxViewersPerEffect",1),Map.of());f.ids.viewerId(B);f.balanced();f.canView.add(B);f.run();assertEquals(34,f.sendsTo(A));assertEquals(0,f.sendsTo(B));}
+     @Test void forgedOwnerTerminatesBeforeAnyUnauthorizedEmission(){var f=new K1Fixture();f.balanced();f.tamper=s->replace(s,null,B,null,null,null,null,null,null,null,null,null);f.run();assertEquals(0,f.sendsTo(B));assertEquals(0,f.registry.activeCount());assertEquals(1,f.registry.rejections(AnchorRejection.OWNER_MISMATCH));}
+     @Test void forgedViewerAndReleasedBindingTerminate(){for(boolean release:List.of(false,true)){var f=new K1Fixture();f.balanced();long id=f.ids.viewerId(B);if(release)f.ids.release(A);else f.tamper=s->replace(s,null,null,id,null,null,null,null,null,null,null,null);f.run();assertFalse(f.registry.active());assertEquals(0,f.sends.size());assertEquals(1,f.registry.rejections(AnchorRejection.VIEWER_ID_MISMATCH));}}
+-    @Test void staleAndFutureSnapshotsSkipThenRecoverWithoutRestartingClock(){for(long delta:new long[]{-1,1,-1000}){var f=new K1Fixture();f.balanced();f.tamper=s->replace(s,s.tick()+delta,null,null,null,null,null,null,null,null,null,null);f.tick=105;f.run();assertEquals(0,f.plans);assertTrue(f.registry.active());f.tamper=java.util.function.UnaryOperator.identity();f.step();assertEquals(6,f.requests.getFirst().frameOrdinal());assertEquals(18,f.sends.size());}}
++    @Test void staleAndFutureSnapshotsSkipThenRecoverWithoutRestartingClock(){for(long delta:new long[]{-1,1,-1000}){var f=new K1Fixture();f.balanced();f.tamper=s->replace(s,s.tick()+delta,null,null,null,null,null,null,null,null,null,null);f.tick=105;f.run();assertEquals(0,f.plans);assertTrue(f.registry.active());f.tamper=java.util.function.UnaryOperator.identity();f.step();assertEquals(6,f.requests.getFirst().frameOrdinal());assertEquals(34,f.sends.size());}}
+     @Test void nonfinitePositionAndYawAxesNeverReachPlanner(){for(int field=0;field<5;field++)for(double bad:new double[]{Double.NaN,Double.POSITIVE_INFINITY,Double.NEGATIVE_INFINITY}){var f=new K1Fixture();f.balanced();int k=field;f.tamper=s->replace(s,null,null,null,null,null,k==0?bad:null,k==1?bad:null,k==2?bad:null,k==3?(float)bad:null,k==4?(float)bad:null,null);f.run();assertEquals(0,f.plans);assertEquals(1,f.registry.rejections(AnchorRejection.NON_FINITE));}}
+     @Test void unknownMismatchedWorldHeightAndChunkFailClosed(){for(int n=0;n<5;n++){var f=new K1Fixture();f.balanced();int k=n;f.tamper=s->replace(s,null,null,null,k==0?W2:null,k==1?Integer.MAX_VALUE:null,null,k==2?Double.valueOf(320):k==3?Double.valueOf(-65):null,null,null,null,k==4?false:null);f.run();assertEquals(0,f.plans);assertEquals(0,f.sends.size());assertTrue(f.registry.active());}}
+-    @Test void invalidStreakTerminatesAtConfiguredLimitAndReadyResetsIt(){var f=new K1Fixture(Map.of(),Map.of("invalidAnchorTicksToTerminate",3));f.balanced();f.tamper=s->replace(s,s.tick()-1,null,null,null,null,null,null,null,null,null,null);f.run();f.step();assertTrue(f.registry.active());f.tamper=java.util.function.UnaryOperator.identity();f.step();assertEquals(18,f.sends.size());f.tamper=s->null;f.step();assertFalse(f.registry.active());var g=new K1Fixture();g.balanced();g.tamper=s->replace(s,s.tick()-1,null,null,null,null,null,null,null,null,null,null);for(int i=0;i<19;i++){g.run();assertTrue(g.registry.active());g.tick++;}g.run();assertFalse(g.registry.active());}
++    @Test void invalidStreakTerminatesAtConfiguredLimitAndReadyResetsIt(){var f=new K1Fixture(Map.of(),Map.of("invalidAnchorTicksToTerminate",3));f.balanced();f.tamper=s->replace(s,s.tick()-1,null,null,null,null,null,null,null,null,null,null);f.run();f.step();assertTrue(f.registry.active());f.tamper=java.util.function.UnaryOperator.identity();f.step();assertEquals(34,f.sends.size());f.tamper=s->null;f.step();assertFalse(f.registry.active());var g=new K1Fixture();g.balanced();g.tamper=s->replace(s,s.tick()-1,null,null,null,null,null,null,null,null,null,null);for(int i=0;i<19;i++){g.run();assertTrue(g.registry.active());g.tick++;}g.run();assertFalse(g.registry.active());}
+     @Test void realAuraDraftUsesBoundIdentityAndRejectsTamperedDirectContributions(){var f=new K1Fixture();f.balanced();var e=f.current();var s=f.snapshot(A,f.tick);assertTrue(e.contribute(f.tick,replace(s,null,B,f.ids.viewerId(B),null,null,null,null,null,null,null,null)).isEmpty());var d=e.contribute(f.tick,s).orElseThrow();assertEquals(A,d.owner());assertEquals(f.ids.viewerId(A),d.ownerViewerId());assertTrue(d.requestId()>=DynamicEffectRegistry.FIRST_ID);assertEquals(0,f.registry.identityViolations());}
+ }
+diff --git a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1LifecycleTest.java b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1LifecycleTest.java
+index da29de7..1e92208 100644
+--- a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1LifecycleTest.java
++++ b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1LifecycleTest.java
+@@ -8,7 +8,7 @@ import workshop.vfx.paper.core.*;
+ import workshop.vfx.scene.*;
+ 
+ class K1LifecycleTest {
+-    @Test void noAutomaticStartAndAuraAloneUsesOneTask(){var f=new K1Fixture();assertEquals(0,f.schedules);assertFalse(f.driver.running());assertEquals(0,f.registry.activeCount());f.balanced();f.run();assertEquals(1,f.schedules);assertEquals(1,f.plans);assertEquals(18,f.sends.size());}
++    @Test void noAutomaticStartAndAuraAloneUsesOneTask(){var f=new K1Fixture();assertEquals(0,f.schedules);assertFalse(f.driver.running());assertEquals(0,f.registry.activeCount());f.balanced();f.run();assertEquals(1,f.schedules);assertEquals(1,f.plans);assertEquals(34,f.sends.size());}
+     @Test void allTierReplacementsAreSingleRegistrationAndDisposeOld(){var f=new K1Fixture();long last=-1;for(var tier:List.of(QualityTier.SIMPLE,QualityTier.BALANCED,QualityTier.HEAVY,QualityTier.SIMPLE)){var old=f.registry.effect(A,EffectKind.AURA);long id=f.start(tier);assertTrue(id>last);last=id;old.ifPresent(e->assertTrue(e.finished(f.tick)));assertEquals(1,f.registry.activeCount());assertEquals(tier,f.current().tier());}assertEquals(1,f.schedules);}
+     @Test void failedStartPreservesExistingAuraAndTask(){var f=new K1Fixture();f.balanced();var old=f.current();f.tamper=s->null;assertThrows(IllegalArgumentException.class,()->f.start(QualityTier.HEAVY));assertSame(old,f.current());assertFalse(old.finished(f.tick));assertEquals(1,f.schedules);assertEquals(0,f.cancels);}
+     @Test void schedulerFailureLeavesNoRegistrationAndRetryWorks(){var f=new K1Fixture();f.failSchedule=true;assertThrows(IllegalStateException.class,()->f.balanced());assertEquals(0,f.registry.activeCount());assertFalse(f.driver.running());var stale=f.callback;f.failSchedule=false;f.balanced();stale.run();assertEquals(0,f.plans);f.run();assertEquals(1,f.plans);}
+diff --git a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1SyntheticMeasurementsTest.java b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1SyntheticMeasurementsTest.java
+index fd810ba..c3c6b32 100644
+--- a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1SyntheticMeasurementsTest.java
++++ b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1SyntheticMeasurementsTest.java
+@@ -31,7 +31,7 @@ class K1SyntheticMeasurementsTest {
+                     generated+=f.plan.sourcePoints();placements+=r.plannedPlacements();ok+=r.succeededCalls();failed+=r.failedCalls();f.account();}
+                 f.tick++;
+             }
+-            long expectedPerFrame=scenario==0?8:scenario==1?18:scenario==2?24:48;
++            long expectedPerFrame=scenario==0?20:scenario==1?34:scenario==2?44:88;
+             assertEquals(expectedPerFrame*1200,generated);assertEquals(generated*(scenario==3?2:1),placements);
+             assertEquals(placements,ok);assertEquals(0,failed);assertEquals(1,f.schedules);
+             if(scenario>0)json.append(',');
+diff --git a/paper-adapter/src/test/resources/m8-k1.2/k1.1-halo-coordinates.csv b/paper-adapter/src/test/resources/m8-k1.2/k1.1-halo-coordinates.csv
+new file mode 100644
+index 0000000..51360b1
+--- /dev/null
++++ b/paper-adapter/src/test/resources/m8-k1.2/k1.1-halo-coordinates.csv
+@@ -0,0 +1,85 @@
++tier,age,index,x,y,z
++BALANCED,0,0,0x1.1745494781613p1,0x1.209999999999ap6,-0x1.d745494781612p1
++BALANCED,0,1,0x1.4ee8712e3785fp1,0x1.209999999999ap6,-0x1.c85cd81949db4p1
++BALANCED,0,2,0x1.77a327e6b624cp1,0x1.209999999999ap6,-0x1.f1178ed1c87a2p1
++BALANCED,0,3,0x1.68bab6b87e9edp1,0x1.209999999999ap6,-0x1.145d5b5c3f4f7p2
++BALANCED,0,4,0x1.31178ed1c87a2p1,0x1.209999999999ap6,-0x1.1bd193f35b126p2
++BALANCED,0,5,0x1.085cd81949db4p1,0x1.209999999999ap6,-0x1.077438971bc2fp2
++BALANCED,1,0,0x1.14335b985d51ap1,0x1.209999999999ap6,-0x1.da977fb531852p1
++BALANCED,1,1,0x1.4a7f2c12fc4f3p1,0x1.209999999999ap6,-0x1.c75d5101e2c37p1
++BALANCED,1,2,0x1.764bd07a9efd9p1,0x1.209999999999ap6,-0x1.ecc5d14cb13e6p1
++BALANCED,1,3,0x1.6bcca467a2ae6p1,0x1.209999999999ap6,-0x1.12b44025673d7p2
++BALANCED,1,4,0x1.3580d3ed03b0dp1,0x1.209999999999ap6,-0x1.1c51577f0e9e4p2
++BALANCED,1,5,0x1.09b42f8561027p1,0x1.209999999999ap6,-0x1.099d1759a760dp2
++BALANCED,20,0,0x1.1745494781613p1,0x1.209999999999ap6,-0x1.145d5b5c3f4f7p2
++BALANCED,20,1,0x1.085cd81949db4p1,0x1.209999999999ap6,-0x1.f1178ed1c87a2p1
++BALANCED,20,2,0x1.31178ed1c87a1p1,0x1.209999999999ap6,-0x1.c85cd81949db4p1
++BALANCED,20,3,0x1.68bab6b87e9edp1,0x1.209999999999ap6,-0x1.d745494781613p1
++BALANCED,20,4,0x1.77a327e6b624cp1,0x1.209999999999ap6,-0x1.077438971bc2fp2
++BALANCED,20,5,0x1.4ee8712e3785fp1,0x1.209999999999ap6,-0x1.1bd193f35b126p2
++BALANCED,79,0,0x1.1a977fb531852p1,0x1.209999999999ap6,-0x1.d4335b985d51bp1
++BALANCED,79,1,0x1.533a2eb34ec1ap1,0x1.209999999999ap6,-0x1.c9b42f8561028p1
++BALANCED,79,2,0x1.78a2aefe1d3c8p1,0x1.209999999999ap6,-0x1.f580d3ed03b0cp1
++BALANCED,79,3,0x1.6568804ace7aep1,0x1.209999999999ap6,-0x1.15e65233d1573p2
++BALANCED,79,4,0x1.2cc5d14cb13e6p1,0x1.209999999999ap6,-0x1.1b25e83d4f7ecp2
++BALANCED,79,5,0x1.075d5101e2c38p1,0x1.209999999999ap6,-0x1.053f96097e27ap2
++BALANCED,80,0,0x1.1745494781613p1,0x1.209999999999ap6,-0x1.d745494781612p1
++BALANCED,80,1,0x1.4ee8712e3785fp1,0x1.209999999999ap6,-0x1.c85cd81949db4p1
++BALANCED,80,2,0x1.77a327e6b624cp1,0x1.209999999999ap6,-0x1.f1178ed1c87a2p1
++BALANCED,80,3,0x1.68bab6b87e9edp1,0x1.209999999999ap6,-0x1.145d5b5c3f4f7p2
++BALANCED,80,4,0x1.31178ed1c87a2p1,0x1.209999999999ap6,-0x1.1bd193f35b126p2
++BALANCED,80,5,0x1.085cd81949db4p1,0x1.209999999999ap6,-0x1.077438971bc2fp2
++BALANCED,123,0,0x1.711cb0d8c2a31p1,0x1.209999999999ap6,-0x1.0f0c4704dca9fp2
++BALANCED,123,1,0x1.3e7e0154330e3p1,0x1.209999999999ap6,-0x1.1cca4605c5bbdp2
++BALANCED,123,2,0x1.0d61507b706b3p1,0x1.209999999999ap6,-0x1.0dbdff00e911ep2
++BALANCED,123,3,0x1.0ee34f273d5cfp1,0x1.209999999999ap6,-0x1.e1e771f646ac2p1
++BALANCED,123,4,0x1.4181feabccf1cp1,0x1.209999999999ap6,-0x1.c66b73f474886p1
++BALANCED,123,5,0x1.729eaf848f94ep1,0x1.209999999999ap6,-0x1.e48401fe2ddc4p1
++HEAVY,0,0,0x1.1745494781613p1,0x1.209999999999ap6,-0x1.d745494781612p1
++HEAVY,0,1,0x1.4p1,0x1.209999999999ap6,-0x1.c666666666666p1
++HEAVY,0,2,0x1.68bab6b87e9eep1,0x1.209999999999ap6,-0x1.d745494781613p1
++HEAVY,0,3,0x1.799999999999ap1,0x1.209999999999ap6,-0x1.0p2
++HEAVY,0,4,0x1.68bab6b87e9edp1,0x1.209999999999ap6,-0x1.145d5b5c3f4f7p2
++HEAVY,0,5,0x1.4p1,0x1.209999999999ap6,-0x1.1cccccccccccdp2
++HEAVY,0,6,0x1.1745494781612p1,0x1.209999999999ap6,-0x1.145d5b5c3f4f7p2
++HEAVY,0,7,0x1.0666666666666p1,0x1.209999999999ap6,-0x1.0p2
++HEAVY,1,0,0x1.14335b985d51ap1,0x1.209999999999ap6,-0x1.da977fb531852p1
++HEAVY,1,1,0x1.3b7b12d4b30cdp1,0x1.209999999999ap6,-0x1.c693db1354852p1
++HEAVY,1,2,0x1.6568804ace7aep1,0x1.209999999999ap6,-0x1.d4335b985d51ap1
++HEAVY,1,3,0x1.796c24ecab7aep1,0x1.209999999999ap6,-0x1.fb7b12d4b30cdp1
++HEAVY,1,4,0x1.6bcca467a2ae6p1,0x1.209999999999ap6,-0x1.12b44025673d7p2
++HEAVY,1,5,0x1.4484ed2b4cf33p1,0x1.209999999999ap6,-0x1.1cb6127655bd7p2
++HEAVY,1,6,0x1.1a977fb531852p1,0x1.209999999999ap6,-0x1.15e65233d1573p2
++HEAVY,1,7,0x1.0693db1354852p1,0x1.209999999999ap6,-0x1.02427695a679ap2
++HEAVY,20,0,0x1.1745494781613p1,0x1.209999999999ap6,-0x1.145d5b5c3f4f7p2
++HEAVY,20,1,0x1.0666666666666p1,0x1.209999999999ap6,-0x1.0p2
++HEAVY,20,2,0x1.1745494781613p1,0x1.209999999999ap6,-0x1.d745494781613p1
++HEAVY,20,3,0x1.4p1,0x1.209999999999ap6,-0x1.c666666666666p1
++HEAVY,20,4,0x1.68bab6b87e9edp1,0x1.209999999999ap6,-0x1.d745494781613p1
++HEAVY,20,5,0x1.799999999999ap1,0x1.209999999999ap6,-0x1.0p2
++HEAVY,20,6,0x1.68bab6b87e9edp1,0x1.209999999999ap6,-0x1.145d5b5c3f4f7p2
++HEAVY,20,7,0x1.4p1,0x1.209999999999ap6,-0x1.1cccccccccccdp2
++HEAVY,79,0,0x1.1a977fb531852p1,0x1.209999999999ap6,-0x1.d4335b985d51bp1
++HEAVY,79,1,0x1.4484ed2b4cf33p1,0x1.209999999999ap6,-0x1.c693db1354852p1
++HEAVY,79,2,0x1.6bcca467a2ae5p1,0x1.209999999999ap6,-0x1.da977fb531852p1
++HEAVY,79,3,0x1.796c24ecab7aep1,0x1.209999999999ap6,-0x1.02427695a679ap2
++HEAVY,79,4,0x1.6568804ace7aep1,0x1.209999999999ap6,-0x1.15e65233d1573p2
++HEAVY,79,5,0x1.3b7b12d4b30cdp1,0x1.209999999999ap6,-0x1.1cb6127655bd7p2
++HEAVY,79,6,0x1.14335b985d51bp1,0x1.209999999999ap6,-0x1.12b44025673d7p2
++HEAVY,79,7,0x1.0693db1354852p1,0x1.209999999999ap6,-0x1.fb7b12d4b30cdp1
++HEAVY,80,0,0x1.1745494781613p1,0x1.209999999999ap6,-0x1.d745494781612p1
++HEAVY,80,1,0x1.4p1,0x1.209999999999ap6,-0x1.c666666666666p1
++HEAVY,80,2,0x1.68bab6b87e9eep1,0x1.209999999999ap6,-0x1.d745494781613p1
++HEAVY,80,3,0x1.799999999999ap1,0x1.209999999999ap6,-0x1.0p2
++HEAVY,80,4,0x1.68bab6b87e9edp1,0x1.209999999999ap6,-0x1.145d5b5c3f4f7p2
++HEAVY,80,5,0x1.4p1,0x1.209999999999ap6,-0x1.1cccccccccccdp2
++HEAVY,80,6,0x1.1745494781612p1,0x1.209999999999ap6,-0x1.145d5b5c3f4f7p2
++HEAVY,80,7,0x1.0666666666666p1,0x1.209999999999ap6,-0x1.0p2
++HEAVY,123,0,0x1.711cb0d8c2a31p1,0x1.209999999999ap6,-0x1.0f0c4704dca9fp2
++HEAVY,123,1,0x1.4d724abdb63e2p1,0x1.209999999999ap6,-0x1.1c0116c55e65dp2
++HEAVY,123,2,0x1.21e771f646ac2p1,0x1.209999999999ap6,-0x1.188e586c61518p2
++HEAVY,123,3,0x1.07fdd27543346p1,0x1.209999999999ap6,-0x1.06b9255edb1f1p2
++HEAVY,123,4,0x1.0ee34f273d5cfp1,0x1.209999999999ap6,-0x1.e1e771f646ac2p1
++HEAVY,123,5,0x1.328db54249c1ep1,0x1.209999999999ap6,-0x1.c7fdd27543346p1
++HEAVY,123,6,0x1.5e188e09b953ep1,0x1.209999999999ap6,-0x1.cee34f273d5cfp1
++HEAVY,123,7,0x1.78022d8abccbap1,0x1.209999999999ap6,-0x1.f28db54249c1ep1
+diff --git a/paper-adapter/tools/m8-k1-2/summarize.py b/paper-adapter/tools/m8-k1-2/summarize.py
+new file mode 100644
+index 0000000..fe52ba4
+--- /dev/null
++++ b/paper-adapter/tools/m8-k1-2/summarize.py
+@@ -0,0 +1,18 @@
++import sys,json,xml.etree.ElementTree as ET
++from pathlib import Path
++r=Path(sys.argv[1]);m7=set(json.loads((r/'docs/m8/k0/M7-REGRESSION-CLASSES.json').read_text()))
++counts={k:0 for k in ['tests','failures','errors','skipped']};groups={'M1-M6':0,'M7':0,'K0':0,'K1':0,'K1.1':0,'K1.2':0};files=[];seen=set()
++for folder in [r/'build/test-results/test',r/'paper-adapter/build/test-results/test']:
++ xml=sorted(folder.glob('TEST-*.xml'));assert xml,folder;files+=xml
++ for p in xml:
++  suite=ET.parse(p).getroot();name=suite.attrib['name']
++  for c in suite.findall('testcase'):seen.add(c.attrib['classname']+':'+c.attrib['name'])
++  for k in counts:counts[k]+=int(suite.attrib.get(k,0))
++  group='M1-M6' if folder==r/'build/test-results/test' else 'M7' if name in m7 else 'K0' if '.K0' in name else 'K1.1' if '.K11' in name else 'K1.2' if '.K12' in name else 'K1'
++  if group=='K1':assert '.K1' in name,name
++  groups[group]+=int(suite.attrib['tests'])
++assert groups=={'M1-M6':415,'M7':61,'K0':50,'K1':57,'K1.1':6,'K1.2':14},groups
++assert counts==dict(tests=603,failures=0,errors=0,skipped=0),counts
++baseline=json.loads((r/'docs/m8/k1/k1.2/BASELINE-TEST-IDENTIFIERS.json').read_text())
++assert set(baseline['executed_test_cases'])<=seen,sorted(set(baseline['executed_test_cases'])-seen)
++print(json.dumps(dict(counts=counts,groups=groups,xml_reports=len(files)),indent=2))
+diff --git a/paper-adapter/tools/m8-k1-2/verify.sh b/paper-adapter/tools/m8-k1-2/verify.sh
+new file mode 100755
+index 0000000..4b943f5
+--- /dev/null
++++ b/paper-adapter/tools/m8-k1-2/verify.sh
+@@ -0,0 +1,14 @@
++#!/usr/bin/env bash
++set -euo pipefail
++root="$(cd "$(dirname "$0")/../../.." && pwd)"
++evidence="${1:-$(mktemp -d "${TMPDIR:-/tmp}/bedwenton-m8-k1-2.XXXXXX")}";mkdir -p "$evidence"
++cd "$root"
++./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test 2>&1 | tee "$evidence/engine-clean-test.log"
++./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false check 2>&1 | tee "$evidence/engine-check.log"
++./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false -p paper-adapter clean test 2>&1 | tee "$evidence/adapter-clean-test.log"
++./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false -p paper-adapter check 2>&1 | tee "$evidence/adapter-check.log"
++python3 paper-adapter/tools/m8-k1-2/summarize.py "$root" | tee "$evidence/test-summary.json"
++./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false dependencies --configuration runtimeClasspath 2>&1 | tee "$evidence/engine-runtime.log"
++grep -q 'No dependencies' "$evidence/engine-runtime.log"
++python3 verification/m6/regenerate_all.py "$evidence/reference-regeneration" 2>&1 | tee "$evidence/reference-regeneration.log"
++cp paper-adapter/build/reports/k1/synthetic-measurements.json "$evidence/"

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.core.FrameTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-19T15:12:57.815Z" hostname="runnervm8k3b6" time="0.066">
+  <properties/>
+  <testcase name="Constructor accepts right-handed orthonormal triples and rejects everything else" classname="workshop.vfx.math.core.FrameTest" time="0.002"/>
+  <testcase name="transportY follows a direction sweep without twist; naive alignY flips by about pi through the hint (negative control)" classname="workshop.vfx.math.core.FrameTest" time="0.004"/>
+  <testcase name="fromHeading degeneracy: vertical heading, zero heading, zero or parallel up hint" classname="workshop.vfx.math.core.FrameTest" time="0.014"/>
+  <testcase name="toWorld / toLocal are inverse and use the frame axes as columns" classname="workshop.vfx.math.core.FrameTest" time="0.005"/>
+  <testcase name="transportY: random walks stay valid; zero axis keeps the previous frame; antiparallel stays finite" classname="workshop.vfx.math.core.FrameTest" time="0.011"/>
+  <testcase name="alignY/alignZ degeneracy: parallel, antiparallel, zero and non-finite hints or axes (M0: robustness)" classname="workshop.vfx.math.core.FrameTest" time="0.001"/>
+  <testcase name="M0 audit item 2: Astral's (right, up, forward) basis is left-handed; fromHeading's (right, up, back) is right-handed" classname="workshop.vfx.math.core.FrameTest" time="0.0"/>
+  <testcase name="fromHeading: facing each compass direction gives the correct right, up and back axes" classname="workshop.vfx.math.core.FrameTest" time="0.0"/>
+  <testcase name="alignZ hand-derived reference frames" classname="workshop.vfx.math.core.FrameTest" time="0.001"/>
+  <testcase name="alignY hand-derived reference frames" classname="workshop.vfx.math.core.FrameTest" time="0.001"/>
+  <testcase name="alignY/alignZ: right-handed orthonormal, axis honoured, hint lies in the x-y plane (10,000 random)" classname="workshop.vfx.math.core.FrameTest" time="0.022"/>
+  <system-out><![CDATA[[M1 transport report] worst per-step twist: transport = 1.1102230246251568E-16 rad, naive alignY = 3.141592653589793 rad
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

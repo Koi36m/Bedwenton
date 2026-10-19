@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.paper.core.AllocationOrderEmissionTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-19T15:14:14.426Z" hostname="runnervm8k3b6" time="0.169">
+  <properties/>
+  <testcase name="Defensive caps binding (unaligned policy): the rank-0 ring is emitted first, whatever the input order; rotation alternates" classname="workshop.vfx.paper.core.AllocationOrderEmissionTest" time="0.052"/>
+  <testcase name="Aligned policy (placement and viewer budgets capped by the emission limits): M6 decides, the caps never bind" classname="workshop.vfx.paper.core.AllocationOrderEmissionTest" time="0.003"/>
+  <testcase name="Aligned policy over 300 random multi-ring scenarios: no EMISSION_LIMIT skip, attempted calls = planned placements" classname="workshop.vfx.paper.core.AllocationOrderEmissionTest" time="0.111"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.delivery.M6StressTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-19T15:12:56.358Z" hostname="runnervm8k3b6" time="0.647">
+  <properties/>
+  <testcase name="Extremes: ids and ordinals at Long bounds, world Integer.MAX_VALUE, viewer Long.MAX_VALUE, zero budgets" classname="workshop.vfx.delivery.M6StressTest" time="0.001"/>
+  <testcase name="The full M5 frame: 2^20 points, kept in full or thinned to one point, with exact counts and in-range selections" classname="workshop.vfx.delivery.M6StressTest" time="0.039"/>
+  <testcase name="Ceilings: 2^16 requests in one call, maximal budgets, and 2^50 budgets without overflow" classname="workshop.vfx.delivery.M6StressTest" time="0.467"/>
+  <testcase name="Denied preflight allocates nothing proportional to the frame: a 2^20-point scene over budget costs under 64 KiB per plan" classname="workshop.vfx.delivery.M6StressTest" time="0.011"/>
+  <testcase name="Viewer entries: 2^20 entries over 256 requests of 4,096 viewers; per-viewer budgets bind across requests" classname="workshop.vfx.delivery.M6StressTest" time="0.101"/>
+  <testcase name="Many layers: 4,096 one-point layers in three roles, thinned to 1, 100 and 4,095 points with exact role precedence" classname="workshop.vfx.delivery.M6StressTest" time="0.027"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

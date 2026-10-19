@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.time.M2GoldenVectorTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-19T15:13:42.134Z" hostname="runnervm8k3b6" time="0.017">
+  <properties/>
+  <testcase name="playback.csv: 29 control scripts, every anchor and every evaluation bit for bit (section 4)" classname="workshop.vfx.math.time.M2GoldenVectorTest" time="0.006"/>
+  <testcase name="timing.csv: stage, cycle and progress bit for bit over 1,692 cases (section 5)" classname="workshop.vfx.math.time.M2GoldenVectorTest" time="0.006"/>
+  <testcase name="Golden files are intact: MANIFEST.sha256 matches every file" classname="workshop.vfx.math.time.M2GoldenVectorTest" time="0.002"/>
+  <testcase name="timepoint.csv: ticksSince bit for bit, including the overflow rows (section 3)" classname="workshop.vfx.math.time.M2GoldenVectorTest" time="0.001"/>
+  <testcase name="tick_seconds.csv: ticksToSeconds and secondsToTicks bit for bit (section 2)" classname="workshop.vfx.math.time.M2GoldenVectorTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

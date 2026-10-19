@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.time.M2ReviewAdversarialTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-19T15:13:42.152Z" hostname="runnervm8k3b6" time="1.2">
+  <properties/>
+  <testcase name="Subnormal and extreme durations: exact cycles for small multiples of Double.MIN_VALUE; huge durations stay in cycle 0 (section 5)" classname="workshop.vfx.math.time.M2ReviewAdversarialTest" time="0.001"/>
+  <testcase name="Time-translation invariance: shifting every instant by the same amount changes no bit, in both domains (sections 3, 4)" classname="workshop.vfx.math.time.M2ReviewAdversarialTest" time="0.021"/>
+  <testcase name="Stage and cycle are monotone in local time for finite runs: never AFTER -&gt; ACTIVE or a lower cycle later (section 5)" classname="workshop.vfx.math.time.M2ReviewAdversarialTest" time="0.214"/>
+  <testcase name="COSMETIC differences beyond 2^53 ns round twice, as specified, and stay within 2 ulp of the exact quotient (section 3)" classname="workshop.vfx.math.time.M2ReviewAdversarialTest" time="0.078"/>
+  <testcase name="Boundary oracle: on and next to 11 cycle boundaries up to 2^51 - 1, for 14 durations including subnormals, stage and cycle are exact and forward progress is correctly rounded (sections 5, 6.4)" classname="workshop.vfx.math.time.M2ReviewAdversarialTest" time="0.011"/>
+  <testcase name="Determinism under JIT: results computed before and after 3 million hot iterations are bit-identical (section 6.1)" classname="workshop.vfx.math.time.M2ReviewAdversarialTest" time="0.057"/>
+  <testcase name="Integer control scripts: random pause/resume/restart/seek/withRate (integer rates in [-3, 3]) match a pure long-arithmetic model bit for bit, through Timing as well (section 6.3)" classname="workshop.vfx.math.time.M2ReviewAdversarialTest" time="0.09"/>
+  <testcase name="Re-anchoring error: GAME stays within the contract's 1.5 * 2^-52 * M; COSMETIC needs 2.5 * 2^-52 * M (finding A1: the contract's 1.5 is exceeded)" classname="workshop.vfx.math.time.M2ReviewAdversarialTest" time="0.348"/>
+  <testcase name="Exhaustive small integers: every delay in [-6, 6], duration in [1, 8], local in [-30, 90], all modes and cycle counts agree with integer arithmetic (section 6.3)" classname="workshop.vfx.math.time.M2ReviewAdversarialTest" time="0.012"/>
+  <testcase name="The 2^51 cycle-exact domain is sufficient: 200,000 random elapsed times with elapsed/duration in [2^50, 2^51) give the exact cycle (section 6.4)" classname="workshop.vfx.math.time.M2ReviewAdversarialTest" time="0.34"/>
+  <testcase name="PING_PONG mirror symmetry: for integer d and u in [0, 2d], progress(u) == progress(2d - u) bit for bit (section 5)" classname="workshop.vfx.math.time.M2ReviewAdversarialTest" time="0.023"/>
+  <testcase name="Validation order: control-instant checks, then argument checks, then evaluation; so an invalid rate is an IAE even where evaluation would overflow (section 4)" classname="workshop.vfx.math.time.M2ReviewAdversarialTest" time="0.002"/>
+  <testcase name="Environment: tests run on Java 25" classname="workshop.vfx.math.time.M2ReviewAdversarialTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

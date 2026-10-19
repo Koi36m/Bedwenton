@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.sample.M4R21RegressionTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-19T15:13:35.193Z" hostname="runnervm8k3b6" time="0.233">
+  <properties/>
+  <testcase name="F4: subnormal speeds over long ranges lose at most MIN_VALUE/2 per half-panel rule (no MIN_VALUE per unit of parameter): lines with components (q, q, 0), (q, 2q, 2q), (3q, q, 0) and (q, 0, 0) on [0, 1000] and [-7, 9]" classname="workshop.vfx.math.sample.M4R21RegressionTest" time="0.003"/>
+  <testcase name="F4: M3 lines on ranges of a few MIN_VALUE (half-width rounds to 0): length within the contract 10.2 allowance (R2.1), whose underflow term is MIN_VALUE/2 per half-panel rule of nonzero width (1 to 7 rules on [0, k MIN_VALUE]); unit speed on [0, k MIN_VALUE] is exact (a consequence of the normative operation order); lengthAt one ulp above t0 accurate" classname="workshop.vfx.math.sample.M4R21RegressionTest" time="0.006"/>
+  <testcase name="F5: a finite table whose partial integral overflowed (speed 1e308, or components at MAX_VALUE, only for t &lt;= 1e-300; 1 elsewhere): lengthAt and parameterAt near t0 are finite, never NaN, and within [0, length()] (F_k need not be monotone for such a curve)" classname="workshop.vfx.math.sample.M4R21RegressionTest" time="0.001"/>
+  <testcase name="F5: finite smooth curves whose weighted node sum overflows (speeds 1e308 to 2.5e308, components up to MAX_VALUE): build returns the finite length, converged, within the allowance; lengthAt and parameterAt finite" classname="workshop.vfx.math.sample.M4R21RegressionTest" time="0.002"/>
+  <testcase name="F4/F5: no spurious overflow or underflow in the panel rule: 3,000 random lines (speeds 1e-300 to 2.9e308 with components up to MAX_VALUE, range widths 1 MIN_VALUE to 1e3, exact lengths below MAX_VALUE/4) all give finite, converged lengths within the allowance" classname="workshop.vfx.math.sample.M4R21RegressionTest" time="0.22"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.paper.core.RingDriverTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-19T15:14:15.730Z" hostname="runnervm8k3b6" time="0.024">
+  <properties/>
+  <testcase name="cancelledCallbackAndPreviousGenerationNeverEmit()" classname="workshop.vfx.paper.core.RingDriverTest" time="0.002"/>
+  <testcase name="idleEnableThenOnePlannerForAllRingsAndNoDuplicateTickBudgets()" classname="workshop.vfx.paper.core.RingDriverTest" time="0.002"/>
+  <testcase name="unloadAndMissingWorldStopOnlyAffectedRings()" classname="workshop.vfx.paper.core.RingDriverTest" time="0.001"/>
+  <testcase name="expiryAndOwnerOfflineStopAndCancel()" classname="workshop.vfx.paper.core.RingDriverTest" time="0.002"/>
+  <testcase name="teleportWorldChangeAndInvalidAnchorsFailClosed()" classname="workshop.vfx.paper.core.RingDriverTest" time="0.002"/>
+  <testcase name="ownerFirstAndDuplicateEnumerationCannotReachM6()" classname="workshop.vfx.paper.core.RingDriverTest" time="0.001"/>
+  <testcase name="permissionAndWorldEligibilityArePerRingAndRechecked()" classname="workshop.vfx.paper.core.RingDriverTest" time="0.002"/>
+  <testcase name="styleFailuresPersistAcrossDriverTicksAndNextPlanExcludesStyle()" classname="workshop.vfx.paper.core.RingDriverTest" time="0.001"/>
+  <testcase name="falsePrimaryRefusesTickAndCommandsBeforeHostAccess()" classname="workshop.vfx.paper.core.RingDriverTest" time="0.002"/>
+  <testcase name="repeatedStartReplacesAndDoesNotMultiplyTasksAtCap()" classname="workshop.vfx.paper.core.RingDriverTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,17 @@
+{"kind":"synthetic in-memory production pipeline; NOT Paper, TPS, MSPT or network latency","warmup_ticks":600,"measured_ticks":1200,"scenarios":[{"scenario":"SIMPLE","generated_per_frame":20,"generated_total":24000,"planned_placements":24000,"successful_calls":24000,"failed_calls":0,"planner_ns":{"p50":9765,"p95":25214,"max":396457},"emitter_ns":{"p50":10896,"p95":16375,"max":26733613},"snapshot_reads_ns":{"p50":393,"p95":657,"max":38035},"whole_fake_tick_ns":{"p50":26582,"p95":63913,"max":26829349}},{"scenario":"BALANCED","generated_per_frame":34,"generated_total":40800,"planned_placements":40800,"successful_calls":40800,"failed_calls":0,"planner_ns":{"p50":10221,"p95":16622,"max":91009},"emitter_ns":{"p50":16206,"p95":22747,"max":18979006},"snapshot_reads_ns":{"p50":403,"p95":650,"max":13880},"whole_fake_tick_ns":{"p50":32163,"p95":60465,"max":19126180}},{"scenario":"HEAVY","generated_per_frame":44,"generated_total":52800,"planned_placements":52800,"successful_calls":52800,"failed_calls":0,"planner_ns":{"p50":10403,"p95":38272,"max":278834},"emitter_ns":{"p50":20003,"p95":36268,"max":428602},"snapshot_reads_ns":{"p50":336,"p95":595,"max":2295},"whole_fake_tick_ns":{"p50":35940,"p95":78812,"max":444319}},{"scenario":"two-heavy-auras-two-viewers","generated_per_frame":88,"generated_total":105600,"planned_placements":211200,"successful_calls":211200,"failed_calls":0,"planner_ns":{"p50":18747,"p95":40677,"max":116770},"emitter_ns":{"p50":73439,"p95":106356,"max":2966186},"snapshot_reads_ns":{"p50":134,"p95":154,"max":21337},"whole_fake_tick_ns":{"p50":100149,"p95":149052,"max":4830233}}]}
+
+
+Test run finished after 3295 ms
+[        25 containers found      ]
+[         0 containers skipped    ]
+[        25 containers started    ]
+[         0 containers aborted    ]
+[        25 containers successful ]
+[         0 containers failed     ]
+[       188 tests found           ]
+[         0 tests skipped         ]
+[       188 tests started         ]
+[         0 tests aborted         ]
+[       188 tests successful      ]
+[         0 tests failed          ]
+
