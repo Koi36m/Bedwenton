@@ -1,0 +1,15 @@
+{
+  "native_k11_production": "e07afc8f17139a96a8d6da366e7a4fcacf98e24e",
+  "native_k11_evidence": "d5a1fa2b59662af98d228f1f63fc6e87af5e9105",
+  "k11_tested_tree": "7987d9f21aacb25f8b0705cfbe87fe0d13f728ab",
+  "k11_evidence_tree": "2e5eeed18445f68fe14d9aa799372b80d9f95635",
+  "github_k11_evidence": "4fa4ec4db5a2279056941a94fff049b8aa7dd719",
+  "native_recovery": "Exact local Git clone and strict fsck PASS, no reconstructed commits",
+  "owner_authorization_sha256": "daaaec5e95c00c2d8a98e69c99d767d1cea59c84a0b2bfe350569c482c2771a0",
+  "primary_visual_reference": "Owner inline hand-drawn image: vertical disc behind torso, asymmetric curved inner pattern. No claim of byte-exporting the inline image.",
+  "baseline_tracked_files": 1921,
+  "unchanged_baseline_files": 1913,
+  "existing_baseline_test_identifiers_preserved": 589,
+  "ordinary_test_methods_preserved": 583,
+  "halo_fixture_sha256": "b8935d537308166a5061054e20194b83401bfadd0917a1f668128c8022c7f574"
+}

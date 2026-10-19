@@ -1,0 +1,14 @@
+e2a36d3b73720ceaf4995e04d053cb95386748e236c5213a3aaa40bda1366293  .github/workflows/m8-k1-2-java25-verification.yml
+87f3fa8a744420e074ce3607e337d5141675f1555802cf8b46229a5e26855bd5  paper-adapter/gradle.properties
+2bad586f0584c52b0781053366f324a792164948099aadc0a30d39f2d264f3fd  paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java
+ea5f9578874089a177c5ab63278d046beaa294a7170bc0265071e4312691056a  paper-adapter/src/test/java/workshop/vfx/paper/m8/K11RearArcTest.java
+24967722062395c6cd4a1f71a496de48a841db2357efbe4d5baeff52198cc988  paper-adapter/src/test/java/workshop/vfx/paper/m8/K12BackSigilTest.java
+17fdaaef842825cccec463c2a57af5bce2684537226a705034346fe45c9129d7  paper-adapter/src/test/java/workshop/vfx/paper/m8/K12GeometryOracle.java
+c863d03a6c4dd54de8298626ec01ade38f03a1cf27f76218ba69faf93655108e  paper-adapter/src/test/java/workshop/vfx/paper/m8/K1BudgetAndSchedulingTest.java
+b90dc41cb5a7b28f93eb19f5b1781a3626a0f65f5d238bcb3c054f8bd053770e  paper-adapter/src/test/java/workshop/vfx/paper/m8/K1GeometryTest.java
+e0215eca91d3b0ec34d12aac1b21269f235dca98ca71c57a8c270bf139cb162c  paper-adapter/src/test/java/workshop/vfx/paper/m8/K1IdentityAndPermissionsTest.java
+4cc9a45477e2bf997c88171b5892f28e680ed0f7ecbc8ff55f7c68cd71c77a17  paper-adapter/src/test/java/workshop/vfx/paper/m8/K1LifecycleTest.java
+9aa300ce7040097bdeb1cfb988dd12fb2f0a5ccbebe705422869f28ea31d1b43  paper-adapter/src/test/java/workshop/vfx/paper/m8/K1SyntheticMeasurementsTest.java
+b8935d537308166a5061054e20194b83401bfadd0917a1f668128c8022c7f574  paper-adapter/src/test/resources/m8-k1.2/k1.1-halo-coordinates.csv
+c53b67447833d1bff43c64a38ccf50bdda5f2d25340bffe72f838c8b77cecb03  paper-adapter/tools/m8-k1-2/summarize.py
+0e7dde93c97e49c1af37d60c63122775a577d0f3bf1643c2b7f21ac395a381b3  paper-adapter/tools/m8-k1-2/verify.sh

@@ -1,0 +1,34 @@
+{
+  "paper-adapter/gradle.properties": {
+    "old_sha256": "21d4510ea686d1738ccf3be2233c52e71829849840f70cc0d90116f973f30103",
+    "new_sha256": "87f3fa8a744420e074ce3607e337d5141675f1555802cf8b46229a5e26855bd5"
+  },
+  "paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java": {
+    "old_sha256": "da5be74eba110eafc352cd7b4ac64813e6203f5df7b41bba294623ef5a91ec9a",
+    "new_sha256": "2bad586f0584c52b0781053366f324a792164948099aadc0a30d39f2d264f3fd"
+  },
+  "paper-adapter/src/test/java/workshop/vfx/paper/m8/K11RearArcTest.java": {
+    "old_sha256": "993aadd210532d790095cf21beae14c83d237c3ba971681b5bd4714978387bfc",
+    "new_sha256": "ea5f9578874089a177c5ab63278d046beaa294a7170bc0265071e4312691056a"
+  },
+  "paper-adapter/src/test/java/workshop/vfx/paper/m8/K1BudgetAndSchedulingTest.java": {
+    "old_sha256": "46e98e305797baac0bd75b538fcfd19514315acd630660c2a3334d431dd8dcbb",
+    "new_sha256": "c863d03a6c4dd54de8298626ec01ade38f03a1cf27f76218ba69faf93655108e"
+  },
+  "paper-adapter/src/test/java/workshop/vfx/paper/m8/K1GeometryTest.java": {
+    "old_sha256": "cc9055c75697e9bc37ea7551e74f8e9f199a381861e239e206419da4339220e3",
+    "new_sha256": "b90dc41cb5a7b28f93eb19f5b1781a3626a0f65f5d238bcb3c054f8bd053770e"
+  },
+  "paper-adapter/src/test/java/workshop/vfx/paper/m8/K1IdentityAndPermissionsTest.java": {
+    "old_sha256": "0375c7c647ef86694fbb1169d54a8768765abbb21804d95282fe5d920507f0c1",
+    "new_sha256": "e0215eca91d3b0ec34d12aac1b21269f235dca98ca71c57a8c270bf139cb162c"
+  },
+  "paper-adapter/src/test/java/workshop/vfx/paper/m8/K1LifecycleTest.java": {
+    "old_sha256": "bc431c1558321ee6ad415593e07fe086b427112db90d36ee3ff4102d9db5b06e",
+    "new_sha256": "4cc9a45477e2bf997c88171b5892f28e680ed0f7ecbc8ff55f7c68cd71c77a17"
+  },
+  "paper-adapter/src/test/java/workshop/vfx/paper/m8/K1SyntheticMeasurementsTest.java": {
+    "old_sha256": "292a030529fd23d52e20654673f7c9f200e6b910604774095d5891b9996778e6",
+    "new_sha256": "9aa300ce7040097bdeb1cfb988dd12fb2f0a5ccbebe705422869f28ea31d1b43"
+  }
+}

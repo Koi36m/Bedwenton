@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420">
+<rect width="1200" height="420" fill="#101b2d"/>
+<g fill="#e7edf5" font-family="sans-serif"><text x="24" y="30" font-size="20">K1.2 geometry preview — actual Balanced production sample positions</text><text x="24" y="54" font-size="13">Back-facing XY projection; four phases of one 80-tick inner rotation. Not a Minecraft rendering or smoke result.</text></g>
+<text x="100" y="85" fill="#c9d9ee" font-family="sans-serif">Local tick 0</text>
+<path d="M 128 330 L 128 160 L 172 160 L 172 330 Z" fill="none" stroke="#293c56"/>
+<circle cx="228.00000" cy="205.00000" r="2.2" fill="#ffffff"/>
+<circle cx="222.06260" cy="175.15069" r="2.2" fill="#ffffff"/>
+<circle cx="205.15433" cy="149.84567" r="2.2" fill="#ffffff"/>
+<circle cx="179.84931" cy="132.93740" r="2.2" fill="#ffffff"/>
+<circle cx="150.00000" cy="127.00000" r="2.2" fill="#ffffff"/>
+<circle cx="120.15069" cy="132.93740" r="2.2" fill="#ffffff"/>
+<circle cx="94.84567" cy="149.84567" r="2.2" fill="#ffffff"/>
+<circle cx="77.93740" cy="175.15069" r="2.2" fill="#ffffff"/>
+<circle cx="72.00000" cy="205.00000" r="2.2" fill="#ffffff"/>
+<circle cx="77.93740" cy="234.84931" r="2.2" fill="#ffffff"/>
+<circle cx="94.84567" cy="260.15433" r="2.2" fill="#ffffff"/>
+<circle cx="120.15069" cy="277.06260" r="2.2" fill="#ffffff"/>
+<circle cx="150.00000" cy="283.00000" r="2.2" fill="#ffffff"/>
+<circle cx="179.84931" cy="277.06260" r="2.2" fill="#ffffff"/>
+<circle cx="205.15433" cy="260.15433" r="2.2" fill="#ffffff"/>
+<circle cx="222.06260" cy="234.84931" r="2.2" fill="#ffffff"/>
+<circle cx="88.00000" cy="229.00000" r="2.2" fill="#ffffff"/>
+<circle cx="110.70400" cy="233.40000" r="2.2" fill="#ffffff"/>
+<circle cx="126.59200" cy="231.08000" r="2.2" fill="#ffffff"/>
+<circle cx="136.52800" cy="223.96000" r="2.2" fill="#ffffff"/>
+<circle cx="141.37600" cy="213.96000" r="2.2" fill="#ffffff"/>
+<circle cx="142.00000" cy="203.00000" r="2.2" fill="#ffffff"/>
+<circle cx="143.40741" cy="188.28704" r="2.2" fill="#ffffff"/>
+<circle cx="150.59259" cy="179.29630" r="2.2" fill="#ffffff"/>
+<circle cx="162.00000" cy="174.75000" r="2.2" fill="#ffffff"/>
+<circle cx="176.07407" cy="173.37037" r="2.2" fill="#ffffff"/>
+<circle cx="191.25926" cy="173.87963" r="2.2" fill="#ffffff"/>
+<circle cx="206.00000" cy="175.00000" r="2.2" fill="#ffffff"/>
+<circle cx="195.00000" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="172.50000" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="127.50000" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="105.00000" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="127.50000" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="172.50000" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<text x="45" y="370" fill="#9fb3cc" font-family="sans-serif" font-size="12">Sigil plane is 0.65 blocks behind torso</text>
+<text x="395" y="85" fill="#c9d9ee" font-family="sans-serif">Local tick 20</text>
+<path d="M 423 330 L 423 160 L 467 160 L 467 330 Z" fill="none" stroke="#293c56"/>
+<circle cx="523.00000" cy="205.00000" r="2.2" fill="#ffffff"/>
+<circle cx="517.06260" cy="175.15069" r="2.2" fill="#ffffff"/>
+<circle cx="500.15433" cy="149.84567" r="2.2" fill="#ffffff"/>
+<circle cx="474.84931" cy="132.93740" r="2.2" fill="#ffffff"/>
+<circle cx="445.00000" cy="127.00000" r="2.2" fill="#ffffff"/>
+<circle cx="415.15069" cy="132.93740" r="2.2" fill="#ffffff"/>
+<circle cx="389.84567" cy="149.84567" r="2.2" fill="#ffffff"/>
+<circle cx="372.93740" cy="175.15069" r="2.2" fill="#ffffff"/>
+<circle cx="367.00000" cy="205.00000" r="2.2" fill="#ffffff"/>
+<circle cx="372.93740" cy="234.84931" r="2.2" fill="#ffffff"/>
+<circle cx="389.84567" cy="260.15433" r="2.2" fill="#ffffff"/>
+<circle cx="415.15069" cy="277.06260" r="2.2" fill="#ffffff"/>
+<circle cx="445.00000" cy="283.00000" r="2.2" fill="#ffffff"/>
+<circle cx="474.84931" cy="277.06260" r="2.2" fill="#ffffff"/>
+<circle cx="500.15433" cy="260.15433" r="2.2" fill="#ffffff"/>
+<circle cx="517.06260" cy="234.84931" r="2.2" fill="#ffffff"/>
+<circle cx="469.00000" cy="267.00000" r="2.2" fill="#ffffff"/>
+<circle cx="473.40000" cy="244.29600" r="2.2" fill="#ffffff"/>
+<circle cx="471.08000" cy="228.40800" r="2.2" fill="#ffffff"/>
+<circle cx="463.96000" cy="218.47200" r="2.2" fill="#ffffff"/>
+<circle cx="453.96000" cy="213.62400" r="2.2" fill="#ffffff"/>
+<circle cx="443.00000" cy="213.00000" r="2.2" fill="#ffffff"/>
+<circle cx="428.28704" cy="211.59259" r="2.2" fill="#ffffff"/>
+<circle cx="419.29630" cy="204.40741" r="2.2" fill="#ffffff"/>
+<circle cx="414.75000" cy="193.00000" r="2.2" fill="#ffffff"/>
+<circle cx="413.37037" cy="178.92593" r="2.2" fill="#ffffff"/>
+<circle cx="413.87963" cy="163.74074" r="2.2" fill="#ffffff"/>
+<circle cx="415.00000" cy="149.00000" r="2.2" fill="#ffffff"/>
+<circle cx="445.00000" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="483.97114" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="483.97114" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="445.00000" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="406.02886" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="406.02886" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<text x="340" y="370" fill="#9fb3cc" font-family="sans-serif" font-size="12">Sigil plane is 0.65 blocks behind torso</text>
+<text x="690" y="85" fill="#c9d9ee" font-family="sans-serif">Local tick 40</text>
+<path d="M 718 330 L 718 160 L 762 160 L 762 330 Z" fill="none" stroke="#293c56"/>
+<circle cx="818.00000" cy="205.00000" r="2.2" fill="#ffffff"/>
+<circle cx="812.06260" cy="175.15069" r="2.2" fill="#ffffff"/>
+<circle cx="795.15433" cy="149.84567" r="2.2" fill="#ffffff"/>
+<circle cx="769.84931" cy="132.93740" r="2.2" fill="#ffffff"/>
+<circle cx="740.00000" cy="127.00000" r="2.2" fill="#ffffff"/>
+<circle cx="710.15069" cy="132.93740" r="2.2" fill="#ffffff"/>
+<circle cx="684.84567" cy="149.84567" r="2.2" fill="#ffffff"/>
+<circle cx="667.93740" cy="175.15069" r="2.2" fill="#ffffff"/>
+<circle cx="662.00000" cy="205.00000" r="2.2" fill="#ffffff"/>
+<circle cx="667.93740" cy="234.84931" r="2.2" fill="#ffffff"/>
+<circle cx="684.84567" cy="260.15433" r="2.2" fill="#ffffff"/>
+<circle cx="710.15069" cy="277.06260" r="2.2" fill="#ffffff"/>
+<circle cx="740.00000" cy="283.00000" r="2.2" fill="#ffffff"/>
+<circle cx="769.84931" cy="277.06260" r="2.2" fill="#ffffff"/>
+<circle cx="795.15433" cy="260.15433" r="2.2" fill="#ffffff"/>
+<circle cx="812.06260" cy="234.84931" r="2.2" fill="#ffffff"/>
+<circle cx="802.00000" cy="181.00000" r="2.2" fill="#ffffff"/>
+<circle cx="779.29600" cy="176.60000" r="2.2" fill="#ffffff"/>
+<circle cx="763.40800" cy="178.92000" r="2.2" fill="#ffffff"/>
+<circle cx="753.47200" cy="186.04000" r="2.2" fill="#ffffff"/>
+<circle cx="748.62400" cy="196.04000" r="2.2" fill="#ffffff"/>
+<circle cx="748.00000" cy="207.00000" r="2.2" fill="#ffffff"/>
+<circle cx="746.59259" cy="221.71296" r="2.2" fill="#ffffff"/>
+<circle cx="739.40741" cy="230.70370" r="2.2" fill="#ffffff"/>
+<circle cx="728.00000" cy="235.25000" r="2.2" fill="#ffffff"/>
+<circle cx="713.92593" cy="236.62963" r="2.2" fill="#ffffff"/>
+<circle cx="698.74074" cy="236.12037" r="2.2" fill="#ffffff"/>
+<circle cx="684.00000" cy="235.00000" r="2.2" fill="#ffffff"/>
+<circle cx="695.00000" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="717.50000" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="762.50000" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="785.00000" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="762.50000" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="717.50000" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<text x="635" y="370" fill="#9fb3cc" font-family="sans-serif" font-size="12">Sigil plane is 0.65 blocks behind torso</text>
+<text x="985" y="85" fill="#c9d9ee" font-family="sans-serif">Local tick 60</text>
+<path d="M 1013 330 L 1013 160 L 1057 160 L 1057 330 Z" fill="none" stroke="#293c56"/>
+<circle cx="1113.00000" cy="205.00000" r="2.2" fill="#ffffff"/>
+<circle cx="1107.06260" cy="175.15069" r="2.2" fill="#ffffff"/>
+<circle cx="1090.15433" cy="149.84567" r="2.2" fill="#ffffff"/>
+<circle cx="1064.84931" cy="132.93740" r="2.2" fill="#ffffff"/>
+<circle cx="1035.00000" cy="127.00000" r="2.2" fill="#ffffff"/>
+<circle cx="1005.15069" cy="132.93740" r="2.2" fill="#ffffff"/>
+<circle cx="979.84567" cy="149.84567" r="2.2" fill="#ffffff"/>
+<circle cx="962.93740" cy="175.15069" r="2.2" fill="#ffffff"/>
+<circle cx="957.00000" cy="205.00000" r="2.2" fill="#ffffff"/>
+<circle cx="962.93740" cy="234.84931" r="2.2" fill="#ffffff"/>
+<circle cx="979.84567" cy="260.15433" r="2.2" fill="#ffffff"/>
+<circle cx="1005.15069" cy="277.06260" r="2.2" fill="#ffffff"/>
+<circle cx="1035.00000" cy="283.00000" r="2.2" fill="#ffffff"/>
+<circle cx="1064.84931" cy="277.06260" r="2.2" fill="#ffffff"/>
+<circle cx="1090.15433" cy="260.15433" r="2.2" fill="#ffffff"/>
+<circle cx="1107.06260" cy="234.84931" r="2.2" fill="#ffffff"/>
+<circle cx="1011.00000" cy="143.00000" r="2.2" fill="#ffffff"/>
+<circle cx="1006.60000" cy="165.70400" r="2.2" fill="#ffffff"/>
+<circle cx="1008.92000" cy="181.59200" r="2.2" fill="#ffffff"/>
+<circle cx="1016.04000" cy="191.52800" r="2.2" fill="#ffffff"/>
+<circle cx="1026.04000" cy="196.37600" r="2.2" fill="#ffffff"/>
+<circle cx="1037.00000" cy="197.00000" r="2.2" fill="#ffffff"/>
+<circle cx="1051.71296" cy="198.40741" r="2.2" fill="#ffffff"/>
+<circle cx="1060.70370" cy="205.59259" r="2.2" fill="#ffffff"/>
+<circle cx="1065.25000" cy="217.00000" r="2.2" fill="#ffffff"/>
+<circle cx="1066.62963" cy="231.07407" r="2.2" fill="#ffffff"/>
+<circle cx="1066.12037" cy="246.25926" r="2.2" fill="#ffffff"/>
+<circle cx="1065.00000" cy="261.00000" r="2.2" fill="#ffffff"/>
+<circle cx="1035.00000" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="996.02886" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="996.02886" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="1035.00000" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="1073.97114" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<circle cx="1073.97114" cy="115.00000" r="2.8" fill="#5ce1ff"/>
+<text x="930" y="370" fill="#9fb3cc" font-family="sans-serif" font-size="12">Sigil plane is 0.65 blocks behind torso</text>
+<text x="24" y="405" fill="#a5b8d1" font-family="sans-serif" font-size="12">Outline r0.78, centre feet+1.25; cyan halo feet+2.15. Dot size is schematic; persistence and native appearance are unmodelled.</text>
+</svg>

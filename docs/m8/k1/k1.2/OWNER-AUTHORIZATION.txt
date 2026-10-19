@@ -1,0 +1,443 @@
+Bedwenton — M8 K1.2: Arcane Halo Visual Correction
+
+Repository: Koi36m/Bedwenton
+Checkpoint: M8 K1.2
+Assignment: Back-Mounted Rotating Arcane Sigil
+
+1. Authorization and baseline
+
+Implement a focused K1.2 visual correction in an isolated development branch.
+
+Continue from the verified K1.1 implementation. Do not start development again from M7, K0, or the original K1.
+
+Baseline:
+
+K1.1 native implementation: e07afc8f17139a96a8d6da366e7a4fcacf98e24e
+
+K1.1 GitHub-tested snapshot: 555b20871f3dfbed93192e565019afdf6643b3cb
+
+K1.1 source tree: 7987d9f21aacb25f8b0705cfbe87fe0d13f728ab
+
+K1.1 automated verification: 589/589 PASS
+
+K1.1 GitHub evidence branch: m8-k1-1-review-evidence
+
+Preserve the accepted M1–M6 engine, M7 rendering adapter, K0 registry and scheduler, and all established security and lifecycle contracts.
+
+2. Corrected creative direction
+
+IMPORTANT: The owner has supplied a hand-drawn image. Treat it as the primary visual reference for this correction.
+
+Previous implementations misunderstood the intended placement.
+
+K1 featured a horizontal waist circle.
+
+K1.1 featured a horizontal crescent behind the waist.
+
+Neither represents the requested effect.
+
+The intended effect is a vertical magical circle floating behind the player's back, with curved internal strokes that visibly rotate inside the circle.
+
+The drawing shows:
+
+Front/back relationship: a circular magical formation located behind the player's torso.
+
+Side profile: the formation floats behind the character rather than surrounding their waist.
+
+Ring design: a complete outer circumference containing an asymmetric, curved, flowing internal pattern that rotates.
+
+Implement this design, not another horizontal waist effect.
+
+3. Geometry and placement
+
+Outer circle
+
+Particle: white END_ROD.
+
+Shape: complete circular outline.
+
+Orientation: vertical plane, not horizontal XZ ground/waist plane.
+
+Center: behind the player's torso/back.
+
+Suggested initial radius: approximately 0.75–0.80 blocks.
+
+Suggested initial center height: 1.25 blocks above feet.
+
+Suggested initial backward offset: 0.65 blocks.
+
+Follow player body yaw.
+
+Maintain the same relative placement when the player walks, jumps, turns, teleports, or changes dimensions.
+
+Coordinate requirements:
+
+The existing player-local frame uses:
+
++X = player's left.
+
++Y = up.
+
++Z = forward.
+
+−Z = behind the player.
+
+Therefore the vertical ring should lie in the local XY plane, with its center translated along negative local Z.
+
+A representative local circle is:
+
+(radius * cos(angle), centerHeight + radius * sin(angle), -backOffset)
+
+Evaluate the scene using the existing M1 Pose/Quat body-yaw anchor and M5 composition APIs.
+
+Never use fixed world directions for the backward offset.
+
+These dimensions are initial design targets. Minor adjustments are permitted when necessary for geometry or visual clarity, but document the actual values.
+
+Appearance
+
+The outer circumference should be:
+
+bright but elegant;
+
+clearly circular;
+
+visually separate from the player;
+
+readable from behind and at an angle;
+
+not unnecessarily dense.
+
+Do not create a particle-filled disc.
+
+4. Rotating internal design
+
+This is the most important new visual requirement.
+
+The owner drew curved internal lines inside the circle to indicate visible rotation.
+
+Implement a minimalist, asymmetric design consisting of two gently curved sweeping strokes, together resembling a flowing S-shaped or paired arcane swirl.
+
+The strokes must:
+
+lie inside the vertical outer ring;
+
+use white END_ROD particles;
+
+resemble smooth curved lines rather than straight spokes;
+
+remain contained within the outer circumference;
+
+rotate continuously around the center of the vertical disc;
+
+remain visible from behind the character;
+
+avoid forming a thick particle cloud.
+
+Use the existing M3 curve, M4 sampling and M5 motion systems wherever appropriate.
+
+Rotation requirements
+
+The internal design must rotate in the plane of the circle, about the circle's local normal axis.
+
+It must not merely oscillate left to right.
+
+It must not swing the entire circle in front of the player.
+
+It must not rotate the disc edge-on to the player.
+
+Target one complete revolution approximately every 60–100 ticks, using deterministic M2 timing.
+
+Choose and document the initial period.
+
+The asymmetry of the inner curved strokes must make the rotation visually obvious.
+
+A uniformly spaced circular outline alone is insufficient: a symmetrical circle can mathematically rotate without providing a visible rotational cue.
+
+Keep the outer circumference stable or subtly animated while the inner strokes rotate.
+
+5. Preserve the cyan head halo
+
+The owner likes the existing rotating illusion of the cyan head halo.
+
+Keep it substantially unchanged from K1.1:
+
+Cyan DUST, RGB 0x5CE1FF.
+
+Particle size 0.55.
+
+Radius 0.45.
+
+Feet +2.15 height.
+
+Existing 80-tick rotation.
+
+Visible from Balanced upward.
+
+The white back-mounted sigil and cyan head halo must read as separate, complementary magical elements.
+
+Do not unnecessarily redesign the halo.
+
+6. Quality tiers and particle budgets
+
+Prioritize elegance and clear motion over particle quantity.
+
+Proposed conservative point targets, subject to the actual geometry:
+
+Tier
+
+Outer circle
+
+Internal strokes
+
+Cyan halo
+
+Total
+
+Simple
+
+12
+
+8
+
+0
+
+20
+
+Balanced
+
+16
+
+12
+
+6
+
+34
+
+Heavy
+
+20
+
+16
+
+8
+
+44
+
+These are design targets, not permission to exceed existing M6 budgets.
+
+The new design requires additional inner-stroke points compared with K1.1. Keep the total below existing tier caps wherever possible.
+
+Simple should remain recognizable.
+
+Balanced should be the best general showcase tier.
+
+Heavy should provide smoother geometry without becoming an opaque white mass.
+
+If these point counts produce poor spacing or insufficient detail, document a revised allocation and its performance implications.
+
+Do not add Experimental quality.
+
+7. Preserve existing behavior
+
+All previous K1 functionality must remain intact:
+
+/vfxdemo aura
+
+/vfxdemo aura simple
+
+/vfxdemo aura balanced
+
+/vfxdemo aura heavy
+
+/vfxdemo aura off
+
+/vfxdemo stop
+
+/vfxdemo stop all
+
+/vfxdemo status
+
+Preserve:
+
+player following;
+
+walking/sprinting/jumping;
+
+body-yaw orientation;
+
+no head-pitch tilting;
+
+teleport continuation;
+
+dimension-change continuation;
+
+death and disconnect cleanup;
+
+expiration;
+
+replacement;
+
+permission isolation;
+
+owner-binding validation;
+
+transactional start;
+
+one shared scheduler;
+
+one global M6 plan per applicable tick;
+
+global and per-viewer budgets;
+
+deterministic timing.
+
+Do not alter unrelated VFX effects.
+
+8. Implementation requirements
+
+Use the existing M1–M6 engine interfaces and K0/K1 infrastructure.
+
+Prefer minimal visual geometry changes within the existing aura recipe and related tests.
+
+Do not rewrite the rendering architecture.
+
+Build geometry once per enabled session and reuse it.
+
+Use current anchor snapshots for player positioning.
+
+No new per-effect scheduling, block displays, entities, NMS, reflection, client mods, world modification, or gameplay effects.
+
+No global particle broadcasts or forced particles.
+
+If the existing curve/motion composition cannot represent the requested vertical rotation safely, document the limitation and propose the smallest compatible change rather than modifying frozen M1–M6 contracts without authorization.
+
+9. Automated testing
+
+Preserve all 589 existing baseline test cases, updating visual-specific assertions only where necessary to reflect the authorized K1.2 geometry change.
+
+Do not delete tests, weaken tolerances, or change historical reference datasets merely to make the suite pass.
+
+Add K1.2-specific tests verifying:
+
+Outer ring is vertical in the local XY plane.
+
+The entire formation is positioned behind the player's body.
+
+Body yaw changes the backward-facing direction correctly.
+
+Outer circle stays circular and uses the intended radius.
+
+Internal strokes remain contained within the outer circumference.
+
+Internal strokes visibly change orientation across ticks.
+
+One complete internal rotation has no discontinuity.
+
+Inner animation does not move the circle in front of the player.
+
+Halo remains at the correct height with its previous rotation.
+
+Simple/Balanced/Heavy geometry and reservations.
+
+One shared scheduler and one planning call.
+
+Player movement, teleport and dimension changes.
+
+Permissions, lifecycle and cleanup remain protected.
+
+Particle budgets and emission accounting.
+
+Determinism and shared recipe reuse.
+
+Execute the full production and frozen regression tests with Java 25 and Gradle 9.1.0.
+
+Preserve Paper API 26.3.build.204-stable and its recorded checksum.
+
+Run plugin JAR verification, dependency checks, both Gradle checks and all seven reference dataset regenerations.
+
+10. Deliverables
+
+Provide:
+
+K1.2 compiled Paper plugin JAR.
+
+Complete source ZIP.
+
+Native history-preserving Git bundle.
+
+Source-tree and commit provenance.
+
+SHA-256 manifests.
+
+Visual correction documentation.
+
+Automated test report.
+
+GitHub Actions build evidence where applicable.
+
+Concise installation and rollback instructions.
+
+Focused in-game visual test checklist.
+
+Document the exact implemented ring radius, height, backward offset, rotation period, and tier point counts.
+
+Use a prerelease version such as 0.8.0-k1.2.
+
+11. Real Minecraft testing
+
+Codex must not claim real-server success without actual observations.
+
+The owner will test:
+
+appearance from the back, front and side;
+
+clearly visible internal rotation;
+
+player-relative rear attachment;
+
+movement and jumping;
+
+halo separation;
+
+tier appearance and performance.
+
+Avoid requesting a complete replay of previously demonstrated M7 and K1 tests unless a relevant regression is observed.
+
+Two-player permission isolation remains a separate requirement before an outside-player showcase.
+
+12. Explicit scope restrictions
+
+Authorized: K1.2 Arcane Halo visual correction and directly necessary tests, packaging and documentation.
+
+Not authorized:
+
+K2 Movement Trail;
+
+K3 Animated Activation;
+
+K4 Combined Showcase;
+
+new gameplay systems;
+
+new particle effect families unrelated to this sigil;
+
+M1–M6 redesign;
+
+merge into main;
+
+live SMP deployment;
+
+production release.
+
+Stop after successful implementation and available verification.
+
+Report:
+
+READY FOR INDEPENDENT K1.2 IMPLEMENTATION REVIEW
+
+or
+
+BLOCKED
+
+Do not begin K2.
