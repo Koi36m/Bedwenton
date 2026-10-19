@@ -1,0 +1,42 @@
+{
+  "status": "READY FOR INDEPENDENT K1 IMPLEMENTATION REVIEW",
+  "native_implementation": "632e3564420db67209cc1babc8b2039c80badd6f",
+  "native_parent": "9cfd4eac65502161ffa079a34bd1a5198580bb28",
+  "github_source": "ca4e8170aa2c3d9a47802f145938834eb0cc7d42",
+  "github_parent": "d5ad9a321cd230df56971bb2068605b25aacb3bb",
+  "verified_source_tree": "c06b957fc5adbdf308c627c9d1ac23ae182cb28c",
+  "actions_run": 39218386254,
+  "xml": {
+    "engine": {
+      "tests": 415,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": 59
+    },
+    "adapter": {
+      "tests": 168,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": 22
+    }
+  },
+  "total": {
+    "tests": 583,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "jar_name": "bedwenton-vfx-paper-0.8.0-k1.jar",
+  "jar_sha256": "db5a3895f802802dd7735fe64cd6fb735f5a0128971ec6fd7ed276463038a3b8",
+  "engine_class_set_count": 61,
+  "paper_api": "26.3.build.204-stable",
+  "paper_sha256": "f6852324bbf519d8c27ba06cf2391ee21aed542852de9ac20b9403b7d6ea1556",
+  "reference_regeneration": "7/7 datasets byte-identical, M6 regenerated twice",
+  "production_compiler_warnings": 0,
+  "runtime_dependencies": "engine empty; adapter only frozen engine; Paper compileOnly",
+  "new_k1_smoke": "NOT RUN",
+  "new_mutation_campaign": "NOT RUN",
+  "final_acceptance": "PENDING OWNER/CHATGPT REVIEW"
+}

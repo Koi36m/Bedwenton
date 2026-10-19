@@ -1,0 +1,441 @@
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/bukkit/VfxDemoPlugin.java b/paper-adapter/src/main/java/workshop/vfx/paper/bukkit/VfxDemoPlugin.java
+index 787a10c..7c83f4a 100644
+--- a/paper-adapter/src/main/java/workshop/vfx/paper/bukkit/VfxDemoPlugin.java
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/bukkit/VfxDemoPlugin.java
+@@ -32,7 +32,10 @@ import workshop.vfx.scene.StyleKey;
+ import workshop.vfx.delivery.DeliveryPlanner;
+ import workshop.vfx.paper.m8.DynamicEffectRegistry;
+ import workshop.vfx.paper.m8.M8Config;
+-import workshop.vfx.paper.m8.K0CommandRouting;
++import workshop.vfx.paper.m8.AuraSession;
++import workshop.vfx.paper.m8.M8Commands;
++import workshop.vfx.paper.m8.M8StyleCatalog;
++import workshop.vfx.paper.m8.TimedAnchorSource;
+ 
+ /** Ordinary Paper adapter. All platform calls run exclusively on the main thread. */
+ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
+@@ -46,6 +49,9 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
+     private RingDriver driver;
+     private SessionStyleHealth health;
+     private DemoCommands commands;
++    private M8Commands m8Commands;
++    private AuraSession auras;
++    private TimedAnchorSource anchorTiming;
+     private final Properties provenance = new Properties();
+     private long lastDebugTick = Long.MIN_VALUE;
+     private long lastStyleReportTick = Long.MIN_VALUE;
+@@ -68,16 +74,20 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
+             resolveCatalogue();
+             health = new SessionStyleHealth(particles.keySet(),thread);
+             if (m8Config.enabled()) {
+-                registry = new DynamicEffectRegistry(thread,new PaperAnchorSource(thread,ids),ids,
++                anchorTiming = new TimedAnchorSource(thread,new PaperAnchorSource(thread,ids),System::nanoTime);
++                registry = new DynamicEffectRegistry(thread,anchorTiming,ids,
+                     m8Config.maxEffectsPerPlayer(),m8Config.invalidAnchorTicksToTerminate());
+                 driver = new RingDriver(thread,new PaperHost(),config,ids,health,this::validatePoint,this::send,DeliveryPlanner::plan,registry);
+                 registry.bind(driver);
++                auras = new AuraSession(thread,ids,anchorTiming,registry,m8Config);
+             } else {
+                 registry = null;
++                auras = null; anchorTiming = null;
+                 driver = new RingDriver(thread,new PaperHost(),config,ids,health,this::validatePoint,this::send);
+             }
+             commands = new DemoCommands(thread,config.defaultTier());
+-            registerCommand("vfxdemo","Opt-in static VFX ring",List.of(),new PaperCommand());
++            m8Commands = new M8Commands(thread,m8Config);
++            registerCommand("vfxdemo","Opt-in static ring and Arcane Halo aura",List.of(),new PaperCommand());
+             Bukkit.getPluginManager().registerEvents(this,this);
+             getLogger().info("Bedwenton VFX " + getPluginMeta().getVersion() + "; engine tree=" + provenance.getProperty("engineTree")
+                 + "; paper-api=" + provenance.getProperty("paperApiVersion") + "; server=" + Bukkit.getVersion()
+@@ -88,7 +98,8 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
+         }
+     }
+     private void resolveCatalogue() {
+-        for (var entry : DemoStyleCatalog.whitelist().entrySet()) {
++        var catalogue = m8Config.enabled() ? M8StyleCatalog.whitelist() : DemoStyleCatalog.whitelist();
++        for (var entry : catalogue.entrySet()) {
+             try {
+                 Particle particle; Object data;
+                 if (entry.getValue() instanceof ParticleSpec.Plain) {
+@@ -110,6 +121,7 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
+         thread.check();
+         if (driver != null) driver.close();
+         registry = null;
++        auras = null; anchorTiming = null; m8Commands = null;
+         Bukkit.getScheduler().cancelTasks(this);
+         if (ids != null) ids.clear();
+         particles.clear(); health = null; commands = null;
+@@ -166,7 +178,9 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
+                         for (StyleKey style : report.stylesDisabledThisTick()) getLogger().warning("Particle style disabled for this session: " + style);
+                     }
+                     if (config.debug() && report.tickOrdinal() != lastDebugTick && Math.floorMod(report.tickOrdinal(),100) == 0) {
+-                        lastDebugTick = report.tickOrdinal(); getLogger().info("VFX tick: " + report);
++                        lastDebugTick = report.tickOrdinal(); getLogger().info("VFX tick: " + report
++                            + (anchorTiming == null ? "" : "; snapshot tick=" + anchorTiming.tick()
++                                + "; snapshotNanos=" + anchorTiming.snapshotNanos() + "; snapshotReads=" + anchorTiming.reads()));
+                     }
+                 }
+             },1L,1L);
+@@ -179,8 +193,16 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
+             thread.check();
+             if (commands == null || driver == null) return;
+             Player player = source.getExecutor() instanceof Player p ? p : null;
+-            if (K0CommandRouting.handles(m8Config.enabled(),args)) {
+-                source.getSender().sendMessage(K0CommandRouting.unavailable(source.getSender().hasPermission(USE),player != null));
++            if (m8Commands.handles(args)) {
++                m8Commands.execute(new M8Commands.Endpoint() {
++                    @Override public boolean permitted() { return source.getSender().hasPermission(USE); }
++                    @Override public boolean player() { return player != null; }
++                    @Override public void start(workshop.vfx.delivery.QualityTier tier) {
++                        auras.start(player.getUniqueId(),tier,Bukkit.getCurrentTick());
++                    }
++                    @Override public void stopAura() { auras.stop(player.getUniqueId()); }
++                    @Override public void reply(String text) { source.getSender().sendMessage(text); }
++                },args);
+                 return;
+             }
+             commands.execute(new DemoCommands.Endpoint() {
+@@ -194,21 +216,33 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
+                 @Override public void stop() {
+                     driver.stop(player.getUniqueId());
+                     if (registry != null) registry.stopOwner(player.getUniqueId());
++                    if (registry != null) source.getSender().sendMessage("Your M8 effects stopped.");
++                }
++                @Override public void stopAll() {
++                    driver.stopAll();
++                    if (registry != null) { registry.stopAll(); source.getSender().sendMessage("All M8 effects stopped."); }
+                 }
+-                @Override public void stopAll() { driver.stopAll(); if (registry != null) registry.stopAll(); }
+                 @Override public String status() { return statusText(player,admin()); }
+                 @Override public void reply(String text) { source.getSender().sendMessage(text); }
+             },args);
+         }
+         @Override public Collection<String> suggest(CommandSourceStack source, String[] args) {
+-            thread.check(); return commands == null ? List.of() : commands.suggest(args,source.getSender().hasPermission(ADMIN));
++            thread.check();
++            if (commands == null) return List.of();
++            var original = commands.suggest(args,source.getSender().hasPermission(ADMIN));
++            if (!source.getSender().hasPermission(USE)) return original;
++            return java.util.stream.Stream.concat(original.stream(),m8Commands.suggest(args).stream()).distinct().toList();
+         }
+     }
+     private String statusText(Player player, boolean admin) {
+         String status = m7StatusText(player,admin);
+         if (registry == null) return status;
+         int own = admin ? registry.activeCount() : player == null ? 0 : registry.countOwner(player.getUniqueId());
+-        return status + "; M8 K0 registrations=" + own + "; visuals not implemented";
++        return status + "; M8 registrations=" + own
++            + (player == null ? "" : "; " + auras.status(player.getUniqueId()))
++            + "; aura default=" + m8Config.defaultTier() + "; heavyAllowed=" + m8Config.heavyAllowed()
++            + "; snapshot tick=" + anchorTiming.tick() + "; snapshotNanos=" + anchorTiming.snapshotNanos()
++            + "; snapshotReads=" + anchorTiming.reads();
+     }
+     private String m7StatusText(Player player, boolean admin) {
+         int count = admin ? driver.activeCount() : player != null && driver.ring(player.getUniqueId()) != null ? 1 : 0;
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraEffect.java b/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraEffect.java
+new file mode 100644
+index 0000000..9128316
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraEffect.java
+@@ -0,0 +1,59 @@
++package workshop.vfx.paper.m8;
++
++import java.util.Objects;
++import java.util.Optional;
++import java.util.UUID;
++import workshop.vfx.delivery.EffectRecipe;
++import workshop.vfx.delivery.QualityTier;
++import workshop.vfx.math.core.Pose;
++import workshop.vfx.math.core.Quat;
++import workshop.vfx.math.core.Vec3;
++import workshop.vfx.math.time.Playback;
++import workshop.vfx.math.time.TimePoint;
++import workshop.vfx.paper.core.ThreadGuard;
++
++/** Player-only, body-yaw attachment. No retained platform objects, history, task or clock reads. */
++public final class AuraEffect implements DynamicEffect {
++    private final ThreadGuard thread;
++    private final AnchorIdentityGuard guard;
++    private final AnchorBinding binding;
++    private final long id, startTick;
++    private final int lifetime;
++    private final EffectRecipe recipe;
++    private final QualityTier tier;
++    private final Playback playback;
++    private boolean disposed;
++
++    // Session-owned construction ensures the configured lifetime and shared recipe cannot disagree.
++    AuraEffect(ThreadGuard thread, AnchorIdentityGuard guard, long id, AnchorBinding binding,
++               long startTick, int lifetime, EffectRecipe recipe, QualityTier tier) {
++        this.thread = Objects.requireNonNull(thread); this.guard = Objects.requireNonNull(guard);
++        this.binding = Objects.requireNonNull(binding); this.recipe = Objects.requireNonNull(recipe);
++        this.tier = Objects.requireNonNull(tier);
++        if (id < DynamicEffectRegistry.FIRST_ID || lifetime < 20 || lifetime > 12000)
++            throw new IllegalArgumentException("Invalid aura identity or lifetime");
++        this.id = id; this.startTick = startTick; this.lifetime = lifetime;
++        playback = Playback.start(TimePoint.gameTick(startTick));
++    }
++
++    @Override public long requestId() { thread.check(); return id; }
++    @Override public UUID owner() { thread.check(); return binding.owner(); }
++    @Override public EffectKind kind() { thread.check(); return EffectKind.AURA; }
++    public QualityTier tier() { thread.check(); return tier; }
++    @Override public boolean finished(long tick) {
++        thread.check();
++        return disposed || tick < startTick || tick - startTick >= lifetime;
++    }
++    @Override public Optional<EffectDraft> contribute(long tick, AnchorSnapshot snapshot) {
++        thread.check();
++        if (finished(tick) || guard.validate(snapshot, binding, tick).state() != AnchorState.READY)
++            return Optional.empty();
++        // Normative Paper yaw: +Z forward -> (-sin(yaw), 0, cos(yaw)); pitch is deliberately unused.
++        double half = -StrictMath.toRadians(snapshot.bodyYawDegrees()) / 2;
++        Pose anchor = new Pose(new Vec3(snapshot.x(), snapshot.y(), snapshot.z()),
++            new Quat(StrictMath.cos(half), 0, StrictMath.sin(half), 0), 1);
++        return Optional.of(new EffectDraft(EffectKind.AURA, id, binding.owner(), binding.ownerViewerId(),
++            snapshot.worldId(), anchor, recipe, tier, playback, TimePoint.gameTick(tick), tick - startTick));
++    }
++    @Override public void dispose() { thread.check(); disposed = true; }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java b/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java
+new file mode 100644
+index 0000000..efcf443
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java
+@@ -0,0 +1,46 @@
++package workshop.vfx.paper.m8;
++
++import java.util.ArrayList;
++import java.util.List;
++import java.util.Map;
++import workshop.vfx.delivery.*;
++import workshop.vfx.math.core.Pose;
++import workshop.vfx.math.core.Vec3;
++import workshop.vfx.math.curve.Easing;
++import workshop.vfx.math.curve.Spiral;
++import workshop.vfx.math.sample.Endpoints;
++import workshop.vfx.math.sample.SampleLimits;
++import workshop.vfx.math.sample.Sampler;
++import workshop.vfx.math.time.TimeDomain;
++import workshop.vfx.math.time.Timing;
++import workshop.vfx.paper.core.DemoStyleCatalog;
++import workshop.vfx.scene.*;
++
++/** Immutable M1–M6 geometry, built once per enabled session and shared by every aura. */
++public final class AuraRecipe {
++    private AuraRecipe() { }
++
++    private static Layer ring(String name, double radius, double height, int points, int period,
++                              double turns, StyleKey style) {
++        Shape shape = Shape.of(Sampler.uniformParameter(Spiral.circle(radius), points,
++            Endpoints.EXCLUDE_END, new SampleLimits(36, 256)));
++        Motion motion = Motion.fixed(Pose.ofTranslation(new Vec3(0, height, 0)))
++            .then(Motion.spin(Vec3.Y, turns, 0, Timing.loop(period), Easing.LINEAR));
++        return new Layer(name, Timing.loop(period), Visibility.ACTIVE_ONLY, Reveal.ALL, motion, shape, style);
++    }
++
++    private static EffectScene scene(int orbit, int halo, int lifetime) {
++        List<Layer> layers = new ArrayList<>();
++        layers.add(ring("orbit", 0.9, 1.0, orbit, 60, 1, DemoStyleCatalog.END_ROD));
++        if (halo > 0) layers.add(ring("halo", 0.45, 2.15, halo, 80, -1, M8StyleCatalog.CYAN_HALO));
++        return EffectScene.of(TimeDomain.GAME, lifetime, layers, new SceneLimits(2, 36));
++    }
++
++    public static EffectRecipe create(int lifetime) {
++        if (lifetime < 20 || lifetime > 12000) throw new IllegalArgumentException("Aura lifetime outside approved bounds");
++        return EffectRecipe.of("bedwenton-m8-aura", EffectPriority.NORMAL,
++            Map.of(QualityTier.SIMPLE, scene(12, 0, lifetime),
++                QualityTier.BALANCED, scene(18, 9, lifetime), QualityTier.HEAVY, scene(24, 12, lifetime)),
++            Map.of("orbit", LayerRole.ESSENTIAL, "halo", LayerRole.STANDARD));
++    }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraSession.java b/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraSession.java
+new file mode 100644
+index 0000000..2065c98
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraSession.java
+@@ -0,0 +1,46 @@
++package workshop.vfx.paper.m8;
++
++import java.util.Objects;
++import java.util.UUID;
++import workshop.vfx.delivery.EffectRecipe;
++import workshop.vfx.delivery.QualityTier;
++import workshop.vfx.paper.core.SessionIds;
++import workshop.vfx.paper.core.ThreadGuard;
++
++/** K1 command-to-registry boundary. All fallible start validation precedes transactional replacement. */
++public final class AuraSession {
++    private final ThreadGuard thread;
++    private final SessionIds ids;
++    private final AnchorSource anchors;
++    private final AnchorIdentityGuard guard;
++    private final DynamicEffectRegistry registry;
++    private final M8Config config;
++    private final EffectRecipe recipe;
++
++    public AuraSession(ThreadGuard thread, SessionIds ids, AnchorSource anchors,
++                       DynamicEffectRegistry registry, M8Config config) {
++        this.thread = Objects.requireNonNull(thread); this.ids = Objects.requireNonNull(ids);
++        this.anchors = Objects.requireNonNull(anchors); this.registry = Objects.requireNonNull(registry);
++        this.config = Objects.requireNonNull(config); guard = new AnchorIdentityGuard(ids, thread);
++        recipe = AuraRecipe.create(config.auraLifetimeTicks());
++    }
++
++    public long start(UUID owner, QualityTier tier, long tick) {
++        thread.check(); Objects.requireNonNull(owner); Objects.requireNonNull(tier);
++        if (!config.enabled()) throw new IllegalArgumentException("M8 is disabled in configuration");
++        if (tier == QualityTier.HEAVY && !config.heavyAllowed()) throw new IllegalArgumentException("M8 heavy tier is disabled");
++        AnchorBinding binding = new AnchorBinding(owner, ids.viewerId(owner));
++        AnchorVerdict verdict = guard.validate(anchors.snapshot(owner, tick), binding, tick);
++        if (verdict.state() != AnchorState.READY)
++            throw new IllegalArgumentException("Aura anchor unavailable: " + verdict.reason());
++        return registry.start(owner, EffectKind.AURA, (id, bound) ->
++            new AuraEffect(thread, guard, id, bound, tick, config.auraLifetimeTicks(), recipe, tier));
++    }
++
++    public void stop(UUID owner) { thread.check(); registry.stop(owner, EffectKind.AURA); }
++    public String status(UUID owner) {
++        thread.check();
++        return registry.effect(owner, EffectKind.AURA).map(e -> "aura=" + ((AuraEffect)e).tier().name().toLowerCase(java.util.Locale.ROOT))
++            .orElse("aura=off");
++    }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/m8/M8Commands.java b/paper-adapter/src/main/java/workshop/vfx/paper/m8/M8Commands.java
+new file mode 100644
+index 0000000..a5f4568
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/m8/M8Commands.java
+@@ -0,0 +1,57 @@
++package workshop.vfx.paper.m8;
++
++import java.util.List;
++import java.util.Locale;
++import java.util.Objects;
++import workshop.vfx.delivery.QualityTier;
++import workshop.vfx.paper.core.ThreadGuard;
++
++/** K1 grammar only; K2/K3 prefixes remain explicitly unavailable. */
++public final class M8Commands {
++    public interface Endpoint {
++        boolean permitted();
++        boolean player();
++        void start(QualityTier tier);
++        void stopAura();
++        void reply(String message);
++    }
++    private final ThreadGuard thread;
++    private final M8Config config;
++    public M8Commands(ThreadGuard thread, M8Config config) {
++        this.thread = Objects.requireNonNull(thread); this.config = Objects.requireNonNull(config);
++    }
++    public boolean handles(String[] args) {
++        thread.check();
++        return args.length > 0 && List.of("aura", "trail", "activate").contains(args[0].toLowerCase(Locale.ROOT));
++    }
++    public void execute(Endpoint e, String[] args) {
++        thread.check();
++        if (!e.permitted()) { e.reply("Permission required: bedwenton.vfxdemo.use"); return; }
++        if (!e.player()) { e.reply("This command requires a player."); return; }
++        if (!config.enabled()) { e.reply("M8 is disabled in configuration."); return; }
++        if (args.length > 0 && !args[0].equalsIgnoreCase("aura")) {
++            e.reply("Only aura is available in K1; trail and activation are not implemented."); return;
++        }
++        if (args.length < 1 || args.length > 2) { usage(e); return; }
++        if (args.length == 2 && args[1].equalsIgnoreCase("off")) { e.stopAura(); e.reply("Your aura stopped."); return; }
++        QualityTier tier = config.defaultTier();
++        if (args.length == 2) {
++            try { tier = QualityTier.valueOf(args[1].toUpperCase(Locale.ROOT)); }
++            catch (IllegalArgumentException bad) { usage(e); return; }
++        }
++        if (tier == QualityTier.HEAVY && !config.heavyAllowed()) { e.reply("Aura refused: M8 heavy tier is disabled."); return; }
++        try { e.start(tier); e.reply("Arcane Halo aura started: " + tier.name().toLowerCase(Locale.ROOT)); }
++        catch (IllegalArgumentException | IllegalStateException bad) { e.reply("Aura refused: " + bad.getMessage()); }
++    }
++    private static void usage(Endpoint e) { e.reply("Usage: /vfxdemo aura [simple|balanced|heavy|off]"); }
++    public List<String> suggest(String[] args) {
++        thread.check();
++        if (!config.enabled()) return List.of();
++        List<String> choices = args.length == 1 ? List.of("aura")
++            : args.length == 2 && args[0].equalsIgnoreCase("aura")
++                ? config.heavyAllowed() ? List.of("simple", "balanced", "heavy", "off") : List.of("simple", "balanced", "off")
++                : List.of();
++        String prefix = args.length == 0 ? "" : args[args.length - 1].toLowerCase(Locale.ROOT);
++        return choices.stream().filter(s -> s.startsWith(prefix)).toList();
++    }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/m8/M8StyleCatalog.java b/paper-adapter/src/main/java/workshop/vfx/paper/m8/M8StyleCatalog.java
+new file mode 100644
+index 0000000..53dae5e
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/m8/M8StyleCatalog.java
+@@ -0,0 +1,35 @@
++package workshop.vfx.paper.m8;
++
++import java.util.HashMap;
++import java.util.Map;
++import java.util.Set;
++import workshop.vfx.paper.core.DemoStyleCatalog;
++import workshop.vfx.paper.core.ParticleSpec;
++import workshop.vfx.paper.core.StyleCatalog;
++import workshop.vfx.scene.StyleKey;
++
++/** K1 closed whitelist. Historical violet/gold and future showcase keys are not reassigned. */
++public final class M8StyleCatalog implements StyleCatalog {
++    public static final StyleKey CYAN_HALO = StyleKey.of("bedwenton:m8_arcane_halo_cyan");
++    private final Map<StyleKey, ParticleSpec> styles;
++
++    public static Map<StyleKey, ParticleSpec> whitelist() {
++        Map<StyleKey, ParticleSpec> all = new HashMap<>(DemoStyleCatalog.whitelist());
++        all.put(CYAN_HALO, new ParticleSpec.Dust(0x5CE1FF, 0.7f));
++        return Map.copyOf(all);
++    }
++
++    public M8StyleCatalog(Set<StyleKey> resolved) {
++        Map<StyleKey, ParticleSpec> all = whitelist();
++        Map<StyleKey, ParticleSpec> selected = new HashMap<>();
++        for (StyleKey key : resolved) {
++            if (!all.containsKey(key)) throw new IllegalArgumentException("Style outside K1 catalogue");
++            selected.put(key, all.get(key));
++        }
++        styles = Map.copyOf(selected);
++    }
++
++    @Override public Set<StyleKey> supportedStyles() { return styles.keySet(); }
++    @Override public ParticleSpec spec(StyleKey key) { return styles.get(key); }
++    @Override public Map<StyleKey, ParticleSpec> asMap() { return styles; }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/m8/TimedAnchorSource.java b/paper-adapter/src/main/java/workshop/vfx/paper/m8/TimedAnchorSource.java
+new file mode 100644
+index 0000000..acad54c
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/m8/TimedAnchorSource.java
+@@ -0,0 +1,28 @@
++package workshop.vfx.paper.m8;
++
++import java.util.Objects;
++import java.util.UUID;
++import java.util.function.LongSupplier;
++import workshop.vfx.paper.core.ThreadGuard;
++
++/** Bounded diagnostic counters, separate from deterministic effect timing. Measures snapshot reads only. */
++public final class TimedAnchorSource implements AnchorSource {
++    private final ThreadGuard thread;
++    private final AnchorSource source;
++    private final LongSupplier nanos;
++    private long tick = Long.MIN_VALUE, snapshotNanos, reads;
++    public TimedAnchorSource(ThreadGuard thread, AnchorSource source, LongSupplier nanos) {
++        this.thread = Objects.requireNonNull(thread); this.source = Objects.requireNonNull(source);
++        this.nanos = Objects.requireNonNull(nanos);
++    }
++    @Override public AnchorSnapshot snapshot(UUID owner, long planningTick) {
++        thread.check();
++        if (planningTick != tick) { tick = planningTick; snapshotNanos = 0; reads = 0; }
++        long start = nanos.getAsLong();
++        try { return source.snapshot(owner, planningTick); }
++        finally { snapshotNanos += nanos.getAsLong() - start; reads++; }
++    }
++    public long tick() { thread.check(); return tick; }
++    public long snapshotNanos() { thread.check(); return snapshotNanos; }
++    public long reads() { thread.check(); return reads; }
++}

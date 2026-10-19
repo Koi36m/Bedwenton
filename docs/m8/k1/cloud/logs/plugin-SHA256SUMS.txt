@@ -1,0 +1,1 @@
+db5a3895f802802dd7735fe64cd6fb735f5a0128971ec6fd7ed276463038a3b8  paper-adapter/build/libs/bedwenton-vfx-paper-0.8.0-k1.jar

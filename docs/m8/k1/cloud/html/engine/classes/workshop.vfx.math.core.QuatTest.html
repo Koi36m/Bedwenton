@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - QuatTest</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<h1>QuatTest</h1>
+<div class="breadcrumbs">
+<a href="../index.html">all</a> &gt; 
+<a href="../packages/workshop.vfx.math.core.html">workshop.vfx.math.core</a> &gt; QuatTest</div>
+<div id="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox" id="tests">
+<div class="counter">17</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="failures">
+<div class="counter">0</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="ignored">
+<div class="counter">0</div>
+<p>ignored</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="duration">
+<div class="counter">0.197s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox success" id="successRate">
+<div class="percent">100%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="tab-container">
+<ul class="tabLinks">
+<li>
+<a href="#">Tests</a>
+</li>
+<li>
+<a href="#">Standard output</a>
+</li>
+</ul>
+<div class="tab">
+<h2>Tests</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Method name</th>
+<th>Duration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tr>
+<td class="success">angleTo recovers the rotation angle, including tiny angles and near pi</td>
+<td class="success">angleTo()</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Quaternion multiplication is associative (as rotations) and composes rotations</td>
+<td class="success">associativityAndComposition()</td>
+<td class="success">0.006s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">axisAngle normalizes non-unit axes and rejects zero or non-finite input</td>
+<td class="success">axisAngleValidation()</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">1,000,000 compositions: periodic renormalization keeps the norm within 1e-12; raw drift is reported</td>
+<td class="success">driftOverMillionCompositions()</td>
+<td class="success">0.026s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">fromEulerApplyXThenYThenZ equals the explicit rotation sequence X, then Y, then Z about fixed axes</td>
+<td class="success">eulerApplyOrder()</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">toFrame / fromFrame round trip, including 180-degree rotations (all matrix-to-quaternion branches)</td>
+<td class="success">frameRoundTrip()</td>
+<td class="success">0.007s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Golden: qa.mul(qb).rotate(v) equals Rodrigues(a, Rodrigues(b, v)) (1,500 rows)</td>
+<td class="success">goldenComposition()</td>
+<td class="success">0.013s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Golden: axisAngle(axis, angle).rotate(v) equals Rodrigues from the Python oracle (2,042 rows)</td>
+<td class="success">goldenRotation()</td>
+<td class="success">0.056s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Golden: slerp action matches the oracle, also with q1 negated (shortest path)</td>
+<td class="success">goldenSlerp()</td>
+<td class="success">0.045s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Identity, conjugate, inverse and normalization</td>
+<td class="success">identityAndInverse()</td>
+<td class="success">0.011s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">nlerp: unit norm, endpoints, shortest sign</td>
+<td class="success">nlerp()</td>
+<td class="success">0.003s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Degenerate quaternions: zero and non-finite normalize to identity (M0: no NaN propagation)</td>
+<td class="success">normalizeDegenerate()</td>
+<td class="success">0s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">shortestArc: identical, antiparallel, near-antiparallel and zero inputs (M0: robustness)</td>
+<td class="success">shortestArcDegenerate()</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">shortestArc maps from-direction onto to-direction for random pairs</td>
+<td class="success">shortestArcRandom()</td>
+<td class="success">0.009s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">slerp: endpoints and constant angular speed, with extrapolation</td>
+<td class="success">slerpConstantSpeed()</td>
+<td class="success">0.013s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">slerp is continuous across the near-parallel (nlerp) threshold and never NaN</td>
+<td class="success">slerpNearParallel()</td>
+<td class="success">0s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">slerp takes the shortest path: q1 and -q1 give the same result</td>
+<td class="success">slerpShortestPath()</td>
+<td class="success">0.003s</td>
+<td class="success">passed</td>
+</tr>
+</table>
+</div>
+<div class="tab">
+<h2>Standard output</h2>
+<span class="code">
+<pre id="class-stdout">[M1 drift report] raw |norm-1| after 1,000,000 compositions = 1.6544543512964083E-12
+[M1 drift report] worst |norm-1| between renormalizations (every 1000) = 6.8833827526759706E-15
+</pre>
+<button class="clipboard-copy-btn" aria-label="Copy to clipboard" data-copy-element-id="class-stdout">Copy</button>
+</span>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="https://www.gradle.org">Gradle 9.1.0</a> at Oct 19, 2026, 7:50:02 AM</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.paper.m8.K0DraftIdentityTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-19T07:50:34.182Z" hostname="runnervm8k3b6" time="0.084">
+  <properties/>
+  <testcase name="driverRejectsBadOwnerRangeWorldAndDuplicateIdsBeforePlanning()" classname="workshop.vfx.paper.m8.K0DraftIdentityTest" time="0.008"/>
+  <testcase name="releasedOrReplayedViewerBindingTerminatesWithoutResurrection()" classname="workshop.vfx.paper.m8.K0DraftIdentityTest" time="0.019"/>
+  <testcase name="ownerAndViewerSwapCannotRedirectToUseOnlyNonowner()" classname="workshop.vfx.paper.m8.K0DraftIdentityTest" time="0.017"/>
+  <testcase name="staleFutureRecoverThenTwentyConsecutiveSkipsTerminate()" classname="workshop.vfx.paper.m8.K0DraftIdentityTest" time="0.017"/>
+  <testcase name="completeOrderedReasonTableAndHeightBoundaries()" classname="workshop.vfx.paper.m8.K0DraftIdentityTest" time="0.001"/>
+  <testcase name="everyNonfinitePositionAndYawIsRejectedBeforeEffectInvocation()" classname="workshop.vfx.paper.m8.K0DraftIdentityTest" time="0.008"/>
+  <testcase name="knownWorldAndOwnerDraftsKeepContextAndOwnerIsolation()" classname="workshop.vfx.paper.m8.K0DraftIdentityTest" time="0.001"/>
+  <testcase name="worldHeightAndChunkErrorsSkipWithoutCreatingMappings()" classname="workshop.vfx.paper.m8.K0DraftIdentityTest" time="0.002"/>
+  <testcase name="driverDropsMalformedAndOversizeContributionsWithoutEmission()" classname="workshop.vfx.paper.m8.K0DraftIdentityTest" time="0.001"/>
+  <testcase name="registryDropsEachForgedDraftDimensionAndDisposesOnce()" classname="workshop.vfx.paper.m8.K0DraftIdentityTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

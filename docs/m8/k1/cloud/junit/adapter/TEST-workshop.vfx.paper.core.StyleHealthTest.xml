@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.paper.core.StyleHealthTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-19T07:50:34.172Z" hostname="runnervm8k3b6" time="0.008">
+  <properties/>
+  <testcase name="Third consecutive failure disables the style at once; its remaining points in the tick are skipped" classname="workshop.vfx.paper.core.StyleHealthTest" time="0.002"/>
+  <testcase name="All styles disabled: the planner skips the ring as unsupported before evaluation; a new session re-enables" classname="workshop.vfx.paper.core.StyleHealthTest" time="0.001"/>
+  <testcase name="Successes of another style do not reset the streak; the streak spans ticks" classname="workshop.vfx.paper.core.StyleHealthTest" time="0.001"/>
+  <testcase name="A success of the same style resets the streak: fail, fail, succeed, fail, fail does not disable" classname="workshop.vfx.paper.core.StyleHealthTest" time="0.001"/>
+  <testcase name="The next planning pass excludes the disabled style: M6 reports it unsupported, nothing of it is sent" classname="workshop.vfx.paper.core.StyleHealthTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

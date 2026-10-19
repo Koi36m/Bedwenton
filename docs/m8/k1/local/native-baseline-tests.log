@@ -1,0 +1,26 @@
+[M1 JOML report] rotationXYZ applies X first = false, applies Z first = true
+[M1 transport report] worst per-step twist: transport = 1.1102230246251568E-16 rad, naive alignY = 3.141592653589793 rad
+[M1 review] normalizedOr worst component error vs exact: 2.220446049250313E-16
+[M1 review] slerp |t|<=1e3 worst action error vs analytic: 9.056739506726039E-13
+[M1 review] shortestArc offset 0.1 worst error 8.065179992641965E-15 (allowed 1.0E-9)
+[M1 review] shortestArc offset 0.001 worst error 7.980693752677138E-13 (allowed 1.0E-9)
+[M1 review] shortestArc offset 1.0E-6 worst error 7.624904121111344E-10 (allowed 1.0E-9)
+[M1 review] shortestArc offset 1.0E-7 worst error 7.937575590433542E-9 (allowed 1.0E-8)
+[M1 review] shortestArc offset 1.0E-9 worst error 7.908609860608958E-7 (allowed 1.0E-6)
+[M1 drift report] raw |norm-1| after 1,000,000 compositions = 1.6544543512964083E-12
+[M1 drift report] worst |norm-1| between renormalizations (every 1000) = 6.8833827526759706E-15
+
+Test run finished after 74851 ms
+[        61 containers found      ]
+[         0 containers skipped    ]
+[        61 containers started    ]
+[         0 containers aborted    ]
+[        61 containers successful ]
+[         0 containers failed     ]
+[       415 tests found           ]
+[         0 tests skipped         ]
+[       415 tests started         ]
+[         0 tests aborted         ]
+[       415 tests successful      ]
+[         0 tests failed          ]
+

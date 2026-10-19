@@ -1,0 +1,30 @@
+
+Test run finished after 2959 ms
+[        22 containers found      ]
+[         0 containers skipped    ]
+[        22 containers started    ]
+[         0 containers aborted    ]
+[        22 containers successful ]
+[         0 containers failed     ]
+[       167 tests found           ]
+[         0 tests skipped         ]
+[       167 tests started         ]
+[         0 tests aborted         ]
+[       166 tests successful      ]
+[         1 tests failed          ]
+
+
+Failures (1):
+  JUnit Jupiter:K1IdentityAndPermissionsTest:unknownMismatchedWorldHeightAndChunkFailClosed()
+    MethodSource [className = 'workshop.vfx.paper.m8.K1IdentityAndPermissionsTest', methodName = 'unknownMismatchedWorldHeightAndChunkFailClosed', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+       org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+       org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+       org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)
+       workshop.vfx.paper.m8.K1IdentityAndPermissionsTest.unknownMismatchedWorldHeightAndChunkFailClosed(K1IdentityAndPermissionsTest.java:20)
+       java.base/java.lang.reflect.Method.invoke(Method.java:565)
+       java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+       java.base/java.util.ArrayList.forEach(ArrayList.java:1604)

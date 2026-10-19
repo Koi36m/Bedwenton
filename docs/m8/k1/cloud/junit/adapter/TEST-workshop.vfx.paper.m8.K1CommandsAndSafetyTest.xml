@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.paper.m8.K1CommandsAndSafetyTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-19T07:50:36.066Z" hostname="runnervm8k3b6" time="0.012">
+  <properties/>
+  <testcase name="strictCyanCatalogueDoesNotOverwriteHistoricalKeysOrM7()" classname="workshop.vfx.paper.m8.K1CommandsAndSafetyTest" time="0.003"/>
+  <testcase name="permissionsAndConsoleFailBeforeMutation()" classname="workshop.vfx.paper.m8.K1CommandsAndSafetyTest" time="0.001"/>
+  <testcase name="heavyRefusedBothDefaultAndExplicitAndSessionPreservesOld()" classname="workshop.vfx.paper.m8.K1CommandsAndSafetyTest" time="0.001"/>
+  <testcase name="malformedGrammarAndFutureCommandsDoNotStart()" classname="workshop.vfx.paper.m8.K1CommandsAndSafetyTest" time="0.001"/>
+  <testcase name="commandFailureIsReportedAndSuggestionsDoNotOfferFutureCheckpoints()" classname="workshop.vfx.paper.m8.K1CommandsAndSafetyTest" time="0.001"/>
+  <testcase name="invalidM8SettingsRejectRatherThanClamp()" classname="workshop.vfx.paper.m8.K1CommandsAndSafetyTest" time="0.001"/>
+  <testcase name="allExplicitTiersAndCaseInsensitiveOff()" classname="workshop.vfx.paper.m8.K1CommandsAndSafetyTest" time="0.001"/>
+  <testcase name="defaultSimpleAndConfiguredBalanced()" classname="workshop.vfx.paper.m8.K1CommandsAndSafetyTest" time="0.0"/>
+  <testcase name="timedSnapshotsUseInjectedDiagnosticsAndThreadChecks()" classname="workshop.vfx.paper.m8.K1CommandsAndSafetyTest" time="0.002"/>
+  <testcase name="disabledCommandsAndSessionCannotStart()" classname="workshop.vfx.paper.m8.K1CommandsAndSafetyTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.paper.core.OwnerAwareEmissionTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-19T07:50:33.048Z" hostname="runnervm8k3b6" time="0.009">
+  <properties/>
+  <testcase name="View permission granted: B sees both rings; revoked between planning and emission: B loses ring A only" classname="workshop.vfx.paper.core.OwnerAwareEmissionTest" time="0.002"/>
+  <testcase name="Missing ownership context: the delivery is skipped whole and counted; the other ring is unaffected" classname="workshop.vfx.paper.core.OwnerAwareEmissionTest" time="0.001"/>
+  <testcase name="A planned non-owner recipient with use but without view permission is refused for the other ring only" classname="workshop.vfx.paper.core.OwnerAwareEmissionTest" time="0.0"/>
+  <testcase name="Viewer selection: the owner is admitted before sorting and capping; the result is strictly increasing" classname="workshop.vfx.paper.core.OwnerAwareEmissionTest" time="0.0"/>
+  <testcase name="Owner's use permission revoked between planning and emission: the owner receives nothing of their ring" classname="workshop.vfx.paper.core.OwnerAwareEmissionTest" time="0.0"/>
+  <testcase name="Coincident rings, no view permission: each owner sees exactly their own ring" classname="workshop.vfx.paper.core.OwnerAwareEmissionTest" time="0.001"/>
+  <testcase name="Owner A holding view permission is still authorized for ring A by use, and for ring B by view" classname="workshop.vfx.paper.core.OwnerAwareEmissionTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

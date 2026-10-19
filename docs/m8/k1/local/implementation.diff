@@ -1,0 +1,903 @@
+diff --git a/.github/workflows/m8-k1-java25-verification.yml b/.github/workflows/m8-k1-java25-verification.yml
+new file mode 100644
+index 0000000..56e654a
+--- /dev/null
++++ b/.github/workflows/m8-k1-java25-verification.yml
+@@ -0,0 +1,86 @@
++name: M8 K1 Java 25 Verification
++on:
++  push:
++    branches: [m8-k1-implementation, m8-k1-actions-verification]
++  workflow_dispatch:
++permissions:
++  contents: read
++jobs:
++  verify:
++    runs-on: ubuntu-latest
++    timeout-minutes: 30
++    steps:
++      - uses: actions/checkout@v5
++      - uses: actions/setup-java@v5
++        with:
++          distribution: temurin
++          java-version: '25'
++      - name: Verify exact source, frozen engine and accepted M7 tests
++        shell: bash
++        run: |
++          set -euo pipefail
++          mkdir -p "$RUNNER_TEMP/m8-k1-evidence"
++          {
++            git rev-parse HEAD
++            git rev-parse HEAD^{tree}
++            java -version
++            javac -version
++            ./gradlew --version
++            sha256sum -c docs/m8/k0/FROZEN-M1-M6-SHA256SUMS.txt
++            sha256sum -c docs/m8/k1/FROZEN-K0-SHA256SUMS.txt
++            sha256sum -c docs/m8/k0/APPROVED-R3-SHA256SUMS.txt
++            sha256sum -c docs/m8/k1/IMPLEMENTATION-SHA256SUMS.txt
++          } > "$RUNNER_TEMP/m8-k1-evidence/source-and-toolchain.log" 2>&1
++          cat "$RUNNER_TEMP/m8-k1-evidence/source-and-toolchain.log"
++      - name: Clean Java 25 regression, production K1 tests and Paper JAR checks
++        shell: bash
++        run: bash paper-adapter/tools/m8-k1/verify.sh "$RUNNER_TEMP/m8-k1-evidence"
++      - name: Verify API signatures, scope exclusions and production compiler warnings
++        shell: bash
++        run: |
++          set -euo pipefail
++          API=$(find "$HOME/.gradle/caches/modules-2/files-2.1/io.papermc.paper/paper-api/26.3.build.204-stable" -name '*.jar' -print -quit)
++          javap -classpath "$API" org.bukkit.Bukkit org.bukkit.Server org.bukkit.entity.Player org.bukkit.entity.Entity org.bukkit.entity.LivingEntity org.bukkit.Location org.bukkit.World org.bukkit.generator.WorldInfo org.bukkit.Particle 'org.bukkit.Particle$DustOptions' org.bukkit.Color org.bukkit.plugin.java.JavaPlugin io.papermc.paper.command.brigadier.BasicCommand org.bukkit.scheduler.BukkitScheduler > "$RUNNER_TEMP/m8-k1-evidence/paper-api-signatures.txt"
++          cp paper-adapter/build/paper-api-provenance.txt "$RUNNER_TEMP/m8-k1-evidence/"
++          sha256sum paper-adapter/build/libs/*.jar > "$RUNNER_TEMP/m8-k1-evidence/plugin-SHA256SUMS.txt"
++          python3 - <<'PY'
++          import os,zipfile
++          from pathlib import Path
++          evidence=Path(os.environ['RUNNER_TEMP'])/'m8-k1-evidence'
++          for name in ['engine-clean-test.log','adapter-clean-test.log']:
++              text=(evidence/name).read_text()
++              if name.startswith('adapter'): assert 'warning:' not in text,text
++              else:
++                  production=text.split('> Task :compileJava',1)[1].split('> Task :',1)[0]
++                  assert 'warning:' not in production,production
++          api=(evidence/'paper-api-signatures.txt').read_text()
++          for signature in ['getBodyYaw()', 'getYaw()', 'getPitch()', 'getLocation()', 'isDead()', 'getUniqueId()', 'getPlayer(java.util.UUID)', 'getMinHeight()', 'getMaxHeight()', 'isChunkLoaded(int, int)', 'getCurrentTick()', 'registerCommand(', 'runTaskTimer(', 'org.bukkit.Particle$DustOptions(org.bukkit.Color, float)']:
++              assert signature in api,signature
++          jar=next(Path('paper-adapter/build/libs').glob('*.jar'))
++          with zipfile.ZipFile(jar) as z:
++              names=z.namelist()
++              for deferred in ['TrailEffect','ActivationEffect','M8Recipes','RingBufferTrailHistory']:
++                  assert not any(n.endswith('/'+deferred+'.class') for n in names),deferred
++              (evidence/'plugin-contents.txt').write_text('\n'.join(names)+'\n')
++          print('PASS: exact pinned API methods; no K2–K4 visual implementations; zero production compiler warnings')
++          PY
++      - uses: actions/upload-artifact@v6
++        if: always()
++        with:
++          name: m8-k1-java25-verification-${{ github.run_id }}
++          if-no-files-found: error
++          retention-days: 90
++          path: |
++            ${{ runner.temp }}/m8-k1-evidence/
++            build/test-results/test/
++            build/reports/tests/test/
++            paper-adapter/build/test-results/test/
++            paper-adapter/build/reports/tests/test/
++            paper-adapter/build/libs/*.jar
++      - uses: actions/upload-artifact@v6
++        if: success()
++        with:
++          name: bedwenton-vfx-paper-0.8.0-k1
++          if-no-files-found: error
++          retention-days: 90
++          path: paper-adapter/build/libs/bedwenton-vfx-paper-0.8.0-k1.jar
+diff --git a/paper-adapter/gradle.properties b/paper-adapter/gradle.properties
+index 492d5ee..52de0e3 100644
+--- a/paper-adapter/gradle.properties
++++ b/paper-adapter/gradle.properties
+@@ -1,2 +1,2 @@
+-version=0.8.0-k0
++version=0.8.0-k1
+ paperApiVersion=26.3.build.204-stable
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/bukkit/VfxDemoPlugin.java b/paper-adapter/src/main/java/workshop/vfx/paper/bukkit/VfxDemoPlugin.java
+index 787a10c..7c83f4a 100644
+--- a/paper-adapter/src/main/java/workshop/vfx/paper/bukkit/VfxDemoPlugin.java
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/bukkit/VfxDemoPlugin.java
+@@ -32,7 +32,10 @@ import workshop.vfx.scene.StyleKey;
+ import workshop.vfx.delivery.DeliveryPlanner;
+ import workshop.vfx.paper.m8.DynamicEffectRegistry;
+ import workshop.vfx.paper.m8.M8Config;
+-import workshop.vfx.paper.m8.K0CommandRouting;
++import workshop.vfx.paper.m8.AuraSession;
++import workshop.vfx.paper.m8.M8Commands;
++import workshop.vfx.paper.m8.M8StyleCatalog;
++import workshop.vfx.paper.m8.TimedAnchorSource;
+ 
+ /** Ordinary Paper adapter. All platform calls run exclusively on the main thread. */
+ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
+@@ -46,6 +49,9 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
+     private RingDriver driver;
+     private SessionStyleHealth health;
+     private DemoCommands commands;
++    private M8Commands m8Commands;
++    private AuraSession auras;
++    private TimedAnchorSource anchorTiming;
+     private final Properties provenance = new Properties();
+     private long lastDebugTick = Long.MIN_VALUE;
+     private long lastStyleReportTick = Long.MIN_VALUE;
+@@ -68,16 +74,20 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
+             resolveCatalogue();
+             health = new SessionStyleHealth(particles.keySet(),thread);
+             if (m8Config.enabled()) {
+-                registry = new DynamicEffectRegistry(thread,new PaperAnchorSource(thread,ids),ids,
++                anchorTiming = new TimedAnchorSource(thread,new PaperAnchorSource(thread,ids),System::nanoTime);
++                registry = new DynamicEffectRegistry(thread,anchorTiming,ids,
+                     m8Config.maxEffectsPerPlayer(),m8Config.invalidAnchorTicksToTerminate());
+                 driver = new RingDriver(thread,new PaperHost(),config,ids,health,this::validatePoint,this::send,DeliveryPlanner::plan,registry);
+                 registry.bind(driver);
++                auras = new AuraSession(thread,ids,anchorTiming,registry,m8Config);
+             } else {
+                 registry = null;
++                auras = null; anchorTiming = null;
+                 driver = new RingDriver(thread,new PaperHost(),config,ids,health,this::validatePoint,this::send);
+             }
+             commands = new DemoCommands(thread,config.defaultTier());
+-            registerCommand("vfxdemo","Opt-in static VFX ring",List.of(),new PaperCommand());
++            m8Commands = new M8Commands(thread,m8Config);
++            registerCommand("vfxdemo","Opt-in static ring and Arcane Halo aura",List.of(),new PaperCommand());
+             Bukkit.getPluginManager().registerEvents(this,this);
+             getLogger().info("Bedwenton VFX " + getPluginMeta().getVersion() + "; engine tree=" + provenance.getProperty("engineTree")
+                 + "; paper-api=" + provenance.getProperty("paperApiVersion") + "; server=" + Bukkit.getVersion()
+@@ -88,7 +98,8 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
+         }
+     }
+     private void resolveCatalogue() {
+-        for (var entry : DemoStyleCatalog.whitelist().entrySet()) {
++        var catalogue = m8Config.enabled() ? M8StyleCatalog.whitelist() : DemoStyleCatalog.whitelist();
++        for (var entry : catalogue.entrySet()) {
+             try {
+                 Particle particle; Object data;
+                 if (entry.getValue() instanceof ParticleSpec.Plain) {
+@@ -110,6 +121,7 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
+         thread.check();
+         if (driver != null) driver.close();
+         registry = null;
++        auras = null; anchorTiming = null; m8Commands = null;
+         Bukkit.getScheduler().cancelTasks(this);
+         if (ids != null) ids.clear();
+         particles.clear(); health = null; commands = null;
+@@ -166,7 +178,9 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
+                         for (StyleKey style : report.stylesDisabledThisTick()) getLogger().warning("Particle style disabled for this session: " + style);
+                     }
+                     if (config.debug() && report.tickOrdinal() != lastDebugTick && Math.floorMod(report.tickOrdinal(),100) == 0) {
+-                        lastDebugTick = report.tickOrdinal(); getLogger().info("VFX tick: " + report);
++                        lastDebugTick = report.tickOrdinal(); getLogger().info("VFX tick: " + report
++                            + (anchorTiming == null ? "" : "; snapshot tick=" + anchorTiming.tick()
++                                + "; snapshotNanos=" + anchorTiming.snapshotNanos() + "; snapshotReads=" + anchorTiming.reads()));
+                     }
+                 }
+             },1L,1L);
+@@ -179,8 +193,16 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
+             thread.check();
+             if (commands == null || driver == null) return;
+             Player player = source.getExecutor() instanceof Player p ? p : null;
+-            if (K0CommandRouting.handles(m8Config.enabled(),args)) {
+-                source.getSender().sendMessage(K0CommandRouting.unavailable(source.getSender().hasPermission(USE),player != null));
++            if (m8Commands.handles(args)) {
++                m8Commands.execute(new M8Commands.Endpoint() {
++                    @Override public boolean permitted() { return source.getSender().hasPermission(USE); }
++                    @Override public boolean player() { return player != null; }
++                    @Override public void start(workshop.vfx.delivery.QualityTier tier) {
++                        auras.start(player.getUniqueId(),tier,Bukkit.getCurrentTick());
++                    }
++                    @Override public void stopAura() { auras.stop(player.getUniqueId()); }
++                    @Override public void reply(String text) { source.getSender().sendMessage(text); }
++                },args);
+                 return;
+             }
+             commands.execute(new DemoCommands.Endpoint() {
+@@ -194,21 +216,33 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
+                 @Override public void stop() {
+                     driver.stop(player.getUniqueId());
+                     if (registry != null) registry.stopOwner(player.getUniqueId());
++                    if (registry != null) source.getSender().sendMessage("Your M8 effects stopped.");
++                }
++                @Override public void stopAll() {
++                    driver.stopAll();
++                    if (registry != null) { registry.stopAll(); source.getSender().sendMessage("All M8 effects stopped."); }
+                 }
+-                @Override public void stopAll() { driver.stopAll(); if (registry != null) registry.stopAll(); }
+                 @Override public String status() { return statusText(player,admin()); }
+                 @Override public void reply(String text) { source.getSender().sendMessage(text); }
+             },args);
+         }
+         @Override public Collection<String> suggest(CommandSourceStack source, String[] args) {
+-            thread.check(); return commands == null ? List.of() : commands.suggest(args,source.getSender().hasPermission(ADMIN));
++            thread.check();
++            if (commands == null) return List.of();
++            var original = commands.suggest(args,source.getSender().hasPermission(ADMIN));
++            if (!source.getSender().hasPermission(USE)) return original;
++            return java.util.stream.Stream.concat(original.stream(),m8Commands.suggest(args).stream()).distinct().toList();
+         }
+     }
+     private String statusText(Player player, boolean admin) {
+         String status = m7StatusText(player,admin);
+         if (registry == null) return status;
+         int own = admin ? registry.activeCount() : player == null ? 0 : registry.countOwner(player.getUniqueId());
+-        return status + "; M8 K0 registrations=" + own + "; visuals not implemented";
++        return status + "; M8 registrations=" + own
++            + (player == null ? "" : "; " + auras.status(player.getUniqueId()))
++            + "; aura default=" + m8Config.defaultTier() + "; heavyAllowed=" + m8Config.heavyAllowed()
++            + "; snapshot tick=" + anchorTiming.tick() + "; snapshotNanos=" + anchorTiming.snapshotNanos()
++            + "; snapshotReads=" + anchorTiming.reads();
+     }
+     private String m7StatusText(Player player, boolean admin) {
+         int count = admin ? driver.activeCount() : player != null && driver.ring(player.getUniqueId()) != null ? 1 : 0;
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraEffect.java b/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraEffect.java
+new file mode 100644
+index 0000000..9128316
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraEffect.java
+@@ -0,0 +1,59 @@
++package workshop.vfx.paper.m8;
++
++import java.util.Objects;
++import java.util.Optional;
++import java.util.UUID;
++import workshop.vfx.delivery.EffectRecipe;
++import workshop.vfx.delivery.QualityTier;
++import workshop.vfx.math.core.Pose;
++import workshop.vfx.math.core.Quat;
++import workshop.vfx.math.core.Vec3;
++import workshop.vfx.math.time.Playback;
++import workshop.vfx.math.time.TimePoint;
++import workshop.vfx.paper.core.ThreadGuard;
++
++/** Player-only, body-yaw attachment. No retained platform objects, history, task or clock reads. */
++public final class AuraEffect implements DynamicEffect {
++    private final ThreadGuard thread;
++    private final AnchorIdentityGuard guard;
++    private final AnchorBinding binding;
++    private final long id, startTick;
++    private final int lifetime;
++    private final EffectRecipe recipe;
++    private final QualityTier tier;
++    private final Playback playback;
++    private boolean disposed;
++
++    // Session-owned construction ensures the configured lifetime and shared recipe cannot disagree.
++    AuraEffect(ThreadGuard thread, AnchorIdentityGuard guard, long id, AnchorBinding binding,
++               long startTick, int lifetime, EffectRecipe recipe, QualityTier tier) {
++        this.thread = Objects.requireNonNull(thread); this.guard = Objects.requireNonNull(guard);
++        this.binding = Objects.requireNonNull(binding); this.recipe = Objects.requireNonNull(recipe);
++        this.tier = Objects.requireNonNull(tier);
++        if (id < DynamicEffectRegistry.FIRST_ID || lifetime < 20 || lifetime > 12000)
++            throw new IllegalArgumentException("Invalid aura identity or lifetime");
++        this.id = id; this.startTick = startTick; this.lifetime = lifetime;
++        playback = Playback.start(TimePoint.gameTick(startTick));
++    }
++
++    @Override public long requestId() { thread.check(); return id; }
++    @Override public UUID owner() { thread.check(); return binding.owner(); }
++    @Override public EffectKind kind() { thread.check(); return EffectKind.AURA; }
++    public QualityTier tier() { thread.check(); return tier; }
++    @Override public boolean finished(long tick) {
++        thread.check();
++        return disposed || tick < startTick || tick - startTick >= lifetime;
++    }
++    @Override public Optional<EffectDraft> contribute(long tick, AnchorSnapshot snapshot) {
++        thread.check();
++        if (finished(tick) || guard.validate(snapshot, binding, tick).state() != AnchorState.READY)
++            return Optional.empty();
++        // Normative Paper yaw: +Z forward -> (-sin(yaw), 0, cos(yaw)); pitch is deliberately unused.
++        double half = -StrictMath.toRadians(snapshot.bodyYawDegrees()) / 2;
++        Pose anchor = new Pose(new Vec3(snapshot.x(), snapshot.y(), snapshot.z()),
++            new Quat(StrictMath.cos(half), 0, StrictMath.sin(half), 0), 1);
++        return Optional.of(new EffectDraft(EffectKind.AURA, id, binding.owner(), binding.ownerViewerId(),
++            snapshot.worldId(), anchor, recipe, tier, playback, TimePoint.gameTick(tick), tick - startTick));
++    }
++    @Override public void dispose() { thread.check(); disposed = true; }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java b/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java
+new file mode 100644
+index 0000000..efcf443
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java
+@@ -0,0 +1,46 @@
++package workshop.vfx.paper.m8;
++
++import java.util.ArrayList;
++import java.util.List;
++import java.util.Map;
++import workshop.vfx.delivery.*;
++import workshop.vfx.math.core.Pose;
++import workshop.vfx.math.core.Vec3;
++import workshop.vfx.math.curve.Easing;
++import workshop.vfx.math.curve.Spiral;
++import workshop.vfx.math.sample.Endpoints;
++import workshop.vfx.math.sample.SampleLimits;
++import workshop.vfx.math.sample.Sampler;
++import workshop.vfx.math.time.TimeDomain;
++import workshop.vfx.math.time.Timing;
++import workshop.vfx.paper.core.DemoStyleCatalog;
++import workshop.vfx.scene.*;
++
++/** Immutable M1–M6 geometry, built once per enabled session and shared by every aura. */
++public final class AuraRecipe {
++    private AuraRecipe() { }
++
++    private static Layer ring(String name, double radius, double height, int points, int period,
++                              double turns, StyleKey style) {
++        Shape shape = Shape.of(Sampler.uniformParameter(Spiral.circle(radius), points,
++            Endpoints.EXCLUDE_END, new SampleLimits(36, 256)));
++        Motion motion = Motion.fixed(Pose.ofTranslation(new Vec3(0, height, 0)))
++            .then(Motion.spin(Vec3.Y, turns, 0, Timing.loop(period), Easing.LINEAR));
++        return new Layer(name, Timing.loop(period), Visibility.ACTIVE_ONLY, Reveal.ALL, motion, shape, style);
++    }
++
++    private static EffectScene scene(int orbit, int halo, int lifetime) {
++        List<Layer> layers = new ArrayList<>();
++        layers.add(ring("orbit", 0.9, 1.0, orbit, 60, 1, DemoStyleCatalog.END_ROD));
++        if (halo > 0) layers.add(ring("halo", 0.45, 2.15, halo, 80, -1, M8StyleCatalog.CYAN_HALO));
++        return EffectScene.of(TimeDomain.GAME, lifetime, layers, new SceneLimits(2, 36));
++    }
++
++    public static EffectRecipe create(int lifetime) {
++        if (lifetime < 20 || lifetime > 12000) throw new IllegalArgumentException("Aura lifetime outside approved bounds");
++        return EffectRecipe.of("bedwenton-m8-aura", EffectPriority.NORMAL,
++            Map.of(QualityTier.SIMPLE, scene(12, 0, lifetime),
++                QualityTier.BALANCED, scene(18, 9, lifetime), QualityTier.HEAVY, scene(24, 12, lifetime)),
++            Map.of("orbit", LayerRole.ESSENTIAL, "halo", LayerRole.STANDARD));
++    }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraSession.java b/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraSession.java
+new file mode 100644
+index 0000000..2065c98
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraSession.java
+@@ -0,0 +1,46 @@
++package workshop.vfx.paper.m8;
++
++import java.util.Objects;
++import java.util.UUID;
++import workshop.vfx.delivery.EffectRecipe;
++import workshop.vfx.delivery.QualityTier;
++import workshop.vfx.paper.core.SessionIds;
++import workshop.vfx.paper.core.ThreadGuard;
++
++/** K1 command-to-registry boundary. All fallible start validation precedes transactional replacement. */
++public final class AuraSession {
++    private final ThreadGuard thread;
++    private final SessionIds ids;
++    private final AnchorSource anchors;
++    private final AnchorIdentityGuard guard;
++    private final DynamicEffectRegistry registry;
++    private final M8Config config;
++    private final EffectRecipe recipe;
++
++    public AuraSession(ThreadGuard thread, SessionIds ids, AnchorSource anchors,
++                       DynamicEffectRegistry registry, M8Config config) {
++        this.thread = Objects.requireNonNull(thread); this.ids = Objects.requireNonNull(ids);
++        this.anchors = Objects.requireNonNull(anchors); this.registry = Objects.requireNonNull(registry);
++        this.config = Objects.requireNonNull(config); guard = new AnchorIdentityGuard(ids, thread);
++        recipe = AuraRecipe.create(config.auraLifetimeTicks());
++    }
++
++    public long start(UUID owner, QualityTier tier, long tick) {
++        thread.check(); Objects.requireNonNull(owner); Objects.requireNonNull(tier);
++        if (!config.enabled()) throw new IllegalArgumentException("M8 is disabled in configuration");
++        if (tier == QualityTier.HEAVY && !config.heavyAllowed()) throw new IllegalArgumentException("M8 heavy tier is disabled");
++        AnchorBinding binding = new AnchorBinding(owner, ids.viewerId(owner));
++        AnchorVerdict verdict = guard.validate(anchors.snapshot(owner, tick), binding, tick);
++        if (verdict.state() != AnchorState.READY)
++            throw new IllegalArgumentException("Aura anchor unavailable: " + verdict.reason());
++        return registry.start(owner, EffectKind.AURA, (id, bound) ->
++            new AuraEffect(thread, guard, id, bound, tick, config.auraLifetimeTicks(), recipe, tier));
++    }
++
++    public void stop(UUID owner) { thread.check(); registry.stop(owner, EffectKind.AURA); }
++    public String status(UUID owner) {
++        thread.check();
++        return registry.effect(owner, EffectKind.AURA).map(e -> "aura=" + ((AuraEffect)e).tier().name().toLowerCase(java.util.Locale.ROOT))
++            .orElse("aura=off");
++    }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/m8/M8Commands.java b/paper-adapter/src/main/java/workshop/vfx/paper/m8/M8Commands.java
+new file mode 100644
+index 0000000..a5f4568
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/m8/M8Commands.java
+@@ -0,0 +1,57 @@
++package workshop.vfx.paper.m8;
++
++import java.util.List;
++import java.util.Locale;
++import java.util.Objects;
++import workshop.vfx.delivery.QualityTier;
++import workshop.vfx.paper.core.ThreadGuard;
++
++/** K1 grammar only; K2/K3 prefixes remain explicitly unavailable. */
++public final class M8Commands {
++    public interface Endpoint {
++        boolean permitted();
++        boolean player();
++        void start(QualityTier tier);
++        void stopAura();
++        void reply(String message);
++    }
++    private final ThreadGuard thread;
++    private final M8Config config;
++    public M8Commands(ThreadGuard thread, M8Config config) {
++        this.thread = Objects.requireNonNull(thread); this.config = Objects.requireNonNull(config);
++    }
++    public boolean handles(String[] args) {
++        thread.check();
++        return args.length > 0 && List.of("aura", "trail", "activate").contains(args[0].toLowerCase(Locale.ROOT));
++    }
++    public void execute(Endpoint e, String[] args) {
++        thread.check();
++        if (!e.permitted()) { e.reply("Permission required: bedwenton.vfxdemo.use"); return; }
++        if (!e.player()) { e.reply("This command requires a player."); return; }
++        if (!config.enabled()) { e.reply("M8 is disabled in configuration."); return; }
++        if (args.length > 0 && !args[0].equalsIgnoreCase("aura")) {
++            e.reply("Only aura is available in K1; trail and activation are not implemented."); return;
++        }
++        if (args.length < 1 || args.length > 2) { usage(e); return; }
++        if (args.length == 2 && args[1].equalsIgnoreCase("off")) { e.stopAura(); e.reply("Your aura stopped."); return; }
++        QualityTier tier = config.defaultTier();
++        if (args.length == 2) {
++            try { tier = QualityTier.valueOf(args[1].toUpperCase(Locale.ROOT)); }
++            catch (IllegalArgumentException bad) { usage(e); return; }
++        }
++        if (tier == QualityTier.HEAVY && !config.heavyAllowed()) { e.reply("Aura refused: M8 heavy tier is disabled."); return; }
++        try { e.start(tier); e.reply("Arcane Halo aura started: " + tier.name().toLowerCase(Locale.ROOT)); }
++        catch (IllegalArgumentException | IllegalStateException bad) { e.reply("Aura refused: " + bad.getMessage()); }
++    }
++    private static void usage(Endpoint e) { e.reply("Usage: /vfxdemo aura [simple|balanced|heavy|off]"); }
++    public List<String> suggest(String[] args) {
++        thread.check();
++        if (!config.enabled()) return List.of();
++        List<String> choices = args.length == 1 ? List.of("aura")
++            : args.length == 2 && args[0].equalsIgnoreCase("aura")
++                ? config.heavyAllowed() ? List.of("simple", "balanced", "heavy", "off") : List.of("simple", "balanced", "off")
++                : List.of();
++        String prefix = args.length == 0 ? "" : args[args.length - 1].toLowerCase(Locale.ROOT);
++        return choices.stream().filter(s -> s.startsWith(prefix)).toList();
++    }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/m8/M8StyleCatalog.java b/paper-adapter/src/main/java/workshop/vfx/paper/m8/M8StyleCatalog.java
+new file mode 100644
+index 0000000..53dae5e
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/m8/M8StyleCatalog.java
+@@ -0,0 +1,35 @@
++package workshop.vfx.paper.m8;
++
++import java.util.HashMap;
++import java.util.Map;
++import java.util.Set;
++import workshop.vfx.paper.core.DemoStyleCatalog;
++import workshop.vfx.paper.core.ParticleSpec;
++import workshop.vfx.paper.core.StyleCatalog;
++import workshop.vfx.scene.StyleKey;
++
++/** K1 closed whitelist. Historical violet/gold and future showcase keys are not reassigned. */
++public final class M8StyleCatalog implements StyleCatalog {
++    public static final StyleKey CYAN_HALO = StyleKey.of("bedwenton:m8_arcane_halo_cyan");
++    private final Map<StyleKey, ParticleSpec> styles;
++
++    public static Map<StyleKey, ParticleSpec> whitelist() {
++        Map<StyleKey, ParticleSpec> all = new HashMap<>(DemoStyleCatalog.whitelist());
++        all.put(CYAN_HALO, new ParticleSpec.Dust(0x5CE1FF, 0.7f));
++        return Map.copyOf(all);
++    }
++
++    public M8StyleCatalog(Set<StyleKey> resolved) {
++        Map<StyleKey, ParticleSpec> all = whitelist();
++        Map<StyleKey, ParticleSpec> selected = new HashMap<>();
++        for (StyleKey key : resolved) {
++            if (!all.containsKey(key)) throw new IllegalArgumentException("Style outside K1 catalogue");
++            selected.put(key, all.get(key));
++        }
++        styles = Map.copyOf(selected);
++    }
++
++    @Override public Set<StyleKey> supportedStyles() { return styles.keySet(); }
++    @Override public ParticleSpec spec(StyleKey key) { return styles.get(key); }
++    @Override public Map<StyleKey, ParticleSpec> asMap() { return styles; }
++}
+diff --git a/paper-adapter/src/main/java/workshop/vfx/paper/m8/TimedAnchorSource.java b/paper-adapter/src/main/java/workshop/vfx/paper/m8/TimedAnchorSource.java
+new file mode 100644
+index 0000000..acad54c
+--- /dev/null
++++ b/paper-adapter/src/main/java/workshop/vfx/paper/m8/TimedAnchorSource.java
+@@ -0,0 +1,28 @@
++package workshop.vfx.paper.m8;
++
++import java.util.Objects;
++import java.util.UUID;
++import java.util.function.LongSupplier;
++import workshop.vfx.paper.core.ThreadGuard;
++
++/** Bounded diagnostic counters, separate from deterministic effect timing. Measures snapshot reads only. */
++public final class TimedAnchorSource implements AnchorSource {
++    private final ThreadGuard thread;
++    private final AnchorSource source;
++    private final LongSupplier nanos;
++    private long tick = Long.MIN_VALUE, snapshotNanos, reads;
++    public TimedAnchorSource(ThreadGuard thread, AnchorSource source, LongSupplier nanos) {
++        this.thread = Objects.requireNonNull(thread); this.source = Objects.requireNonNull(source);
++        this.nanos = Objects.requireNonNull(nanos);
++    }
++    @Override public AnchorSnapshot snapshot(UUID owner, long planningTick) {
++        thread.check();
++        if (planningTick != tick) { tick = planningTick; snapshotNanos = 0; reads = 0; }
++        long start = nanos.getAsLong();
++        try { return source.snapshot(owner, planningTick); }
++        finally { snapshotNanos += nanos.getAsLong() - start; reads++; }
++    }
++    public long tick() { thread.check(); return tick; }
++    public long snapshotNanos() { thread.check(); return snapshotNanos; }
++    public long reads() { thread.check(); return reads; }
++}
+diff --git a/paper-adapter/src/main/resources/config.yml b/paper-adapter/src/main/resources/config.yml
+index 8acf04c..547b89e 100644
+--- a/paper-adapter/src/main/resources/config.yml
++++ b/paper-adapter/src/main/resources/config.yml
+@@ -16,7 +16,7 @@ maxCallsPerTick: 2048
+ maxCallsPerViewerPerTick: 256
+ debug: false
+ 
+-# K0 foundation only: enabling this section does not enable any M8 visuals.
++# K1 Arcane Halo aura is opt-in. No effect starts automatically. Restart to apply.
+ m8:
+   enabled: false
+   defaultTier: simple
+diff --git a/paper-adapter/src/main/resources/plugin.yml b/paper-adapter/src/main/resources/plugin.yml
+index 5816269..5c3ffa7 100644
+--- a/paper-adapter/src/main/resources/plugin.yml
++++ b/paper-adapter/src/main/resources/plugin.yml
+@@ -2,8 +2,8 @@ name: BedwentonVfxDemo
+ version: '${version}'
+ main: workshop.vfx.paper.bukkit.VfxDemoPlugin
+ api-version: '26.3'
+-description: Opt-in VFX engine debug demo. Particles only; M8 K0 foundation has no new visuals.
++description: Opt-in VFX engine debug demo. Particles only; K1 Arcane Halo aura prerelease.
+ permissions:
+-  bedwenton.vfxdemo.use: {default: op, description: 'Use /vfxdemo ring, stop and status'}
++  bedwenton.vfxdemo.use: {default: op, description: 'Use /vfxdemo ring, aura, stop and status'}
+   bedwenton.vfxdemo.view: {default: op, description: 'See demo effects started by other players'}
+   bedwenton.vfxdemo.admin: {default: op, description: 'Stop all demo effects; see server-wide status'}
+diff --git a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1BudgetAndSchedulingTest.java b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1BudgetAndSchedulingTest.java
+new file mode 100644
+index 0000000..c74757f
+--- /dev/null
++++ b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1BudgetAndSchedulingTest.java
+@@ -0,0 +1,21 @@
++package workshop.vfx.paper.m8;
++import org.junit.jupiter.api.Test;
++import static org.junit.jupiter.api.Assertions.*;
++import static workshop.vfx.paper.m8.K1Fixture.*;
++import java.util.*;
++import workshop.vfx.delivery.*;
++import workshop.vfx.paper.core.*;
++import workshop.vfx.scene.*;
++
++class K1BudgetAndSchedulingTest {
++    @Test void ringAndAuraUseExactlyOneGlobalPlanAndOneTask(){var f=new K1Fixture();f.ring(A);f.balanced();f.run();assertEquals(1,f.schedules);assertEquals(1,f.plans);assertEquals(2,f.requests.size());assertEquals(75,f.plan.reservedGeneratedPoints());assertEquals(75,f.driver.lastReport().succeededCalls());f.driver.stop(A);f.step();assertEquals(2,f.plans);assertEquals(27,f.sends.size());assertEquals(1,f.schedules);}
++    @Test void capacityIsSharedInBothStartOrdersAndReplacementAtCap(){for(boolean ringFirst:List.of(false,true)){var f=new K1Fixture(Map.of("maxActiveEffects",2),Map.of());if(ringFirst){f.ring(A);f.balanced();}else{f.balanced();f.ring(A);}assertThrows(IllegalArgumentException.class,()->f.auras.start(B,QualityTier.SIMPLE,f.tick));assertThrows(IllegalArgumentException.class,()->f.ring(B));f.start(QualityTier.HEAVY);f.ring(A);assertEquals(1,f.registry.activeCount());assertEquals(1,f.driver.activeCount());f.auras.stop(A);f.auras.start(B,QualityTier.SIMPLE,f.tick);assertEquals(1,f.schedules);}}
++    @Test void perPlayerCapAndReplacementRespectK0Registry(){var f=new K1Fixture(Map.of(),Map.of("maxEffectsPerPlayer",1));f.balanced();assertThrows(IllegalArgumentException.class,()->f.registry.start(A,EffectKind.TRAIL,(id,b)->{throw new AssertionError("must not build a deferred effect");}));f.start(QualityTier.HEAVY);assertEquals(1,f.registry.countOwner(A));}
++    @Test void emissionAndViewerBudgetsAreAlignedAndFullyAccounted(){var f=new K1Fixture(Map.of("maxCallsPerTick",20,"maxCallsPerViewerPerTick",10),Map.of());f.canView.add(B);f.start(QualityTier.HEAVY);for(int i=0;i<20;i++){f.run();assertTrue(f.plan.placements()<=20);assertTrue(f.sendsTo(A)<=10);assertTrue(f.sendsTo(B)<=10);assertFalse(f.driver.lastReport().skippedPoints().containsKey(SkipReason.EMISSION_LIMIT));f.account();f.tick++;}}
++    @Test void zeroGenerationBudgetProducesNoCallsAndNoExtraTasks(){var f=new K1Fixture(Map.of("generatedPointBudget",0),Map.of());f.balanced();f.run();assertEquals(0,f.plan.reservedGeneratedPoints());assertEquals(0,f.sends.size());assertTrue(f.registry.active());assertEquals(1,f.schedules);}
++    @Test void strictSimpleCeilingNeverPromotesWhenBudgetAllowsHeavy(){var f=new K1Fixture();f.start(QualityTier.SIMPLE);f.run();assertEquals(12,f.plan.sourcePoints());assertEquals(12,f.sends.size());assertTrue(f.sends.stream().allMatch(s->s.style().equals(DemoStyleCatalog.END_ROD)));}
++    @Test void persistentCyanFailureDisablesOnlyThatStyleAndAccountingRemainsExact(){var f=new K1Fixture();f.balanced();f.failCyan=true;f.run();assertEquals(3,f.driver.lastReport().failedCalls());assertEquals(18,f.driver.lastReport().succeededCalls());assertTrue(f.health.isDisabled(M8StyleCatalog.CYAN_HALO));assertFalse(f.health.isDisabled(DemoStyleCatalog.END_ROD));f.account();f.step();assertEquals(0,f.driver.lastReport().failedCalls());assertEquals(18,f.sends.size());assertEquals(9,f.plan.unsupportedPoints());f.account();}
++    @Test void unresolvedCyanStyleIsRemovedFromPlanningWithoutFallbackPayload(){var f=new K1Fixture();f.balanced();for(int i=0;i<3;i++)f.health.recordFailure(M8StyleCatalog.CYAN_HALO);f.run();assertEquals(18,f.sends.size());assertEquals(9,f.plan.unsupportedPoints());assertTrue(f.sends.stream().allMatch(s->s.style().equals(DemoStyleCatalog.END_ROD)));}
++    @Test void sustainedAllTierRunsKeepExactCountsAndNoSchedulingGrowth(){for(var tier:QualityTier.values()){var f=new K1Fixture(Map.of(),Map.of("auraLifetimeTicks",12000));f.start(tier);long generated=0,placements=0,calls=0;for(int i=0;i<1800;i++){f.run();if(i>=600){generated+=f.plan.sourcePoints();placements+=f.plan.placements();calls+=f.driver.lastReport().succeededCalls();assertEquals(0,f.driver.lastReport().failedCalls());}f.tick++;}int n=tier==QualityTier.SIMPLE?12:tier==QualityTier.BALANCED?27:36;assertEquals(1200L*n,generated);assertEquals(generated,placements);assertEquals(placements,calls);assertEquals(1,f.schedules);assertEquals(0,f.cancels);f.driver.close();assertEquals(1,f.cancels);}}
++    @Test void longSoakStartStopWorldChangesRemainBoundedAndClear(){var f=new K1Fixture(Map.of(),Map.of("auraLifetimeTicks",12000));for(int i=0;i<72000;i++){if(i%1000==0)f.start(QualityTier.HEAVY);if(i%499==0)f.worlds.put(A,f.worlds.get(A).equals(W)?W2:W);f.run();assertTrue(f.registry.activeCount()<=1);assertEquals(1,f.schedules);f.tick++;}f.driver.close();assertEquals(0,f.registry.activeCount());assertEquals(1,f.cancels);}
++}
+diff --git a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1CommandsAndSafetyTest.java b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1CommandsAndSafetyTest.java
+new file mode 100644
+index 0000000..c8a9629
+--- /dev/null
++++ b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1CommandsAndSafetyTest.java
+@@ -0,0 +1,28 @@
++package workshop.vfx.paper.m8;
++import org.junit.jupiter.api.Test;
++import static org.junit.jupiter.api.Assertions.*;
++import static workshop.vfx.paper.m8.K1Fixture.*;
++import java.util.*;
++import workshop.vfx.delivery.*;
++import workshop.vfx.paper.core.*;
++import workshop.vfx.scene.*;
++
++class K1CommandsAndSafetyTest {
++    static final class Endpoint implements M8Commands.Endpoint {
++        boolean use=true,player=true,fail;int starts,stops;QualityTier tier;String reply;
++        public boolean permitted(){return use;}public boolean player(){return player;}
++        public void start(QualityTier t){if(fail)throw new IllegalArgumentException("injected cap");starts++;tier=t;}
++        public void stopAura(){stops++;}public void reply(String s){reply=s;}
++    }
++    M8Commands commands(Map<String,Object> settings){var m=new HashMap<String,Object>(Map.of("enabled",true));m.putAll(settings);return new M8Commands(new ThreadGuard(),M8Config.from(m));}
++    @Test void defaultSimpleAndConfiguredBalanced(){for(String tier:List.of("simple","balanced")){var e=new Endpoint();commands(Map.of("defaultTier",tier)).execute(e,new String[]{"aura"});assertEquals(QualityTier.valueOf(tier.toUpperCase(Locale.ROOT)),e.tier);assertEquals(1,e.starts);}}
++    @Test void allExplicitTiersAndCaseInsensitiveOff(){var c=commands(Map.of());var e=new Endpoint();for(String tier:List.of("SIMPLE","balanced","Heavy")){c.execute(e,new String[]{"AURA",tier});assertEquals(QualityTier.valueOf(tier.toUpperCase(Locale.ROOT)),e.tier);}c.execute(e,new String[]{"aura","OFF"});assertEquals(3,e.starts);assertEquals(1,e.stops);}
++    @Test void disabledCommandsAndSessionCannotStart(){var e=new Endpoint();commands(Map.of("enabled",false)).execute(e,new String[]{"aura"});assertEquals(0,e.starts);assertTrue(e.reply.contains("disabled"));var f=new K1Fixture(Map.of(),Map.of("enabled",false));assertThrows(IllegalArgumentException.class,()->f.balanced());assertEquals(0,f.schedules);}
++    @Test void permissionsAndConsoleFailBeforeMutation(){for(boolean permission:List.of(false,true)){var e=new Endpoint();e.use=permission;e.player=false;commands(Map.of()).execute(e,new String[]{"aura","off"});assertEquals(0,e.starts+e.stops);assertTrue(e.reply.contains(permission?"requires a player":"Permission required"));}}
++    @Test void malformedGrammarAndFutureCommandsDoNotStart(){for(String[] args:new String[][]{{},{"aura","experimental"},{"aura","simple","extra"},{"trail"},{"activate","heavy"}}){var e=new Endpoint();commands(Map.of()).execute(e,args);assertEquals(0,e.starts+e.stops);}}
++    @Test void heavyRefusedBothDefaultAndExplicitAndSessionPreservesOld(){for(String[] args:new String[][]{{"aura"},{"aura","heavy"}}){var e=new Endpoint();commands(Map.of("defaultTier","heavy","heavyAllowed",false)).execute(e,args);assertEquals(0,e.starts);assertTrue(e.reply.contains("disabled"));}var f=new K1Fixture(Map.of(),Map.of("heavyAllowed",false));f.balanced();var old=f.current();assertThrows(IllegalArgumentException.class,()->f.start(QualityTier.HEAVY));assertSame(old,f.current());}
++    @Test void commandFailureIsReportedAndSuggestionsDoNotOfferFutureCheckpoints(){var e=new Endpoint();e.fail=true;var c=commands(Map.of("heavyAllowed",false));c.execute(e,new String[]{"aura"});assertTrue(e.reply.contains("injected cap"));assertEquals(List.of("aura"),c.suggest(new String[]{""}));assertEquals(List.of("simple","balanced","off"),c.suggest(new String[]{"aura",""}));assertEquals(List.of(),commands(Map.of("enabled",false)).suggest(new String[]{""}));assertTrue(c.handles(new String[]{"AuRa"}));assertFalse(c.handles(new String[]{"ring"}));}
++    @Test void invalidM8SettingsRejectRatherThanClamp(){for(var settings:List.<Map<String,Object>>of(Map.of("auraLifetimeTicks",19),Map.of("auraLifetimeTicks",12001),Map.of("enabled","true"),Map.of("defaultTier","experimental"),Map.of("heavyAllowed",1),Map.of("maxEffectsPerPlayer",4),Map.of("invalidAnchorTicksToTerminate",0),Map.of("auraLifetimeTicks",20.5))){assertThrows(IllegalArgumentException.class,()->M8Config.from(settings));}}
++    @Test void strictCyanCatalogueDoesNotOverwriteHistoricalKeysOrM7(){var styles=M8StyleCatalog.whitelist();assertEquals(3,styles.size());DemoStyleCatalog.whitelist().forEach((k,v)->assertEquals(v,styles.get(k)));assertEquals(new ParticleSpec.Dust(0x5CE1FF,0.7f),styles.get(M8StyleCatalog.CYAN_HALO));for(String k:List.of("bedwenton:m8_aura_violet","bedwenton:m8_aura_gold","bedwenton:m8_trail_cyan"))assertFalse(styles.containsKey(StyleKey.of(k)));assertThrows(UnsupportedOperationException.class,()->styles.clear());assertThrows(IllegalArgumentException.class,()->new M8StyleCatalog(Set.of(StyleKey.of("bad:unknown"))));assertThrows(IllegalArgumentException.class,()->new ParticleSpec.Dust(-1,0.7f));assertThrows(IllegalArgumentException.class,()->new ParticleSpec.Dust(0,Float.NaN));assertEquals(Set.of(M8StyleCatalog.CYAN_HALO),new M8StyleCatalog(Set.of(M8StyleCatalog.CYAN_HALO)).supportedStyles());}
++    @Test void timedSnapshotsUseInjectedDiagnosticsAndThreadChecks(){var thread=new ThreadGuard();long[] time={0};var source=new TimedAnchorSource(thread,(owner,t)->null,()->time[0]+=7);source.snapshot(A,1);source.snapshot(B,1);assertEquals(14,source.snapshotNanos());assertEquals(2,source.reads());source.snapshot(A,2);assertEquals(7,source.snapshotNanos());assertEquals(1,source.reads());boolean[] primary={true};var guarded=new ThreadGuard(()->primary[0]);var commands=new M8Commands(guarded,M8Config.from(Map.of()));primary[0]=false;assertThrows(IllegalStateException.class,()->commands.handles(new String[]{"aura"}));}
++}
+diff --git a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1Fixture.java b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1Fixture.java
+new file mode 100644
+index 0000000..20a3f9d
+--- /dev/null
++++ b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1Fixture.java
+@@ -0,0 +1,77 @@
++package workshop.vfx.paper.m8;
++import java.util.*;
++import java.util.function.UnaryOperator;
++import workshop.vfx.delivery.*;
++import workshop.vfx.math.core.*;
++import workshop.vfx.paper.core.*;
++import workshop.vfx.scene.*;
++
++/** Exercises real aura, registry, driver, planner and emitter. No visual or security behaviour is faked. */
++final class K1Fixture {
++    static final UUID A=new UUID(0,1), B=new UUID(0,2), C=new UUID(0,3), W=new UUID(0,4), W2=new UUID(0,5);
++    final ThreadGuard thread=new ThreadGuard();
++    final DefaultSessionIds ids=new DefaultSessionIds(thread);
++    final Map<UUID,double[]> position=new HashMap<>();
++    final Map<UUID,UUID> worlds=new HashMap<>();
++    final Set<UUID> offline=new HashSet<>(), dead=new HashSet<>(), noUse=new HashSet<>(), canView=new HashSet<>();
++    final List<UUID> players=new ArrayList<>(List.of(A,B));
++    final SessionStyleHealth health=new SessionStyleHealth(M8StyleCatalog.whitelist().keySet(),thread);
++    final DynamicEffectRegistry registry;
++    final AuraSession auras;
++    final TimedAnchorSource snapshots;
++    final RingDriver driver;
++    final DemoConfig config;
++    long tick=100;int schedules,cancels,plans,reads;
++    Runnable callback,afterPlan=()->{};
++    boolean failSchedule,failCyan,failRod;
++    UnaryOperator<AnchorSnapshot> tamper=UnaryOperator.identity();
++    List<DeliveryRequest> requests=List.of();DeliveryPlan plan;
++    record Send(long viewer,int world,StyleKey style,double x,double y,double z){}
++    final List<Send> sends=new ArrayList<>();
++    K1Fixture(){this(Map.of(),Map.of());}
++    K1Fixture(Map<String,Object> settings,Map<String,Object> m8){
++        config=DemoConfig.from(settings);
++        var m=new HashMap<String,Object>(Map.of("enabled",true));m.putAll(m8);M8Config mc=M8Config.from(m);
++        for(UUID p:List.of(A,B,C)){position.put(p,new double[]{0,64,0,0,0,0});worlds.put(p,W);}
++        snapshots=new TimedAnchorSource(thread,this::snapshot,System::nanoTime);
++        registry=new DynamicEffectRegistry(thread,snapshots,ids,mc.maxEffectsPerPlayer(),mc.invalidAnchorTicksToTerminate());
++        RingDriver.Host host=new RingDriver.Host(){
++            public long tick(){return tick;}public long nanoTime(){return System.nanoTime();}
++            public boolean worldReady(UUID w,double x,double y,double z){return true;}
++            public ViewerFacts facts(UUID p){
++                if(p==null||offline.contains(p)||!position.containsKey(p))return null;
++                double[] q=position.get(p);return new ViewerFacts(true,true,ids.worldId(worlds.get(p)),q[0],q[1],q[2],!noUse.contains(p),canView.contains(p));
++            }
++            public List<UUID> players(){return List.copyOf(players);}
++            public Runnable schedule(Runnable body){callback=body;if(failSchedule)throw new IllegalStateException("injected refusal");schedules++;return ()->cancels++;}
++        };
++        driver=new RingDriver(thread,host,config,ids,health,(w,x,y,z)->Optional.empty(),(v,w,s,x,y,z)->{
++            if((failCyan&&s.equals(M8StyleCatalog.CYAN_HALO))||(failRod&&s.equals(DemoStyleCatalog.END_ROD)))throw new IllegalStateException("injected send failure");
++            sends.add(new Send(v,w,s,x,y,z));
++        },(t,r,s,p)->{plans++;requests=r;plan=DeliveryPlanner.plan(t,r,s,p);afterPlan.run();return plan;},registry);
++        registry.bind(driver);auras=new AuraSession(thread,ids,snapshots,registry,mc);
++    }
++    AnchorSnapshot snapshot(UUID owner,long t){
++        reads++;if(offline.contains(owner))return null;double[] p=position.get(owner);UUID world=worlds.get(owner);
++        return tamper.apply(new AnchorSnapshot(t,owner,ids.existingViewerId(owner).orElse(-1),world,ids.worldId(world),
++            p[0],p[1],p[2],(float)p[3],(float)p[4],(float)p[5],-64,320,true,true,true,dead.contains(owner),0));
++    }
++    long start(QualityTier tier){return auras.start(A,tier,tick);}
++    AuraEffect current(){return (AuraEffect)registry.effect(A,EffectKind.AURA).orElseThrow();}
++    void run(){sends.clear();callback.run();}
++    void step(){tick++;run();}
++    void ring(UUID owner){driver.start(owner,worlds.get(owner),0,64,0,QualityTier.BALANCED);}
++    EffectDraft draft(UUID owner){return registry.drafts(tick).stream().filter(d->d.owner().equals(owner)).findFirst().orElseThrow();}
++    static EffectFrame frame(EffectDraft d){return d.recipe().variant(d.tier()).evaluate(d.anchor(),d.playback(),d.now());}
++    long sendsTo(UUID p){long id=ids.viewerId(p);return sends.stream().filter(s->s.viewer()==id).count();}
++    void balanced(){start(QualityTier.BALANCED);}
++    void account(){EmissionReport r=driver.lastReport();org.junit.jupiter.api.Assertions.assertEquals(r.plannedPlacements(),
++        r.attemptedCalls()+r.skippedPoints().values().stream().mapToLong(Long::longValue).sum()+r.placementsInSkippedRecipients()+r.placementsInSkippedDeliveries());
++        org.junit.jupiter.api.Assertions.assertEquals(r.attemptedCalls(),r.succeededCalls()+r.failedCalls());}
++    static AnchorSnapshot replace(AnchorSnapshot s,Long tick,UUID owner,Long viewer,UUID world,Integer worldId,Double x,Double y,Double z,Float body,Float head,Boolean loaded){
++        return new AnchorSnapshot(tick==null?s.tick():tick,owner==null?s.owner():owner,viewer==null?s.ownerViewerId():viewer,
++            world==null?s.world():world,worldId==null?s.worldId():worldId,x==null?s.x():x,y==null?s.y():y,z==null?s.z():z,
++            body==null?s.bodyYawDegrees():body,head==null?s.headYawDegrees():head,s.pitchDegrees(),s.minHeight(),s.maxHeight(),
++            loaded==null?s.chunkLoaded():loaded,s.online(),s.valid(),s.dead(),s.discontinuitySerial());
++    }
++}
+diff --git a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1GeometryTest.java b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1GeometryTest.java
+new file mode 100644
+index 0000000..2ebf232
+--- /dev/null
++++ b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1GeometryTest.java
+@@ -0,0 +1,29 @@
++package workshop.vfx.paper.m8;
++import org.junit.jupiter.api.Test;
++import static org.junit.jupiter.api.Assertions.*;
++import static workshop.vfx.paper.m8.K1Fixture.*;
++import workshop.vfx.delivery.*;
++import workshop.vfx.math.core.*;
++import workshop.vfx.scene.*;
++
++class K1GeometryTest {
++    @Test void exactTierTotalsAndReservations(){int[] n={12,27,36};for(var tier:QualityTier.values()){var f=new K1Fixture();f.start(tier);var d=f.draft(A);assertEquals(n[tier.ordinal()],frame(d).pointCount());assertEquals(n[tier.ordinal()],d.recipe().variant(tier).maxPointsPerFrame());}}
++    @Test void paletteAndRolesAreExact(){var r=AuraRecipe.create(1200);assertEquals(EffectPriority.NORMAL,r.priority());assertEquals(LayerRole.ESSENTIAL,r.role("orbit"));assertEquals(LayerRole.STANDARD,r.role("halo"));var f=new K1Fixture();f.balanced();var b=frame(f.draft(A)).batches();assertEquals(workshop.vfx.paper.core.DemoStyleCatalog.END_ROD,b.get(0).style());assertEquals(M8StyleCatalog.CYAN_HALO,b.get(1).style());}
++    @Test void bothLayersMatchIndependentFormulaAtAllTiersAndBoundaryTicks(){
++        for(var tier:QualityTier.values()){var f=new K1Fixture();f.start(tier);for(long age:new long[]{0,1,15,30,59,60,79,80,123,1199}){
++            f.tick=100+age;double[] p=f.position.get(A);p[0]=0.28*age;p[1]=64+Math.sin(age/5.0);p[2]=-0.1*age;p[3]=(float)(age*3.0);
++            var fr=frame(f.draft(A));for(var b:fr.batches()){boolean orbit=b.layer().equals("orbit");double r=orbit?0.9:0.45,h=orbit?1:2.15;int period=orbit?60:80;double spin=(orbit?1:-1)*2*Math.PI*(age%period)/period;
++                for(int i=0;i<b.size();i++){double angle=2*Math.PI*i/b.size()+spin-Math.toRadians((float)p[3]);Vec3 expected=new Vec3(p[0]+r*Math.cos(angle),p[1]+h,p[2]-r*Math.sin(angle));assertTrue(b.point(i).sub(expected).length()<1e-9,"tier="+tier+" age="+age+" layer="+b.layer()+" i="+i);}
++            }
++        }}
++    }
++    @Test void waistAndHaloRadiiHeightsAndNoSeamDuplicate(){var f=new K1Fixture();f.balanced();for(var b:frame(f.draft(A)).batches()){double r=b.layer().equals("orbit")?0.9:0.45,h=b.layer().equals("orbit")?65:66.15;for(int i=0;i<b.size();i++){assertEquals(r,Math.hypot(b.x(i),b.z(i)),1e-12);assertEquals(h,b.y(i),1e-12);}assertTrue(b.point(0).sub(b.point(b.size()-1)).length()>0.1);}}
++    @Test void oppositeDirectionAndExactIndependentPeriods(){var f=new K1Fixture();f.balanced();var zero=frame(f.draft(A));f.tick++;var one=frame(f.draft(A));assertTrue(one.batches().get(0).z(0)<0);assertTrue(one.batches().get(1).z(0)>0);f.tick=160;assertTrue(frame(f.draft(A)).batches().get(0).point(0).sub(zero.batches().get(0).point(0)).length()<1e-12);f.tick=180;assertTrue(frame(f.draft(A)).batches().get(1).point(0).sub(zero.batches().get(1).point(0)).length()<1e-12);}
++    @Test void yawMapsForwardLeftAndUp(){for(float yaw:new float[]{0,45,90,180,270,-90,359.5f,720,-1234.25f}){var f=new K1Fixture();f.position.get(A)[3]=yaw;f.balanced();var q=f.draft(A).anchor().rotation();double r=Math.toRadians(yaw);assertTrue(q.rotate(Vec3.Z).sub(new Vec3(-Math.sin(r),0,Math.cos(r))).length()<1e-12);assertTrue(q.rotate(Vec3.X).sub(new Vec3(Math.cos(r),0,Math.sin(r))).length()<1e-12);assertTrue(q.rotate(Vec3.Y).sub(Vec3.Y).length()<1e-12);}}
++    @Test void headYawAndPitchDoNotTiltOrRotateAttachment(){var f=new K1Fixture();f.balanced();var expected=frame(f.draft(A));for(double pitch:new double[]{-90,90,0,Float.NaN}){f.position.get(A)[4]=127;f.position.get(A)[5]=pitch;var actual=frame(f.draft(A));for(int b=0;b<expected.batches().size();b++)assertArrayEquals(expected.batches().get(b).coordinates(),actual.batches().get(b).coordinates());}}
++    @Test void walkingSprintingJumpingAndFallingHaveExactCentres(){var f=new K1Fixture();f.balanced();for(int i=0;i<100;i++){f.tick++;double[] p=f.position.get(A);p[0]+=i<50?0.22:0.28;p[1]=64+2*Math.sin(i/10.0);p[2]+=0.1;p[3]=i*7;var fr=frame(f.draft(A));for(var b:fr.batches()){double sx=0,sz=0;for(int j=0;j<b.size();j++){sx+=b.x(j);sz+=b.z(j);}assertEquals(p[0],sx/b.size(),1e-10);assertEquals(p[2],sz/b.size(),1e-10);assertEquals(p[1]+(b.layer().equals("orbit")?1:2.15),b.y(0),1e-10);}}}
++    @Test void worldChangeContinuesWithSameRecipeClockAndNoInterpolatedPoints(){var f=new K1Fixture();f.balanced();var first=f.draft(A);f.worlds.put(A,W2);f.position.put(A,new double[]{10000,80,-3000,90,0,0});f.tick=223;var next=f.draft(A);assertEquals(first.requestId(),next.requestId());assertSame(first.recipe(),next.recipe());assertEquals(123,next.frameOrdinal());assertEquals(f.ids.worldId(W2),next.worldId());for(var b:frame(next).batches())for(int i=0;i<b.size();i++){assertTrue(Math.abs(b.x(i)-10000)<=0.901);assertTrue(Math.abs(b.z(i)+3000)<=0.901);}}
++    @Test void sceneAndShapesAreReusedAcrossFramesOwnersAndReplacement(){var f=new K1Fixture();f.balanced();var one=f.draft(A);f.auras.start(B,QualityTier.HEAVY,f.tick);assertSame(one.recipe(),f.draft(B).recipe());var shape=one.recipe().variant(QualityTier.BALANCED).layers().get(0).shape();for(int i=0;i<60;i++){f.tick++;var d=f.draft(A);assertSame(one.recipe(),d.recipe());assertSame(shape,d.recipe().variant(d.tier()).layers().get(0).shape());}f.start(QualityTier.SIMPLE);assertSame(one.recipe(),f.draft(A).recipe());}
++    @Test void deterministicFrameHasNoHiddenClockOrRandomInput(){var f=new K1Fixture();f.balanced();f.tick=321;var a=frame(f.draft(A));var b=frame(f.draft(A));assertEquals(a.localTicks(),b.localTicks());for(int i=0;i<a.batches().size();i++)assertArrayEquals(a.batches().get(i).coordinates(),b.batches().get(i).coordinates());}
++    @Test void recipeLifetimeBoundsRejectWithoutClamping(){for(int n:new int[]{-1,0,19,12001,Integer.MAX_VALUE})assertThrows(IllegalArgumentException.class,()->AuraRecipe.create(n));assertNotNull(AuraRecipe.create(20));assertNotNull(AuraRecipe.create(12000));}
++}
+diff --git a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1IdentityAndPermissionsTest.java b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1IdentityAndPermissionsTest.java
+new file mode 100644
+index 0000000..189054d
+--- /dev/null
++++ b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1IdentityAndPermissionsTest.java
+@@ -0,0 +1,23 @@
++package workshop.vfx.paper.m8;
++import org.junit.jupiter.api.Test;
++import static org.junit.jupiter.api.Assertions.*;
++import static workshop.vfx.paper.m8.K1Fixture.*;
++import java.util.*;
++import workshop.vfx.delivery.*;
++import workshop.vfx.paper.core.*;
++import workshop.vfx.scene.*;
++
++class K1IdentityAndPermissionsTest {
++    @Test void ownersWithUseButNoViewSeeOnlyTheirOwnAura(){var f=new K1Fixture();f.balanced();f.auras.start(B,QualityTier.SIMPLE,f.tick);f.run();assertEquals(27,f.sendsTo(A));assertEquals(12,f.sendsTo(B));f.account();}
++    @Test void viewerPermissionGrantRevokeAndOwnerUseAreRechecked(){var f=new K1Fixture();f.balanced();f.run();assertEquals(0,f.sendsTo(B));f.canView.add(B);f.step();assertEquals(27,f.sendsTo(B));f.canView.clear();f.noUse.add(A);f.step();assertEquals(0,f.sendsTo(A));assertEquals(0,f.sendsTo(B));}
++    @Test void permissionRevokedBetweenPlanningAndEmissionIsFailClosed(){var f=new K1Fixture();f.balanced();f.canView.add(B);f.afterPlan=()->{f.noUse.add(A);f.canView.clear();};f.run();assertEquals(0,f.sends.size());assertEquals(54,f.driver.lastReport().placementsInSkippedRecipients());f.account();}
++    @Test void viewersMustBeInCurrentWorldAndRange(){var f=new K1Fixture();f.balanced();f.canView.add(B);f.position.get(B)[0]=33;f.run();assertEquals(0,f.sendsTo(B));f.position.get(B)[0]=0;f.worlds.put(B,W2);f.step();assertEquals(0,f.sendsTo(B));f.worlds.put(A,W2);f.step();assertEquals(27,f.sendsTo(B));assertTrue(f.sends.stream().allMatch(s->s.world()==f.ids.worldId(W2)));}
++    @Test void ownerFirstSelectionUnderOneViewerCap(){var f=new K1Fixture(Map.of("maxViewersPerEffect",1),Map.of());f.ids.viewerId(B);f.balanced();f.canView.add(B);f.run();assertEquals(27,f.sendsTo(A));assertEquals(0,f.sendsTo(B));}
++    @Test void forgedOwnerTerminatesBeforeAnyUnauthorizedEmission(){var f=new K1Fixture();f.balanced();f.tamper=s->replace(s,null,B,null,null,null,null,null,null,null,null,null);f.run();assertEquals(0,f.sendsTo(B));assertEquals(0,f.registry.activeCount());assertEquals(1,f.registry.rejections(AnchorRejection.OWNER_MISMATCH));}
++    @Test void forgedViewerAndReleasedBindingTerminate(){for(boolean release:List.of(false,true)){var f=new K1Fixture();f.balanced();long id=f.ids.viewerId(B);if(release)f.ids.release(A);else f.tamper=s->replace(s,null,null,id,null,null,null,null,null,null,null,null);f.run();assertFalse(f.registry.active());assertEquals(0,f.sends.size());assertEquals(1,f.registry.rejections(AnchorRejection.VIEWER_ID_MISMATCH));}}
++    @Test void staleAndFutureSnapshotsSkipThenRecoverWithoutRestartingClock(){for(long delta:new long[]{-1,1,-1000}){var f=new K1Fixture();f.balanced();f.tamper=s->replace(s,s.tick()+delta,null,null,null,null,null,null,null,null,null,null);f.tick=105;f.run();assertEquals(0,f.plans);assertTrue(f.registry.active());f.tamper=java.util.function.UnaryOperator.identity();f.step();assertEquals(6,f.requests.getFirst().frameOrdinal());assertEquals(27,f.sends.size());}}
++    @Test void nonfinitePositionAndYawAxesNeverReachPlanner(){for(int field=0;field<5;field++)for(double bad:new double[]{Double.NaN,Double.POSITIVE_INFINITY,Double.NEGATIVE_INFINITY}){var f=new K1Fixture();f.balanced();int k=field;f.tamper=s->replace(s,null,null,null,null,null,k==0?bad:null,k==1?bad:null,k==2?bad:null,k==3?(float)bad:null,k==4?(float)bad:null,null);f.run();assertEquals(0,f.plans);assertEquals(1,f.registry.rejections(AnchorRejection.NON_FINITE));}}
++    @Test void unknownMismatchedWorldHeightAndChunkFailClosed(){for(int n=0;n<5;n++){var f=new K1Fixture();f.balanced();int k=n;f.tamper=s->replace(s,null,null,null,k==0?W2:null,k==1?Integer.MAX_VALUE:null,null,k==2?Double.valueOf(320):k==3?Double.valueOf(-65):null,null,null,null,k==4?false:null);f.run();assertEquals(0,f.plans);assertEquals(0,f.sends.size());assertTrue(f.registry.active());}}
++    @Test void invalidStreakTerminatesAtConfiguredLimitAndReadyResetsIt(){var f=new K1Fixture(Map.of(),Map.of("invalidAnchorTicksToTerminate",3));f.balanced();f.tamper=s->replace(s,s.tick()-1,null,null,null,null,null,null,null,null,null,null);f.run();f.step();assertTrue(f.registry.active());f.tamper=java.util.function.UnaryOperator.identity();f.step();assertEquals(27,f.sends.size());f.tamper=s->null;f.step();assertFalse(f.registry.active());var g=new K1Fixture();g.balanced();g.tamper=s->replace(s,s.tick()-1,null,null,null,null,null,null,null,null,null,null);for(int i=0;i<19;i++){g.run();assertTrue(g.registry.active());g.tick++;}g.run();assertFalse(g.registry.active());}
++    @Test void realAuraDraftUsesBoundIdentityAndRejectsTamperedDirectContributions(){var f=new K1Fixture();f.balanced();var e=f.current();var s=f.snapshot(A,f.tick);assertTrue(e.contribute(f.tick,replace(s,null,B,f.ids.viewerId(B),null,null,null,null,null,null,null,null)).isEmpty());var d=e.contribute(f.tick,s).orElseThrow();assertEquals(A,d.owner());assertEquals(f.ids.viewerId(A),d.ownerViewerId());assertTrue(d.requestId()>=DynamicEffectRegistry.FIRST_ID);assertEquals(0,f.registry.identityViolations());}
++}
+diff --git a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1LifecycleTest.java b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1LifecycleTest.java
+new file mode 100644
+index 0000000..6cd3fed
+--- /dev/null
++++ b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1LifecycleTest.java
+@@ -0,0 +1,23 @@
++package workshop.vfx.paper.m8;
++import org.junit.jupiter.api.Test;
++import static org.junit.jupiter.api.Assertions.*;
++import static workshop.vfx.paper.m8.K1Fixture.*;
++import java.util.*;
++import workshop.vfx.delivery.*;
++import workshop.vfx.paper.core.*;
++import workshop.vfx.scene.*;
++
++class K1LifecycleTest {
++    @Test void noAutomaticStartAndAuraAloneUsesOneTask(){var f=new K1Fixture();assertEquals(0,f.schedules);assertFalse(f.driver.running());assertEquals(0,f.registry.activeCount());f.balanced();f.run();assertEquals(1,f.schedules);assertEquals(1,f.plans);assertEquals(27,f.sends.size());}
++    @Test void allTierReplacementsAreSingleRegistrationAndDisposeOld(){var f=new K1Fixture();long last=-1;for(var tier:List.of(QualityTier.SIMPLE,QualityTier.BALANCED,QualityTier.HEAVY,QualityTier.SIMPLE)){var old=f.registry.effect(A,EffectKind.AURA);long id=f.start(tier);assertTrue(id>last);last=id;old.ifPresent(e->assertTrue(e.finished(f.tick)));assertEquals(1,f.registry.activeCount());assertEquals(tier,f.current().tier());}assertEquals(1,f.schedules);}
++    @Test void failedStartPreservesExistingAuraAndTask(){var f=new K1Fixture();f.balanced();var old=f.current();f.tamper=s->null;assertThrows(IllegalArgumentException.class,()->f.start(QualityTier.HEAVY));assertSame(old,f.current());assertFalse(old.finished(f.tick));assertEquals(1,f.schedules);assertEquals(0,f.cancels);}
++    @Test void schedulerFailureLeavesNoRegistrationAndRetryWorks(){var f=new K1Fixture();f.failSchedule=true;assertThrows(IllegalStateException.class,()->f.balanced());assertEquals(0,f.registry.activeCount());assertFalse(f.driver.running());var stale=f.callback;f.failSchedule=false;f.balanced();stale.run();assertEquals(0,f.plans);f.run();assertEquals(1,f.plans);}
++    @Test void expirationIsExactEvenAfterSkippedSnapshots(){var f=new K1Fixture(Map.of(),Map.of("auraLifetimeTicks",20));f.balanced();var e=f.current();f.tick=119;f.run();assertEquals(1,f.registry.activeCount());f.tick=120;f.run();assertEquals(0,f.registry.activeCount());assertTrue(e.finished(120));assertEquals(1,f.cancels);assertFalse(f.driver.running());}
++    @Test void deathTerminatesAndCancelsBeforePlan(){var f=new K1Fixture();f.balanced();var e=f.current();f.dead.add(A);f.run();assertEquals(0,f.plans);assertTrue(e.finished(f.tick));assertEquals(0,f.registry.activeCount());assertEquals(1,f.cancels);}
++    @Test void disconnectTerminatesAndReleasedSessionCannotResume(){var f=new K1Fixture();f.balanced();f.offline.add(A);f.ids.release(A);f.run();assertEquals(0,f.plans);assertFalse(f.registry.active());f.offline.clear();f.step();assertEquals(0,f.plans);}
++    @Test void auraOffStopsOnlyAuraAndPreservesRing(){var f=new K1Fixture();f.ring(A);f.balanced();f.auras.stop(A);assertNotNull(f.driver.ring(A));assertEquals(0,f.registry.activeCount());assertTrue(f.driver.running());f.run();assertEquals(48,f.sends.size());f.driver.stop(A);assertEquals(1,f.cancels);}
++    @Test void stopOwnerAndStopAllCleanUpOnlyIntendedOwners(){var f=new K1Fixture();f.balanced();f.auras.start(B,QualityTier.SIMPLE,f.tick);f.ring(A);f.driver.stop(A);f.registry.stopOwner(A);assertEquals(1,f.registry.activeCount());assertTrue(f.driver.running());f.driver.stopAll();f.registry.stopAll();assertEquals(0,f.registry.activeCount());assertFalse(f.driver.running());assertEquals(1,f.cancels);}
++    @Test void shutdownDisposesAndForbidsAllLaterStarts(){var f=new K1Fixture();f.balanced();var e=f.current();var stale=f.callback;f.driver.close();f.driver.close();e.dispose();assertTrue(e.finished(f.tick));assertTrue(e.contribute(f.tick,f.snapshot(A,f.tick)).isEmpty());assertThrows(IllegalStateException.class,()->f.balanced());stale.run();assertEquals(0,f.plans);assertEquals(1,f.cancels);}
++    @Test void duplicateTicksAndStoppedCallbacksCannotPlanAgain(){var f=new K1Fixture();f.balanced();f.run();f.run();assertEquals(1,f.plans);var stale=f.callback;f.auras.stop(A);f.tick++;f.balanced();stale.run();assertEquals(1,f.plans);f.run();assertEquals(2,f.plans);assertEquals(2,f.schedules);}
++    @Test void thousandsOfReplacementsAndStopsHaveBoundedRegistrationsAndTasks(){var f=new K1Fixture();for(int i=0;i<1000;i++){f.start(QualityTier.HEAVY);assertEquals(1,f.registry.activeCount());f.auras.stop(A);assertEquals(0,f.registry.activeCount());}assertEquals(f.schedules,f.cancels);assertFalse(f.driver.running());}
++}
+diff --git a/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1SyntheticMeasurementsTest.java b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1SyntheticMeasurementsTest.java
+new file mode 100644
+index 0000000..b3143d3
+--- /dev/null
++++ b/paper-adapter/src/test/java/workshop/vfx/paper/m8/K1SyntheticMeasurementsTest.java
+@@ -0,0 +1,50 @@
++package workshop.vfx.paper.m8;
++
++import java.nio.file.Files;
++import java.nio.file.Path;
++import java.util.Arrays;
++import java.util.Map;
++import org.junit.jupiter.api.Test;
++import static org.junit.jupiter.api.Assertions.*;
++import static workshop.vfx.paper.m8.K1Fixture.*;
++import workshop.vfx.delivery.QualityTier;
++
++/** Real production pipeline with in-memory host/sink, explicitly NOT a Paper/TPS/MSPT benchmark. */
++class K1SyntheticMeasurementsTest {
++    private static String stats(long[] values) {
++        long[] sorted=values.clone(); Arrays.sort(sorted);
++        return "{\"p50\":"+sorted[599]+",\"p95\":"+sorted[1139]+",\"max\":"+sorted[1199]+"}";
++    }
++    @Test void recordAllTiersAndTwoViewerSustainedPipelineMeasurements() throws Exception {
++        StringBuilder json=new StringBuilder("{\"kind\":\"synthetic in-memory production pipeline; NOT Paper, TPS, MSPT or network latency\",\"warmup_ticks\":600,\"measured_ticks\":1200,\"scenarios\":[");
++        for(int scenario=0;scenario<4;scenario++) {
++            QualityTier tier=scenario==0?QualityTier.SIMPLE:scenario==1?QualityTier.BALANCED:QualityTier.HEAVY;
++            var f=new K1Fixture(Map.of(),Map.of("auraLifetimeTicks",12000));
++            f.start(tier);
++            if(scenario==3){f.auras.start(B,tier,f.tick);f.canView.add(A);f.canView.add(B);}
++            long[] planner=new long[1200],emitter=new long[1200],snapshot=new long[1200],total=new long[1200];
++            long generated=0,placements=0,ok=0,failed=0;
++            for(int i=0;i<1800;i++) {
++                double[] p=f.position.get(A);p[0]=Math.sin(i/20.0);p[1]=64+Math.sin(i/5.0);p[3]=i*3;
++                long start=System.nanoTime();f.run();long elapsed=System.nanoTime()-start;
++                if(i>=600){int k=i-600;var r=f.driver.lastReport();planner[k]=r.planningNanos();emitter[k]=r.emissionNanos();snapshot[k]=f.snapshots.snapshotNanos();total[k]=elapsed;
++                    generated+=f.plan.sourcePoints();placements+=r.plannedPlacements();ok+=r.succeededCalls();failed+=r.failedCalls();f.account();}
++                f.tick++;
++            }
++            long expectedPerFrame=scenario==0?12:scenario==1?27:scenario==2?36:72;
++            assertEquals(expectedPerFrame*1200,generated);assertEquals(generated*(scenario==3?2:1),placements);
++            assertEquals(placements,ok);assertEquals(0,failed);assertEquals(1,f.schedules);
++            if(scenario>0)json.append(',');
++            json.append("{\"scenario\":\"").append(scenario==3?"two-heavy-auras-two-viewers":tier.name()).append("\",\"generated_per_frame\":").append(expectedPerFrame)
++                .append(",\"generated_total\":").append(generated).append(",\"planned_placements\":").append(placements)
++                .append(",\"successful_calls\":").append(ok).append(",\"failed_calls\":").append(failed)
++                .append(",\"planner_ns\":").append(stats(planner)).append(",\"emitter_ns\":").append(stats(emitter))
++                .append(",\"snapshot_reads_ns\":").append(stats(snapshot)).append(",\"whole_fake_tick_ns\":").append(stats(total)).append('}');
++            f.driver.close();assertEquals(1,f.cancels);
++        }
++        json.append("]}\n");
++        Path output=Path.of(System.getProperty("adapter.root","."),"build/reports/k1/synthetic-measurements.json");
++        Files.createDirectories(output.getParent());Files.writeString(output,json.toString());
++        System.out.println(json);
++    }
++}
+diff --git a/paper-adapter/tools/m8-k1/summarize.py b/paper-adapter/tools/m8-k1/summarize.py
+new file mode 100644
+index 0000000..f6a5402
+--- /dev/null
++++ b/paper-adapter/tools/m8-k1/summarize.py
+@@ -0,0 +1,15 @@
++import sys,json,xml.etree.ElementTree as ET
++from pathlib import Path
++r=Path(sys.argv[1]);m7=set(json.loads((r/'docs/m8/k0/M7-REGRESSION-CLASSES.json').read_text()))
++counts={k:0 for k in ['tests','failures','errors','skipped']};groups={'M1-M6':0,'M7':0,'K0':0,'K1':0};files=[]
++for folder in [r/'build/test-results/test',r/'paper-adapter/build/test-results/test']:
++ xml=sorted(folder.glob('TEST-*.xml'));assert xml,folder;files+=xml
++ for p in xml:
++  suite=ET.parse(p).getroot();name=suite.attrib['name']
++  for k in counts:counts[k]+=int(suite.attrib.get(k,0))
++  group='M1-M6' if folder==r/'build/test-results/test' else 'M7' if name in m7 else 'K0' if '.K0' in name else 'K1'
++  if group=='K1':assert '.K1' in name,name
++  groups[group]+=int(suite.attrib['tests'])
++assert groups=={'M1-M6':415,'M7':61,'K0':50,'K1':57},groups
++assert counts==dict(tests=583,failures=0,errors=0,skipped=0),counts
++print(json.dumps(dict(counts=counts,groups=groups,xml_reports=len(files)),indent=2))
+diff --git a/paper-adapter/tools/m8-k1/verify.sh b/paper-adapter/tools/m8-k1/verify.sh
+new file mode 100755
+index 0000000..2e20450
+--- /dev/null
++++ b/paper-adapter/tools/m8-k1/verify.sh
+@@ -0,0 +1,14 @@
++#!/usr/bin/env bash
++set -euo pipefail
++root="$(cd "$(dirname "$0")/../../.." && pwd)"
++evidence="${1:-$(mktemp -d "${TMPDIR:-/tmp}/bedwenton-m8-k1.XXXXXX")}";mkdir -p "$evidence"
++cd "$root"
++./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false clean test 2>&1 | tee "$evidence/engine-clean-test.log"
++./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false check 2>&1 | tee "$evidence/engine-check.log"
++./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false -p paper-adapter clean test 2>&1 | tee "$evidence/adapter-clean-test.log"
++./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false -p paper-adapter check 2>&1 | tee "$evidence/adapter-check.log"
++python3 paper-adapter/tools/m8-k1/summarize.py "$root" | tee "$evidence/test-summary.json"
++./gradlew --no-daemon -Porg.gradle.java.installations.auto-download=false dependencies --configuration runtimeClasspath 2>&1 | tee "$evidence/engine-runtime.log"
++grep -q 'No dependencies' "$evidence/engine-runtime.log"
++python3 verification/m6/regenerate_all.py "$evidence/reference-regeneration" 2>&1 | tee "$evidence/reference-regeneration.log"
++cp paper-adapter/build/reports/k1/synthetic-measurements.json "$evidence/"

@@ -1,0 +1,17 @@
+{"kind":"synthetic in-memory production pipeline; NOT Paper, TPS, MSPT or network latency","warmup_ticks":600,"measured_ticks":1200,"scenarios":[{"scenario":"SIMPLE","generated_per_frame":12,"generated_total":14400,"planned_placements":14400,"successful_calls":14400,"failed_calls":0,"planner_ns":{"p50":5073,"p95":7066,"max":301730},"emitter_ns":{"p50":10019,"p95":13158,"max":246039},"snapshot_reads_ns":{"p50":334,"p95":483,"max":1529},"whole_fake_tick_ns":{"p50":22709,"p95":37793,"max":14952375}},{"scenario":"BALANCED","generated_per_frame":27,"generated_total":32400,"planned_placements":32400,"successful_calls":32400,"failed_calls":0,"planner_ns":{"p50":6486,"p95":9421,"max":464493},"emitter_ns":{"p50":20608,"p95":27162,"max":10582353},"snapshot_reads_ns":{"p50":364,"p95":531,"max":1659},"whole_fake_tick_ns":{"p50":35702,"p95":73594,"max":10596996}},{"scenario":"HEAVY","generated_per_frame":36,"generated_total":43200,"planned_placements":43200,"successful_calls":43200,"failed_calls":0,"planner_ns":{"p50":6524,"p95":9840,"max":330668},"emitter_ns":{"p50":24705,"p95":54516,"max":2565722},"snapshot_reads_ns":{"p50":357,"p95":520,"max":36365},"whole_fake_tick_ns":{"p50":39313,"p95":75753,"max":2580182}},{"scenario":"two-heavy-auras-two-viewers","generated_per_frame":72,"generated_total":86400,"planned_placements":172800,"successful_calls":172800,"failed_calls":0,"planner_ns":{"p50":12063,"p95":22187,"max":218725},"emitter_ns":{"p50":92196,"p95":174934,"max":10659721},"snapshot_reads_ns":{"p50":756,"p95":1385,"max":3803},"whole_fake_tick_ns":{"p50":121953,"p95":234979,"max":10694661}}]}
+
+
+Test run finished after 3970 ms
+[        23 containers found      ]
+[         0 containers skipped    ]
+[        23 containers started    ]
+[         0 containers aborted    ]
+[        23 containers successful ]
+[         0 containers failed     ]
+[       168 tests found           ]
+[         0 tests skipped         ]
+[       168 tests started         ]
+[         0 tests aborted         ]
+[       168 tests successful      ]
+[         0 tests failed          ]
+
