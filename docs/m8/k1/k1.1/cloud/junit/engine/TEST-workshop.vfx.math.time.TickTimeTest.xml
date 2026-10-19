@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.time.TickTimeTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-19T09:12:21.703Z" hostname="runnervm8k3b6" time="0.035">
+  <properties/>
+  <testcase name="Tier 1: conversions follow IEEE-754 for NaN and infinities and never throw (section 6)" classname="workshop.vfx.math.time.TickTimeTest" time="0.0"/>
+  <testcase name="Constants: 20 ticks per second, 50,000,000 ns per tick, and their product is exactly one second (section 2)" classname="workshop.vfx.math.time.TickTimeTest" time="0.0"/>
+  <testcase name="secondsToTicks is seconds * 20.0; the seconds round trip is not exact for large counts, so authoritative ticks never come from seconds (section 2)" classname="workshop.vfx.math.time.TickTimeTest" time="0.02"/>
+  <testcase name="ticksToSeconds is ticks / 20.0, the correctly rounded quotient, not ticks * 0.05 (section 2)" classname="workshop.vfx.math.time.TickTimeTest" time="0.014"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

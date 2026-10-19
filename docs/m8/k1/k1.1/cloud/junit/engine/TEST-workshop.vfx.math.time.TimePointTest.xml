@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.time.TimePointTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-19T09:12:21.738Z" hostname="runnervm8k3b6" time="0.072">
+  <properties/>
+  <testcase name="COSMETIC ticksSince is the exact nanosecond difference divided by 5e7 with one rounding below 2^53 ns (section 3)" classname="workshop.vfx.math.time.TimePointTest" time="0.047"/>
+  <testcase name="Mixing domains or passing null is an IllegalArgumentException; an unrepresentable difference is an ArithmeticException (sections 3, 7)" classname="workshop.vfx.math.time.TimePointTest" time="0.002"/>
+  <testcase name="GAME ticksSince is the exact tick difference converted once to double (section 3)" classname="workshop.vfx.math.time.TimePointTest" time="0.022"/>
+  <testcase name="Factories set the domain and the raw value; a null domain is rejected (section 3)" classname="workshop.vfx.math.time.TimePointTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

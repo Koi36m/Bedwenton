@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.sample.M4ReferenceVectorTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-19T09:12:14.830Z" hostname="runnervm8k3b6" time="5.11">
+  <properties/>
+  <testcase name="counts.csv: 202 normative spacing counts (round half up of fl(L / d), saturation at Long.MAX_VALUE)" classname="workshop.vfx.math.sample.M4ReferenceVectorTest" time="0.0"/>
+  <testcase name="Reference files are intact: MANIFEST.sha256 matches every file" classname="workshop.vfx.math.sample.M4ReferenceVectorTest" time="0.001"/>
+  <testcase name="arclength.csv: 336 lengths (lines, circles, helices, spirals, quadratic and cubic Beziers, cusps, stationary and collapsed curves, extrapolated ranges): converged, |L - L*| &lt;= tau + rounding allowance" classname="workshop.vfx.math.sample.M4ReferenceVectorTest" time="0.008"/>
+  <testcase name="inverse.csv: 216 inversions (quadratic and cubic Beziers, spirals; distances 1/4, 1/2, 3/4 of L): |t - t*| &lt;= (3 tau + allowance) / minimum speed" classname="workshop.vfx.math.sample.M4ReferenceVectorTest" time="0.005"/>
+  <testcase name="uniform.csv: 2,310 normative uniform parameters, compared bit for bit (counts up to 2^20, ranges from subnormal to 1e100, -0.0)" classname="workshop.vfx.math.sample.M4ReferenceVectorTest" time="5.095"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

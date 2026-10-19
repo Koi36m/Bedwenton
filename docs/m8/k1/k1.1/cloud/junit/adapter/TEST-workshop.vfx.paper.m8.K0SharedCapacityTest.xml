@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.paper.m8.K0SharedCapacityTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-19T09:12:45.658Z" hostname="runnervm8k3b6" time="0.016">
+  <properties/>
+  <testcase name="M7-only compatibility: without a contributor the hooked driver admits exactly as M7 (cap counts rings only)" classname="workshop.vfx.paper.m8.K0SharedCapacityTest" time="0.0"/>
+  <testcase name="Per-player M8 cap: a third M8 kind is refused at 2 even below the global cap; replacement still allowed" classname="workshop.vfx.paper.m8.K0SharedCapacityTest" time="0.0"/>
+  <testcase name="Rings first, then M8: at cap 2, two rings refuse a new aura; a ring replacement still succeeds" classname="workshop.vfx.paper.m8.K0SharedCapacityTest" time="0.001"/>
+  <testcase name="Every activation order of a mixed set reaches exactly the cap and refuses the next start, whatever its kind" classname="workshop.vfx.paper.m8.K0SharedCapacityTest" time="0.011"/>
+  <testcase name="M8 first, then rings: M8 effects count toward the ring path's cap; replacement of an M8 effect at cap succeeds" classname="workshop.vfx.paper.m8.K0SharedCapacityTest" time="0.001"/>
+  <testcase name="Freed capacity is reusable by either path: stopping an aura admits a ring, stopping a ring admits an aura" classname="workshop.vfx.paper.m8.K0SharedCapacityTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

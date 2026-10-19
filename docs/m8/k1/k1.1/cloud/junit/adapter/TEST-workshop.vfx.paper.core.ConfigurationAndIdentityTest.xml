@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.paper.core.ConfigurationAndIdentityTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-19T09:12:44.620Z" hostname="runnervm8k3b6" time="0.02">
+  <properties/>
+  <testcase name="viewerInputMustBeUniqueSortedAndNonnegative()" classname="workshop.vfx.paper.core.ConfigurationAndIdentityTest" time="0.003"/>
+  <testcase name="threadOwnershipRefusesCrossThreadAndFalsePrimary()" classname="workshop.vfx.paper.core.ConfigurationAndIdentityTest" time="0.003"/>
+  <testcase name="budgetsAlignWithoutRaisingRequestedBudgets()" classname="workshop.vfx.paper.core.ConfigurationAndIdentityTest" time="0.001"/>
+  <testcase name="whitelistAndDustValidationAreClosedAndImmutable()" classname="workshop.vfx.paper.core.ConfigurationAndIdentityTest" time="0.003"/>
+  <testcase name="allIntegerBoundariesAndHardCeilings()" classname="workshop.vfx.paper.core.ConfigurationAndIdentityTest" time="0.004"/>
+  <testcase name="emissionReportsAreDefensiveSnapshots()" classname="workshop.vfx.paper.core.ConfigurationAndIdentityTest" time="0.0"/>
+  <testcase name="radiusIsFiniteAndBoundedBeforeRules()" classname="workshop.vfx.paper.core.ConfigurationAndIdentityTest" time="0.001"/>
+  <testcase name="invalidTypesAndCapsRefuseInsteadOfDefaulting()" classname="workshop.vfx.paper.core.ConfigurationAndIdentityTest" time="0.002"/>
+  <testcase name="idsUseBothUuidHalvesAndNeverReuseReleasedNumbers()" classname="workshop.vfx.paper.core.ConfigurationAndIdentityTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

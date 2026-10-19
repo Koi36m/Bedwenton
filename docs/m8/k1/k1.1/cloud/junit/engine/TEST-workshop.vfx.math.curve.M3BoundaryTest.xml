@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.curve.M3BoundaryTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-19T09:11:57.941Z" hostname="runnervm8k3b6" time="0.006">
+  <properties/>
+  <testcase name="Purity: no clocks, randomness, threads, platform types or dependency on the M2 time package; no mutable statics (sections 1, 9)" classname="workshop.vfx.math.curve.M3BoundaryTest" time="0.001"/>
+  <testcase name="Portability: no java.lang.Math transcendental, pow, hypot or fma calls; trigonometry goes through StrictMath (section 7, DM3-7)" classname="workshop.vfx.math.curve.M3BoundaryTest" time="0.003"/>
+  <testcase name="Public API: the seven specified types are public; curves are records implementing Curve; every other source type is not public (section 2)" classname="workshop.vfx.math.curve.M3BoundaryTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.time.M2BoundaryTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-19T09:12:20.569Z" hostname="runnervm8k3b6" time="0.005">
+  <properties/>
+  <testcase name="No mutable static state: every static field is final and primitive, String or an enum constant (section 6.1)" classname="workshop.vfx.math.time.M2BoundaryTest" time="0.002"/>
+  <testcase name="The public API is exactly the eight specified types; none exposes platform, java.time, concurrency or random types (section 1)" classname="workshop.vfx.math.time.M2BoundaryTest" time="0.002"/>
+  <testcase name="No hidden clock reads, randomness, threads or platform imports in the time package sources (sections 1, 6.1)" classname="workshop.vfx.math.time.M2BoundaryTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

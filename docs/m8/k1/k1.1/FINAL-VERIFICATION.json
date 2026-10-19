@@ -1,0 +1,54 @@
+{
+  "status": "READY FOR INDEPENDENT K1.1 IMPLEMENTATION REVIEW",
+  "native_implementation": "e07afc8f17139a96a8d6da366e7a4fcacf98e24e",
+  "native_parent": "738dbd3d449d2f15c2a524793d447b11e3184211",
+  "github_snapshot": "555b20871f3dfbed93192e565019afdf6643b3cb",
+  "tested_tree": "7987d9f21aacb25f8b0705cfbe87fe0d13f728ab",
+  "counts": {
+    "tests": 589,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "groups": {
+    "M1-M6": 415,
+    "M7": 61,
+    "K0": 50,
+    "K1": 57,
+    "K1.1": 6
+  },
+  "xml": {
+    "engine": {
+      "tests": 415,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_files": 59
+    },
+    "adapter": {
+      "tests": 174,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_files": 23
+    }
+  },
+  "jar_name": "bedwenton-vfx-paper-0.8.0-k1.1.jar",
+  "jar_sha256": "2d4b6c58363edc8759e3a5ca6bb36b423a1154b377a927264657f4f9e7327925",
+  "jar_size": 196137,
+  "production_changed_java": [
+    "AuraRecipe.java",
+    "M8StyleCatalog.java"
+  ],
+  "prior_tests_preserved": 526,
+  "k1_tests_updated_for_authorized_visuals": 57,
+  "new_polish_tests": 6,
+  "unchanged_baseline_files": 1686,
+  "reference_datasets": "7/7 byte-identical, M6 regenerated twice",
+  "production_warnings": 0,
+  "engine_runtime_dependencies": "empty",
+  "adapter_runtime": "only accepted engine; Paper compileOnly",
+  "real_k1_1_smoke": "NOT RUN",
+  "k1_historical_smoke": "Owner reports original K1 tested in Minecraft; not K1.1 evidence",
+  "acceptance": "PENDING OWNER AND INDEPENDENT REVIEW"
+}

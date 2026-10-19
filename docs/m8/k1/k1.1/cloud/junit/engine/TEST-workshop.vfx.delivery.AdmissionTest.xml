@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.delivery.AdmissionTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-19T09:11:43.115Z" hostname="runnervm8k3b6" time="0.045">
+  <properties/>
+  <testcase name="Generation reserve: non-ambient requests can never use it; ambient requests can use the whole budget" classname="workshop.vfx.delivery.AdmissionTest" time="0.031"/>
+  <testcase name="Deliverability: a variant without a supported, non-empty layer is passed over; none deliverable is SKIPPED_UNSUPPORTED" classname="workshop.vfx.delivery.AdmissionTest" time="0.002"/>
+  <testcase name="G11 strict ceiling: the next lower tier when one is missing; never a higher tier; none at or below is SKIPPED_NO_ELIGIBLE_TIER" classname="workshop.vfx.delivery.AdmissionTest" time="0.002"/>
+  <testcase name="FAILED_EVALUATION is isolated: its reservation stays counted, and later requests are planned normally" classname="workshop.vfx.delivery.AdmissionTest" time="0.001"/>
+  <testcase name="SKIPPED_INACTIVE: before the start, at or after the lifetime, every layer ended, and an empty prefix; the frame is kept" classname="workshop.vfx.delivery.AdmissionTest" time="0.002"/>
+  <testcase name="SKIPPED_NO_ELIGIBLE_TIER: decided after the viewer check and before styles and budget; never evaluated; reserves nothing" classname="workshop.vfx.delivery.AdmissionTest" time="0.001"/>
+  <testcase name="Skipped requests are never evaluated: a failing anchor with no viewers, unsupported styles or no budget is not FAILED_EVALUATION" classname="workshop.vfx.delivery.AdmissionTest" time="0.001"/>
+  <testcase name="Downgrade only: the highest tier at most the requested one that fits the generation budget" classname="workshop.vfx.delivery.AdmissionTest" time="0.003"/>
+  <testcase name="Phase 2 SKIPPED_UNSUPPORTED: admitted (a supported layer exists) but only unsupported layers are visible now" classname="workshop.vfx.delivery.AdmissionTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

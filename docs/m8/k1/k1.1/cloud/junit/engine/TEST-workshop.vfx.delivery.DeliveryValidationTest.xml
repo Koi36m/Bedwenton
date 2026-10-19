@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.delivery.DeliveryValidationTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-19T09:11:44.398Z" hostname="runnervm8k3b6" time="0.033">
+  <properties/>
+  <testcase name="EffectRecipe.of: name pattern, nonnull priority and maps, 1 to 3 variants, one time domain, roles naming existing layers" classname="workshop.vfx.delivery.DeliveryValidationTest" time="0.008"/>
+  <testcase name="plan: the request list and style set are copied; mutating them afterwards does not change the plan" classname="workshop.vfx.delivery.DeliveryValidationTest" time="0.003"/>
+  <testcase name="plan: an empty request list gives an empty plan with zero totals" classname="workshop.vfx.delivery.DeliveryValidationTest" time="0.0"/>
+  <testcase name="plan: null arguments and elements, size checked before copying, unique ids, viewers per request and total viewer entries" classname="workshop.vfx.delivery.DeliveryValidationTest" time="0.004"/>
+  <testcase name="EffectRecipe: maps are copied; tiers() is ascending and unmodifiable; variant() of a missing tier is IAE" classname="workshop.vfx.delivery.DeliveryValidationTest" time="0.001"/>
+  <testcase name="DeliveryRequest.of: nonnull arguments, recipe domain, world &gt;= 0, viewers bounded before copying, &gt;= 0 and strictly increasing, copied" classname="workshop.vfx.delivery.DeliveryValidationTest" time="0.012"/>
+  <testcase name="DeliveryPolicy: every field bound of section 4.3, inclusive at both ends, and keptCap per tier" classname="workshop.vfx.delivery.DeliveryValidationTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

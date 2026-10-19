@@ -1,0 +1,42 @@
+{
+  "artifacts": [
+    {
+      "id": 12176450590,
+      "name": "m8-k1-1-java25-verification-39228161331",
+      "size_in_bytes": 1880303,
+      "url": "https://api.github.com/repos/Koi36m/Bedwenton/actions/artifacts/12176450590",
+      "archive_download_url": "https://api.github.com/repos/Koi36m/Bedwenton/actions/artifacts/12176450590/zip",
+      "expired": false,
+      "created_at": "2026-10-19T09:13:38Z",
+      "expires_at": "2027-01-17T09:11:18Z",
+      "updated_at": "2026-10-19T09:13:38Z",
+      "digest": "sha256:81f91867790b3f4f4eb2da5dec7b65808e2e9c0b7766002fb43f8e1618917bf9",
+      "workflow_run": {
+        "id": 39228161331,
+        "repository_id": 1419934059,
+        "head_repository_id": 1419934059,
+        "head_branch": "m8-k1-1-actions-verification",
+        "head_sha": "555b20871f3dfbed93192e565019afdf6643b3cb"
+      }
+    },
+    {
+      "id": 12176285700,
+      "name": "bedwenton-vfx-paper-0.8.0-k1.1",
+      "size_in_bytes": 181431,
+      "url": "https://api.github.com/repos/Koi36m/Bedwenton/actions/artifacts/12176285700",
+      "archive_download_url": "https://api.github.com/repos/Koi36m/Bedwenton/actions/artifacts/12176285700/zip",
+      "expired": false,
+      "created_at": "2026-10-19T09:13:39Z",
+      "expires_at": "2027-01-17T09:11:18Z",
+      "updated_at": "2026-10-19T09:13:39Z",
+      "digest": "sha256:f0ac20af51ff288dc1898b48d782b028476369cafd602fe68403d2cdc8d76d6f",
+      "workflow_run": {
+        "id": 39228161331,
+        "repository_id": 1419934059,
+        "head_repository_id": 1419934059,
+        "head_branch": "m8-k1-1-actions-verification",
+        "head_sha": "555b20871f3dfbed93192e565019afdf6643b3cb"
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{"kind":"synthetic in-memory production pipeline; NOT Paper, TPS, MSPT or network latency","warmup_ticks":600,"measured_ticks":1200,"scenarios":[{"scenario":"SIMPLE","generated_per_frame":8,"generated_total":9600,"planned_placements":9600,"successful_calls":9600,"failed_calls":0,"planner_ns":{"p50":9347,"p95":19364,"max":22657124},"emitter_ns":{"p50":6042,"p95":11229,"max":711371},"snapshot_reads_ns":{"p50":72,"p95":154,"max":11689},"whole_fake_tick_ns":{"p50":20856,"p95":62179,"max":22702263}},{"scenario":"BALANCED","generated_per_frame":18,"generated_total":21600,"planned_placements":21600,"successful_calls":21600,"failed_calls":0,"planner_ns":{"p50":8267,"p95":16411,"max":3631415},"emitter_ns":{"p50":9055,"p95":14728,"max":1459535},"snapshot_reads_ns":{"p50":72,"p95":96,"max":548},"whole_fake_tick_ns":{"p50":21639,"p95":47507,"max":12183566}},{"scenario":"HEAVY","generated_per_frame":24,"generated_total":28800,"planned_placements":28800,"successful_calls":28800,"failed_calls":0,"planner_ns":{"p50":8234,"p95":12675,"max":118348},"emitter_ns":{"p50":11035,"p95":13182,"max":149308},"snapshot_reads_ns":{"p50":75,"p95":84,"max":227},"whole_fake_tick_ns":{"p50":23601,"p95":44646,"max":366769}},{"scenario":"two-heavy-auras-two-viewers","generated_per_frame":48,"generated_total":57600,"planned_placements":115200,"successful_calls":115200,"failed_calls":0,"planner_ns":{"p50":15961,"p95":28764,"max":299408},"emitter_ns":{"p50":38954,"p95":70187,"max":10627639},"snapshot_reads_ns":{"p50":126,"p95":173,"max":4722},"whole_fake_tick_ns":{"p50":62437,"p95":132544,"max":10656818}}]}
+
+
+Test run finished after 3612 ms
+[        24 containers found      ]
+[         0 containers skipped    ]
+[        24 containers started    ]
+[         0 containers aborted    ]
+[        24 containers successful ]
+[         0 containers failed     ]
+[       174 tests found           ]
+[         0 tests skipped         ]
+[       174 tests started         ]
+[         0 tests aborted         ]
+[       174 tests successful      ]
+[         0 tests failed          ]
+

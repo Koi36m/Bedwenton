@@ -1,0 +1,878 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.1.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :clean UP-TO-DATE
+> Task :compileJava
+> Task :processResources NO-SOURCE
+> Task :classes
+
+> Task :compileTestJava
+/home/runner/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.9/438e036486bad66b189bff385dd07dea4f74a146/joml-1.10.9.jar(/org/joml/Quaterniond.class): warning: [classfile] RuntimeVisibleTypeAnnotations attribute introduced in version 52.0 class files is ignored in version 46.0 class files
+/home/runner/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.9/438e036486bad66b189bff385dd07dea4f74a146/joml-1.10.9.jar(/org/joml/Vector3d.class): warning: [classfile] RuntimeVisibleTypeAnnotations attribute introduced in version 52.0 class files is ignored in version 46.0 class files
+/home/runner/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.9/438e036486bad66b189bff385dd07dea4f74a146/joml-1.10.9.jar(/org/joml/Vector4f.class): warning: [classfile] RuntimeVisibleTypeAnnotations attribute introduced in version 52.0 class files is ignored in version 46.0 class files
+/home/runner/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.9/438e036486bad66b189bff385dd07dea4f74a146/joml-1.10.9.jar(/org/joml/Vector3f.class): warning: [classfile] RuntimeVisibleTypeAnnotations attribute introduced in version 52.0 class files is ignored in version 46.0 class files
+/home/runner/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.9/438e036486bad66b189bff385dd07dea4f74a146/joml-1.10.9.jar(/org/joml/Vector4d.class): warning: [classfile] RuntimeVisibleTypeAnnotations attribute introduced in version 52.0 class files is ignored in version 46.0 class files
+5 warnings
+
+> Task :processTestResources
+> Task :testClasses
+
+> Task :test
+
+AdmissionTest > Generation reserve: non-ambient requests can never use it; ambient requests can use the whole budget PASSED
+
+AdmissionTest > Deliverability: a variant without a supported, non-empty layer is passed over; none deliverable is SKIPPED_UNSUPPORTED PASSED
+
+AdmissionTest > G11 strict ceiling: the next lower tier when one is missing; never a higher tier; none at or below is SKIPPED_NO_ELIGIBLE_TIER PASSED
+
+AdmissionTest > FAILED_EVALUATION is isolated: its reservation stays counted, and later requests are planned normally PASSED
+
+AdmissionTest > SKIPPED_INACTIVE: before the start, at or after the lifetime, every layer ended, and an empty prefix; the frame is kept PASSED
+
+AdmissionTest > SKIPPED_NO_ELIGIBLE_TIER: decided after the viewer check and before styles and budget; never evaluated; reserves nothing PASSED
+
+AdmissionTest > Skipped requests are never evaluated: a failing anchor with no viewers, unsupported styles or no budget is not FAILED_EVALUATION PASSED
+
+AdmissionTest > Downgrade only: the highest tier at most the requested one that fits the generation budget PASSED
+
+AdmissionTest > Phase 2 SKIPPED_UNSUPPORTED: admitted (a supported layer exists) but only unsupported layers are visible now PASSED
+
+BudgetPropertyTest > G1 to G5, G7, G9 and the phase-1 decisions hold for 3,000 random scenarios with binding budgets PASSED
+
+BudgetPropertyTest > G10: non-ambient effects never consume the placement reserve, however much they want PASSED
+
+BudgetPropertyTest > G9: a saturated viewer does not hold back the others; k grows until the next unit of cost exceeds the budget PASSED
+
+BudgetPropertyTest > G10 counterexample 2 (R2): placement cost is per viewer, so ambient may realize less than min(reserve, demand) PASSED
+
+BudgetPropertyTest > G10 counterexample 1 (R2): generation reservations are indivisible, so ambient may realize less than min(reserve, demand) PASSED
+
+BudgetPropertyTest > G3: the global, world and viewer budgets bind exactly; one viewer shared by three worlds is limited across worlds PASSED
+
+BudgetPropertyTest > Input order is irrelevant: shuffling the request list permutes the deliveries and changes nothing else PASSED
+
+DeliveryReferenceTest > Reference plans: every case of the family reproduces the independent plan field by field > bloom PASSED
+
+DeliveryReferenceTest > Reference plans: every case of the family reproduces the independent plan field by field > cloudstep PASSED
+
+DeliveryReferenceTest > Reference plans: every case of the family reproduces the independent plan field by field > healer PASSED
+
+DeliveryReferenceTest > Reference plans: every case of the family reproduces the independent plan field by field > trident PASSED
+
+DeliveryReferenceTest > Reference plans: every case of the family reproduces the independent plan field by field > astral PASSED
+
+DeliveryReferenceTest > Reference plans: every case of the family reproduces the independent plan field by field > stress PASSED
+
+DeliveryReferenceTest > Manifest: the six reference files match MANIFEST.sha256 PASSED
+
+DeliveryValidationTest > EffectRecipe.of: name pattern, nonnull priority and maps, 1 to 3 variants, one time domain, roles naming existing layers PASSED
+
+DeliveryValidationTest > plan: the request list and style set are copied; mutating them afterwards does not change the plan PASSED
+
+DeliveryValidationTest > plan: an empty request list gives an empty plan with zero totals PASSED
+
+DeliveryValidationTest > plan: null arguments and elements, size checked before copying, unique ids, viewers per request and total viewer entries PASSED
+
+DeliveryValidationTest > EffectRecipe: maps are copied; tiers() is ascending and unmodifiable; variant() of a missing tier is IAE PASSED
+
+DeliveryValidationTest > DeliveryRequest.of: nonnull arguments, recipe domain, world >= 0, viewers bounded before copying, >= 0 and strictly increasing, copied PASSED
+
+DeliveryValidationTest > DeliveryPolicy: every field bound of section 4.3, inclusive at both ends, and keptCap per tier PASSED
+
+FairnessTest > Generation and placement are both decided in allocation order: a lower group never displaces a higher one PASSED
+
+FairnessTest > Rotation: with the same m requests for m consecutive ticks, each is first in its group exactly once and served once PASSED
+
+FairnessTest > Allocation order: ACTION, NORMAL, AMBIENT; ids ascending, rotated by floorMod(tick, m) within each group PASSED
+
+FairnessTest > Strict priority: ACTION is served before NORMAL whatever the ids, input order or tick; NORMAL has no reserve PASSED
+
+M6BoundaryTest > No mutable static state: every static field is final, of a primitive, String, enum or empty-array constant PASSED
+
+M6BoundaryTest > API shape: exactly the ten public types of section 2, with exactly the listed public members PASSED
+
+M6BoundaryTest > Forbidden: clocks, randomness, threads, locks, logging, System and floating point in planning PASSED
+
+M6BoundaryTest > Imports: only workshop.vfx.scene, M1 core, M2 time and java.util; never Bukkit, Paper, Minecraft, I/O, concurrency or reflection PASSED
+
+M6DeterminismTest > G8: the same scenarios planned concurrently on 8 threads give the single-threaded plans PASSED
+
+M6DeterminismTest > G8: 200 random scenarios planned 10 times each give identical plans PASSED
+
+M6StressTest > Extremes: ids and ordinals at Long bounds, world Integer.MAX_VALUE, viewer Long.MAX_VALUE, zero budgets PASSED
+
+M6StressTest > The full M5 frame: 2^20 points, kept in full or thinned to one point, with exact counts and in-range selections PASSED
+
+M6StressTest > Ceilings: 2^16 requests in one call, maximal budgets, and 2^50 budgets without overflow PASSED
+
+M6StressTest > Denied preflight allocates nothing proportional to the frame: a 2^20-point scene over budget costs under 64 KiB per plan PASSED
+
+M6StressTest > Viewer entries: 2^20 entries over 256 requests of 4,096 viewers; per-viewer budgets bind across requests PASSED
+
+M6StressTest > Many layers: 4,096 one-point layers in three roles, thinned to 1, 100 and 4,095 points with exact role precedence PASSED
+
+ThinningSelectionTest > Recipients receive a prefix of the selection sequence: a saturated viewer gets the essential points first PASSED
+
+ThinningSelectionTest > Thinning does not read or copy coordinates: the frame of a delivery is the M5 frame, and selections index into it PASSED
+
+ThinningSelectionTest > Selection formula: floorMod(ordinal, g) + floor(j n / m) with g = ceil(n / m), strictly increasing, for extreme ordinals PASSED
+
+ThinningSelectionTest > G6 coverage: any g consecutive frame ordinals together select every point; selected points are spread with gaps <= g PASSED
+
+ThinningSelectionTest > Largest remainder: floor shares, then one point each to the largest (r n_b) mod T, ties to the earlier layer PASSED
+
+ThinningSelectionTest > G7: essential layers complete before standard, standard before decorative, whatever the layer order PASSED
+
+Amendment3AcceptanceTest > D1: Pose.then names the scale when the scale product is not representable, even if the translation also overflows PASSED
+
+Amendment3AcceptanceTest > A3: Tier 3 inputs reject null with IllegalArgumentException (axisAngle axis, Frame axes, Pose fields) PASSED
+
+Amendment3AcceptanceTest > A1: transportY's y is normalize(newY) to 1e-15 per component (not bitwise), including after antiparallel flips PASSED
+
+Amendment3AcceptanceTest > A4: a hint that is null, non-finite or below LENGTH_EPS is absent; exactly LENGTH_EPS is present PASSED
+
+Amendment3AcceptanceTest > D1: Pose.inverse names the scale when 1/s is not representable, whatever the translation PASSED
+
+Amendment3AcceptanceTest > D1: a translation-only failure names the translation, not the scale; the set of throwing inputs is unchanged PASSED
+
+Amendment3AcceptanceTest > A2: the inverse of a degenerate quaternion is the identity rotation numerically; signed zeros are equivalent PASSED
+
+Amendment3AcceptanceTest > A5: fromHeading(f, u) depends only on the directions of f and u, and equals alignZ(-f, u) with an absent u read as +Y PASSED
+
+Amendment3AcceptanceTest > A6: rotate(v) is within (2|k^2 - 1| + 1e-13)|v| of the rotation by q/|q|, k = |q| within 1e-12 of 1, and finite for |v| <= 1e100 PASSED
+
+Amendment3AcceptanceTest > A5: fromHeading's parallel test uses the sine of the angle between the normalized vectors; worked examples PASSED
+
+BoundaryTest > Core classes never expose Paper, Bukkit, Minecraft or JOML types PASSED
+
+BoundaryTest > Paper and Bukkit are not on the test classpath either PASSED
+
+ConventionsTest > Frame reference examples from docs/REFERENCE-VECTORS.md PASSED
+
+ConventionsTest > +90 degrees about +Y sends +X to -Z (east to north) PASSED
+
+ConventionsTest > +90 degrees about +Y is counter-clockwise when viewed from above PASSED
+
+ConventionsTest > Axis rotations by +90 degrees, both directions PASSED
+
+ConventionsTest > Pose reference example: t=(10,0,0), +90 about +Y, scale 2 maps local (1,0,0) to (10,0,-2) PASSED
+
+ConventionsTest > Clockwise 90 degrees viewed from above sends +X to +Z (east to south) PASSED
+
+ConventionsTest > Minecraft world axes are a right-handed basis: east x up = south PASSED
+
+ConventionsTest > Positive rotation about +Y and clockwise-from-above are opposite senses PASSED
+
+ConventionsTest > Full Heal 0.2.0 ring formula (cos t, 0, sin t) is clockwise from above (audit item 1) PASSED
+
+ConventionsTest > a.mul(b) applies b first, then a PASSED
+
+FrameTest > Constructor accepts right-handed orthonormal triples and rejects everything else PASSED
+
+FrameTest > transportY follows a direction sweep without twist; naive alignY flips by about pi through the hint (negative control) STANDARD_OUT
+    [M1 transport report] worst per-step twist: transport = 1.1102230246251568E-16 rad, naive alignY = 3.141592653589793 rad
+
+FrameTest > transportY follows a direction sweep without twist; naive alignY flips by about pi through the hint (negative control) PASSED
+
+FrameTest > fromHeading degeneracy: vertical heading, zero heading, zero or parallel up hint PASSED
+
+FrameTest > toWorld / toLocal are inverse and use the frame axes as columns PASSED
+
+FrameTest > transportY: random walks stay valid; zero axis keeps the previous frame; antiparallel stays finite PASSED
+
+FrameTest > alignY/alignZ degeneracy: parallel, antiparallel, zero and non-finite hints or axes (M0: robustness) PASSED
+
+FrameTest > M0 audit item 2: Astral's (right, up, forward) basis is left-handed; fromHeading's (right, up, back) is right-handed PASSED
+
+FrameTest > fromHeading: facing each compass direction gives the correct right, up and back axes PASSED
+
+FrameTest > alignZ hand-derived reference frames PASSED
+
+FrameTest > alignY hand-derived reference frames PASSED
+
+FrameTest > alignY/alignZ: right-handed orthonormal, axis honoured, hint lies in the x-y plane (10,000 random) PASSED
+
+JomlOracleTest > Records which application order JOML's rotationXYZ uses; it must match one of the two candidates STANDARD_OUT
+    [M1 JOML report] rotationXYZ applies X first = false, applies Z first = true
+
+JomlOracleTest > Records which application order JOML's rotationXYZ uses; it must match one of the two candidates PASSED
+
+JomlOracleTest > Quat.rotate agrees with JOML Quaterniond on 10,000 seeded rotations PASSED
+
+JomlOracleTest > Quat.slerp agrees with JOML slerp (as rotations) away from the near-parallel regime PASSED
+
+JomlOracleTest > Quat.mul agrees with JOML's Hamilton product (same operand order) PASSED
+
+M0RegressionTest > Audit item 1: +90 about +Y reaches -Z, but Full Heal's ring parameterization reaches +Z (opposite senses) PASSED
+
+M0RegressionTest > Audit item 2: the (right, up, forward) mapping is a reflection; the engine frame is a proper rotation PASSED
+
+M0RegressionTest > Astral Spec pattern: non-finite or out-of-range configuration is rejected at construction PASSED
+
+M0RegressionTest > Audit (Euler order): Astral-style X-then-Y-then-Z rotation equals the engine's named Euler helper PASSED
+
+M0RegressionTest > Full Heal outward(): a zero offset must give a finite unit fallback, never NaN PASSED
+
+M0RegressionTest > Large-coordinate regression: a 0.3-block offset survives at the world edge in double, not in float PASSED
+
+MathUtilTest > LENGTH_EPS is the documented 1e-12 PASSED
+
+MathUtilTest > clamp: inside, outside, boundaries, infinities, NaN maps to the lower bound PASSED
+
+MathUtilTest > clamp rejects an inverted or NaN range PASSED
+
+MathUtilTest > approxEquals is inclusive at the tolerance and false for NaN PASSED
+
+NumericPolicyTest > Supported magnitude: Vec3, Quat.rotate and Frame stay finite and homogeneous up to 1e100 PASSED
+
+NumericPolicyTest > Tier 1: Pose.toWorld overflows to infinity (no exception, no clamping); Frame.toWorld likewise PASSED
+
+NumericPolicyTest > Tier 1: Vec3 and Quat overflow to infinity with no exception and no saturation PASSED
+
+NumericPolicyTest > Supported magnitude: Pose with scale and translation up to 1e100 is finite and accurate; compositions of two stay finite PASSED
+
+NumericPolicyTest > Tier 3: Pose.then throws ArithmeticException when scale overflows or underflows to zero; two valid poses never give an invalid one PASSED
+
+NumericPolicyTest > Tier 1: NaN and infinity propagate by IEEE rules (no sanitizing, no exceptions) PASSED
+
+NumericPolicyTest > Tier 3: Pose.inverse throws ArithmeticException when the reciprocal scale or inverse translation is not representable PASSED
+
+NumericPolicyTest > Tier 2: Quat.normalized and inverse are total: finite unit result for every double input, IDENTITY for zero or non-finite PASSED
+
+NumericPolicyTest > Tier 2: Frame factories always return a valid right-handed frame, WORLD for a degenerate axis, for every double input PASSED
+
+NumericPolicyTest > Tier 3: constructors keep throwing IllegalArgumentException for invalid inputs PASSED
+
+NumericPolicyTest > Tier 2: shortestArc is total: unit result for every pair; IDENTITY for degenerate input; correct mapping otherwise PASSED
+
+NumericPolicyTest > Tier 2: normalizedOr is total: fallback exactly for degenerate input, otherwise a finite unit vector PASSED
+
+NumericPolicyTest > Tier 3: Pose.then throws ArithmeticException when the composed translation overflows PASSED
+
+PolicyClarificationTest > A: clamp always returns a value inside its bounds (or the lower bound for NaN); infinite bounds are allowed PASSED
+
+PolicyClarificationTest > B: axisAngle accepts any finite angle and any finite axis whose largest component is at least 1e-12 (Tier 3 validation only) PASSED
+
+PolicyClarificationTest > B: Pose.toLocal with scale 1e-100 and world components at 1e100 is finite (domain edge) PASSED
+
+PolicyClarificationTest > B: slerp and nlerp are accurate for finite unit quaternions and |t| up to 1e3 (extrapolation included) PASSED
+
+PolicyClarificationTest > A: approxEquals is false when the difference is NaN (equal infinities) and never throws PASSED
+
+PolicyClarificationTest > B: Quat.mul and Quat.dot are finite for components up to 1e100 (not only unit quaternions) PASSED
+
+PolicyClarificationTest > B: Vec3.mul(s) and Vec3.lerp(to, t) are finite for components and scalars up to 1e100; outside that, IEEE PASSED
+
+PolicyClarificationTest > A: finiteness and unit length of the fallback path belong to the caller PASSED
+
+PolicyClarificationTest > A: normalizedOr returns the caller's fallback object unchanged, even when it is NaN, infinite, zero or not unit PASSED
+
+PoseTest > Five-deep chain equals nested sequential application; scale and rotation compose PASSED
+
+PoseTest > Constructor normalizes the rotation PASSED
+
+PoseTest > a.then(b) applied equals b first then a; associativity PASSED
+
+PoseTest > Round trip at the Minecraft world edge (29,999,984) stays within 1e-6 blocks PASSED
+
+PoseTest > Constructor validation: non-finite translation, bad scale, bad rotation PASSED
+
+PoseTest > Golden: parent.then(child).toWorld(p) equals the Python oracle (1,500 rows) PASSED
+
+PoseTest > toLocal(toWorld(p)) = p on 10,000 random poses PASSED
+
+PoseTest > Why local-space doubles matter: float spacing is 2 blocks near the world edge and 0.0625 blocks at 1e6 PASSED
+
+PoseTest > Golden: large coordinates near +/-3e7 blocks stay accurate to 1e-7 blocks PASSED
+
+PoseTest > directionToWorld rotates only: ignores translation and scale PASSED
+
+PoseTest > inverse: round trip, composition with the original is the identity PASSED
+
+PoseTest > Identity pose and pure translation PASSED
+
+QuatTest > Quaternion multiplication is associative (as rotations) and composes rotations PASSED
+
+QuatTest > Golden: slerp action matches the oracle, also with q1 negated (shortest path) PASSED
+
+QuatTest > slerp: endpoints and constant angular speed, with extrapolation PASSED
+
+QuatTest > slerp is continuous across the near-parallel (nlerp) threshold and never NaN PASSED
+
+QuatTest > axisAngle normalizes non-unit axes and rejects zero or non-finite input PASSED
+
+QuatTest > Golden: axisAngle(axis, angle).rotate(v) equals Rodrigues from the Python oracle (2,042 rows) PASSED
+
+QuatTest > angleTo recovers the rotation angle, including tiny angles and near pi PASSED
+
+QuatTest > Identity, conjugate, inverse and normalization PASSED
+
+QuatTest > Degenerate quaternions: zero and non-finite normalize to identity (M0: no NaN propagation) PASSED
+
+QuatTest > Golden: qa.mul(qb).rotate(v) equals Rodrigues(a, Rodrigues(b, v)) (1,500 rows) PASSED
+
+QuatTest > nlerp: unit norm, endpoints, shortest sign PASSED
+
+QuatTest > shortestArc maps from-direction onto to-direction for random pairs PASSED
+
+QuatTest > shortestArc: identical, antiparallel, near-antiparallel and zero inputs (M0: robustness) PASSED
+
+QuatTest > fromEulerApplyXThenYThenZ equals the explicit rotation sequence X, then Y, then Z about fixed axes PASSED
+
+QuatTest > 1,000,000 compositions: periodic renormalization keeps the norm within 1e-12; raw drift is reported STANDARD_OUT
+    [M1 drift report] raw |norm-1| after 1,000,000 compositions = 1.6544543512964083E-12
+    [M1 drift report] worst |norm-1| between renormalizations (every 1000) = 6.8833827526759706E-15
+
+QuatTest > 1,000,000 compositions: periodic renormalization keeps the norm within 1e-12; raw drift is reported PASSED
+
+QuatTest > toFrame / fromFrame round trip, including 180-degree rotations (all matrix-to-quaternion branches) PASSED
+
+QuatTest > slerp takes the shortest path: q1 and -q1 give the same result PASSED
+
+ReviewAdversarialTest > normalizedOr: 1e-12 of the exact unit vector for 200,000 extreme finite inputs; same fallback reference below LENGTH_EPS (section 2) STANDARD_OUT
+    [M1 review] normalizedOr worst component error vs exact: 2.220446049250313E-16
+
+ReviewAdversarialTest > normalizedOr: 1e-12 of the exact unit vector for 200,000 extreme finite inputs; same fallback reference below LENGTH_EPS (section 2) PASSED
+
+ReviewAdversarialTest > Tier 1 never throws and Tier 2 is total: NaN, infinities, -0.0, subnormals and MAX_VALUE in every operand (section 0A) PASSED
+
+ReviewAdversarialTest > Pose.then/inverse: inside the domain never throw; outside, only ArithmeticException, never IllegalArgumentException (section 5) PASSED
+
+ReviewAdversarialTest > slerp: constant angular speed; slerp(a, b, t) and slerp(a, -b, t) are the same rotation (section 3) PASSED
+
+ReviewAdversarialTest > Quat.normalized: 1e-12 of the exact unit quaternion for 100,000 extreme inputs; exact IDENTITY for zero (section 3) PASSED
+
+ReviewAdversarialTest > slerp: action equals the analytic great-circle position for |t| <= 1e3 to 1e-9, incl. phi near 1e-8 and near pi (section 3, R3 domain) STANDARD_OUT
+    [M1 review] slerp |t|<=1e3 worst action error vs analytic: 9.056739506726039E-13
+
+ReviewAdversarialTest > slerp: action equals the analytic great-circle position for |t| <= 1e3 to 1e-9, incl. phi near 1e-8 and near pi (section 3, R3 domain) PASSED
+
+ReviewAdversarialTest > Conventions: Euler helper equals Rodrigues X then Y then Z about fixed world axes for random angles (CONVENTIONS 3) PASSED
+
+ReviewAdversarialTest > Quat.rotate of exactly-normalized quaternions matches Rodrigues to 1e-13 * |v| for |v| up to 1e100 (sections 0A, 6) PASSED
+
+ReviewAdversarialTest > nlerp: shortest-sign (1-t)a + tb normalized, including extrapolation to |t| = 1e3 (section 3) PASSED
+
+ReviewAdversarialTest > shortestArc near antiparallel: contract accuracy table, minimal angle, unit norm, half-turn axis rule (section 3) STANDARD_OUT
+    [M1 review] shortestArc offset 0.1 worst error 8.065179992641965E-15 (allowed 1.0E-9)
+    [M1 review] shortestArc offset 0.001 worst error 7.980693752677138E-13 (allowed 1.0E-9)
+    [M1 review] shortestArc offset 1.0E-6 worst error 7.624904121111344E-10 (allowed 1.0E-9)
+    [M1 review] shortestArc offset 1.0E-7 worst error 7.937575590433542E-9 (allowed 1.0E-8)
+    [M1 review] shortestArc offset 1.0E-9 worst error 7.908609860608958E-7 (allowed 1.0E-6)
+
+ReviewAdversarialTest > shortestArc near antiparallel: contract accuracy table, minimal angle, unit norm, half-turn axis rule (section 3) PASSED
+
+ReviewAdversarialTest > Frame factories: valid at 1e-12 for extreme magnitudes and hints within a factor 2 of the 1e-8 threshold (section 4) PASSED
+
+ReviewAdversarialTest > angleTo: 1e-12 absolute from 1e-9 to pi - 1e-6, sign-insensitive, both argument orders (section 3) PASSED
+
+ReviewAdversarialTest > fromHeading equals the contract formula right = n(f x u), up = right x f, back = -f for well-conditioned input (section 4) PASSED
+
+ReviewAdversarialTest > Pose near Minecraft's world border (|x|,|z| <= 3e7): composition 1e-7, inverse and toLocal round trips 1e-6 (section 6) PASSED
+
+ReviewAdversarialTest > fromFrame(q.toFrame()) is q (as a rotation) for half turns about arbitrary and diagonal axes and near-half turns (section 3) PASSED
+
+ReviewAdversarialTest > alignY: x is the normalized perpendicular component of the hint, to within its conditioning (section 4) PASSED
+
+ReviewAdversarialTest > transportY: 200,000-step walk with an antiparallel flip every 1,000 steps stays valid; y within 1e-12 of normalize(newY) (section 4) PASSED
+
+ReviewAdversarialTest > Environment: the test JVM is Java 25 (contract header: Java 25) PASSED
+
+Vec3Test > normalizedOr returns unit vectors for ordinary input PASSED
+
+Vec3Test > normalizedOr is accurate at both ends of the finite range PASSED
+
+Vec3Test > Algebraic identities on 10,000 seeded random vectors PASSED
+
+Vec3Test > Constants and basic arithmetic PASSED
+
+Vec3Test > Full Heal outward-direction pattern: zero offset yields a finite unit fallback for any yaw PASSED
+
+Vec3Test > Cross product: hand-derived values and right-hand rule PASSED
+
+Vec3Test > normalizedOr returns the fallback for zero, tiny, NaN and infinite input (M0: Full Heal outward fallback) PASSED
+
+Vec3Test > lerp: endpoints, midpoint, extrapolation (no clamping) PASSED
+
+Vec3Test > isFinite detects NaN and infinities; Vec3 itself never validates PASSED
+
+BezierTest > Derivatives agree with central finite differences of the points (independent of the derivative formulas) (section 4) PASSED
+
+BezierTest > End derivatives: B'(0) = n (P1 - P0), B'(1) = n (Pn - Pn-1); joining with mirrored handles is C1 (section 4) PASSED
+
+BezierTest > Validation: null or non-finite control points and non-finite parameters are IllegalArgumentExceptions (sections 4, 8) PASSED
+
+BezierTest > Endpoints are exact for arbitrary control points: point(0) = first, point(1) = last (section 4) PASSED
+
+BezierTest > Degree elevation: a line and a quadratic written as higher-degree Beziers give the same points (section 4, metamorphic) PASSED
+
+BezierTest > Affine invariance and reversal: Bezier of posed control points = posed Bezier; reversed control points at 1 - t give the same point (section 4) PASSED
+
+BezierTest > Degenerate geometry: coincident control points give a constant point and a zero derivative, without exceptions (sections 4, 8) PASSED
+
+EasingTest > Composition with M2: easing a TimingSample progress keeps [0, 1] and the ends (section 6, DM3-13) PASSED
+
+EasingTest > Continuity: IN_OUT easings join at 1/2; smoothstep/smootherstep have zero slope at both ends (C1/C2 ends) (section 6) PASSED
+
+EasingTest > Range and accuracy fuzz: 0 <= f <= 1 and |f - exact| <= 2^-50 against an exact rational evaluation (section 6) PASSED
+
+EasingTest > Power easings are exactly monotone on doubles; smoothstep and smootherstep are monotone up to 2^-49 (section 6, DM3-11) PASSED
+
+EasingTest > Symmetry f(1 - t) = 1 - f(t) for symmetric easings and duality OUT(t) = 1 - IN(1 - t), to 2^-49 (section 6) PASSED
+
+EasingTest > Endpoints and clamping: f(t) = 0 for t <= 0 (including -0.0 and -infinity), 1 for t >= 1 (including +infinity); NaN is rejected (section 6) PASSED
+
+EasingTest > Closed-form values at hand-checked points (section 6) PASSED
+
+EasingTest > Exactly the 15 specified easings exist, in the specified order (section 6) PASSED
+
+M3BoundaryTest > Purity: no clocks, randomness, threads, platform types or dependency on the M2 time package; no mutable statics (sections 1, 9) PASSED
+
+M3BoundaryTest > Portability: no java.lang.Math transcendental, pow, hypot or fma calls; trigonometry goes through StrictMath (section 7, DM3-7) PASSED
+
+M3BoundaryTest > Public API: the seven specified types are public; curves are records implementing Curve; every other source type is not public (section 2) PASSED
+
+M3DeterminismTest > Evaluation is path independent: the value at t does not depend on which parameters were evaluated before (section 7.1) PASSED
+
+M3DeterminismTest > Determinism: curves are values; equal curves give bit-identical results, before and after JIT compilation (section 7.1) PASSED
+
+M3ReferenceVectorTest > bezier.csv: 645 line, quadratic and cubic cases (point, derivative, second derivative), 189 exact, extrapolated t included (section 4) PASSED
+
+M3ReferenceVectorTest > easing.csv: 1,155 cases, 450 exact, the rest within 2^-50 of the exact rational value (section 6) PASSED
+
+M3ReferenceVectorTest > spiral.csv: 959 spiral cases against 60-digit Taylor references (549 revision 1 rows, 410 revision 2 adversarial rows: large startTurn, near seams, radius cancellation); exact quarter-turn points; bounds relative to S (sections 5, 7.2) PASSED
+
+M3ReferenceVectorTest > Reference files are intact: MANIFEST.sha256 matches every file PASSED
+
+M3ReviewAdversarialTest > R05: spirals against an exact-phase 90-digit Taylor oracle: 30,000 cases with subnormal to 1e100 radii, subnormal to 2^20 turns, startTurn up to +-MAX_VALUE and -0.0, t extrapolated to +-1e3, within the R2+A3 bounds PASSED
+
+M3ReviewAdversarialTest > R11: determinism: bitwise identical results from 8 concurrent threads and from repeated sequential evaluation (no shared mutable state) PASSED
+
+M3ReviewAdversarialTest > R04: Bezier metamorphic relations: reversal B(P)(t) = B(reversed P)(1 - t), translation equivariance, degree elevation and C1 continuity near the ends PASSED
+
+M3ReviewAdversarialTest > R03: exact endpoints for every input (E1), including t = -0.0, signed-zero and subnormal control points; end derivatives n (P1 - P0) and n (Pn - Pn-1) within bounds PASSED
+
+M3ReviewAdversarialTest > R08: constant radius exact under extrapolation; degenerate zero-radius and zero-turn spirals exact; t = -0.0 equals t = 0; startTurn -0.0 equals 0 PASSED
+
+M3ReviewAdversarialTest > R07: exactness: T3 quarter turns (any startTurn magnitude, products just below 2^51), T4 seams up to the overflow of turns * k, T5 period invariance with subnormal and large fractions PASSED
+
+M3ReviewAdversarialTest > R09: all 15 easings against exact polynomials (G1: 2^-50), dense adjacent-double windows at 0, 0.5 and 1, exact monotonicity of power easings (G4), 2^-49 near-monotonicity of the smooth ones (G5), symmetry and duality (G3, G6), +0.0 for non-positive input PASSED
+
+M3ReviewAdversarialTest > R12: T2 bitwise: a product turns * t whose fraction rounds up to 1.0 (tiny negative) contributes exactly 0, so the phase equals the startTurn fraction bit for bit PASSED
+
+M3ReviewAdversarialTest > R01: every method of every curve, posed or not, rejects NaN and infinite t; extreme finite inputs never throw PASSED
+
+M3ReviewAdversarialTest > R10: PosedCurve against an exact BigDecimal rotation (points translated, derivatives scaled directions never translated), bitwise translation invariance of derivatives, exact power-of-two scale linearity, composition with Pose.then PASSED
+
+M3ReviewAdversarialTest > R02: lines and Beziers against the exact Bernstein form: 30,000 curves, magnitudes from subnormal to 1e100, t near 0 and 1 and extrapolated to +-1e3, within the R2+A3 bounds PASSED
+
+M3ReviewAdversarialTest > R06: handedness and +Y axis: positive turns rotate like M1 Quat.axisAngle(+Y, angle) (counter-clockwise from above, +X towards -Z); the normal p x p' is +Y for positive turns and -Y for negative PASSED
+
+M3UnderflowTest > A3: r0 = q, r1 = 2q, t = 1/2 (q = MIN_VALUE): no double is within the revision 2 bounds of the exact 1.5 q; the amended bounds hold (radius, spiral point, line) PASSED
+
+M3UnderflowTest > A3: lines and Beziers with subnormal control points, against the exact Bernstein form, within the amended bounds (absolute term 2 n^k G^n MIN_VALUE) PASSED
+
+M3UnderflowTest > A3: the radius underflow error is multiplied by w in the derivative and by w^2 in the second derivative (r0 = q, r1 = 2q, t = 1/2, turns 1000 and others) PASSED
+
+M3UnderflowTest > T4 (clarified): seams are exact up to the largest k for which the double product turns * k is finite; beyond that only 'no exception' is promised PASSED
+
+M3UnderflowTest > A3: radii, rise and products in the subnormal range and around MIN_NORMAL, on exact quarter phases, within the amended bounds PASSED
+
+M3UnderflowTest > A3: subnormal turns (w = 2 pi turns underflows) with radii up to 1e100: derivatives within the amended bounds (absolute term proportional to S) PASSED
+
+M3UnderflowTest > A3: the test tolerances are never below the contract bounds computed exactly (BigDecimal, pi rounded up), including subnormal inputs, and never grossly above them PASSED
+
+PosedCurveTest > Composition: c.transformed(a).transformed(b) equals c.transformed(b.then(a)) (M1 Pose.then) (section 3) PASSED
+
+PosedCurveTest > A placed circle lies in the plane normal to the rotated +Y, at distance scale * r from the translation, and runs counter-clockwise about that normal (sections 3, 5) PASSED
+
+PosedCurveTest > Orientation by Frame: Quat.fromFrame(Frame.fromHeading(...)) places a circle facing a heading, without new orientation types (sections 3, 9) PASSED
+
+PosedCurveTest > Validation: curve and pose are required; transformed(pose) is a PosedCurve (section 3) PASSED
+
+PosedCurveTest > Derivatives transform as directions scaled by the pose scale: they match finite differences of the placed points (section 3) PASSED
+
+SpiralTest > Radius accuracy relative to S near an end: very different radii and t close to the end with the small radius (contract 5, radius rule) PASSED
+
+SpiralTest > Derivatives agree with central finite differences, including extrapolated t (section 5) PASSED
+
+SpiralTest > A1: near-seam offsets (-2^-60, +-MIN_VALUE, 1 - 2^-53, ...) match the exact small-angle values within the section 7.2 bound PASSED
+
+SpiralTest > Factories: circle, arc, helix, planar and conical spirals, and the M1 horizontal circle factories (section 5) PASSED
+
+SpiralTest > Helix and spirals: radius interpolates exactly at the ends; height is rise * t; helix speed is constant sqrt((2 pi r turns)^2 + rise^2) (section 5) PASSED
+
+SpiralTest > Large turn counts: quarter phases stay exact after 2^20 turns, where a radian implementation is off by about 1e-9 (section 5, DM3-6) PASSED
+
+SpiralTest > M1 CONVENTIONS 5: starting at +X with normal +Y, counter-clockwise from above reaches -Z at +90 degrees, clockwise reaches +Z (exact) PASSED
+
+SpiralTest > Validation: radii finite and >= 0; rise, turns, startTurn finite; parameters finite (sections 5, 8) PASSED
+
+SpiralTest > T4: seams are exact for every integer t (up to 2^60) and every startTurn magnitude (section 5) PASSED
+
+SpiralTest > Full Heal ring (r cos th, 0, r sin th) is horizontalClockwiseFromAbove; Astral Prism's +Y rotation is horizontalCounterClockwiseFromAbove (M1 CONVENTIONS 2, 5) PASSED
+
+SpiralTest > Exact quarter-turn points for any radius and start phase that land on quarter turns (section 5) PASSED
+
+SpiralTest > A1 / T5: for non-negative startTurn the result depends only on startTurn mod 1, bitwise; negative offsets agree within the bound PASSED
+
+SpiralTest > A2: extrapolated radius cancellation; the error is bounded relative to S = |1-t| r0 + |t| r1, not to r(t) (review counterexample: exact radius 2^-52) PASSED
+
+SpiralTest > A1 / T3: quarter-turn phases are exact for startTurn of any magnitude (2^52, -2^52, 2^53, 2^60, +-MAX_VALUE, 2^50 + 1/4, ...) and for negative offsets PASSED
+
+SpiralTest > Seams: a closed spiral (equal radii, no rise, integer non-zero turns) has point(k) == point(0) and derivative(k) == derivative(0) exactly for integer k (section 5) PASSED
+
+ArcLengthTableTest > Convergence: for a cubic, the length error shrinks with the tolerance and stays below tau for tau = 1e-3 ... 1e-12 relative PASSED
+
+ArcLengthTableTest > Circles and helices: length |t1 - t0| sqrt((2 pi r turns)^2 + rise^2) (constant speed, BigDecimal pi) within the M3 derivative error plus 64 eps PASSED
+
+ArcLengthTableTest > Exact ends: lengthAt(t0) = 0, lengthAt(t1) = length, parameterAt(0) = t0, parameterAt(length) = t1 (bit for bit); lengthAt non-decreasing on a grid for smooth curves PASSED
+
+ArcLengthTableTest > Validation: null arguments; non-finite, reversed or overflowing ranges; lengthAt and parameterAt outside their domains PASSED
+
+ArcLengthTableTest > Rigid motion and uniform scale: the posed curve's length is scale * length (within tau), rotation and translation invariant; subranges add up PASSED
+
+ArcLengthTableTest > Lines: length |t1 - t0| |P1 - P0| (BigDecimal oracle) within 64 eps relative, for magnitudes 1e-300 to 1e100 and extrapolated ranges PASSED
+
+ArcLengthTableTest > Quadratic Beziers and conical spirals against the closed-form antiderivative: |L - L*| <= tau + rounding allowance, with converged() and errorEstimate() <= tau PASSED
+
+ArcLengthTableTest > Effective tolerance: tau = max(absolute, relative * initial estimate); tau >= absolute, and with absolute = 0 tau is relative * L within 1e-6 for smooth curves PASSED
+
+ArcLengthTableTest > Collapsed and stationary geometry: zero length, converged; a stationary point off the initial nodes converges to the exact length PASSED
+
+EqualDistanceTest > Spacing: count = round-half-up(L / d) intervals (+1 for INCLUDE_END, at least 1 for EXCLUDE_END); the realised spacing is L / intervals; denser spacing on a longer spiral keeps the density PASSED
+
+EqualDistanceTest > Spacing validation and explosion guard: non-positive, non-finite or tiny spacing is rejected before any sample is evaluated; countForSpacing saturates PASSED
+
+EqualDistanceTest > Zero-length curves: equal-distance sampling falls back to the uniform parameters (all points coincide); spacing gives exactly one sample PASSED
+
+EqualDistanceTest > Conical and planar spirals (radius changing, as for a spiral around a trident): consecutive samples are equally spaced in arc length within 2 tau (closed-form oracle) PASSED
+
+EqualDistanceTest > Parameters are non-decreasing and within [t0, t1] for every policy and count, also for cusps, stationary points and adversarial curves PASSED
+
+EqualDistanceTest > Monotone parameters under a loose tolerance (relative 2^-3) and dense sampling (60,000 samples), where the inversion's stopping tolerance exceeds the spacing PASSED
+
+EqualDistanceTest > Quadratic Beziers: equal arc-length spacing within 2 tau (closed-form oracle), including extrapolated ranges PASSED
+
+EqualDistanceTest > Constant-speed curves: equal-distance parameters equal the uniform parameters within 2 tau / speed; a closed circle sampled with EXCLUDE_END has no duplicate seam point PASSED
+
+M4AdversarialTest > Signed zero and tiny ranges: t0 = -0.0 is kept; a range of one ulp works; t0 == t1 gives length 0 and one repeated point PASSED
+
+M4AdversarialTest > Particle-count explosion: the largest permitted request is bounded by SampleLimits; limit violations are reported before any allocation-sized work PASSED
+
+M4AdversarialTest > Sampling work: each equal-distance sample calls point() exactly once and derivative() at most 336 times; parameterAt and lengthAt are bounded too PASSED
+
+M4AdversarialTest > Failures: a non-finite derivative gives ArithmeticException; exceptions thrown by a user curve propagate unchanged; overflow of the length gives ArithmeticException PASSED
+
+M4AdversarialTest > Fast oscillation (200 periods): a small budget terminates unconverged with an honest estimate; a large budget converges; more budget never increases the error estimate much PASSED
+
+M4AdversarialTest > Budget: build() never calls derivative() more than maxEvaluations times, evaluations() reports the exact count, and point()/secondDerivative() are never called PASSED
+
+M4AdversarialTest > Extreme magnitudes: subnormal and 1e100-scale curves give accurate lengths (scaled speed norm: no overflow or underflow of squares); ranges up to +-1e3 PASSED
+
+M4AdversarialTest > Inversion cost on smooth curves (validated, contract 6.3): Newton steps keep the mean below 40 derivative evaluations per equal-distance sample (pure bisection would need about 6 x 30) PASSED
+
+M4BoundaryTest > Purity: no mutable static state (every static field is final and of an immutable type) PASSED
+
+M4BoundaryTest > Dependencies and calls: imports only java.*, workshop.vfx.math.core and workshop.vfx.math.curve (never time); no trigonometry, pow, exp, log, fma, random, clocks, threads, synchronization or I/O PASSED
+
+M4BoundaryTest > API shape (contract section 2): exactly the six public types with exactly the specified public members; no public constructors on ArcLengthTable, SampleSet, Sampler PASSED
+
+M4DeterminismTest > Concurrent use: 8 threads building and sampling, and 8 threads sharing one table, give the sequential bits PASSED
+
+M4DeterminismTest > Repeated evaluation (before and after JIT warm-up) gives bit-identical tables and samples PASSED
+
+M4R21RegressionTest > F4: subnormal speeds over long ranges lose at most MIN_VALUE/2 per half-panel rule (no MIN_VALUE per unit of parameter): lines with components (q, q, 0), (q, 2q, 2q), (3q, q, 0) and (q, 0, 0) on [0, 1000] and [-7, 9] PASSED
+
+M4R21RegressionTest > F4: M3 lines on ranges of a few MIN_VALUE (half-width rounds to 0): length within the contract 10.2 allowance (R2.1), whose underflow term is MIN_VALUE/2 per half-panel rule of nonzero width (1 to 7 rules on [0, k MIN_VALUE]); unit speed on [0, k MIN_VALUE] is exact (a consequence of the normative operation order); lengthAt one ulp above t0 accurate PASSED
+
+M4R21RegressionTest > F5: a finite table whose partial integral overflowed (speed 1e308, or components at MAX_VALUE, only for t <= 1e-300; 1 elsewhere): lengthAt and parameterAt near t0 are finite, never NaN, and within [0, length()] (F_k need not be monotone for such a curve) PASSED
+
+M4R21RegressionTest > F5: finite smooth curves whose weighted node sum overflows (speeds 1e308 to 2.5e308, components up to MAX_VALUE): build returns the finite length, converged, within the allowance; lengthAt and parameterAt finite PASSED
+
+M4R21RegressionTest > F4/F5: no spurious overflow or underflow in the panel rule: 3,000 random lines (speeds 1e-300 to 2.9e308 with components up to MAX_VALUE, range widths 1 MIN_VALUE to 1e3, exact lengths below MAX_VALUE/4) all give finite, converged lengths within the allowance PASSED
+
+M4R2RegressionTest > F2: ratio mode is clamped to the panel value: a speed seen only by the partial integral's nodes cannot make lengthAt exceed the length at the panel end (F_k in [0, I2_k], contract 5.5) PASSED
+
+M4R2RegressionTest > F3: iteration cap: a target inside a jump of F (unreachable tolerance) near t = 2^-40, where the bracket cannot collapse within 64 iterations, and zero speed at the first iterate: all 64 iterations run (332 to 336 evaluations); the result is the bracket end with the smaller residual, on the correct side of the jump and within 2^-47 (b - a) + 2 ulp of it PASSED
+
+M4R2RegressionTest > Non-finite derivative after build (contract 9, R2 mutation survivor M12): a curve finite at every table node but NaN elsewhere makes lengthAt and parameterAt throw ArithmeticException, never return NaN PASSED
+
+M4R2RegressionTest > F2: pathological panels (I2/I1 overflowing, I1 = 0, I2 = 1000 I1, I1 = 1000 I2, I2/I1 underflowing) on finite tables: lengthAt and parameterAt are finite, monotone and follow the linear fallback of contract 5.5 exactly PASSED
+
+M4R2RegressionTest > Stationary intervals (R2 mutation survivors M26, M15): parameterAt(length()) == t1 even when the last panels have zero length; a distance reached at the start of a stationary interval maps to its start (the smallest panel k with S_(k+1) >= distance) PASSED
+
+M4R2RegressionTest > F3: a speed discontinuous at a 2^-41 scale (F has jumps, the tolerance is unreachable; in this scenario every exit is by tolerance or by bracket collapse): every result is within the tolerance or is the better end of an adjacent-double bracket; at most 336 evaluations; deterministic PASSED
+
+M4R2RegressionTest > F3: Newton creep (a speed spike at the root, invisible to the quadrature, makes Newton steps tiny): at most 336 derivative evaluations; |lengthAt(t) - s| <= max(tau 2^-10, 4 (b - a) 2^-47); t within the bound of the exact inverse -1 + sqrt(1 + 2s) PASSED
+
+M4R2RegressionTest > F1: nonzero subnormal-speed lines and constant-speed spirals converge with 16 panels; tau = max(abs, rel L0, 1024 MIN_VALUE); |L - L*| <= rounding allowance with the absolute underflow term 8 K MIN_VALUE PASSED
+
+M4R2RegressionTest > F3: ties go to the upper end: (a) a target exactly halfway across a panel shorter than 2 tau 2^-10 returns b_k; (b) after a collapse exit between adjacent doubles with exactly equal residuals, the upper double is returned PASSED
+
+M4R2RegressionTest > F3: a target equal to the length at a panel end (an end of the bracket is already within the tolerance) returns that end exactly, with no derivative evaluation PASSED
+
+M4ReferenceVectorTest > counts.csv: 202 normative spacing counts (round half up of fl(L / d), saturation at Long.MAX_VALUE) PASSED
+
+M4ReferenceVectorTest > Reference files are intact: MANIFEST.sha256 matches every file PASSED
+
+M4ReferenceVectorTest > arclength.csv: 336 lengths (lines, circles, helices, spirals, quadratic and cubic Beziers, cusps, stationary and collapsed curves, extrapolated ranges): converged, |L - L*| <= tau + rounding allowance PASSED
+
+M4ReferenceVectorTest > inverse.csv: 216 inversions (quadratic and cubic Beziers, spirals; distances 1/4, 1/2, 3/4 of L): |t - t*| <= (3 tau + allowance) / minimum speed PASSED
+
+M4ReferenceVectorTest > uniform.csv: 2,310 normative uniform parameters, compared bit for bit (counts up to 2^20, ranges from subnormal to 1e100, -0.0) PASSED
+
+SampleSetTest > transformed(pose): the same parameters, and points bit for bit equal to curve.transformed(pose).point(t) (sample once, move every tick) PASSED
+
+SampleSetTest > Immutability: parameters() returns a copy; points() is unmodifiable; later changes to returned data do not affect the set PASSED
+
+SampleSetTest > SampleLimits: maxSamples in [1, 2^20], maxEvaluations in [256, 2^24]; ArcLengthTolerance: absolute finite >= 0, relative in [2^-40, 2^-3] PASSED
+
+UniformParameterTest > On [0, 1] the parameters are exactly the correctly rounded k/(n-1) (INCLUDE_END) and k/n (EXCLUDE_END) PASSED
+
+UniformParameterTest > Counts 0, 1 and 2: empty set; one sample at the start (representative value t0) for both policies; both ends PASSED
+
+UniformParameterTest > Uniform parameter samples of constant-speed curves are equally spaced in distance (circle chords equal to rounding) PASSED
+
+UniformParameterTest > Validation: null curve, policy or limits; non-finite or reversed range; range width overflow; negative count; count above maxSamples (before any evaluation) PASSED
+
+UniformParameterTest > Uniform parameter sampling evaluates point(t) exactly once per sample and never the derivatives PASSED
+
+UniformParameterTest > Exact endpoints and points: first parameter t0, last t1 (INCLUDE_END), every point equals curve.point(t) bit for bit; parameters non-decreasing; extrapolated and signed-zero ranges PASSED
+
+M2BoundaryTest > No mutable static state: every static field is final and primitive, String or an enum constant (section 6.1) PASSED
+
+M2BoundaryTest > The public API is exactly the eight specified types; none exposes platform, java.time, concurrency or random types (section 1) PASSED
+
+M2BoundaryTest > No hidden clock reads, randomness, threads or platform imports in the time package sources (sections 1, 6.1) PASSED
+
+M2DeterminismTest > Discontinuities: a cosmetic gap jumps forward by design; pause/resume or seek removes it; a reset tick counter is rejected for control (section 6.5) PASSED
+
+M2DeterminismTest > Low TPS: GAME time follows ticks (half speed at 10 TPS), COSMETIC time follows supplied nanoseconds (real-time speed) (sections 3, 6.2) PASSED
+
+M2DeterminismTest > Reversal: a negative rate runs a timing backwards through its start into BEFORE (sections 4, 5) PASSED
+
+M2DeterminismTest > Integer pause/resume chains are exact: local time equals the playing span, after 100,000 control events (section 6.3) PASSED
+
+M2DeterminismTest > Determinism: equal inputs give bit-identical outputs, across repeated calls and freshly built equal objects (section 6.1) PASSED
+
+M2DeterminismTest > Path independence: skipped, irregular or out-of-order evaluation gives exactly the values of regular evaluation (section 6.2) PASSED
+
+M2DeterminismTest > Long-running: 10 million consecutive ticks from 2^40 are exact integers with exact loop phases, no drift (section 6.4) PASSED
+
+M2DeterminismTest > Fractional rate chains: the error after n re-anchorings is at most 2 n 2^-52 max|local| against exact arithmetic (section 6.4) PASSED
+
+M2GoldenVectorTest > playback.csv: 29 control scripts, every anchor and every evaluation bit for bit (section 4) PASSED
+
+M2GoldenVectorTest > timing.csv: stage, cycle and progress bit for bit over 1,692 cases (section 5) PASSED
+
+M2GoldenVectorTest > Golden files are intact: MANIFEST.sha256 matches every file PASSED
+
+M2GoldenVectorTest > timepoint.csv: ticksSince bit for bit, including the overflow rows (section 3) PASSED
+
+M2GoldenVectorTest > tick_seconds.csv: ticksToSeconds and secondsToTicks bit for bit (section 2) PASSED
+
+M2ReviewAdversarialTest > Subnormal and extreme durations: exact cycles for small multiples of Double.MIN_VALUE; huge durations stay in cycle 0 (section 5) PASSED
+
+M2ReviewAdversarialTest > Time-translation invariance: shifting every instant by the same amount changes no bit, in both domains (sections 3, 4) PASSED
+
+M2ReviewAdversarialTest > Stage and cycle are monotone in local time for finite runs: never AFTER -> ACTIVE or a lower cycle later (section 5) PASSED
+
+M2ReviewAdversarialTest > COSMETIC differences beyond 2^53 ns round twice, as specified, and stay within 2 ulp of the exact quotient (section 3) PASSED
+
+M2ReviewAdversarialTest > Boundary oracle: on and next to 11 cycle boundaries up to 2^51 - 1, for 14 durations including subnormals, stage and cycle are exact and forward progress is correctly rounded (sections 5, 6.4) PASSED
+
+M2ReviewAdversarialTest > Determinism under JIT: results computed before and after 3 million hot iterations are bit-identical (section 6.1) PASSED
+
+M2ReviewAdversarialTest > Integer control scripts: random pause/resume/restart/seek/withRate (integer rates in [-3, 3]) match a pure long-arithmetic model bit for bit, through Timing as well (section 6.3) PASSED
+
+M2ReviewAdversarialTest > Re-anchoring error: GAME stays within the contract's 1.5 * 2^-52 * M; COSMETIC needs 2.5 * 2^-52 * M (finding A1: the contract's 1.5 is exceeded) PASSED
+
+M2ReviewAdversarialTest > Exhaustive small integers: every delay in [-6, 6], duration in [1, 8], local in [-30, 90], all modes and cycle counts agree with integer arithmetic (section 6.3) PASSED
+
+M2ReviewAdversarialTest > The 2^51 cycle-exact domain is sufficient: 200,000 random elapsed times with elapsed/duration in [2^50, 2^51) give the exact cycle (section 6.4) PASSED
+
+M2ReviewAdversarialTest > PING_PONG mirror symmetry: for integer d and u in [0, 2d], progress(u) == progress(2d - u) bit for bit (section 5) PASSED
+
+M2ReviewAdversarialTest > Validation order: control-instant checks, then argument checks, then evaluation; so an invalid rate is an IAE even where evaluation would overflow (section 4) PASSED
+
+M2ReviewAdversarialTest > Environment: tests run on Java 25 PASSED
+
+M2Revision2Test > P-R1: GAME keeps checked subtraction and raw ordering: no wrap-around for tick counters (sections 3, 4) PASSED
+
+M2Revision2Test > P-R1: COSMETIC playback evaluates and accepts control events across the wrap; earlier instants are rejected by wrapped order (section 4 [R2]) PASSED
+
+M2Revision2Test > P-A2: no-op controls return the same object and keep the stored anchor; the next control is checked against that anchor only (section 4 [R2]) PASSED
+
+M2Revision2Test > P-A3: FOREVER reports AFTER only when the cycle index reaches 2^63 (documented limitation, section 5 [R2]) PASSED
+
+M2Revision2Test > P-R1: translating a COSMETIC history so that it crosses the wrap changes no bit (section 3 [R2]) PASSED
+
+M2Revision2Test > P-R1: the wrapping difference d is valid for |true elapsed| < 2^63; d = -2^63 is read as 2^63 ns backwards (section 3 [R2]) PASSED
+
+M2Revision2Test > P-R1: COSMETIC ticksSince across the Long.MAX_VALUE -> Long.MIN_VALUE wrap is the elapsed time, forwards and backwards (section 3 [R2]) PASSED
+
+M2Revision2Test > P-R1: domain checks are unchanged: mixing COSMETIC and GAME is an IllegalArgumentException, also near the wrap (sections 3, 4) PASSED
+
+M2Revision2Test > P-R1: zero elapsed time is +0.0 everywhere, including at both ends of the long range (section 3 [R2]) PASSED
+
+PlaybackTest > Construction: anchor required, anchorTicks and rate finite; start() is local 0, rate 1, playing (sections 4, 7) PASSED
+
+PlaybackTest > withRate keeps the value continuous at the switch instant; negative rates reverse; rate 0 freezes without pausing (section 4) PASSED
+
+PlaybackTest > COSMETIC playback runs at one local tick per 50 ms of supplied nanoseconds (sections 3, 4) PASSED
+
+PlaybackTest > localTicks = anchorTicks + rate * ticksSince(anchor); integer data give exact integers (sections 4, 6.3) PASSED
+
+PlaybackTest > seek sets the value at the instant and keeps rate and pause state; restart is local 0, playing, same rate (section 4) PASSED
+
+PlaybackTest > pause on a paused playback and resume on a playing one return the same object (idempotent), after validating the instant (section 4) PASSED
+
+PlaybackTest > Unrepresentable results: instant overflow while playing and a non-finite re-anchored value are ArithmeticExceptions (sections 4, 7) PASSED
+
+PlaybackTest > Control instants: same domain, not before the anchor (equal allowed); localTicks also validates its domain (sections 4, 7) PASSED
+
+PlaybackTest > pause holds the value exactly, even far in the future; resume continues from it; a paused span adds exactly nothing (section 4) PASSED
+
+TickTimeTest > Tier 1: conversions follow IEEE-754 for NaN and infinities and never throw (section 6) PASSED
+
+TickTimeTest > Constants: 20 ticks per second, 50,000,000 ns per tick, and their product is exactly one second (section 2) PASSED
+
+TickTimeTest > secondsToTicks is seconds * 20.0; the seconds round trip is not exact for large counts, so authoritative ticks never come from seconds (section 2) PASSED
+
+TickTimeTest > ticksToSeconds is ticks / 20.0, the correctly rounded quotient, not ticks * 0.05 (section 2) PASSED
+
+TimePointTest > COSMETIC ticksSince is the exact nanosecond difference divided by 5e7 with one rounding below 2^53 ns (section 3) PASSED
+
+TimePointTest > Mixing domains or passing null is an IllegalArgumentException; an unrepresentable difference is an ArithmeticException (sections 3, 7) PASSED
+
+TimePointTest > GAME ticksSince is the exact tick difference converted once to double (section 3) PASSED
+
+TimePointTest > Factories set the domain and the raw value; a null domain is rejected (section 3) PASSED
+
+TimingTest > Integer exactness: integer delay, duration and local time give the exact stage and cycle and a once-rounded progress (section 6.3) PASSED
+
+TimingTest > Phase precision does not depend on elapsed time: exact remainder, unlike frac(u / d) (sections 5, 6.4) PASSED
+
+TimingTest > Fuzz: for every finite input the sample is valid, ACTIVE forward progress is below 1, nothing throws (sections 5, 6) PASSED
+
+TimingTest > sample rejects non-finite local time (IAE) and an unrepresentable elapsed time (ArithmeticException) (sections 5, 7) PASSED
+
+TimingTest > PING_PONG: odd cycles run backwards as (d - r) / d, values are continuous at every turn, the end value depends on parity (section 5) PASSED
+
+TimingTest > Validation: finite delay, finite positive duration, cycles >= 1, ONCE has exactly one cycle (sections 5, 7) PASSED
+
+TimingTest > LOOP: half-open cycles [n d, (n+1) d); finite cycles end in AFTER with cycle = cycles - 1 and progress 1 (section 5) PASSED
+
+TimingTest > ONCE: BEFORE below the delay, ACTIVE on [0, d) with progress u/d < 1, AFTER from d on with progress 1 (section 5) PASSED
+
+TimingTest > Delay: u = local - delay; negative delays start part-way; -0.0 elapsed time gives +0.0 progress (section 5) PASSED
+
+TimingTest > TimingSample validates stage, cycle >= 0 and progress in [0, 1] (sections 5, 7) PASSED
+
+TimingTest > Within one pass progress is monotone in local time: non-decreasing forward, non-increasing backward (section 5) PASSED
+
+BudgetTest > No curve work: evaluate never calls a Curve (shapes are copied when built); 1,000 frames of a scene built from a counting curve add 0 calls PASSED
+
+BudgetTest > Largest frame: one layer of 2^20 points on a moving, rotated, scaled anchor evaluates with every coordinate finite and in shape order PASSED
+
+BudgetTest > Preflight: the scene is rejected at construction when the sum of shape sizes exceeds maxPointsPerFrame (sum in long, no overflow); accepted at exactly the limit; 4096 layers of 256 points fill 2^20 PASSED
+
+BudgetTest > Motion depth: at most 16 steps per motion (Motion.MAX_STEPS), so a layer costs at most 16 drive samples and 17 pose compositions PASSED
+
+CompositionTest > Scale and translate: exact 'from' at progress 0 and exact 'to' at progress 1 (and after a ONCE drive); easing is applied to the drive's progress PASSED
+
+CompositionTest > Random compositions of up to 6 steps (fixed, spin, scale, translate) on random anchors match the independent matrix oracle within the tolerance PASSED
+
+CompositionTest > Shared motions: one Motion value reused by layers with different visibility timings gives the same pose in every layer (transform grouping) PASSED
+
+CompositionTest > The frame's pose is anchor.then(motion.poseAt(local)) and every point is pose.toWorld(local point), bit for bit (normative order) PASSED
+
+CompositionTest > Spin: right-handed about the axis by 2 pi (phase + turns e); a quarter turn about +Y maps +X to -Z; whole turns and negative turns; equals the M1 Quat.axisAngle rotation within the tolerance PASSED
+
+CompositionTest > Composition order: m.then(child) applies the child first (M1 Pose.then); translate-then-spin differs from spin-then-translate; both match the independent matrix oracle PASSED
+
+CompositionTest > Inverted transforms: fixed(p).then(fixed(p.inverse())) is the identity within the tolerance; an inverse anchor maps world points back to local ones PASSED
+
+CompositionTest > Finite results: an unrepresentable composed scale or translation (M1 Pose.then) or a non-finite world point gives ArithmeticException, and no frame is returned PASSED
+
+DemoReferenceTest > D. Astral Prism constellation: a spinning, tilted five-star ring and five staged pentagram links (PREFIX reveal, HOLD_AFTER); seek; the scene ends at local tick 120 PASSED
+
+DemoReferenceTest > C. Moving trident: an arc-length-sampled helix drawing itself (PREFIX) and spinning, on seven trident pose snapshots; the scene ends at local tick 30 PASSED
+
+DemoReferenceTest > B. Orbiting sparkles: four phase-offset sparks and a three-ghost trail on a moving, turning player anchor; COSMETIC nanoseconds across the long wrap; before the start PASSED
+
+DemoReferenceTest > MANIFEST.sha256 matches the four reference files PASSED
+
+DemoReferenceTest > A. Healing ritual: three separated expanding, rising ring pulses; forward, reversed, rotated-and-scaled anchor, paused and half-rate playback; the scene ends at local tick 60 PASSED
+
+FrameContractTest > Easing applies only to motions; batch timing and reveal use the layer's raw M2 progress PASSED
+
+FrameContractTest > Point counts: pointCount is the sum of batch sizes and never exceeds scene.maxPointsPerFrame(), at every instant of the example scenes PASSED
+
+FrameContractTest > Reveal PREFIX: k = n at progress >= 1, else min(n - 1, floor(progress n)); 0 at the start, n - 1 just before the end, n when held after; a 1-point shape appears only at progress 1 PASSED
+
+FrameContractTest > Exact single-point placement: with the identity anchor and no motion, every coordinate is returned exactly; with a translation-only anchor, exactly anchor + point (one rounding per coordinate) PASSED
+
+FrameContractTest > Order: batches follow layer insertion order (layerIndex increasing), points follow shape order; overlapping layers with identical timing and geometry are all emitted PASSED
+
+FrameContractTest > Immutability: batches and layers are unmodifiable; coordinates() is a copy; accessors outside [0, size) throw IndexOutOfBoundsException PASSED
+
+FrameContractTest > Omission: hidden layers (BEFORE, AFTER with ACTIVE_ONLY), empty shapes and empty reveals produce no batch; an empty scene gives an empty ACTIVE frame PASSED
+
+M5AdversarialTest > Stateless frames (cancellation is the caller's): evaluation order does not matter; a stopped effect is one the caller no longer evaluates; BEFORE, ACTIVE-but-empty and AFTER (ended) are distinct PASSED
+
+M5AdversarialTest > Signed zeros in inputs do not change positions: -0.0 anchor and point coordinates, -0.0 phase, give the same values (compared with ==) as +0.0 PASSED
+
+M5AdversarialTest > Extreme magnitudes: anchors at |x| = 3e7 (world border) and 1e15, scales 1e-9 and 1e9, subnormal and huge local offsets stay finite and match the oracle within the tolerance PASSED
+
+M5AdversarialTest > Overlapping animations: 200 layers with the same timing, geometry and style but different motions are all emitted, in insertion order, each with its own pose PASSED
+
+M5AdversarialTest > 0 and 1 samples: shapes from M4 sample sets of 0 and 1 points; a 0-point layer is never emitted; a 1-point layer is a single exact placement PASSED
+
+M5AdversarialTest > Inactive layers never leak: across 2,000 instants of the four example scenes, a batch exists only for ACTIVE layers or AFTER layers with HOLD_AFTER, and only inside the scene window PASSED
+
+M5BoundaryTest > API shape: exactly the ten public types of contract section 2 with exactly their public members; final classes without public constructors PASSED
+
+M5BoundaryTest > Forbidden calls: no Math trigonometry, pow, exp, log, hypot, fma or random (StrictMath sin and cos only); no clocks, threads, synchronization, Random, System.out or mutable static fields PASSED
+
+M5BoundaryTest > Imports: only workshop.vfx.math.core, .time, .curve, .sample and java.util; never Bukkit, Paper, Minecraft, java.io, java.nio, java.net, threads or reflection PASSED
+
+M5DeterminismTest > Threads: 8 threads evaluating the same scene objects concurrently produce the single-threaded frames PASSED
+
+M5DeterminismTest > Repetition: 25 rounds over the four example scenes at 15 instants give bit-identical frames (including through JIT compilation) PASSED
+
+SceneValidationTest > Layer: name [a-z0-9_.-]{1,64}; every component nonnull PASSED
+
+SceneValidationTest > SceneLimits: 1 <= maxLayers <= 4096 and 1 <= maxPointsPerFrame <= 2^20 PASSED
+
+SceneValidationTest > EffectScene.of: nonnull domain, limits and layers; lifetime > 0 (finite or UNBOUNDED); unique layer names; layer and point counts within the limits; empty scenes allowed; the list is copied and unmodifiable PASSED
+
+SceneValidationTest > Shape: finite nonnull points, at most 2^20; 0 points allowed; the input list is copied PASSED
+
+SceneValidationTest > EffectScene.evaluate: null anchor, playback or instant gives IllegalArgumentException PASSED
+
+SceneValidationTest > Motion: spin axis finite with largest component >= 1e-12, |turns| <= 2^20, finite phase; scales in [1e-9, 1e9]; finite translations; nonnull drives and easings; at most 16 steps PASSED
+
+SceneValidationTest > StyleKey: namespace [a-z0-9_.-]{1,32}, one colon, path [a-z0-9_./-]{1,64}; anything else (null, empty parts, upper case, spaces, two colons, slash in the namespace, overlong parts) is rejected PASSED
+
+TimeSemanticsTest > Playback controls are M2's: paused frames do not change; seek moves; negative rate plays backwards; zero rate freezes; restart and resume PASSED
+
+TimeSemanticsTest > Signed zero: local ticks of -0.0 are reported as +0.0 and evaluated as the scene start PASSED
+
+TimeSemanticsTest > Scene window: local < 0 is BEFORE (empty), [0, lifetime) is ACTIVE, local >= lifetime is AFTER (empty, even with HOLD_AFTER layers); UNBOUNDED never ends; -0.0 counts as 0 PASSED
+
+TimeSemanticsTest > The frame reports the playback's local ticks exactly (M2 Playback.localTicks) PASSED
+
+TimeSemanticsTest > Layer passes are half-open (M2): visible at the start, still at nextDown(end), hidden at the end for ACTIVE_ONLY, held at progress 1 for HOLD_AFTER; hidden before a delay PASSED
+
+TimeSemanticsTest > Extreme instants: GAME tick differences that overflow long give ArithmeticException (M2); COSMETIC nanoseconds wrap (M2); non-finite local ticks give ArithmeticException; huge finite local ticks are evaluated PASSED
+
+TimeSemanticsTest > Ping-pong and loops: cycle and progress are M2's; a held ping-pong with an even cycle count ends at progress 0 PASSED
+
+TimeSemanticsTest > Domains: the playback anchor and the instant must both have the scene's domain (IllegalArgumentException), GAME and COSMETIC alike PASSED
+
+[Incubating] Problems report is available at: file:///home/runner/work/Bedwenton/Bedwenton/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 51s
+5 actionable tasks: 4 executed, 1 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.1.0/userguide/configuration_cache_enabling.html

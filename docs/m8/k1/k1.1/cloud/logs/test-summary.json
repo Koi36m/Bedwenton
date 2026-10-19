@@ -1,0 +1,16 @@
+{
+  "counts": {
+    "tests": 589,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "groups": {
+    "M1-M6": 415,
+    "M7": 61,
+    "K0": 50,
+    "K1": 57,
+    "K1.1": 6
+  },
+  "xml_reports": 82
+}

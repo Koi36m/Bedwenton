@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.sample.UniformParameterTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-19T09:12:20.497Z" hostname="runnervm8k3b6" time="0.07">
+  <properties/>
+  <testcase name="On [0, 1] the parameters are exactly the correctly rounded k/(n-1) (INCLUDE_END) and k/n (EXCLUDE_END)" classname="workshop.vfx.math.sample.UniformParameterTest" time="0.011"/>
+  <testcase name="Counts 0, 1 and 2: empty set; one sample at the start (representative value t0) for both policies; both ends" classname="workshop.vfx.math.sample.UniformParameterTest" time="0.0"/>
+  <testcase name="Uniform parameter samples of constant-speed curves are equally spaced in distance (circle chords equal to rounding)" classname="workshop.vfx.math.sample.UniformParameterTest" time="0.0"/>
+  <testcase name="Validation: null curve, policy or limits; non-finite or reversed range; range width overflow; negative count; count above maxSamples (before any evaluation)" classname="workshop.vfx.math.sample.UniformParameterTest" time="0.001"/>
+  <testcase name="Uniform parameter sampling evaluates point(t) exactly once per sample and never the derivatives" classname="workshop.vfx.math.sample.UniformParameterTest" time="0.0"/>
+  <testcase name="Exact endpoints and points: first parameter t0, last t1 (INCLUDE_END), every point equals curve.point(t) bit for bit; parameters non-decreasing; extrapolated and signed-zero ranges" classname="workshop.vfx.math.sample.UniformParameterTest" time="0.057"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

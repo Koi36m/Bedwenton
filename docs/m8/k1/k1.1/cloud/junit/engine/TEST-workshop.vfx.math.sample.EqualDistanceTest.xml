@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.sample.EqualDistanceTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-19T09:12:12.185Z" hostname="runnervm8k3b6" time="1.284">
+  <properties/>
+  <testcase name="Spacing: count = round-half-up(L / d) intervals (+1 for INCLUDE_END, at least 1 for EXCLUDE_END); the realised spacing is L / intervals; denser spacing on a longer spiral keeps the density" classname="workshop.vfx.math.sample.EqualDistanceTest" time="0.004"/>
+  <testcase name="Spacing validation and explosion guard: non-positive, non-finite or tiny spacing is rejected before any sample is evaluated; countForSpacing saturates" classname="workshop.vfx.math.sample.EqualDistanceTest" time="0.002"/>
+  <testcase name="Zero-length curves: equal-distance sampling falls back to the uniform parameters (all points coincide); spacing gives exactly one sample" classname="workshop.vfx.math.sample.EqualDistanceTest" time="0.0"/>
+  <testcase name="Conical and planar spirals (radius changing, as for a spiral around a trident): consecutive samples are equally spaced in arc length within 2 tau (closed-form oracle)" classname="workshop.vfx.math.sample.EqualDistanceTest" time="0.264"/>
+  <testcase name="Parameters are non-decreasing and within [t0, t1] for every policy and count, also for cusps, stationary points and adversarial curves" classname="workshop.vfx.math.sample.EqualDistanceTest" time="0.212"/>
+  <testcase name="Monotone parameters under a loose tolerance (relative 2^-3) and dense sampling (60,000 samples), where the inversion's stopping tolerance exceeds the spacing" classname="workshop.vfx.math.sample.EqualDistanceTest" time="0.684"/>
+  <testcase name="Quadratic Beziers: equal arc-length spacing within 2 tau (closed-form oracle), including extrapolated ranges" classname="workshop.vfx.math.sample.EqualDistanceTest" time="0.112"/>
+  <testcase name="Constant-speed curves: equal-distance parameters equal the uniform parameters within 2 tau / speed; a closed circle sampled with EXCLUDE_END has no duplicate seam point" classname="workshop.vfx.math.sample.EqualDistanceTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

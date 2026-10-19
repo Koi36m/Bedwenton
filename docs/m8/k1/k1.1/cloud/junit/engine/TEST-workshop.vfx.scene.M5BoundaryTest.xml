@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.scene.M5BoundaryTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-19T09:12:22.439Z" hostname="runnervm8k3b6" time="0.017">
+  <properties/>
+  <testcase name="API shape: exactly the ten public types of contract section 2 with exactly their public members; final classes without public constructors" classname="workshop.vfx.scene.M5BoundaryTest" time="0.006"/>
+  <testcase name="Forbidden calls: no Math trigonometry, pow, exp, log, hypot, fma or random (StrictMath sin and cos only); no clocks, threads, synchronization, Random, System.out or mutable static fields" classname="workshop.vfx.scene.M5BoundaryTest" time="0.005"/>
+  <testcase name="Imports: only workshop.vfx.math.core, .time, .curve, .sample and java.util; never Bukkit, Paper, Minecraft, java.io, java.nio, java.net, threads or reflection" classname="workshop.vfx.scene.M5BoundaryTest" time="0.006"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

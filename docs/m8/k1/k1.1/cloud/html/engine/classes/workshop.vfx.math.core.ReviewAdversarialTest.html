@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - ReviewAdversarialTest</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<h1>ReviewAdversarialTest</h1>
+<div class="breadcrumbs">
+<a href="../index.html">all</a> &gt; 
+<a href="../packages/workshop.vfx.math.core.html">workshop.vfx.math.core</a> &gt; ReviewAdversarialTest</div>
+<div id="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox" id="tests">
+<div class="counter">18</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="failures">
+<div class="counter">0</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="ignored">
+<div class="counter">0</div>
+<p>ignored</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="duration">
+<div class="counter">9.886s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox success" id="successRate">
+<div class="percent">100%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="tab-container">
+<ul class="tabLinks">
+<li>
+<a href="#">Tests</a>
+</li>
+<li>
+<a href="#">Standard output</a>
+</li>
+</ul>
+<div class="tab">
+<h2>Tests</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Method name</th>
+<th>Duration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tr>
+<td class="success">alignY: x is the normalized perpendicular component of the hint, to within its conditioning (section 4)</td>
+<td class="success">alignYUsesPerpendicularComponentOfHint()</td>
+<td class="success">0.540s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">angleTo: 1e-12 absolute from 1e-9 to pi - 1e-6, sign-insensitive, both argument orders (section 3)</td>
+<td class="success">angleToAccuracy()</td>
+<td class="success">0.052s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Conventions: Euler helper equals Rodrigues X then Y then Z about fixed world axes for random angles (CONVENTIONS 3)</td>
+<td class="success">eulerAgainstRodrigues()</td>
+<td class="success">0.009s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Frame factories: valid at 1e-12 for extreme magnitudes and hints within a factor 2 of the 1e-8 threshold (section 4)</td>
+<td class="success">frameFactoriesAdversarial()</td>
+<td class="success">0.219s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">fromFrame(q.toFrame()) is q (as a rotation) for half turns about arbitrary and diagonal axes and near-half turns (section 3)</td>
+<td class="success">fromFrameHalfTurnsAndNearHalfTurns()</td>
+<td class="success">0.129s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">fromHeading equals the contract formula right = n(f x u), up = right x f, back = -f for well-conditioned input (section 4)</td>
+<td class="success">fromHeadingMatchesContractFormula()</td>
+<td class="success">0.552s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">nlerp: shortest-sign (1-t)a + tb normalized, including extrapolation to |t| = 1e3 (section 3)</td>
+<td class="success">nlerpMatchesIndependentFormula()</td>
+<td class="success">0.035s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">normalizedOr: 1e-12 of the exact unit vector for 200,000 extreme finite inputs; same fallback reference below LENGTH_EPS (section 2)</td>
+<td class="success">normalizedOrAgainstExactReference()</td>
+<td class="success">3.768s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Pose.then/inverse: inside the domain never throw; outside, only ArithmeticException, never IllegalArgumentException (section 5)</td>
+<td class="success">poseExceptionTypesAcrossScaleRange()</td>
+<td class="success">0.152s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Pose near Minecraft's world border (|x|,|z| &lt;= 3e7): composition 1e-7, inverse and toLocal round trips 1e-6 (section 6)</td>
+<td class="success">poseNearWorldBorder()</td>
+<td class="success">0.089s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Quat.normalized: 1e-12 of the exact unit quaternion for 100,000 extreme inputs; exact IDENTITY for zero (section 3)</td>
+<td class="success">quatNormalizedAgainstExactReference()</td>
+<td class="success">2.387s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Quat.rotate of exactly-normalized quaternions matches Rodrigues to 1e-13 * |v| for |v| up to 1e100 (sections 0A, 6)</td>
+<td class="success">rotateAtDomainEdge()</td>
+<td class="success">0.022s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Environment: the test JVM is Java 25 (contract header: Java 25)</td>
+<td class="success">runsOnJava25()</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">shortestArc near antiparallel: contract accuracy table, minimal angle, unit norm, half-turn axis rule (section 3)</td>
+<td class="success">shortestArcNearAntiparallel()</td>
+<td class="success">0.223s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">slerp: constant angular speed; slerp(a, b, t) and slerp(a, -b, t) are the same rotation (section 3)</td>
+<td class="success">slerpConstantSpeedAndSignInvariance()</td>
+<td class="success">0.018s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">slerp: action equals the analytic great-circle position for |t| &lt;= 1e3 to 1e-9, incl. phi near 1e-8 and near pi (section 3, R3 domain)</td>
+<td class="success">slerpExtrapolationAgainstAnalyticGreatCircle()</td>
+<td class="success">0.026s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Tier 1 never throws and Tier 2 is total: NaN, infinities, -0.0, subnormals and MAX_VALUE in every operand (section 0A)</td>
+<td class="success">tierTotalityFuzz()</td>
+<td class="success">0.625s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">transportY: 200,000-step walk with an antiparallel flip every 1,000 steps stays valid; y within 1e-12 of normalize(newY) (section 4)</td>
+<td class="success">transportYLongWalk()</td>
+<td class="success">1.039s</td>
+<td class="success">passed</td>
+</tr>
+</table>
+</div>
+<div class="tab">
+<h2>Standard output</h2>
+<span class="code">
+<pre id="class-stdout">[M1 review] normalizedOr worst component error vs exact: 2.220446049250313E-16
+[M1 review] slerp |t|&lt;=1e3 worst action error vs analytic: 9.056739506726039E-13
+[M1 review] shortestArc offset 0.1 worst error 8.065179992641965E-15 (allowed 1.0E-9)
+[M1 review] shortestArc offset 0.001 worst error 7.980693752677138E-13 (allowed 1.0E-9)
+[M1 review] shortestArc offset 1.0E-6 worst error 7.624904121111344E-10 (allowed 1.0E-9)
+[M1 review] shortestArc offset 1.0E-7 worst error 7.937575590433542E-9 (allowed 1.0E-8)
+[M1 review] shortestArc offset 1.0E-9 worst error 7.908609860608958E-7 (allowed 1.0E-6)
+</pre>
+<button class="clipboard-copy-btn" aria-label="Copy to clipboard" data-copy-element-id="class-stdout">Copy</button>
+</span>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="https://www.gradle.org">Gradle 9.1.0</a> at Oct 19, 2026, 9:12:22 AM</p>
+</div>
+</div>
+</body>
+</html>
