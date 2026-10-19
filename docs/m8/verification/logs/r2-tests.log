@@ -1,0 +1,114 @@
+M8 R2 design verification run: 2026-10-18T07:52:09Z
+commit: 7cf789c4b6f87e4942f7bb3d02805e3407c1d244; uncommitted tracked files: 10
+java version "25.0.4.1" 2026-08-18 LTS
+gradle exit: 0
+workshop.vfx.paper.core.AllocationOrderEmissionTest  3 tests, 0 not passed
+    PASS  Defensive caps binding (unaligned policy): the rank-0 ring is emitted first, whatever the input order; rotation alternates
+    PASS  Aligned policy (placement and viewer budgets capped by the emission limits): M6 decides, the caps never bind
+    PASS  Aligned policy over 300 random multi-ring scenarios: no EMISSION_LIMIT skip, attempted calls = planned placements
+workshop.vfx.paper.core.ConfigurationAndIdentityTest  9 tests, 0 not passed
+    PASS  viewerInputMustBeUniqueSortedAndNonnegative()
+    PASS  threadOwnershipRefusesCrossThreadAndFalsePrimary()
+    PASS  budgetsAlignWithoutRaisingRequestedBudgets()
+    PASS  whitelistAndDustValidationAreClosedAndImmutable()
+    PASS  allIntegerBoundariesAndHardCeilings()
+    PASS  emissionReportsAreDefensiveSnapshots()
+    PASS  radiusIsFiniteAndBoundedBeforeRules()
+    PASS  invalidTypesAndCapsRefuseInsteadOfDefaulting()
+    PASS  idsUseBothUuidHalvesAndNeverReuseReleasedNumbers()
+workshop.vfx.paper.core.DemoCommandsTest  6 tests, 0 not passed
+    PASS  unknownAndExtraArgumentsHaveNoSideEffects()
+    PASS  adminStopAllIsSeparateFromOwnerStop()
+    PASS  tiersAndDefaultRouteToProductionController()
+    PASS  capsAreReportedAndRepeatedCommandsNeverAddHiddenOperations()
+    PASS  suggestionsRespectGrammarAndAdminPermission()
+    PASS  permissionAndPlayerBoundariesAreEnforced()
+workshop.vfx.paper.core.OwnerAwareEmissionTest  7 tests, 0 not passed
+    PASS  View permission granted: B sees both rings; revoked between planning and emission: B loses ring A only
+    PASS  Missing ownership context: the delivery is skipped whole and counted; the other ring is unaffected
+    PASS  A planned non-owner recipient with use but without view permission is refused for the other ring only
+    PASS  Viewer selection: the owner is admitted before sorting and capping; the result is strictly increasing
+    PASS  Owner's use permission revoked between planning and emission: the owner receives nothing of their ring
+    PASS  Coincident rings, no view permission: each owner sees exactly their own ring
+    PASS  Owner A holding view permission is still authorized for ring A by use, and for ring B by view
+workshop.vfx.paper.core.PluginPackagingTest  5 tests, 0 not passed
+    PASS  syntheticCleanJarPasses()
+    PASS  unresolvedAndWrongPluginVersionsAreRejected()
+    PASS  sourceBoundaryHasNoPlatformCallsInCoreOrBroadcastAndAsyncInPaper()
+    PASS  failedGradleCannotBeMaskedByStaleSuccessfulXml()
+    PASS  eachServerAndTestDependencyNamespaceIsRejected()
+workshop.vfx.paper.core.ProductionEmissionTest  6 tests, 0 not passed
+    PASS  skippedPointsAreNotPromotedBeyondRecipientPrefix()
+    PASS  pointValidationRejectsEveryNonfiniteAxisAndHonorsWorldEdges()
+    PASS  demoRecipePreservesCountsRadiiLoopAndStaticAnchor()
+    PASS  recipientPrefixesMatchIndependentSelectionFormulaBitwise()
+    PASS  limitsCountFailuresAndApplyAcrossRecipients()
+    PASS  allGateReasonsSkipOnlyTheirRecipientAndPreserveAccounting()
+workshop.vfx.paper.core.RecipientRuleRobustnessTest  5 tests, 0 not passed
+    PASS  Request anchor x, y or z NaN, +infinity or -infinity: denied as INVALID_REQUEST_CONTEXT
+    PASS  View radius: NaN, infinite or negative is rejected at construction; 0 is valid (exact anchor only)
+    PASS  Authorization order for normal inputs is unchanged: offline, world, permission, then range checks
+    PASS  Viewer x, y or z NaN, +infinity or -infinity: denied as VIEWER_POSITION_INVALID (owner and non-owner)
+    PASS  Normal controls: in range allowed, exactly at the radius allowed, just beyond and huge finite coordinates denied
+workshop.vfx.paper.core.RequestContextConsistencyTest  5 tests, 0 not passed
+    PASS  Invalid contexts (NaN or infinite anchor, negative owner or world id): the delivery is rejected whole
+    PASS  A viewer with a NaN position is refused (VIEWER_POSITION_INVALID); the other viewers are unaffected
+    PASS  One mismatched context (ring B's slot names ring A, owner A): only ring B is rejected; ring A is unaffected
+    PASS  Control: valid contexts; each owner sees its own ring; non-owners without view are refused; accounting balances
+    PASS  Swapped contexts (key ring A holds ring B's context with owner B, and vice versa): both deliveries rejected, nothing sent
+workshop.vfx.paper.core.RingDriverTest  10 tests, 0 not passed
+    PASS  cancelledCallbackAndPreviousGenerationNeverEmit()
+    PASS  idleEnableThenOnePlannerForAllRingsAndNoDuplicateTickBudgets()
+    PASS  unloadAndMissingWorldStopOnlyAffectedRings()
+    PASS  expiryAndOwnerOfflineStopAndCancel()
+    PASS  teleportWorldChangeAndInvalidAnchorsFailClosed()
+    PASS  ownerFirstAndDuplicateEnumerationCannotReachM6()
+    PASS  permissionAndWorldEligibilityArePerRingAndRechecked()
+    PASS  styleFailuresPersistAcrossDriverTicksAndNextPlanExcludesStyle()
+    PASS  falsePrimaryRefusesTickAndCommandsBeforeHostAccess()
+    PASS  repeatedStartReplacesAndDoesNotMultiplyTasksAtCap()
+workshop.vfx.paper.core.RingDriverWithHookM7CompatTest  10 tests, 0 not passed
+    PASS  cancelledCallbackAndPreviousGenerationNeverEmit()
+    PASS  idleEnableThenOnePlannerForAllRingsAndNoDuplicateTickBudgets()
+    PASS  unloadAndMissingWorldStopOnlyAffectedRings()
+    PASS  expiryAndOwnerOfflineStopAndCancel()
+    PASS  teleportWorldChangeAndInvalidAnchorsFailClosed()
+    PASS  ownerFirstAndDuplicateEnumerationCannotReachM6()
+    PASS  permissionAndWorldEligibilityArePerRingAndRechecked()
+    PASS  styleFailuresPersistAcrossDriverTicksAndNextPlanExcludesStyle()
+    PASS  falsePrimaryRefusesTickAndCommandsBeforeHostAccess()
+    PASS  repeatedStartReplacesAndDoesNotMultiplyTasksAtCap()
+workshop.vfx.paper.core.StyleHealthTest  5 tests, 0 not passed
+    PASS  Third consecutive failure disables the style at once; its remaining points in the tick are skipped
+    PASS  All styles disabled: the planner skips the ring as unsupported before evaluation; a new session re-enables
+    PASS  Successes of another style do not reset the streak; the streak spans ticks
+    PASS  A success of the same style resets the streak: fail, fail, succeed, fail, fail does not disable
+    PASS  The next planning pass excludes the disabled style: M6 reports it unsupported, nothing of it is sent
+workshop.vfx.paper.m8.M8OnlySchedulingTest  6 tests, 0 not passed
+    PASS  Stale callbacks: a callback from a cancelled generation never plans, also after an M8-only restart
+    PASS  Shutdown: close disposes M8 effects and rings, cancels the task, refuses later starts, and stale ticks do nothing
+    PASS  Natural end and termination: finished effects are disposed in the tick, and the task is cancelled when nothing remains
+    PASS  Ring and M8 together: exactly one planning call per tick containing both requests; one task
+    PASS  Aura only: first M8 start schedules the one task; each tick plans once with the aura request; stop cancels
+    PASS  Stationary trail with no live samples: task keeps lightweight ticks, planner is skipped, zero report; moving resumes planning
+workshop.vfx.paper.m8.OrientationAndAnimationTest  5 tests, 0 not passed
+    PASS  Yaw mapping: local +Z -> (-sin yaw, 0, cos yaw), local +X -> (cos yaw, 0, sin yaw), +Y fixed; |error| <= 1e-12
+    PASS  Snapshot validation: absent/offline/invalid/dead terminate; non-finite position or yaw skips the tick
+    PASS  Pitch never orients an effect; HEAD_YAW and WORLD_FIXED select their own yaw; lift is world-vertical
+    PASS  Activation phase boundaries are exact for all tiers (materialize, buildup, release, dissolution, end)
+    PASS  Aura geometry with a moving, turning anchor equals an independent formula (<= 1e-9 blocks) at known ticks
+workshop.vfx.paper.m8.SharedCapacityTest  6 tests, 0 not passed
+    PASS  M7-only compatibility: without a contributor the hooked driver admits exactly as M7 (cap counts rings only)
+    PASS  Per-player M8 cap: a third M8 kind is refused at 2 even below the global cap; replacement still allowed
+    PASS  Rings first, then M8: at cap 2, two rings refuse a new aura; a ring replacement still succeeds
+    PASS  Every activation order of a mixed set reaches exactly the cap and refuses the next start, whatever its kind
+    PASS  M8 first, then rings: M8 effects count toward the ring path's cap; replacement of an M8 effect at cap succeeds
+    PASS  Freed capacity is reusable by either path: stopping an aura admits a ring, stopping a ring admits an aura
+workshop.vfx.paper.m8.TrailTimingTest  6 tests, 0 not passed
+    PASS  Discontinuity: a teleport (serial change) starts a new segment and no live sample lies between the two locations
+    PASS  History expiry: after stopping at local 100, live samples drop to zero after maxAge and requests stop
+    PASS  Short teleport (3 blocks, below maxStep) with a serial change still breaks the segment and adds no interpolated samples
+    PASS  Thinning phase follows the effect clock: with a kept cap below the trail size, M6's offset is floorMod(frameOrdinal, g)
+    PASS  A moving player's trail emits on every tick well beyond the first two, including local ticks 3, 50, 100 and 299
+    PASS  Lifetime is measured on the effect clock: a 1200-tick trail is still active at local 100 and ends exactly at 1200
+TOTAL 94 tests, 94 passed, 0 not passed, in 15 report files

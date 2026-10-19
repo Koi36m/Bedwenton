@@ -1,0 +1,15 @@
+plugins { id 'java' }
+repositories { mavenCentral() }
+def adapter = file('../../../../paper-adapter')
+dependencies {
+    implementation 'workshop.vfx:minecraft-vfx-math:0.1.0-m1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.12.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+java { toolchain.languageVersion = JavaLanguageVersion.of(25) }
+sourceSets {
+    main { java { srcDirs = [new File(adapter, 'src/main/java')]; exclude 'workshop/vfx/paper/bukkit/**' } }
+    test { java { srcDirs = [new File(adapter, 'src/test/java')] } }
+}
+tasks.withType(JavaCompile).configureEach { options.release = 25; options.compilerArgs += ['-Xlint:all', '-Werror'] }
+test { useJUnitPlatform(); systemProperty 'adapter.root', adapter.absolutePath }

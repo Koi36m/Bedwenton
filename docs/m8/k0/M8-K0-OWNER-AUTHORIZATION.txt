@@ -1,0 +1,54 @@
+Bedwenton M8 — K0 Codex Implementation Authorization
+Repository: Koi36m/Bedwenton
+Authorized checkpoint: K0 ONLY — Shared integration foundation
+Status: Owner authorized. Design PASS; production K0 not yet implemented, reviewed, merged, released, or deployed.
+1. Authorization and baseline
+The owner explicitly authorizes Codex to implement and test K0 only in an isolated development branch, including the strictly additive edits to the accepted M7 paper-adapter/.../core/RingDriver.java necessary for the independently approved M8 R3 architecture.
+Authoritative design tip: 17ad99186f6b2a73eaccaa22ff5aa0f0e7fd6d82 (m8-spec-r3). Its immediate ancestor chain includes R2 f04a843e4d5f76b3c47f9e9dfc07e872b826eaa5, R1 7cf789c4b6f87e4942f7bb3d02805e3407c1d244, accepted M7 GitHub snapshot ed5fc7bff548edf4b005e919495b22213a65b64e (tree afa33672b5850bdda3be636415659fa27ac53047), and accepted M6 c43a66e656a77aa82bd72d8ffe27f1a037240e99.
+Read M8-R3-INDEPENDENT-DESIGN-REVIEW.md (independent DESIGN PASS) and all docs/m8/ normative documents, especially:
+1. M8-R3-CHANGES.md and M8-R2-CHANGES.md;
+2. M8-ARCHITECTURE-AND-CONTRACT.md sections 2–4, 7–8, 10;
+3. M8-ANCHOR-AND-MOTION-SPEC.md for identity and freshness rules;
+4. M8-PERFORMANCE-AND-BUDGETS.md;
+5. M8-TEST-AND-SMOKE-PLAN.md;
+6. docs/m8/spi/, docs/m8/reference/, and docs/m8/validation/ringdriver-proposed.diff as design aids, not trusted production code.
+Source recovery: R3 wasn't pushed to GitHub (HTTP 403). Obtain the owner's bedwenton-m8-r3-design.zip, SHA-256 9d03dbdf041bbb7ca327fb869c64ccbfaa2083d78aa2221635e3e635ecc70899. It includes m8-r3.bundle, SHA-256 0a872ba0524d9ed76e4c15362e6dd1170ec13f4e05814739dfe5cad31cce0789. Verify ZIP, manifest, bundle, ancestry, and exact R3 HEAD before creating m8-k0-implementation from R3. Do not silently start from the GitHub default branch or invent a replacement history. If recovery fails, STOP and report BLOCKED.
+The accepted M7 native and GitHub snapshot commits have distinct histories; earlier independent verification established source tree equality. Preserve and explicitly report this provenance distinction. Do not overwrite or force-push shared branches.
+2. K0 scope — permitted production changes
+Implement only the shared M7/M8 plumbing needed before any visible M8 effect is introduced:
+- Add the TickContributor seam to M7's RingDriver, with an optional constructor overload and TickContributor.NONE so the original M7 constructors, commands, and ring semantics continue unchanged.
+- Implement or prepare the pure Java dynamic registry / effect-identity scaffolding, capacity accounting and contributor contracts required for K0. It must not introduce actual Aura, Trail, or Activation particle emissions.
+- Use one M7-owned scheduler for all rings and eligible future M8 effects; no repeating task per effect, and no separate M8 planning loop.
+- Enforce one shared effect cap for ring and M8 effect registrations, independently of start order. Replacement at capacity must succeed without deleting the previous effect if candidate creation or scheduler startup fails. Enforce the prospective per-player M8 cap at the registry boundary.
+- Preserve correct shared-task startup, idle cancellation, shutdown, duplicate-tick and stale-callback protection, and generation-token semantics, including when M8 effects exist without rings.
+- Per active tick, prune M7 rings, obtain future M8 drafts even if no ring exists, then evaluate whether any registered effects remain. Build combined requests only after identity validation; invoke at most one global DeliveryPlanner.plan per tick for any nonempty request list; when registered effects yield zero requests, skip planning but keep the scheduler alive. Keep M6 allocation-rank fairness, original recipient-prefix semantics, all global/per-viewer emission budgets, and existing style health.
+- Enforce R3 identity checks on future contributor drafts and protect existing owner/session/world mappings. No invalid draft may be emitted. Do not load chunks just for VFX.
+- Add opt-in M8 configuration parsing and Paper wiring/command-routing scaffolding only, as justified by K0. m8.enabled must default to false; invalid config must fail safely. Preserve M7 command grammar, suggestions, status and ring rendering with M8 disabled. Future /vfxdemo aura, trail, activate must not pretend to work; if routed during K0, respond clearly as unavailable or not yet implemented. Keep command permission checks.
+- Keep any Paper-facing implementation thin and main-thread-only. Maintain safe disable/start recovery with no leaked tasks or M8 effects.
+The only accepted M7 source alteration explicitly authorized is the minimal additive change to RingDriver.java and necessary supporting Paper wiring/config. Prefer isolated additions under paper-adapter/. Do not modify M1–M6, root engine source/build/tests, golden reference datasets, existing M7 tests, or established M7 behavior. If a larger accepted-source change proves necessary, stop and request authorization.
+3. Nonnegotiable implementation invariants
+1. Original M7 ring functions exactly as before when M8 is disabled or uses TickContributor.NONE.
+2. Exactly one driver-owned scheduler; exactly one globally budgeted planner pass per tick when requests exist; none when request list is empty.
+3. Global cap counts rings plus registered M8 effects, including a new M7 ring after M8 effects are already active.
+4. Transactional effect start: validate and construct, ensureRunning, then commit, then dispose replaced effect. Failed first-start/replacement must preserve previous state and leave no new task behind.
+5. Bound owner UUID and session viewer ID may not be substituted by snapshot contents; stale/mismatched or released identities fail closed. Implement the K0 identity guard even if there are not yet Paper-backed attached effects.
+6. No unbounded collections, no chunk loading, no asynchronous Bukkit access, no independent budget resets or particle broadcasting.
+7. Preserve original M7 stop, quit, death, world change, world unload, and plugin disable cleanup behavior.
+4. Build and verification
+- Target Paper 26.3, Java 25, Gradle 9.1.0 and the exactly pinned io.papermc.paper:paper-api:26.3.build.204-stable, previously SHA-256 f6852324bbf519d8c27ba06cf2391ee21aed542852de9ac20b9403b7d6ea1556. Verify the actual dependency JAR and API signatures; never substitute an unverified Paper version.
+- Compile the full Paper/Bukkit adapter, not just the scratch core. Run verifyPluginJar, packaging checks, recordPaperApi or equivalent provenance verification. Preserve exclusion of Paper APIs, JUnit, etc. from the shaded JAR.
+- Run all 415 unchanged M1–M6 tests and regenerate/compare all seven golden datasets byte-for-byte; run all 61 unchanged M7 adapter tests. The required accepted regression baseline is 476/476 before counting any new K0 tests.
+- Port the relevant R2/R3 reference tests to genuine production tests against the modified real RingDriver, not merely RingDriverWithHook: SharedCapacityTest, M8OnlySchedulingTest, RingDriverWithHookM7CompatTest, TransactionalStartTest, and K0 draft-identity tests. Include fake contributor/scheduler, injected startup failures, replacement-at-cap, M8-only zero-request ticks, ring-then-M8/M8-then-ring start orders, task/callback disposal and nonzero invalid-draft rejection. Report exact new test count.
+- Verify full Paper-facing startup and M7 ring smoke checks on an isolated disposable Paper 26.3 test server if one is available. Record S2/S4/S8/S9/S11 as actually executed, not assumed. Existing M7 in-game evidence is historical, not automatic proof of this new K0 JAR.
+- When a server, pinned Paper jar or Java 25 is unavailable, report that exact gate as NOT RUN/BLOCKED. Do not imply full K0 acceptance from scratch-reference tests.
+5. Deliverables and review boundary
+Supply:
+- Recoverable isolated Git branch, full commit SHA, preserved ancestry, source ZIP and Git bundle if GitHub push fails (at most one push attempt; do not force-push or rewrite accepted refs).
+- Compiled K0 plugin JAR only if full pinned Paper build succeeds, with SHA-256, version, Java/Paper dependency provenance and Gradle verification logs.
+- Full changed-file list and exact source diffs, including the additive RingDriver.java patch and a statement of M1–M6 preservation.
+- Unit-test and dataset results separating new production K0 tests from unchanged 476 regressions and R3 design-reference evidence.
+- Smoke-test status table showing PASS/FAIL/NOT RUN per check, remaining blockers, build limitations and installation/rollback guidance for test server only.
+- M8-K0-IMPLEMENTATION-REPORT.md and M8-K0-REVIEW-HANDOFF.md with reproducible commands, artifact and bundle hashes, exact scope exclusions, and recommended independent review decision.
+After K0 implementation and available verification, STOP. Report READY FOR INDEPENDENT K0 IMPLEMENTATION REVIEW or BLOCKED.
+Not authorized: K1 Orbiting Aura visuals; K2 Movement Trail; K3 Animated Activation; K4 combined showcase; non-player attachment; global cinematic summoning; Ender Dragon event; changes to M1–M6; merge to main; release; live SMP deployment. Codex must not start any of these without separate owner approval.
+The project owner and ChatGPT will independently assess K0 before the next checkpoint is authorized.

@@ -1,0 +1,99 @@
+F1a (F1: ring path counts rings only (R1 behaviour)): CAUGHT, 7 failing test(s)
+    SharedCapacityTest.Every activation order of a mixed set reaches exactly the cap and refuses the next start, whatever its kind
+    SharedCapacityTest.Freed capacity is reusable by either path: stopping an aura admits a ring, stopping a ring admits an aura
+    SharedCapacityTest.M8 first, then rings: M8 effects count toward the ring path's cap; replacement of an M8 effect at cap succeeds
+    ShowcaseCapacityTest.S-X1b (override 8/3): a third player's first ring or M8 effect is the ninth unique effect and is refused; freed capacity admits it
+    ShowcaseCapacityTest.S-X2 (production defaults 4/2), M8-first order: the fifth is refused on the ring path; a third M8 kind hits the per-player cap
+    ShowcaseCapacityTest.S-X2 (production defaults 4/2), ring-first order: the fifth unique effect is refused by the global cap; replacements succeed
+    TransactionalStartTest.Refused admission (per-player or global cap) never calls the factory or the scheduler
+F1b (F1: M8 path ignores the shared cap): CAUGHT, 5 failing test(s)
+    SharedCapacityTest.Every activation order of a mixed set reaches exactly the cap and refuses the next start, whatever its kind
+    SharedCapacityTest.Rings first, then M8: at cap 2, two rings refuse a new aura; a ring replacement still succeeds
+    ShowcaseCapacityTest.S-X1b (override 8/3): a third player's first ring or M8 effect is the ninth unique effect and is refused; freed capacity admits it
+    ShowcaseCapacityTest.S-X2 (production defaults 4/2), ring-first order: the fifth unique effect is refused by the global cap; replacements succeed
+    TransactionalStartTest.Refused admission (per-player or global cap) never calls the factory or the scheduler
+F2a (F2: R1 order, early return when no ring): CAUGHT, 23 failing test(s)
+    AnchorIdentityTest.A cached snapshot that still carries the released (bound) viewer id after quit is rejected: the session no longer maps it
+    AnchorIdentityTest.A session id released on quit and reassigned on rejoin no longer matches the binding: the effect terminates
+    AnchorIdentityTest.Drafts carry the bound owner viewer id even if a (defective) rule accepted a snapshot with another id
+    AnchorIdentityTest.Driver (defence in depth): drafts with a mismatched owner/viewer id, a ring-range id or an unknown world are dropped
+    AnchorIdentityTest.Inconsistent world identity, out-of-height feet and unloaded chunks skip the tick; no request reaches the planner
+    AnchorIdentityTest.Registry: a draft whose owner or owner viewer id differs from the binding is dropped and the effect stopped
+    AnchorIdentityTest.Snapshot naming another owner (B's UUID and B's viewer id) terminates A's aura; B receives nothing
+    AnchorIdentityTest.Snapshot with A's UUID but B's viewer id (owner-viewer redirection) terminates the aura; B receives nothing
+    AnchorIdentityTest.Stale and future snapshots contribute nothing that tick and keep the effect; 20 in a row terminate it
+    M8OnlySchedulingTest.Aura only: first M8 start schedules the one task; each tick plans once with the aura request; stop cancels
+    M8OnlySchedulingTest.Natural end and termination: finished effects are disposed in the tick, and the task is cancelled when nothing remains
+    M8OnlySchedulingTest.Ring and M8 together: exactly one planning call per tick containing both requests; one task
+    M8OnlySchedulingTest.Stale callbacks: a callback from a cancelled generation never plans, also after an M8-only restart
+    M8OnlySchedulingTest.Stationary trail with no live samples: task keeps lightweight ticks, planner is skipped, zero report; moving resumes planning
+    TrailTimingTest.A moving player's trail emits on every tick well beyond the first two, including local ticks 3, 50, 100 and 299
+    TrailTimingTest.Discontinuity: a teleport (serial change) starts a new segment and no live sample lies between the two locations
+    TrailTimingTest.History expiry: after stopping at local 100, live samples drop to zero after maxAge and requests stop
+    TrailTimingTest.Lifetime is measured on the effect clock: a 1200-tick trail is still active at local 100 and ends exactly at 1200
+    TrailTimingTest.Short teleport (3 blocks, below maxStep) with a serial change still breaks the segment and adds no interpolated samples
+    TrailTimingTest.Thinning phase follows the effect clock: with a kept cap below the trail size, M6's offset is floorMod(frameOrdinal, g)
+    TransactionalStartTest.First registration, scheduler refuses: exception propagates, nothing registered, candidate disposed, no task; a retry works with a fresh id
+    TransactionalStartTest.Replacement, ensureRunning throws: the existing effect stays registered, undisposed and planned; only the candidate is disposed
+    TransactionalStartTest.Successful replacement: committed, old disposed exactly once after the commit, count and task unchanged
+F2b (F2: cancel ignores active M8 effects): CAUGHT, 1 failing test(s)
+    M8OnlySchedulingTest.Ring and M8 together: exactly one planning call per tick containing both requests; one task
+F2c (F2: planner called with zero requests): CAUGHT, 4 failing test(s)
+    AnchorIdentityTest.Inconsistent world identity, out-of-height feet and unloaded chunks skip the tick; no request reaches the planner
+    AnchorIdentityTest.Stale and future snapshots contribute nothing that tick and keep the effect; 20 in a row terminate it
+    M8OnlySchedulingTest.Stationary trail with no live samples: task keeps lightweight ticks, planner is skipped, zero report; moving resumes planning
+    TrailTimingTest.History expiry: after stopping at local 100, live samples drop to zero after maxAge and requests stop
+F3a (F3: scene clock = effect clock (R1 defect)): CAUGHT, 2 failing test(s)
+    TrailTimingTest.A moving player's trail emits on every tick well beyond the first two, including local ticks 3, 50, 100 and 299
+    TrailTimingTest.Thinning phase follows the effect clock: with a kept cap below the trail size, M6's offset is floorMod(frameOrdinal, g)
+F3b (F3: frame ordinal from the scene clock): CAUGHT, 1 failing test(s)
+    TrailTimingTest.A moving player's trail emits on every tick well beyond the first two, including local ticks 3, 50, 100 and 299
+F3c (F3: no history expiry): CAUGHT, 2 failing test(s)
+    M8OnlySchedulingTest.Stationary trail with no live samples: task keeps lightweight ticks, planner is skipped, zero report; moving resumes planning
+    TrailTimingTest.History expiry: after stopping at local 100, live samples drop to zero after maxAge and requests stop
+T1 (teleport serial ignored): CAUGHT, 1 failing test(s)
+    TrailTimingTest.Short teleport (3 blocks, below maxStep) with a serial change still breaks the segment and adds no interpolated samples
+O1 (yaw sign inverted): CAUGHT, 3 failing test(s)
+    OrientationAndAnimationTest.Aura geometry with a moving, turning anchor equals an independent formula (<= 1e-9 blocks) at known ticks
+    OrientationAndAnimationTest.Pitch never orients an effect; HEAD_YAW and WORLD_FIXED select their own yaw; lift is world-vertical
+    OrientationAndAnimationTest.Yaw mapping: local +Z -> (-sin yaw, 0, cos yaw), local +X -> (cos yaw, 0, sin yaw), +Y fixed; |error| <= 1e-12
+F5a (F5: R2 order, commit and dispose the old effect before ensureRunning): CAUGHT, 2 failing test(s)
+    TransactionalStartTest.First registration, scheduler refuses: exception propagates, nothing registered, candidate disposed, no task; a retry works with a fresh id
+    TransactionalStartTest.Replacement, ensureRunning throws: the existing effect stays registered, undisposed and planned; only the candidate is disposed
+F5b (F5: candidate identity not verified): CAUGHT, 1 failing test(s)
+    TransactionalStartTest.A candidate with the wrong id, owner or kind, or null, is rejected before the commit; the old effect is untouched
+F5c (F5: throwing dispose escapes after the commit point): CAUGHT, 1 failing test(s)
+    TransactionalStartTest.A throwing dispose of the replaced effect is contained after the commit: the new effect is registered and counted
+F6a (F6: snapshot owner not checked): CAUGHT, 2 failing test(s)
+    AnchorIdentityTest.Each rejection reason is recorded, and the right state is chosen (identity: TERMINATE; freshness/world: SKIP_TICK)
+    AnchorIdentityTest.Snapshot naming another owner (B's UUID and B's viewer id) terminates A's aura; B receives nothing
+F6b (F6: stale/future snapshots accepted): CAUGHT, 2 failing test(s)
+    AnchorIdentityTest.Each rejection reason is recorded, and the right state is chosen (identity: TERMINATE; freshness/world: SKIP_TICK)
+    AnchorIdentityTest.Stale and future snapshots contribute nothing that tick and keep the effect; 20 in a row terminate it
+F6c (F6: world identity not checked): CAUGHT, 2 failing test(s)
+    AnchorIdentityTest.Each rejection reason is recorded, and the right state is chosen (identity: TERMINATE; freshness/world: SKIP_TICK)
+    AnchorIdentityTest.Inconsistent world identity, out-of-height feet and unloaded chunks skip the tick; no request reaches the planner
+F6d (F6: world height not checked): CAUGHT, 2 failing test(s)
+    AnchorIdentityTest.Each rejection reason is recorded, and the right state is chosen (identity: TERMINATE; freshness/world: SKIP_TICK)
+    AnchorIdentityTest.Inconsistent world identity, out-of-height feet and unloaded chunks skip the tick; no request reaches the planner
+F6e (F6: unloaded chunk accepted): CAUGHT, 2 failing test(s)
+    AnchorIdentityTest.Each rejection reason is recorded, and the right state is chosen (identity: TERMINATE; freshness/world: SKIP_TICK)
+    AnchorIdentityTest.Inconsistent world identity, out-of-height feet and unloaded chunks skip the tick; no request reaches the planner
+F6f (F6: released/reassigned session id not detected): CAUGHT, 1 failing test(s)
+    AnchorIdentityTest.A cached snapshot that still carries the released (bound) viewer id after quit is rejected: the session no longer maps it
+F6g (F6: draft viewer id copied from the snapshot): CAUGHT, 1 failing test(s)
+    AnchorIdentityTest.Drafts carry the bound owner viewer id even if a (defective) rule accepted a snapshot with another id
+F6h (F6: registry passes forged drafts on): CAUGHT, 1 failing test(s)
+    AnchorIdentityTest.Registry: a draft whose owner or owner viewer id differs from the binding is dropped and the effect stopped
+F6i (F6: driver accepts forged drafts): CAUGHT, 1 failing test(s)
+    AnchorIdentityTest.Driver (defence in depth): drafts with a mismatched owner/viewer id, a ring-range id or an unknown world are dropped
+F7a (F7: replacement at capacity refused): CAUGHT, 8 failing test(s)
+    RingDriverWithHookM7CompatTest.repeatedStartReplacesAndDoesNotMultiplyTasksAtCap()
+    SharedCapacityTest.M7-only compatibility: without a contributor the hooked driver admits exactly as M7 (cap counts rings only)
+    SharedCapacityTest.M8 first, then rings: M8 effects count toward the ring path's cap; replacement of an M8 effect at cap succeeds
+    SharedCapacityTest.Rings first, then M8: at cap 2, two rings refuse a new aura; a ring replacement still succeeds
+    ShowcaseCapacityTest.S-X1 (override 8/3): two players reach 8 effects with one task; every further A/B start is a replacement and succeeds
+    ShowcaseCapacityTest.S-X1b (override 8/3): a third player's first ring or M8 effect is the ninth unique effect and is refused; freed capacity admits it
+    ShowcaseCapacityTest.S-X2 (production defaults 4/2), M8-first order: the fifth is refused on the ring path; a third M8 kind hits the per-player cap
+    ShowcaseCapacityTest.S-X2 (production defaults 4/2), ring-first order: the fifth unique effect is refused by the global cap; replacements succeed
+MUTANTS: 23 caught of 23

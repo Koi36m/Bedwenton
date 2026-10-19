@@ -1,0 +1,3 @@
+// M8 R1 evidence only: re-runs the accepted M7 adapter tests without the Paper layer (no paper-api needed).
+rootProject.name = 'm8-r1-m7-core-rerun'
+includeBuild('../../../..')

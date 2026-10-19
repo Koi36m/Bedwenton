@@ -1,0 +1,7 @@
+[
+  "paper-adapter/src/main/java/workshop/vfx/paper/core/RingDriver.java",
+  "paper-adapter/src/main/java/workshop/vfx/paper/bukkit/VfxDemoPlugin.java",
+  "paper-adapter/gradle.properties",
+  "paper-adapter/src/main/resources/config.yml",
+  "paper-adapter/src/main/resources/plugin.yml"
+]

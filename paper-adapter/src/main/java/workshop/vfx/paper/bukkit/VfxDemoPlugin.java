@@ -29,6 +29,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import workshop.vfx.paper.core.*;
 import workshop.vfx.scene.StyleKey;
+import workshop.vfx.delivery.DeliveryPlanner;
+import workshop.vfx.paper.m8.DynamicEffectRegistry;
+import workshop.vfx.paper.m8.M8Config;
+import workshop.vfx.paper.m8.K0CommandRouting;
 
 /** Ordinary Paper adapter. All platform calls run exclusively on the main thread. */
 public final class VfxDemoPlugin extends JavaPlugin implements Listener {
@@ -37,6 +41,8 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
     private ThreadGuard thread;
     private DefaultSessionIds ids;
     private DemoConfig config;
+    private M8Config m8Config;
+    private DynamicEffectRegistry registry;
     private RingDriver driver;
     private SessionStyleHealth health;
     private DemoCommands commands;
@@ -50,6 +56,10 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
         try {
             saveDefaultConfig();
             config = DemoConfig.from(getConfig().getValues(false));
+            if (getConfig().contains("m8") && !getConfig().isConfigurationSection("m8"))
+                throw new IllegalArgumentException("m8 must be a configuration section");
+            var section = getConfig().getConfigurationSection("m8");
+            m8Config = M8Config.from(section == null ? Map.of() : section.getValues(false));
             try (InputStream in = getResource("META-INF/bedwenton-build.properties")) {
                 if (in == null) throw new IllegalArgumentException("Build provenance is missing");
                 provenance.load(in);
@@ -57,7 +67,15 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
             ids = new DefaultSessionIds(thread);
             resolveCatalogue();
             health = new SessionStyleHealth(particles.keySet(),thread);
-            driver = new RingDriver(thread,new PaperHost(),config,ids,health,this::validatePoint,this::send);
+            if (m8Config.enabled()) {
+                registry = new DynamicEffectRegistry(thread,new PaperAnchorSource(thread,ids),ids,
+                    m8Config.maxEffectsPerPlayer(),m8Config.invalidAnchorTicksToTerminate());
+                driver = new RingDriver(thread,new PaperHost(),config,ids,health,this::validatePoint,this::send,DeliveryPlanner::plan,registry);
+                registry.bind(driver);
+            } else {
+                registry = null;
+                driver = new RingDriver(thread,new PaperHost(),config,ids,health,this::validatePoint,this::send);
+            }
             commands = new DemoCommands(thread,config.defaultTier());
             registerCommand("vfxdemo","Opt-in static VFX ring",List.of(),new PaperCommand());
             Bukkit.getPluginManager().registerEvents(this,this);
@@ -91,6 +109,7 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
         if (thread == null) return;
         thread.check();
         if (driver != null) driver.close();
+        registry = null;
         Bukkit.getScheduler().cancelTasks(this);
         if (ids != null) ids.clear();
         particles.clear(); health = null; commands = null;
@@ -160,6 +179,10 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
             thread.check();
             if (commands == null || driver == null) return;
             Player player = source.getExecutor() instanceof Player p ? p : null;
+            if (K0CommandRouting.handles(m8Config.enabled(),args)) {
+                source.getSender().sendMessage(K0CommandRouting.unavailable(source.getSender().hasPermission(USE),player != null));
+                return;
+            }
             commands.execute(new DemoCommands.Endpoint() {
                 @Override public boolean permitted() { return source.getSender().hasPermission(USE); }
                 @Override public boolean admin() { return source.getSender().hasPermission(ADMIN); }
@@ -168,8 +191,11 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
                     Location p = player.getLocation();
                     driver.start(player.getUniqueId(),player.getWorld().getUID(),p.getBlockX()+0.5,p.getBlockY()+0.1,p.getBlockZ()+0.5,tier);
                 }
-                @Override public void stop() { driver.stop(player.getUniqueId()); }
-                @Override public void stopAll() { driver.stopAll(); }
+                @Override public void stop() {
+                    driver.stop(player.getUniqueId());
+                    if (registry != null) registry.stopOwner(player.getUniqueId());
+                }
+                @Override public void stopAll() { driver.stopAll(); if (registry != null) registry.stopAll(); }
                 @Override public String status() { return statusText(player,admin()); }
                 @Override public void reply(String text) { source.getSender().sendMessage(text); }
             },args);
@@ -179,6 +205,12 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
         }
     }
     private String statusText(Player player, boolean admin) {
+        String status = m7StatusText(player,admin);
+        if (registry == null) return status;
+        int own = admin ? registry.activeCount() : player == null ? 0 : registry.countOwner(player.getUniqueId());
+        return status + "; M8 K0 registrations=" + own + "; visuals not implemented";
+    }
+    private String m7StatusText(Player player, boolean admin) {
         int count = admin ? driver.activeCount() : player != null && driver.ring(player.getUniqueId()) != null ? 1 : 0;
         return "VFX " + getPluginMeta().getVersion() + "; engine=0.1.0-m1 tree=" + provenance.getProperty("engineTree")
             + "; paper-api=" + provenance.getProperty("paperApiVersion") + "; server=" + Bukkit.getVersion()
@@ -188,7 +220,9 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
             + "; last tick=" + driver.lastReport() + "; /reload unsupported";
     }
     @EventHandler public void quit(PlayerQuitEvent event) {
-        thread.check(); if (driver == null) return; driver.stop(event.getPlayer().getUniqueId()); ids.release(event.getPlayer().getUniqueId());
+        thread.check(); if (driver == null) return; driver.stop(event.getPlayer().getUniqueId());
+        if (registry != null) registry.stopOwner(event.getPlayer().getUniqueId());
+        ids.release(event.getPlayer().getUniqueId());
     }
     @EventHandler public void changedWorld(PlayerChangedWorldEvent event) {
         thread.check(); if (driver != null) driver.stop(event.getPlayer().getUniqueId());
@@ -201,6 +235,7 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
     }
     @EventHandler public void death(PlayerDeathEvent event) {
         thread.check(); if (driver != null) driver.stop(event.getEntity().getUniqueId());
+        if (registry != null) registry.stopOwner(event.getEntity().getUniqueId());
     }
     @EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true) public void unload(WorldUnloadEvent event) {
         thread.check(); if (driver == null) return; UUID world=event.getWorld().getUID(); driver.stopWorld(world); ids.forgetWorld(world);

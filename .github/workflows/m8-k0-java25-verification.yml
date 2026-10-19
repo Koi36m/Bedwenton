@@ -1,0 +1,79 @@
+name: M8 K0 Java 25 Verification
+on:
+  push:
+    branches: [m8-k0-implementation, m8-k0-actions-verification]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Verify exact source, frozen engine and accepted M7 tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/m8-k0-evidence"
+          {
+            git rev-parse HEAD
+            git rev-parse HEAD^{tree}
+            java -version
+            javac -version
+            ./gradlew --version
+            sha256sum -c docs/m8/k0/FROZEN-M1-M6-SHA256SUMS.txt
+            sha256sum -c docs/m8/k0/FROZEN-M7-SHA256SUMS.txt
+            sha256sum -c docs/m8/k0/APPROVED-R3-SHA256SUMS.txt
+            sha256sum -c docs/m8/k0/IMPLEMENTATION-SHA256SUMS.txt
+          } > "$RUNNER_TEMP/m8-k0-evidence/source-and-toolchain.log" 2>&1
+          cat "$RUNNER_TEMP/m8-k0-evidence/source-and-toolchain.log"
+      - name: Clean Java 25 regression, production K0 tests and Paper JAR checks
+        shell: bash
+        run: bash paper-adapter/tools/m8-k0/verify.sh "$RUNNER_TEMP/m8-k0-evidence"
+      - name: Verify API signatures, scope exclusions and production compiler warnings
+        shell: bash
+        run: |
+          set -euo pipefail
+          API=$(find "$HOME/.gradle/caches/modules-2/files-2.1/io.papermc.paper/paper-api/26.3.build.204-stable" -name '*.jar' -print -quit)
+          javap -classpath "$API" org.bukkit.Bukkit org.bukkit.Server org.bukkit.entity.Player org.bukkit.entity.Entity org.bukkit.entity.LivingEntity org.bukkit.Location org.bukkit.World org.bukkit.generator.WorldInfo org.bukkit.Particle 'org.bukkit.Particle$DustOptions' org.bukkit.Color org.bukkit.plugin.java.JavaPlugin io.papermc.paper.command.brigadier.BasicCommand org.bukkit.scheduler.BukkitScheduler > "$RUNNER_TEMP/m8-k0-evidence/paper-api-signatures.txt"
+          cp paper-adapter/build/paper-api-provenance.txt "$RUNNER_TEMP/m8-k0-evidence/"
+          sha256sum paper-adapter/build/libs/*.jar > "$RUNNER_TEMP/m8-k0-evidence/plugin-SHA256SUMS.txt"
+          python3 - <<'PY'
+          import os,zipfile
+          from pathlib import Path
+          evidence=Path(os.environ['RUNNER_TEMP'])/'m8-k0-evidence'
+          for name in ['engine-clean-test.log','adapter-clean-test.log']:
+              text=(evidence/name).read_text()
+              if name.startswith('adapter'): assert 'warning:' not in text,text
+              else:
+                  production=text.split('> Task :compileJava',1)[1].split('> Task :',1)[0]
+                  assert 'warning:' not in production,production
+          api=(evidence/'paper-api-signatures.txt').read_text()
+          for signature in ['getBodyYaw()', 'getYaw()', 'getPitch()', 'getLocation()', 'isDead()', 'getUniqueId()', 'getPlayer(java.util.UUID)', 'getMinHeight()', 'getMaxHeight()', 'isChunkLoaded(int, int)', 'getCurrentTick()', 'registerCommand(', 'runTaskTimer(', 'org.bukkit.Particle$DustOptions(org.bukkit.Color, float)']:
+              assert signature in api,signature
+          jar=next(Path('paper-adapter/build/libs').glob('*.jar'))
+          with zipfile.ZipFile(jar) as z:
+              names=z.namelist()
+              for deferred in ['AuraEffect','TrailEffect','ActivationEffect','M8Recipes','RingBufferTrailHistory']:
+                  assert not any(n.endswith('/'+deferred+'.class') for n in names),deferred
+              (evidence/'plugin-contents.txt').write_text('\n'.join(names)+'\n')
+          print('PASS: exact pinned API methods; no K1–K4 visual implementations; zero production compiler warnings')
+          PY
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: m8-k0-java25-verification-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 90
+          path: |
+            ${{ runner.temp }}/m8-k0-evidence/
+            build/test-results/test/
+            build/reports/tests/test/
+            paper-adapter/build/test-results/test/
+            paper-adapter/build/reports/tests/test/
+            paper-adapter/build/libs/*.jar

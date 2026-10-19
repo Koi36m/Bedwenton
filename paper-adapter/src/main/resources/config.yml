@@ -15,3 +15,14 @@ heavyKeptCap: 72
 maxCallsPerTick: 2048
 maxCallsPerViewerPerTick: 256
 debug: false
+
+# K0 foundation only: enabling this section does not enable any M8 visuals.
+m8:
+  enabled: false
+  defaultTier: simple
+  heavyAllowed: true
+  maxEffectsPerPlayer: 2
+  auraLifetimeTicks: 1200
+  trailLifetimeTicks: 1200
+  trailMaxStep: 8.0
+  invalidAnchorTicksToTerminate: 20

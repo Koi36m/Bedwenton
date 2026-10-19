@@ -1,0 +1,11 @@
+{
+  "zip_sha256": "9d03dbdf041bbb7ca327fb869c64ccbfaa2083d78aa2221635e3e635ecc70899",
+  "zip_crc": true,
+  "manifest_entries": 71,
+  "bundle_sha256": "0a872ba0524d9ed76e4c15362e6dd1170ec13f4e05814739dfe5cad31cce0789",
+  "complete_history": true,
+  "r3": "17ad99186f6b2a73eaccaa22ff5aa0f0e7fd6d82",
+  "r3_tree": "8c24886ff2bad1fe3deabaf25a24974761addd25",
+  "only_docs_m8_additions": 61,
+  "original_review_sha256": "8c769b0bd7d4a1175397d7b51520127f4b06bf50fccedc2cd527de90dc1de8df"
+}

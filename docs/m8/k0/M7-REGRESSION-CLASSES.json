@@ -1,0 +1,12 @@
+[
+  "workshop.vfx.paper.core.AllocationOrderEmissionTest",
+  "workshop.vfx.paper.core.ConfigurationAndIdentityTest",
+  "workshop.vfx.paper.core.DemoCommandsTest",
+  "workshop.vfx.paper.core.OwnerAwareEmissionTest",
+  "workshop.vfx.paper.core.PluginPackagingTest",
+  "workshop.vfx.paper.core.ProductionEmissionTest",
+  "workshop.vfx.paper.core.RecipientRuleRobustnessTest",
+  "workshop.vfx.paper.core.RequestContextConsistencyTest",
+  "workshop.vfx.paper.core.RingDriverTest",
+  "workshop.vfx.paper.core.StyleHealthTest"
+]

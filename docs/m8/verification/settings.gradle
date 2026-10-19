@@ -1,0 +1,5 @@
+// M8 R2/R3 design verification build (not production). Compiles the SPI proposal (../spi), the THROWAWAY reference
+// (../reference: RingDriverWithHook and M8 effects) and the M7 adapter core (unchanged, Paper layer excluded) against the
+// accepted engine (includeBuild of the repository root); runs the M8 R2/R3 tests plus the unchanged M7 adapter tests.
+rootProject.name = 'bedwenton-m8-design-verification'
+includeBuild('../../..')

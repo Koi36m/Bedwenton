@@ -1,0 +1,44 @@
+M8 design probe output (R2 version: exits 1 on P1-P3 violations; P4 = synthetic two-layer trail benchmark).
+Command: see docs/m8/validation/reproduce.sh. Run 2026-10-18T07:52Z, Java 25.0.4.1, accepted engine jar built from unchanged sources.
+Negative self-check: a copy with one tampered P3 expectation (local 50 'burst=31') printed 'FAIL: P3 phase table at local 50' and exited 1.
+
+P1 yaw mapping: local +Z (forward) and +X (left) in world space; Paper: yaw 0 = +Z, 90 = -X, 180 = -Z, 270 = +X
+  yaw    0.0 forward ( 0.0000,  0.0000,  1.0000) left ( 1.0000,  0.0000,  0.0000) up ( 0.0,  1.0,  0.0)
+  yaw   45.0 forward (-0.7071,  0.0000,  0.7071) left ( 0.7071,  0.0000,  0.7071) up ( 0.0,  1.0,  0.0)
+  yaw   90.0 forward (-1.0000,  0.0000,  0.0000) left ( 0.0000,  0.0000,  1.0000) up ( 0.0,  1.0,  0.0)
+  yaw  180.0 forward (-0.0000,  0.0000, -1.0000) left (-1.0000,  0.0000,  0.0000) up ( 0.0,  1.0,  0.0)
+  yaw  270.0 forward ( 1.0000,  0.0000, -0.0000) left (-0.0000,  0.0000, -1.0000) up ( 0.0,  1.0,  0.0)
+  yaw  -90.0 forward ( 1.0000,  0.0000,  0.0000) left ( 0.0000,  0.0000, -1.0000) up ( 0.0,  1.0,  0.0)
+  yaw  359.5 forward ( 0.0087,  0.0000,  1.0000) left ( 1.0000,  0.0000, -0.0087) up ( 0.0,  1.0,  0.0)
+  yaw  720.0 forward ( 0.0000,  0.0000,  1.0000) left ( 1.0000,  0.0000, -0.0000) up ( 0.0,  1.0,  0.0)
+  max |forward - (-sin yaw, 0, cos yaw)| = 1.608e-16
+P2 aura (BALANCED: orbit 18 + halo 9) with a moving, turning anchor; start tick 1000
+  tick 1000: 27 points (2 batches), first orbit point (101.4000, 65.0000, -20.5000)
+  tick 1001: 27 points (2 batches), first orbit point (101.6788, 65.0000, -20.4471)
+  tick 1015: 27 points (2 batches), first orbit point (105.3364, 65.0000, -19.6364)
+  tick 1030: 27 points (2 batches), first orbit point (108.9000, 65.0000, -18.4000)
+  tick 1059: 27 points (2 batches), first orbit point (116.1212, 65.0000, -14.6471)
+  tick 1060: 27 points (2 batches), first orbit point (116.4000, 65.0000, -14.5000)
+  tick 1123: 27 points (2 batches), first orbit point (135.8289, 65.0000, -8.3408)
+  126 orbit points checked; max deviation from the independent formula = 3.553e-15 blocks
+P3 activation (HEAVY: form 32, column 24, burst 32, embers 16; lifetime 80) visible points per layer
+  maxPointsPerFrame (generation reservation) = 104
+  local   0: stage ACTIVE total   0  
+  local   1: stage ACTIVE total   1  form=1
+  local  10: stage ACTIVE total  16  form=16
+  local  19: stage ACTIVE total  30  form=30
+  local  20: stage ACTIVE total  24  column=24
+  local  35: stage ACTIVE total  24  column=24
+  local  49: stage ACTIVE total  24  column=24
+  local  50: stage ACTIVE total  32  burst=32
+  local  55: stage ACTIVE total  32  burst=32
+  local  59: stage ACTIVE total  32  burst=32
+  local  60: stage ACTIVE total  16  embers=16
+  local  70: stage ACTIVE total  16  embers=16
+  local  79: stage ACTIVE total  16  embers=16
+  local  80: stage AFTER  total   0  
+P4 SYNTHETIC benchmark: two-layer trail rebuild (fresh/old split by age, R2 design) + one global plan (indicative)
+  12 trail samples, 2 viewers: 6.29 us per tick (build scene + recipe + plan), placements/tick 24
+  24 trail samples, 2 viewers: 3.05 us per tick (build scene + recipe + plan), placements/tick 48
+  36 trail samples, 2 viewers: 4.41 us per tick (build scene + recipe + plan), placements/tick 72
+PROBE RESULT: PASS (all P1-P3 assertions)

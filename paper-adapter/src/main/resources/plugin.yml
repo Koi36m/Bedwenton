@@ -2,7 +2,7 @@ name: BedwentonVfxDemo
 version: '${version}'
 main: workshop.vfx.paper.bukkit.VfxDemoPlugin
 api-version: '26.3'
-description: Opt-in VFX engine debug demo. Particles only; no gameplay effects.
+description: Opt-in VFX engine debug demo. Particles only; M8 K0 foundation has no new visuals.
 permissions:
   bedwenton.vfxdemo.use: {default: op, description: 'Use /vfxdemo ring, stop and status'}
   bedwenton.vfxdemo.view: {default: op, description: 'See demo effects started by other players'}

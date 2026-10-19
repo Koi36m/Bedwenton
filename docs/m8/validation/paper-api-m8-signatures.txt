@@ -1,0 +1,49 @@
+Paper API facts used by the M8 design, read from PaperMC/Paper source commit 09ee222482646f8ed84413aea89d0108653af938 (main, 26.3 STABLE).
+IMPORTANT: this is source near, not identical to, the pinned jar io.papermc.paper:paper-api:26.3.build.204-stable
+(sha256 f6852324bbf519d8c27ba06cf2391ee21aed542852de9ac20b9403b7d6ea1556). repo.papermc.io is blocked here, so the pinned jar
+could not be inspected; M8 production must compile against the pinned jar (gate C0 in M8-TEST-AND-SMOKE-PLAN.md).
+
+org/bukkit/Location.java:250: public float getYaw() {
+          /**
+           * Gets the yaw of this location, measured in degrees.
+           * <ul>
+           * <li>A yaw of 0 or 360 represents the positive z direction.
+           * <li>A yaw of 180 represents the negative z direction.
+           * <li>A yaw of 90 represents the negative x direction.
+           * <li>A yaw of 270 represents the positive x direction.
+           * </ul>
+           * Increasing yaw values are the equivalent of turning to your
+           * right-facing, increasing the scale of the next respective axis, and
+           * decreasing the scale of the previous axis.
+org/bukkit/Location.java:282: public float getPitch() {
+      273-     * <li>A pitch of 0 represents level forward facing.
+      274-     * <li>A pitch of 90 represents downward facing, or negative y
+      276-     * <li>A pitch of -90 represents upward facing, or positive y direction.
+      278-     * Increasing pitch values the equivalent of looking down.
+      280-     * @return the incline's pitch
+org/bukkit/entity/LivingEntity.java:1494: float getBodyYaw();
+org/bukkit/entity/LivingEntity.java:45: public double getEyeHeight();
+org/bukkit/entity/Entity.java:56: public Location getLocation();
+org/bukkit/entity/Entity.java:69: public Location getLocation(@Nullable Location loc);
+org/bukkit/entity/Entity.java:91: public double getHeight();
+org/bukkit/entity/Entity.java:521: public boolean isDead();
+org/bukkit/entity/Entity.java:529: public boolean isValid();
+org/bukkit/entity/Entity.java:134: public World getWorld();
+org/bukkit/entity/Entity.java:691: public UUID getUniqueId();
+org/bukkit/OfflinePlayer.java:35: public boolean isOnline();
+org/bukkit/Server.java:2213: Entity getEntity(@NotNull UUID uuid);
+org/bukkit/Server.java:681: public Player getPlayer(@NotNull UUID id);
+org/bukkit/World.java:388: public boolean isChunkLoaded(int x, int z);
+org/bukkit/event/player/PlayerTeleportEvent.java:50: public TeleportCause getCause() {
+org/bukkit/event/player/PlayerMoveEvent.java:55: public Location getTo() {
+org/bukkit/event/player/PlayerChangedWorldEvent.java:12: public class PlayerChangedWorldEvent extends PlayerEvent {
+org/bukkit/event/player/PlayerRespawnEvent.java:19: public class PlayerRespawnEvent extends AbstractRespawnEvent {
+org/bukkit/event/entity/PlayerDeathEvent.java:17: public class PlayerDeathEvent extends EntityDeathEvent {
+org/bukkit/event/player/PlayerQuitEvent.java:14: public class PlayerQuitEvent extends PlayerEvent {
+org/bukkit/event/world/WorldUnloadEvent.java:12: public class WorldUnloadEvent extends WorldEvent implements Cancellable {
+com/destroystokyo/paper/event/entity/EntityRemoveFromWorldEvent.java:15: public class EntityRemoveFromWorldEvent extends EntityEvent {
+org/bukkit/Particle.java:52: DUST("dust", DustOptions.class),
+org/bukkit/Particle.java:294: this.size = requireRange(size, "size", 0.01F, 4.0F);
+org/bukkit/entity/Player.java:3368: default <T> void spawnParticle(Particle particle, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ, double speed, @Nullable T data, boolean force) {
+org/bukkit/scheduler/BukkitScheduler.java:381: public BukkitTask runTaskTimer(@NotNull Plugin plugin, @NotNull Runnable task, long delay, long period) throws IllegalArgumentException;
+org/bukkit/Bukkit.java:2839: public static int getCurrentTick() {

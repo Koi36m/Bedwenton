@@ -1,0 +1,27 @@
+M8 R1 regression evidence on branch m8-spec (base ed5fc7bff548edf4b005e919495b22213a65b64e, R1 adds docs/m8 only), 2026-10-18T07:04:34Z
+Java 25.0.4.1, Gradle 9.1.0 (root wrapper).
+
+Root M1-M6: ./gradlew --no-daemon clean test check -> exit 0
+TOTAL 415 tests, 415 passed, 0 not passed, in 59 report files
+
+Datasets: python3 verification/m6/regenerate_all.py <scratch dir>
+PASS: all seven M1-M6 golden/reference datasets and manifests regenerate byte-identically.
+
+M7 adapter tests (61): RE-EXECUTED in a scratch Gradle build (not the accepted adapter build):
+  sources = paper-adapter/src/main/java EXCLUDING workshop/vfx/paper/bukkit/** (the Paper layer), tests =
+  paper-adapter/src/test/java unchanged, engine via includeBuild of this checkout, JUnit 5.12.2, -Xlint:all -Werror,
+  system property adapter.root = paper-adapter.
+  Result: TOTAL 61 tests, 61 passed, 0 not passed, in 10 report files (per-class list below).
+  NOT covered by this re-run: compiling VfxDemoPlugin against paper-api 26.3.build.204-stable, recordPaperApi and
+  verifyPluginJar. repo.papermc.io is refused by this environment's network policy. M8 R1 changes no adapter file.
+  workshop.vfx.paper.core.AllocationOrderEmissionTest  3 tests, 0 not passed
+  workshop.vfx.paper.core.ConfigurationAndIdentityTest  9 tests, 0 not passed
+  workshop.vfx.paper.core.DemoCommandsTest  6 tests, 0 not passed
+  workshop.vfx.paper.core.OwnerAwareEmissionTest  7 tests, 0 not passed
+  workshop.vfx.paper.core.PluginPackagingTest  5 tests, 0 not passed
+  workshop.vfx.paper.core.ProductionEmissionTest  6 tests, 0 not passed
+  workshop.vfx.paper.core.RecipientRuleRobustnessTest  5 tests, 0 not passed
+  workshop.vfx.paper.core.RequestContextConsistencyTest  5 tests, 0 not passed
+  workshop.vfx.paper.core.RingDriverTest  10 tests, 0 not passed
+  workshop.vfx.paper.core.StyleHealthTest  5 tests, 0 not passed
+  TOTAL 61 tests, 61 passed, 0 not passed, in 10 report files
