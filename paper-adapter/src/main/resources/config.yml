@@ -16,7 +16,7 @@ maxCallsPerTick: 2048
 maxCallsPerViewerPerTick: 256
 debug: false
 
-# K0 foundation only: enabling this section does not enable any M8 visuals.
+# K1 Arcane Halo aura is opt-in. No effect starts automatically. Restart to apply.
 m8:
   enabled: false
   defaultTier: simple

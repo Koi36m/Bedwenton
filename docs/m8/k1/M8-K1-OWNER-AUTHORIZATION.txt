@@ -1,0 +1,540 @@
+Bedwenton M8 K1 — Arcane Halo Aura Implementation
+
+Repository: Koi36m/Bedwenton
+Checkpoint: M8 K1 — Orbiting Aura
+Assignment: Production implementation and verification of K1 only
+
+1. Authorization and baseline
+
+The project owner authorizes K1 development in an isolated branch, subject to the scope below.
+
+Accepted foundations:
+
+M1–M6: completed, accepted, frozen.
+
+M7: Paper Rendering Adapter, working prototype accepted.
+
+M8 R3: independently accepted design.
+
+M8 K0: automated implementation PASS (526/526 tests) with substantial in-game regression evidence; remaining smoke checks are documented as deferred.
+
+Exact identities:
+
+Accepted M8 R3 design: 17ad99186f6b2a73eaccaa22ff5aa0f0e7fd6d82
+
+K0 native production: a033180b3128c51b2178a1b7a0c8fb1cf6b90378
+
+K0 GitHub-tested snapshot: 37fef2a2670e6bed14661909ce83c7354ef9e8b2
+
+Verified K0 production tree: eb09bdc031ac2bf06b82bb75473f611fbf05f991
+
+K0 evidence branch: m8-k0-review-evidence
+
+K0 GitHub Actions:
+https://github.com/Koi36m/Bedwenton/actions/runs/39203576470
+
+Recover the actual K0 source, accepted R3 specifications, and relevant history before editing.
+
+Prefer the native K0 history if recoverable. Otherwise use the verified GitHub snapshot, preserve its true ancestry, and document the distinction.
+
+Do not invent or reconstruct unavailable commits.
+
+Create an isolated K1 implementation branch. Do not merge or deploy.
+
+2. Primary objective
+
+Implement the first player-following VFX demonstration:
+
+Arcane Halo Aura
+
+The aura must follow a Minecraft player while continuously rotating around their body.
+
+This is a purely cosmetic effect.
+
+It must not alter player attributes, movement, combat, inventory, enchantments, or gameplay mechanics.
+
+3. Visual requirements
+
+The visual target chosen by the owner is a conservative, elegant Arcane Halo.
+
+Main waist ring
+
+White END_ROD particles.
+
+Horizontal circular formation around the player's waist.
+
+Radius: 0.9 blocks.
+
+Height: 1.0 block above the player's feet.
+
+One complete rotation every 60 ticks.
+
+Rotation remains relative to the player's body yaw.
+
+Head halo
+
+Cyan DUST particles.
+
+Radius: 0.45 blocks.
+
+Height: 2.15 blocks above the player's feet.
+
+One complete rotation every 80 ticks.
+
+Opposite rotation direction to the waist ring.
+
+Appears from Balanced quality upward.
+
+Quality tiers
+
+Preserve the accepted R3 initial geometry and point counts:
+
+Tier
+
+Waist
+
+Halo
+
+Total
+
+SIMPLE
+
+12
+
+0
+
+12
+
+BALANCED
+
+18
+
+9
+
+27
+
+HEAVY
+
+24
+
+12
+
+36
+
+Use Simple as the default M8 tier.
+
+The first K1 implementation should prioritize accurate attachment, readable rotation, and stable performance.
+
+Two optional orbiting sparkle nodes are a future visual-polish candidate. Do not add an additional particle layer or increase point reservations without documenting the proposed amendment and obtaining approval.
+
+Explicit visual amendment
+
+The accepted R3 design used violet and gold DUST for the aura.
+
+For K1, use the owner's newly selected white END_ROD and cyan DUST palette instead.
+
+Document this as docs/m8/k1/M8-K1-ARCANE-HALO-AMENDMENT.md.
+
+Reuse the verified M7 END_ROD style where appropriate. Add a strictly validated cyan DUST style.
+
+Do not silently overwrite style keys that later K3 designs might depend on.
+
+No new particle payload family is authorized.
+
+4. Motion and attachment
+
+Implement a player-attached aura using the accepted M1–M6 engine.
+
+Use:
+
+M1 Pose and Quaternion mathematics.
+
+M2 deterministic tick timing.
+
+M3 rotation and motion geometry.
+
+M4 uniform sampling.
+
+M5 scene composition and evaluation.
+
+M6 global particle budgeting.
+
+M7 emitter and recipient authorization.
+
+K0 DynamicEffectRegistry, AnchorSnapshot, and shared TickContributor.
+
+The effect must:
+
+Follow the player while walking.
+
+Follow while sprinting.
+
+Follow vertical movement, including jumping and falling.
+
+Respond correctly to body yaw.
+
+Remain horizontal when the player changes pitch.
+
+Update its anchor from a fresh validated snapshot every tick.
+
+Maintain deterministic rotation relative to its original start tick.
+
+Avoid unnecessary geometry rebuilding each tick.
+
+Use the accepted orientation convention:
+
+Local +X = left.
+
+Local +Y = up.
+
+Local +Z = forward.
+
+Body yaw determines horizontal orientation.
+
+Never infer ownership from untrusted snapshots.
+
+World changes
+
+Preserve the accepted R3 behavior: the aura continues in the new world using the next valid snapshot, provided the owner remains eligible.
+
+It must snap to the new position without creating a particle streak between worlds.
+
+Death, disconnect, expiration, explicit cancellation, or plugin shutdown terminate the aura.
+
+5. Runtime integration
+
+Implement the actual AuraEffect and aura recipe using K0's production registry.
+
+Do not create a second scheduler.
+
+Do not call DeliveryPlanner separately for the aura.
+
+All rings and auras must share:
+
+One scheduler task.
+
+One global M6 planning call per applicable tick.
+
+One global effect capacity.
+
+Existing owner-first viewer selection.
+
+Existing per-recipient permission checks.
+
+Existing particle emission caps.
+
+Existing failure handling and placement accounting.
+
+Aura priority remains NORMAL.
+
+No automatic aura starts when the plugin enables.
+
+Maintain the existing maximum-active-effect policy and the default limit of two M8 effects per player.
+
+6. Commands
+
+Implement:
+
+/vfxdemo aura
+
+/vfxdemo aura simple
+
+/vfxdemo aura balanced
+
+/vfxdemo aura heavy
+
+/vfxdemo aura off
+
+The default should be Simple unless the M8 configuration specifies another tier.
+
+Starting another aura replaces the existing aura, never duplicates it.
+
+/vfxdemo aura off stops only the aura.
+
+Existing /vfxdemo stop and admin /vfxdemo stop all must also clean up active auras.
+
+The existing M7 ring commands, permissions, and status behavior must remain compatible.
+
+Support the M8 opt-in setting:
+
+m8.enabled: false
+
+When disabled, aura commands must not start an effect.
+
+Respect m8.heavyAllowed.
+
+Add clear aura information to /vfxdemo status without breaking the existing output fields.
+
+7. Lifecycle and safety
+
+Preserve K0's transactional registration behavior.
+
+Require:
+
+Main-thread-only Bukkit/Paper access.
+
+No new repeating tasks per aura.
+
+No chunk loading for particle effects.
+
+Fail-closed snapshot validation.
+
+Owner UUID and viewer-session binding.
+
+Strict request identity validation.
+
+Safe effect replacement.
+
+Deterministic expiration.
+
+Clean shutdown and task cancellation.
+
+No unbounded buffers.
+
+No forced particle broadcasting.
+
+Use per-recipient native Paper particle spawning with force=false.
+
+Do not introduce NMS, reflection-based compatibility, client-side mods, or unapproved dependencies.
+
+8. Performance requirements
+
+We are developing on a self-hosted Paper 26.3 test server with approximately 2 GB allocated RAM.
+
+The older Astral VFX prototype previously caused substantial server TPS drops under Heavy and Experimental settings.
+
+This is a known performance concern, not a measured K1 benchmark.
+
+Preserve the global M6 planner limits and all K0 safeguards.
+
+The aura recipe should be built once and reused with updated anchor poses.
+
+Do not recalculate particle geometry unnecessarily.
+
+Test all three quality tiers, including sustained Heavy operation.
+
+Report:
+
+Generated points per frame.
+
+Planned placements.
+
+Successful and failed emission calls.
+
+Planner timing.
+
+Emitter timing.
+
+New snapshot/attachment timing where implemented.
+
+Allocation or scheduling concerns.
+
+Do not claim server TPS or MSPT performance without actual server measurements.
+
+9. Required automated tests
+
+Preserve the complete existing baseline:
+
+415 M1–M6 tests.
+
+61 M7 tests.
+
+50 K0 tests.
+
+All seven reference datasets byte-identical.
+
+Add genuine K1 production tests covering:
+
+Accurate waist-ring and head-halo geometry.
+
+Exact 12/27/36-point tier totals.
+
+Deterministic clockwise/counterclockwise phase behavior.
+
+Correct body-yaw rotation.
+
+Moving, jumping, and turning anchors.
+
+Head pitch not tilting the rings.
+
+World-change continuation.
+
+Death and disconnect cleanup.
+
+Expiration at the configured lifetime.
+
+Simple/Balanced/Heavy replacement.
+
+Global and per-player capacity enforcement.
+
+Owner and viewer permission isolation.
+
+Malformed, stale, non-finite, mismatched, or released anchor identities.
+
+One shared planning call for rings and auras.
+
+Particle budgets and emission limits.
+
+Style validation and persistent failure handling.
+
+No extra scheduled tasks or task leaks.
+
+Clean cancellation and shutdown.
+
+Invalid configuration rejection.
+
+M7 ring and K0 compatibility.
+
+Use the accepted R3 design probes as references, but test the real production classes.
+
+Do not count historical design-reference tests as newly executed production passes.
+
+10. Paper build verification
+
+Use Java 25 and Gradle 9.1.0.
+
+Keep the exact pinned Paper API:
+
+26.3.build.204-stable
+
+Expected Paper API SHA-256:
+
+f6852324bbf519d8c27ba06cf2391ee21aed542852de9ac20b9403b7d6ea1556
+
+Run clean tests and both Gradle checks, including plugin JAR verification, runtime dependency checks, and Paper API provenance.
+
+Require zero production compiler warnings under the existing compiler policy.
+
+Do not modify frozen reference vectors, historical regressions, or test expectations to obtain a green build.
+
+If the Paper dependency cannot be resolved locally, use the existing authorized GitHub Actions workflow approach and independently inspect its actual results. Disclose any remaining limitations.
+
+11. Real-server smoke plan
+
+Provide a concise K1-specific checklist.
+
+Prioritize:
+
+Aura appearance and readable rotation.
+
+Following walking, sprinting, and jumping.
+
+Body yaw versus head pitch.
+
+Tier changes.
+
+World changes.
+
+Death/disconnect cleanup.
+
+Two-player visibility and permission isolation.
+
+Performance comparison with and without the aura.
+
+Shutdown cleanup.
+
+Do not unnecessarily repeat every M7 static-ring test already performed by the owner.
+
+The K0 JAR has substantial owner-supplied in-game regression evidence, including startup, emission, quality replacement, stop, teleport, dimension-change, and death cleanup.
+
+K0 disconnect and restart checks were deferred by the owner.
+
+Historical evidence must remain labeled by the JAR version actually tested.
+
+Two-player permission isolation is required before inviting outside players to a showcase.
+
+If no real Paper server is available to Codex, mark all new K1 smoke tests NOT RUN and hand them to the owner. Never invent screenshots, TPS measurements, or multiplayer results.
+
+12. Deliverables
+
+Supply:
+
+Compiled K1 plugin JAR if successful.
+
+Complete source ZIP.
+
+Recoverable Git bundle preserving native ancestry.
+
+Full commit SHA and source-tree SHA.
+
+Source and dependency provenance.
+
+SHA-256 manifest.
+
+New K1 visual amendment documentation.
+
+Implementation report.
+
+Complete automated test summary.
+
+Evidence of all frozen baseline preservation.
+
+GitHub Actions URL and artifact if used.
+
+Installation and rollback instructions.
+
+K1-specific smoke-test checklist.
+
+Known limitations and future polish recommendations.
+
+Use a clearly identified prerelease version such as 0.8.0-k1, subject to the existing build conventions.
+
+Produce a single downloadable JAR artifact when possible rather than requiring the owner to search through verification logs.
+
+13. Scope boundaries
+
+Authorized:
+
+K1 Arcane Halo Aura.
+
+Necessary additive K1 integration with accepted K0 classes.
+
+White END_ROD / cyan DUST visual amendment.
+
+K1-specific tests, configuration, documentation, and build evidence.
+
+Not authorized:
+
+K2 Movement Trail.
+
+K3 Animated Activation.
+
+K4 Combined Showcase.
+
+Global cinematic summoning.
+
+Ender Dragon encounter features.
+
+Non-player entity attachment.
+
+Particle wings or advanced gyroscope effects.
+
+Astral VFX optimization.
+
+Rewriting M1–M6.
+
+Unrelated refactoring.
+
+Merge into main.
+
+Live SMP deployment.
+
+Production release.
+
+If a new architectural conflict is discovered, document it and stop rather than inventing a workaround that changes accepted behavior.
+
+14. Completion requirement
+
+Stop when K1 implementation and all available automated verification are complete.
+
+Report either:
+
+READY FOR INDEPENDENT K1 IMPLEMENTATION REVIEW
+
+or
+
+BLOCKED
+
+Do not self-approve K1 or begin K2.
+
+ChatGPT and the project owner will review the implementation and decide acceptance separately.

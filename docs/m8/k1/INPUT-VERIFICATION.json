@@ -1,0 +1,20 @@
+{
+  "native_k0_production": "a033180b3128c51b2178a1b7a0c8fb1cf6b90378",
+  "k0_tested_tree": "eb09bdc031ac2bf06b82bb75473f611fbf05f991",
+  "native_k0_evidence": "9cfd4eac65502161ffa079a34bd1a5198580bb28",
+  "k0_evidence_tree": "0c175f0ba04c7b01925b355cfe8677d572c2a2ea",
+  "github_k0_source": "37fef2a2670e6bed14661909ce83c7354ef9e8b2",
+  "github_k0_evidence": "d5ad9a321cd230df56971bb2068605b25aacb3bb",
+  "accepted_r3": "17ad99186f6b2a73eaccaa22ff5aa0f0e7fd6d82",
+  "native_clone": "exact local Git clone, no reconstructed commits; strict fsck PASS",
+  "owner_authorization_sha256": "510959c7adef0bd1633c2c9a81e625799c9df2f037e6f086321199982704e769",
+  "frozen_files": 1453,
+  "authorized_edits": [
+    "paper-adapter/gradle.properties",
+    "paper-adapter/src/main/java/workshop/vfx/paper/bukkit/VfxDemoPlugin.java",
+    "paper-adapter/src/main/resources/config.yml",
+    "paper-adapter/src/main/resources/plugin.yml"
+  ],
+  "m1_m6_production_tree": "10fa150464001d617d33937f42a0c9da45ed99bb",
+  "main_before": "870c9fd75bf9a7a9d619179993d37f2b6487b081"
+}

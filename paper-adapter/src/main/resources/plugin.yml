@@ -2,8 +2,8 @@ name: BedwentonVfxDemo
 version: '${version}'
 main: workshop.vfx.paper.bukkit.VfxDemoPlugin
 api-version: '26.3'
-description: Opt-in VFX engine debug demo. Particles only; M8 K0 foundation has no new visuals.
+description: Opt-in VFX engine debug demo. Particles only; K1 Arcane Halo aura prerelease.
 permissions:
-  bedwenton.vfxdemo.use: {default: op, description: 'Use /vfxdemo ring, stop and status'}
+  bedwenton.vfxdemo.use: {default: op, description: 'Use /vfxdemo ring, aura, stop and status'}
   bedwenton.vfxdemo.view: {default: op, description: 'See demo effects started by other players'}
   bedwenton.vfxdemo.admin: {default: op, description: 'Stop all demo effects; see server-wide status'}

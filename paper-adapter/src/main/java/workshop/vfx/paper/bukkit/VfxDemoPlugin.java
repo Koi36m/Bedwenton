@@ -32,7 +32,10 @@ import workshop.vfx.scene.StyleKey;
 import workshop.vfx.delivery.DeliveryPlanner;
 import workshop.vfx.paper.m8.DynamicEffectRegistry;
 import workshop.vfx.paper.m8.M8Config;
-import workshop.vfx.paper.m8.K0CommandRouting;
+import workshop.vfx.paper.m8.AuraSession;
+import workshop.vfx.paper.m8.M8Commands;
+import workshop.vfx.paper.m8.M8StyleCatalog;
+import workshop.vfx.paper.m8.TimedAnchorSource;
 
 /** Ordinary Paper adapter. All platform calls run exclusively on the main thread. */
 public final class VfxDemoPlugin extends JavaPlugin implements Listener {
@@ -46,6 +49,9 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
     private RingDriver driver;
     private SessionStyleHealth health;
     private DemoCommands commands;
+    private M8Commands m8Commands;
+    private AuraSession auras;
+    private TimedAnchorSource anchorTiming;
     private final Properties provenance = new Properties();
     private long lastDebugTick = Long.MIN_VALUE;
     private long lastStyleReportTick = Long.MIN_VALUE;
@@ -68,16 +74,20 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
             resolveCatalogue();
             health = new SessionStyleHealth(particles.keySet(),thread);
             if (m8Config.enabled()) {
-                registry = new DynamicEffectRegistry(thread,new PaperAnchorSource(thread,ids),ids,
+                anchorTiming = new TimedAnchorSource(thread,new PaperAnchorSource(thread,ids),System::nanoTime);
+                registry = new DynamicEffectRegistry(thread,anchorTiming,ids,
                     m8Config.maxEffectsPerPlayer(),m8Config.invalidAnchorTicksToTerminate());
                 driver = new RingDriver(thread,new PaperHost(),config,ids,health,this::validatePoint,this::send,DeliveryPlanner::plan,registry);
                 registry.bind(driver);
+                auras = new AuraSession(thread,ids,anchorTiming,registry,m8Config);
             } else {
                 registry = null;
+                auras = null; anchorTiming = null;
                 driver = new RingDriver(thread,new PaperHost(),config,ids,health,this::validatePoint,this::send);
             }
             commands = new DemoCommands(thread,config.defaultTier());
-            registerCommand("vfxdemo","Opt-in static VFX ring",List.of(),new PaperCommand());
+            m8Commands = new M8Commands(thread,m8Config);
+            registerCommand("vfxdemo","Opt-in static ring and Arcane Halo aura",List.of(),new PaperCommand());
             Bukkit.getPluginManager().registerEvents(this,this);
             getLogger().info("Bedwenton VFX " + getPluginMeta().getVersion() + "; engine tree=" + provenance.getProperty("engineTree")
                 + "; paper-api=" + provenance.getProperty("paperApiVersion") + "; server=" + Bukkit.getVersion()
@@ -88,7 +98,8 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
         }
     }
     private void resolveCatalogue() {
-        for (var entry : DemoStyleCatalog.whitelist().entrySet()) {
+        var catalogue = m8Config.enabled() ? M8StyleCatalog.whitelist() : DemoStyleCatalog.whitelist();
+        for (var entry : catalogue.entrySet()) {
             try {
                 Particle particle; Object data;
                 if (entry.getValue() instanceof ParticleSpec.Plain) {
@@ -110,6 +121,7 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
         thread.check();
         if (driver != null) driver.close();
         registry = null;
+        auras = null; anchorTiming = null; m8Commands = null;
         Bukkit.getScheduler().cancelTasks(this);
         if (ids != null) ids.clear();
         particles.clear(); health = null; commands = null;
@@ -166,7 +178,9 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
                         for (StyleKey style : report.stylesDisabledThisTick()) getLogger().warning("Particle style disabled for this session: " + style);
                     }
                     if (config.debug() && report.tickOrdinal() != lastDebugTick && Math.floorMod(report.tickOrdinal(),100) == 0) {
-                        lastDebugTick = report.tickOrdinal(); getLogger().info("VFX tick: " + report);
+                        lastDebugTick = report.tickOrdinal(); getLogger().info("VFX tick: " + report
+                            + (anchorTiming == null ? "" : "; snapshot tick=" + anchorTiming.tick()
+                                + "; snapshotNanos=" + anchorTiming.snapshotNanos() + "; snapshotReads=" + anchorTiming.reads()));
                     }
                 }
             },1L,1L);
@@ -179,8 +193,16 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
             thread.check();
             if (commands == null || driver == null) return;
             Player player = source.getExecutor() instanceof Player p ? p : null;
-            if (K0CommandRouting.handles(m8Config.enabled(),args)) {
-                source.getSender().sendMessage(K0CommandRouting.unavailable(source.getSender().hasPermission(USE),player != null));
+            if (m8Commands.handles(args)) {
+                m8Commands.execute(new M8Commands.Endpoint() {
+                    @Override public boolean permitted() { return source.getSender().hasPermission(USE); }
+                    @Override public boolean player() { return player != null; }
+                    @Override public void start(workshop.vfx.delivery.QualityTier tier) {
+                        auras.start(player.getUniqueId(),tier,Bukkit.getCurrentTick());
+                    }
+                    @Override public void stopAura() { auras.stop(player.getUniqueId()); }
+                    @Override public void reply(String text) { source.getSender().sendMessage(text); }
+                },args);
                 return;
             }
             commands.execute(new DemoCommands.Endpoint() {
@@ -194,21 +216,33 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
                 @Override public void stop() {
                     driver.stop(player.getUniqueId());
                     if (registry != null) registry.stopOwner(player.getUniqueId());
+                    if (registry != null) source.getSender().sendMessage("Your M8 effects stopped.");
                 }
-                @Override public void stopAll() { driver.stopAll(); if (registry != null) registry.stopAll(); }
+                @Override public void stopAll() {
+                    driver.stopAll();
+                    if (registry != null) { registry.stopAll(); source.getSender().sendMessage("All M8 effects stopped."); }
+                }
                 @Override public String status() { return statusText(player,admin()); }
                 @Override public void reply(String text) { source.getSender().sendMessage(text); }
             },args);
         }
         @Override public Collection<String> suggest(CommandSourceStack source, String[] args) {
-            thread.check(); return commands == null ? List.of() : commands.suggest(args,source.getSender().hasPermission(ADMIN));
+            thread.check();
+            if (commands == null) return List.of();
+            var original = commands.suggest(args,source.getSender().hasPermission(ADMIN));
+            if (!source.getSender().hasPermission(USE)) return original;
+            return java.util.stream.Stream.concat(original.stream(),m8Commands.suggest(args).stream()).distinct().toList();
         }
     }
     private String statusText(Player player, boolean admin) {
         String status = m7StatusText(player,admin);
         if (registry == null) return status;
         int own = admin ? registry.activeCount() : player == null ? 0 : registry.countOwner(player.getUniqueId());
-        return status + "; M8 K0 registrations=" + own + "; visuals not implemented";
+        return status + "; M8 registrations=" + own
+            + (player == null ? "" : "; " + auras.status(player.getUniqueId()))
+            + "; aura default=" + m8Config.defaultTier() + "; heavyAllowed=" + m8Config.heavyAllowed()
+            + "; snapshot tick=" + anchorTiming.tick() + "; snapshotNanos=" + anchorTiming.snapshotNanos()
+            + "; snapshotReads=" + anchorTiming.reads();
     }
     private String m7StatusText(Player player, boolean admin) {
         int count = admin ? driver.activeCount() : player != null && driver.ring(player.getUniqueId()) != null ? 1 : 0;
