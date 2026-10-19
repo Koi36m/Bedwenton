@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.paper.m8.K0TransactionalStartTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-19T05:17:08.115Z" hostname="runnervm8k3b6" time="0.012">
+  <properties/>
+  <testcase name="Refused admission (per-player or global cap) never calls the factory or the scheduler" classname="workshop.vfx.paper.m8.K0TransactionalStartTest" time="0.001"/>
+  <testcase name="First registration, scheduler refuses: exception propagates, nothing registered, candidate disposed, no task; a retry works with a fresh id" classname="workshop.vfx.paper.m8.K0TransactionalStartTest" time="0.002"/>
+  <testcase name="A candidate with the wrong id, owner or kind, or null, is rejected before the commit; the old effect is untouched" classname="workshop.vfx.paper.m8.K0TransactionalStartTest" time="0.002"/>
+  <testcase name="Factory throws: on first registration nothing is registered and no task starts; on replacement the old effect is untouched" classname="workshop.vfx.paper.m8.K0TransactionalStartTest" time="0.002"/>
+  <testcase name="Ring start in the hooked driver: a first-ring scheduling failure leaves no ring and no task; an aura start afterwards owns the one task" classname="workshop.vfx.paper.m8.K0TransactionalStartTest" time="0.001"/>
+  <testcase name="Replacement, ensureRunning throws: the existing effect stays registered, undisposed and planned; only the candidate is disposed" classname="workshop.vfx.paper.m8.K0TransactionalStartTest" time="0.001"/>
+  <testcase name="A throwing dispose of the replaced effect is contained after the commit: the new effect is registered and counted" classname="workshop.vfx.paper.m8.K0TransactionalStartTest" time="0.0"/>
+  <testcase name="Successful replacement: committed, old disposed exactly once after the commit, count and task unchanged" classname="workshop.vfx.paper.m8.K0TransactionalStartTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.scene.TimeSemanticsTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-19T05:16:38.700Z" hostname="runnervm8k3b6" time="0.004">
+  <properties/>
+  <testcase name="Playback controls are M2's: paused frames do not change; seek moves; negative rate plays backwards; zero rate freezes; restart and resume" classname="workshop.vfx.scene.TimeSemanticsTest" time="0.0"/>
+  <testcase name="Signed zero: local ticks of -0.0 are reported as +0.0 and evaluated as the scene start" classname="workshop.vfx.scene.TimeSemanticsTest" time="0.0"/>
+  <testcase name="Scene window: local &lt; 0 is BEFORE (empty), [0, lifetime) is ACTIVE, local &gt;= lifetime is AFTER (empty, even with HOLD_AFTER layers); UNBOUNDED never ends; -0.0 counts as 0" classname="workshop.vfx.scene.TimeSemanticsTest" time="0.0"/>
+  <testcase name="The frame reports the playback's local ticks exactly (M2 Playback.localTicks)" classname="workshop.vfx.scene.TimeSemanticsTest" time="0.001"/>
+  <testcase name="Layer passes are half-open (M2): visible at the start, still at nextDown(end), hidden at the end for ACTIVE_ONLY, held at progress 1 for HOLD_AFTER; hidden before a delay" classname="workshop.vfx.scene.TimeSemanticsTest" time="0.0"/>
+  <testcase name="Extreme instants: GAME tick differences that overflow long give ArithmeticException (M2); COSMETIC nanoseconds wrap (M2); non-finite local ticks give ArithmeticException; huge finite local ticks are evaluated" classname="workshop.vfx.scene.TimeSemanticsTest" time="0.001"/>
+  <testcase name="Ping-pong and loops: cycle and progress are M2's; a held ping-pong with an even cycle count ends at progress 0" classname="workshop.vfx.scene.TimeSemanticsTest" time="0.0"/>
+  <testcase name="Domains: the playback anchor and the instant must both have the scene's domain (IllegalArgumentException), GAME and COSMETIC alike" classname="workshop.vfx.scene.TimeSemanticsTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

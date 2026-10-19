@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.sample.ArcLengthTableTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-19T05:16:24.903Z" hostname="runnervm8k3b6" time="0.74">
+  <properties/>
+  <testcase name="Convergence: for a cubic, the length error shrinks with the tolerance and stays below tau for tau = 1e-3 ... 1e-12 relative" classname="workshop.vfx.math.sample.ArcLengthTableTest" time="0.002"/>
+  <testcase name="Circles and helices: length |t1 - t0| sqrt((2 pi r turns)^2 + rise^2) (constant speed, BigDecimal pi) within the M3 derivative error plus 64 eps" classname="workshop.vfx.math.sample.ArcLengthTableTest" time="0.091"/>
+  <testcase name="Exact ends: lengthAt(t0) = 0, lengthAt(t1) = length, parameterAt(0) = t0, parameterAt(length) = t1 (bit for bit); lengthAt non-decreasing on a grid for smooth curves" classname="workshop.vfx.math.sample.ArcLengthTableTest" time="0.048"/>
+  <testcase name="Validation: null arguments; non-finite, reversed or overflowing ranges; lengthAt and parameterAt outside their domains" classname="workshop.vfx.math.sample.ArcLengthTableTest" time="0.003"/>
+  <testcase name="Rigid motion and uniform scale: the posed curve's length is scale * length (within tau), rotation and translation invariant; subranges add up" classname="workshop.vfx.math.sample.ArcLengthTableTest" time="0.138"/>
+  <testcase name="Lines: length |t1 - t0| |P1 - P0| (BigDecimal oracle) within 64 eps relative, for magnitudes 1e-300 to 1e100 and extrapolated ranges" classname="workshop.vfx.math.sample.ArcLengthTableTest" time="0.265"/>
+  <testcase name="Quadratic Beziers and conical spirals against the closed-form antiderivative: |L - L*| &lt;= tau + rounding allowance, with converged() and errorEstimate() &lt;= tau" classname="workshop.vfx.math.sample.ArcLengthTableTest" time="0.189"/>
+  <testcase name="Effective tolerance: tau = max(absolute, relative * initial estimate); tau &gt;= absolute, and with absolute = 0 tau is relative * L within 1e-6 for smooth curves" classname="workshop.vfx.math.sample.ArcLengthTableTest" time="0.0"/>
+  <testcase name="Collapsed and stationary geometry: zero length, converged; a stationary point off the initial nodes converges to the exact length" classname="workshop.vfx.math.sample.ArcLengthTableTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

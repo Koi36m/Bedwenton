@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.paper.core.PluginPackagingTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-19T05:17:06.912Z" hostname="runnervm8k3b6" time="0.885">
+  <properties/>
+  <testcase name="syntheticCleanJarPasses()" classname="workshop.vfx.paper.core.PluginPackagingTest" time="0.071"/>
+  <testcase name="unresolvedAndWrongPluginVersionsAreRejected()" classname="workshop.vfx.paper.core.PluginPackagingTest" time="0.261"/>
+  <testcase name="sourceBoundaryHasNoPlatformCallsInCoreOrBroadcastAndAsyncInPaper()" classname="workshop.vfx.paper.core.PluginPackagingTest" time="0.007"/>
+  <testcase name="failedGradleCannotBeMaskedByStaleSuccessfulXml()" classname="workshop.vfx.paper.core.PluginPackagingTest" time="0.013"/>
+  <testcase name="eachServerAndTestDependencyNamespaceIsRejected()" classname="workshop.vfx.paper.core.PluginPackagingTest" time="0.532"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

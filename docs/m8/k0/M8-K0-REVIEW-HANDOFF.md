@@ -33,4 +33,34 @@ Rollback: stop, restore the original M7 JAR and config, restart. No world/player
 
 Do not interpret this checkpoint as Aura, Trail, Activation, combined showcase, generic entity attachment,
 performance qualification, merge/release/deployment approval, or final acceptance. K1–K4 need separate authorization.
-Exact source/JAR hashes, build evidence, recovery identifiers and final recommendation are supplied after verification.
+Exact source/JAR identities, build evidence and recommendation are below; archive and bundle hashes are in the delivery manifest.
+
+## Final evidence and recommended review decision
+
+**READY FOR INDEPENDENT K0 IMPLEMENTATION REVIEW**, with real-server smoke still NOT RUN.
+Authoritative automated run: https://github.com/Koi36m/Bedwenton/actions/runs/39203576470 .
+Artifact: https://github.com/Koi36m/Bedwenton/actions/runs/39203576470/artifacts/12164892334 .
+526/526 passes = 476 unchanged regressions + 50 production K0 tests, zero failures/errors/skips. Both checks,
+verifyPluginJar, recordPaperApi and all seven dataset regenerations pass. See the implementation report and
+FINAL-VERIFICATION.json for source identities and full results, cloud/ for 75 JUnit XML files and console logs,
+and local/RingDriver.patch for the exact accepted-source seam change.
+
+Native production: a033180b3128c51b2178a1b7a0c8fb1cf6b90378 (R3 descendant).
+Verified GitHub snapshot: 37fef2a2670e6bed14661909ce83c7354ef9e8b2 (distinct history, exact tree equality).
+Complete verified tree: eb09bdc031ac2bf06b82bb75473f611fbf05f991.
+JAR SHA-256: 1516906c829c3e8967f3f60a2b913b0131f9c2ddcd4c804cc404572e1d88f318.
+Raw Actions artifact SHA-256: 167ec1c92874555a8d50585624b2016697320e6c71ccd7af48d3800d80b21a6a.
+Source ZIP, full-history bundle and final evidence commit hashes are supplied in the delivery's
+SHA256SUMS.txt and GIT-CHECKPOINT.json. This avoids impossible self-referential archive/commit hashes.
+The bundle preserves all six original design refs plus the separate original native M7 evidence branch.
+
+For installation, stop a disposable server first, back up/remove the old M7 JAR so only one BedwentonVfxDemo
+plugin JAR is installed, and install bedwenton-vfx-paper-0.8.0-k0.jar. Keep m8.enabled:false for the required M7
+smoke rerun. Stop the server before any config changes; /reload is unsupported. Back up and restore the original
+M7 JAR/config for rollback. No real server was changed by this task.
+
+Recommended adversarial focus: failures before/after the single registration commit, candidate aliasing and
+reentrancy, callback generations across failed starts and zero-request ticks, bound identity after release/rejoin,
+forged owner/world/time/request IDs at both guard layers, shared-cap start order and no planner/emission duplication.
+Verify disabled routing still delegates exactly to unchanged M7 commands and that the actual Paper lifecycle leaves
+no pending tasks after shutdown. Do not authorize K1 on the basis of this implementation report alone.

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.sample.M4DeterminismTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-19T05:16:29.160Z" hostname="runnervm8k3b6" time="0.432">
+  <properties/>
+  <testcase name="Concurrent use: 8 threads building and sampling, and 8 threads sharing one table, give the sequential bits" classname="workshop.vfx.math.sample.M4DeterminismTest" time="0.146"/>
+  <testcase name="Repeated evaluation (before and after JIT warm-up) gives bit-identical tables and samples" classname="workshop.vfx.math.sample.M4DeterminismTest" time="0.285"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

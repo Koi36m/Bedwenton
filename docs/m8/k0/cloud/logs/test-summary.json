@@ -1,0 +1,23 @@
+{
+  "engine": {
+    "tests": 415,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "adapter": {
+    "tests": 111,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "unchanged_regressions": 476,
+  "new_k0_tests": 50,
+  "total_tests": 526,
+  "groups": {
+    "M7": 61,
+    "K0": 50
+  },
+  "engine_xml": 59,
+  "adapter_xml": 16
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.scene.BudgetTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-19T05:16:38.065Z" hostname="runnervm8k3b6" time="0.246">
+  <properties/>
+  <testcase name="No curve work: evaluate never calls a Curve (shapes are copied when built); 1,000 frames of a scene built from a counting curve add 0 calls" classname="workshop.vfx.scene.BudgetTest" time="0.002"/>
+  <testcase name="Largest frame: one layer of 2^20 points on a moving, rotated, scaled anchor evaluates with every coordinate finite and in shape order" classname="workshop.vfx.scene.BudgetTest" time="0.196"/>
+  <testcase name="Preflight: the scene is rejected at construction when the sum of shape sizes exceeds maxPointsPerFrame (sum in long, no overflow); accepted at exactly the limit; 4096 layers of 256 points fill 2^20" classname="workshop.vfx.scene.BudgetTest" time="0.046"/>
+  <testcase name="Motion depth: at most 16 steps per motion (Motion.MAX_STEPS), so a layer costs at most 16 drive samples and 17 pose compositions" classname="workshop.vfx.scene.BudgetTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

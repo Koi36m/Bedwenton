@@ -1,0 +1,21 @@
+{
+  "native_commit": "a033180b3128c51b2178a1b7a0c8fb1cf6b90378",
+  "published_snapshot": "37fef2a2670e6bed14661909ce83c7354ef9e8b2",
+  "same_complete_tree": "eb09bdc031ac2bf06b82bb75473f611fbf05f991",
+  "accepted_m7_source_tree": "afa33672b5850bdda3be636415659fa27ac53047",
+  "accepted_m7_native_commit": "c0fa177a73c0e088fca047d606e6f00a4a45bfd7",
+  "accepted_m7_native_tree": "afa33672b5850bdda3be636415659fa27ac53047",
+  "frozen_engine_tree": "10fa150464001d617d33937f42a0c9da45ed99bb",
+  "frozen_engine_tests_tree": "d91d1e983c8497980a8e6d7b0494c81926720ab7",
+  "authorized_modified_files": [
+    "paper-adapter/gradle.properties",
+    "paper-adapter/src/main/java/workshop/vfx/paper/bukkit/VfxDemoPlugin.java",
+    "paper-adapter/src/main/java/workshop/vfx/paper/core/RingDriver.java",
+    "paper-adapter/src/main/resources/config.yml",
+    "paper-adapter/src/main/resources/plugin.yml"
+  ],
+  "original_m7_tests_byte_identical": true,
+  "original_r3_docs_byte_identical": true,
+  "prior_native_m7_ref": "refs/heads/preserved/m7-native-evidence",
+  "prior_native_m7_tip": "3f7c38ebfa2f72ecd0e67f2535229af0c4bbcb81"
+}

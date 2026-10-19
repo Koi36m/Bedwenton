@@ -1,0 +1,38 @@
+{
+  "native_production_commit": "a033180b3128c51b2178a1b7a0c8fb1cf6b90378",
+  "github_source_snapshot": "37fef2a2670e6bed14661909ce83c7354ef9e8b2",
+  "verified_source_tree": "eb09bdc031ac2bf06b82bb75473f611fbf05f991",
+  "action_url": "https://github.com/Koi36m/Bedwenton/actions/runs/39203576470",
+  "artifact_id": 12164892334,
+  "artifact_sha256": "167ec1c92874555a8d50585624b2016697320e6c71ccd7af48d3800d80b21a6a",
+  "jar_name": "bedwenton-vfx-paper-0.8.0-k0.jar",
+  "jar_size": 181252,
+  "jar_sha256": "1516906c829c3e8967f3f60a2b913b0131f9c2ddcd4c804cc404572e1d88f318",
+  "engine_class_count": 61,
+  "counts": {
+    "engine": {
+      "xml_files": 59,
+      "tests": 415,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "adapter": {
+      "xml_files": 16,
+      "tests": 111,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "unchanged_regressions": 476,
+  "new_k0_tests": 50,
+  "total_tests": 526,
+  "production_compiler_warnings": 0,
+  "paper_api": "26.3.build.204-stable",
+  "paper_api_sha256": "f6852324bbf519d8c27ba06cf2391ee21aed542852de9ac20b9403b7d6ea1556",
+  "seven_datasets": "BYTE IDENTICAL",
+  "engine_runtime_dependencies": "EMPTY",
+  "smoke_status": "NOT RUN",
+  "review_recommendation": "READY FOR INDEPENDENT K0 IMPLEMENTATION REVIEW"
+}

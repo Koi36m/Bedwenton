@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.core.PoseTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-19T05:15:52.986Z" hostname="runnervm8k3b6" time="0.159">
+  <properties/>
+  <testcase name="Five-deep chain equals nested sequential application; scale and rotation compose" classname="workshop.vfx.math.core.PoseTest" time="0.008"/>
+  <testcase name="Constructor normalizes the rotation" classname="workshop.vfx.math.core.PoseTest" time="0.0"/>
+  <testcase name="a.then(b) applied equals b first then a; associativity" classname="workshop.vfx.math.core.PoseTest" time="0.011"/>
+  <testcase name="Round trip at the Minecraft world edge (29,999,984) stays within 1e-6 blocks" classname="workshop.vfx.math.core.PoseTest" time="0.004"/>
+  <testcase name="Constructor validation: non-finite translation, bad scale, bad rotation" classname="workshop.vfx.math.core.PoseTest" time="0.002"/>
+  <testcase name="Golden: parent.then(child).toWorld(p) equals the Python oracle (1,500 rows)" classname="workshop.vfx.math.core.PoseTest" time="0.101"/>
+  <testcase name="toLocal(toWorld(p)) = p on 10,000 random poses" classname="workshop.vfx.math.core.PoseTest" time="0.01"/>
+  <testcase name="Why local-space doubles matter: float spacing is 2 blocks near the world edge and 0.0625 blocks at 1e6" classname="workshop.vfx.math.core.PoseTest" time="0.001"/>
+  <testcase name="Golden: large coordinates near +/-3e7 blocks stay accurate to 1e-7 blocks" classname="workshop.vfx.math.core.PoseTest" time="0.011"/>
+  <testcase name="directionToWorld rotates only: ignores translation and scale" classname="workshop.vfx.math.core.PoseTest" time="0.002"/>
+  <testcase name="inverse: round trip, composition with the original is the identity" classname="workshop.vfx.math.core.PoseTest" time="0.007"/>
+  <testcase name="Identity pose and pure translation" classname="workshop.vfx.math.core.PoseTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

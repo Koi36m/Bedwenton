@@ -1,0 +1,27 @@
+[
+  {
+    "path": "paper-adapter/src/main/java/workshop/vfx/paper/core/RingDriver.java",
+    "accepted_sha256": "8f2986a399731015ae06bc7bcf612ce5bf6fde69355f2c3264658a86b8f44ba9",
+    "k0_sha256": "5cf02938b4e35abdab5a7d47cd30259aef062e7f16990b5583df1c23d1508015"
+  },
+  {
+    "path": "paper-adapter/src/main/java/workshop/vfx/paper/bukkit/VfxDemoPlugin.java",
+    "accepted_sha256": "7f2b48fb8175085562e6a3155f75c3e43d3fd35a9aac38d351616c28fe373a96",
+    "k0_sha256": "ee5b0065211a1b41a30bf6e862c8257a7b92a6a4f135d8002d319890c1ed43d8"
+  },
+  {
+    "path": "paper-adapter/gradle.properties",
+    "accepted_sha256": "a271cbc0718c7c68b4d518406933817bde97061a620406db73642ea90995a3c8",
+    "k0_sha256": "8ff4614bdf49d11a885095e75ed19267d5131dfc5ffca717bf7fbe724ff2d3fa"
+  },
+  {
+    "path": "paper-adapter/src/main/resources/config.yml",
+    "accepted_sha256": "f90223877eae6adefef0450c44ab73d9c2ca7deba8389bee6883927315f833fb",
+    "k0_sha256": "f7cf1bc3ac0ca2524750ba1fa937188d4eb973641b96aacccb4dfbaf8db6582d"
+  },
+  {
+    "path": "paper-adapter/src/main/resources/plugin.yml",
+    "accepted_sha256": "39165c28b515a0610f0a79ac81e7c3d242383c09f27b5dd109854a573f6d9a78",
+    "k0_sha256": "a0d7508dd772b0e2d019139b0ada79128cadb403439b40b684938178e71c852b"
+  }
+]
