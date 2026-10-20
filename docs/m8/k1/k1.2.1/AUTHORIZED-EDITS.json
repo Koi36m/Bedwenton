@@ -1,0 +1,26 @@
+{
+  "paper-adapter/gradle.properties": {
+    "old_sha256": "87f3fa8a744420e074ce3607e337d5141675f1555802cf8b46229a5e26855bd5",
+    "new_sha256": "8a2676de14c5a5b4d267692d7fd5496c839c310edc0139fcb7417e1a5aafd953"
+  },
+  "paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java": {
+    "old_sha256": "2bad586f0584c52b0781053366f324a792164948099aadc0a30d39f2d264f3fd",
+    "new_sha256": "5ae5d5b7113e6b05e466cbbfe083c8aa27096e52917d70a320a55f9f392117d2"
+  },
+  "paper-adapter/src/test/java/workshop/vfx/paper/m8/K11RearArcTest.java": {
+    "old_sha256": "ea5f9578874089a177c5ab63278d046beaa294a7170bc0265071e4312691056a",
+    "new_sha256": "7d60befdf71c9783f6ebd54c97026bb857b1b0561dcc8d1d18e6d31f37bc693b"
+  },
+  "paper-adapter/src/test/java/workshop/vfx/paper/m8/K12BackSigilTest.java": {
+    "old_sha256": "24967722062395c6cd4a1f71a496de48a841db2357efbe4d5baeff52198cc988",
+    "new_sha256": "d8a9105e7a8003bb628e0d5e28ec7b38ac21bf0bb83d3ee4b2e019e42ba72008"
+  },
+  "paper-adapter/src/test/java/workshop/vfx/paper/m8/K12GeometryOracle.java": {
+    "old_sha256": "17fdaaef842825cccec463c2a57af5bce2684537226a705034346fe45c9129d7",
+    "new_sha256": "52a5b3f7f4c4f5e2059f34529aec9c62133e28f17ebfd3bf8ff69f74fde2a900"
+  },
+  "paper-adapter/src/test/java/workshop/vfx/paper/m8/K1GeometryTest.java": {
+    "old_sha256": "b90dc41cb5a7b28f93eb19f5b1781a3626a0f65f5d238bcb3c054f8bd053770e",
+    "new_sha256": "c7b656bca4cb5d3510c921e0633bdb056a0ff22df9a8c403bf2f4df44d877aa9"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "native_k12_implementation": "22e6926af55e928fea4f3894b85ff5c23a034e63",
+  "native_k12_evidence": "57e3caacc687617472104beee55b6918fa27e832",
+  "k12_tested_tree": "1ad4e8c25aa2de697b53119f6ceff0f44363cd9e",
+  "k12_evidence_tree": "ccd71cc923779272291e1f750bf49317f446ac85",
+  "github_k12_evidence": "aa6973802a0e817afbf4a6224a12c5a27716587f",
+  "recovery": "Actual local clone, strict fsck PASS; original ancestry preserved",
+  "frozen_baseline_files": 2149,
+  "baseline_test_cases_preserved": 603
+}

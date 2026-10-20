@@ -1,0 +1,9 @@
+8a6ff6fa58ee1edbbc60813e3da6f5bc79321d5592bd56cb811bac10431b8ed9  .github/workflows/m8-k1-2-1-java25-verification.yml
+8a2676de14c5a5b4d267692d7fd5496c839c310edc0139fcb7417e1a5aafd953  paper-adapter/gradle.properties
+5ae5d5b7113e6b05e466cbbfe083c8aa27096e52917d70a320a55f9f392117d2  paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java
+7d60befdf71c9783f6ebd54c97026bb857b1b0561dcc8d1d18e6d31f37bc693b  paper-adapter/src/test/java/workshop/vfx/paper/m8/K11RearArcTest.java
+d8a9105e7a8003bb628e0d5e28ec7b38ac21bf0bb83d3ee4b2e019e42ba72008  paper-adapter/src/test/java/workshop/vfx/paper/m8/K12BackSigilTest.java
+52a5b3f7f4c4f5e2059f34529aec9c62133e28f17ebfd3bf8ff69f74fde2a900  paper-adapter/src/test/java/workshop/vfx/paper/m8/K12GeometryOracle.java
+c7b656bca4cb5d3510c921e0633bdb056a0ff22df9a8c403bf2f4df44d877aa9  paper-adapter/src/test/java/workshop/vfx/paper/m8/K1GeometryTest.java
+6f73b00a8e3433944e05e9fb5c73264513b2098d2a590dcd185b732e588d9639  paper-adapter/tools/m8-k1-2-1/summarize.py
+1d6b808e1b62af018112619c0542d479f9b956a93992c407f2196a3eaa625566  paper-adapter/tools/m8-k1-2-1/verify.sh

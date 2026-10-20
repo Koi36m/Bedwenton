@@ -18,8 +18,8 @@ class K12BackSigilTest {
             for(int age=0;age<160;age++){
                 f.tick=100+age;
                 for(var b:frame(f.draft(A)).batches())if(!b.layer().equals("halo"))for(int i=0;i<b.size();i++){
-                    assertEquals(-.65,b.z(i),1e-12);
-                    assertTrue(b.y(i)>=64+1.25-.78-1e-12 && b.y(i)<=64+1.25+.78+1e-12);
+                    assertEquals(-.85,b.z(i),1e-12);
+                    assertTrue(b.y(i)>=64+1.25-1.05-1e-12 && b.y(i)<=64+1.25+1.05+1e-12);
                 }
             }
         }
@@ -31,9 +31,9 @@ class K12BackSigilTest {
             var ring=frame(f.draft(A)).batches().getFirst();Vec3 sum=Vec3.ZERO;
             for(int i=0;i<ring.size();i++)sum=sum.add(ring.point(i));
             Vec3 centre=sum.mul(1.0/ring.size());double angle=Math.toRadians(yaw);
-            assertEquals(7+.65*Math.sin(angle),centre.x(),1e-12);
+            assertEquals(7+.85*Math.sin(angle),centre.x(),1e-12);
             assertEquals(71.25,centre.y(),1e-12);
-            assertEquals(-9-.65*Math.cos(angle),centre.z(),1e-12);
+            assertEquals(-9-.85*Math.cos(angle),centre.z(),1e-12);
         }
     }
 
@@ -54,7 +54,7 @@ class K12BackSigilTest {
         for(int age=1;age<=160;age++){
             f.tick=100+age;var ring=frame(f.draft(A)).batches().getFirst();
             assertArrayEquals(initial,ring.coordinates());
-            for(int i=0;i<ring.size();i++)assertEquals(.78,Math.hypot(ring.x(i),ring.y(i)-65.25),1e-12);
+            for(int i=0;i<ring.size();i++)assertEquals(1.05,Math.hypot(ring.x(i),ring.y(i)-65.25),1e-12);
         }
     }
 
@@ -64,8 +64,8 @@ class K12BackSigilTest {
             for(int age=0;age<160;age++){
                 f.tick=100+age;var batches=frame(f.draft(A)).batches();
                 for(int b=1;b<=2;b++)for(int i=0;i<batches.get(b).size();i++){
-                    var stroke=batches.get(b);assertTrue(Math.hypot(stroke.x(i),stroke.y(i)-65.25)<.665);
-                    assertEquals(-.65,stroke.z(i),1e-12);
+                    var stroke=batches.get(b);assertTrue(Math.hypot(stroke.x(i),stroke.y(i)-65.25)<.665*(1.05/.78));
+                    assertEquals(-.85,stroke.z(i),1e-12);
                 }
             }
         }
@@ -105,7 +105,7 @@ class K12BackSigilTest {
         for(int b=1;b<=2;b++)for(int i=0;i<first.batches().get(b).size();i++){
             Vec3 p=wrap.batches().get(b).point(i);assertTrue(p.sub(first.batches().get(b).point(i)).length()<1e-12);
             double previous=p.sub(before.batches().get(b).point(i)).length(),next=after.batches().get(b).point(i).sub(p).length();
-            assertEquals(previous,next,1e-12);assertTrue(previous<.053);
+            assertEquals(previous,next,1e-12);assertTrue(previous<.053*(1.05/.78));
         }
     }
 
