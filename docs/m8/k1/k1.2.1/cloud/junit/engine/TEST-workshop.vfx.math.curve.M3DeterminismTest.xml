@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.curve.M3DeterminismTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-20T08:44:38.089Z" hostname="runnervmdkmh8" time="0.106">
+  <properties/>
+  <testcase name="Evaluation is path independent: the value at t does not depend on which parameters were evaluated before (section 7.1)" classname="workshop.vfx.math.curve.M3DeterminismTest" time="0.001"/>
+  <testcase name="Determinism: curves are values; equal curves give bit-identical results, before and after JIT compilation (section 7.1)" classname="workshop.vfx.math.curve.M3DeterminismTest" time="0.105"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.scene.CompositionTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-20T08:41:56.269Z" hostname="15322502875c" time="0.06">
+  <properties/>
+  <testcase name="Scale and translate: exact 'from' at progress 0 and exact 'to' at progress 1 (and after a ONCE drive); easing is applied to the drive's progress" classname="workshop.vfx.scene.CompositionTest" time="0.001"/>
+  <testcase name="Random compositions of up to 6 steps (fixed, spin, scale, translate) on random anchors match the independent matrix oracle within the tolerance" classname="workshop.vfx.scene.CompositionTest" time="0.036"/>
+  <testcase name="Shared motions: one Motion value reused by layers with different visibility timings gives the same pose in every layer (transform grouping)" classname="workshop.vfx.scene.CompositionTest" time="0.001"/>
+  <testcase name="The frame's pose is anchor.then(motion.poseAt(local)) and every point is pose.toWorld(local point), bit for bit (normative order)" classname="workshop.vfx.scene.CompositionTest" time="0.008"/>
+  <testcase name="Spin: right-handed about the axis by 2 pi (phase + turns e); a quarter turn about +Y maps +X to -Z; whole turns and negative turns; equals the M1 Quat.axisAngle rotation within the tolerance" classname="workshop.vfx.scene.CompositionTest" time="0.008"/>
+  <testcase name="Composition order: m.then(child) applies the child first (M1 Pose.then); translate-then-spin differs from spin-then-translate; both match the independent matrix oracle" classname="workshop.vfx.scene.CompositionTest" time="0.0"/>
+  <testcase name="Inverted transforms: fixed(p).then(fixed(p.inverse())) is the identity within the tolerance; an inverse anchor maps world points back to local ones" classname="workshop.vfx.scene.CompositionTest" time="0.004"/>
+  <testcase name="Finite results: an unrepresentable composed scale or translation (M1 Pose.then) or a non-finite world point gives ArithmeticException, and no frame is returned" classname="workshop.vfx.scene.CompositionTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

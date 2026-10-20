@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.curve.M3ReviewAdversarialTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-20T08:44:38.248Z" hostname="runnervmdkmh8" time="11.278">
+  <properties/>
+  <testcase name="R05: spirals against an exact-phase 90-digit Taylor oracle: 30,000 cases with subnormal to 1e100 radii, subnormal to 2^20 turns, startTurn up to +-MAX_VALUE and -0.0, t extrapolated to +-1e3, within the R2+A3 bounds" classname="workshop.vfx.math.curve.M3ReviewAdversarialTest" time="3.585"/>
+  <testcase name="R11: determinism: bitwise identical results from 8 concurrent threads and from repeated sequential evaluation (no shared mutable state)" classname="workshop.vfx.math.curve.M3ReviewAdversarialTest" time="0.054"/>
+  <testcase name="R04: Bezier metamorphic relations: reversal B(P)(t) = B(reversed P)(1 - t), translation equivariance, degree elevation and C1 continuity near the ends" classname="workshop.vfx.math.curve.M3ReviewAdversarialTest" time="0.087"/>
+  <testcase name="R03: exact endpoints for every input (E1), including t = -0.0, signed-zero and subnormal control points; end derivatives n (P1 - P0) and n (Pn - Pn-1) within bounds" classname="workshop.vfx.math.curve.M3ReviewAdversarialTest" time="5.674"/>
+  <testcase name="R08: constant radius exact under extrapolation; degenerate zero-radius and zero-turn spirals exact; t = -0.0 equals t = 0; startTurn -0.0 equals 0" classname="workshop.vfx.math.curve.M3ReviewAdversarialTest" time="0.039"/>
+  <testcase name="R07: exactness: T3 quarter turns (any startTurn magnitude, products just below 2^51), T4 seams up to the overflow of turns * k, T5 period invariance with subnormal and large fractions" classname="workshop.vfx.math.curve.M3ReviewAdversarialTest" time="0.106"/>
+  <testcase name="R09: all 15 easings against exact polynomials (G1: 2^-50), dense adjacent-double windows at 0, 0.5 and 1, exact monotonicity of power easings (G4), 2^-49 near-monotonicity of the smooth ones (G5), symmetry and duality (G3, G6), +0.0 for non-positive input" classname="workshop.vfx.math.curve.M3ReviewAdversarialTest" time="0.802"/>
+  <testcase name="R12: T2 bitwise: a product turns * t whose fraction rounds up to 1.0 (tiny negative) contributes exactly 0, so the phase equals the startTurn fraction bit for bit" classname="workshop.vfx.math.curve.M3ReviewAdversarialTest" time="0.01"/>
+  <testcase name="R01: every method of every curve, posed or not, rejects NaN and infinite t; extreme finite inputs never throw" classname="workshop.vfx.math.curve.M3ReviewAdversarialTest" time="0.004"/>
+  <testcase name="R10: PosedCurve against an exact BigDecimal rotation (points translated, derivatives scaled directions never translated), bitwise translation invariance of derivatives, exact power-of-two scale linearity, composition with Pose.then" classname="workshop.vfx.math.curve.M3ReviewAdversarialTest" time="0.307"/>
+  <testcase name="R02: lines and Beziers against the exact Bernstein form: 30,000 curves, magnitudes from subnormal to 1e100, t near 0 and 1 and extrapolated to +-1e3, within the R2+A3 bounds" classname="workshop.vfx.math.curve.M3ReviewAdversarialTest" time="0.589"/>
+  <testcase name="R06: handedness and +Y axis: positive turns rotate like M1 Quat.axisAngle(+Y, angle) (counter-clockwise from above, +X towards -Z); the normal p x p' is +Y for positive turns and -Y for negative" classname="workshop.vfx.math.curve.M3ReviewAdversarialTest" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

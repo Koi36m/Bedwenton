@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.delivery.DeliveryReferenceTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-20T08:40:51.951Z" hostname="15322502875c" time="1.833">
+  <properties/>
+  <testcase name="bloom" classname="workshop.vfx.delivery.DeliveryReferenceTest" time="0.039"/>
+  <testcase name="cloudstep" classname="workshop.vfx.delivery.DeliveryReferenceTest" time="0.008"/>
+  <testcase name="healer" classname="workshop.vfx.delivery.DeliveryReferenceTest" time="0.005"/>
+  <testcase name="trident" classname="workshop.vfx.delivery.DeliveryReferenceTest" time="0.002"/>
+  <testcase name="astral" classname="workshop.vfx.delivery.DeliveryReferenceTest" time="0.006"/>
+  <testcase name="stress" classname="workshop.vfx.delivery.DeliveryReferenceTest" time="1.752"/>
+  <testcase name="Manifest: the six reference files match MANIFEST.sha256" classname="workshop.vfx.delivery.DeliveryReferenceTest" time="0.013"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

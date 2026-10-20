@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.paper.m8.K1IdentityAndPermissionsTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-20T08:45:28.537Z" hostname="runnervmdkmh8" time="0.017">
+  <properties/>
+  <testcase name="realAuraDraftUsesBoundIdentityAndRejectsTamperedDirectContributions()" classname="workshop.vfx.paper.m8.K1IdentityAndPermissionsTest" time="0.0"/>
+  <testcase name="viewerPermissionGrantRevokeAndOwnerUseAreRechecked()" classname="workshop.vfx.paper.m8.K1IdentityAndPermissionsTest" time="0.001"/>
+  <testcase name="nonfinitePositionAndYawAxesNeverReachPlanner()" classname="workshop.vfx.paper.m8.K1IdentityAndPermissionsTest" time="0.003"/>
+  <testcase name="staleAndFutureSnapshotsSkipThenRecoverWithoutRestartingClock()" classname="workshop.vfx.paper.m8.K1IdentityAndPermissionsTest" time="0.001"/>
+  <testcase name="permissionRevokedBetweenPlanningAndEmissionIsFailClosed()" classname="workshop.vfx.paper.m8.K1IdentityAndPermissionsTest" time="0.001"/>
+  <testcase name="invalidStreakTerminatesAtConfiguredLimitAndReadyResetsIt()" classname="workshop.vfx.paper.m8.K1IdentityAndPermissionsTest" time="0.002"/>
+  <testcase name="ownerFirstSelectionUnderOneViewerCap()" classname="workshop.vfx.paper.m8.K1IdentityAndPermissionsTest" time="0.0"/>
+  <testcase name="forgedViewerAndReleasedBindingTerminate()" classname="workshop.vfx.paper.m8.K1IdentityAndPermissionsTest" time="0.001"/>
+  <testcase name="unknownMismatchedWorldHeightAndChunkFailClosed()" classname="workshop.vfx.paper.m8.K1IdentityAndPermissionsTest" time="0.002"/>
+  <testcase name="forgedOwnerTerminatesBeforeAnyUnauthorizedEmission()" classname="workshop.vfx.paper.m8.K1IdentityAndPermissionsTest" time="0.0"/>
+  <testcase name="viewersMustBeInCurrentWorldAndRange()" classname="workshop.vfx.paper.m8.K1IdentityAndPermissionsTest" time="0.001"/>
+  <testcase name="ownersWithUseButNoViewSeeOnlyTheirOwnAura()" classname="workshop.vfx.paper.m8.K1IdentityAndPermissionsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

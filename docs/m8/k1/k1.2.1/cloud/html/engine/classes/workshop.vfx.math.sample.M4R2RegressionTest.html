@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - M4R2RegressionTest</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<h1>M4R2RegressionTest</h1>
+<div class="breadcrumbs">
+<a href="../index.html">all</a> &gt; 
+<a href="../packages/workshop.vfx.math.sample.html">workshop.vfx.math.sample</a> &gt; M4R2RegressionTest</div>
+<div id="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox" id="tests">
+<div class="counter">10</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="failures">
+<div class="counter">0</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="ignored">
+<div class="counter">0</div>
+<p>ignored</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="duration">
+<div class="counter">0.012s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox success" id="successRate">
+<div class="percent">100%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="tab-container">
+<ul class="tabLinks">
+<li>
+<a href="#">Tests</a>
+</li>
+</ul>
+<div class="tab">
+<h2>Tests</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Method name</th>
+<th>Duration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tr>
+<td class="success">F3: iteration cap: a target inside a jump of F (unreachable tolerance) near t = 2^-40, where the bracket cannot collapse within 64 iterations, and zero speed at the first iterate: all 64 iterations run (332 to 336 evaluations); the result is the bracket end with the smaller residual, on the correct side of the jump and within 2^-47 (b - a) + 2 ulp of it</td>
+<td class="success">iterationCapExit()</td>
+<td class="success">0s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">F3: Newton creep (a speed spike at the root, invisible to the quadrature, makes Newton steps tiny): at most 336 derivative evaluations; |lengthAt(t) - s| &lt;= max(tau 2^-10, 4 (b - a) 2^-47); t within the bound of the exact inverse -1 + sqrt(1 + 2s)</td>
+<td class="success">newtonCreep()</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">F3: a speed discontinuous at a 2^-41 scale (F has jumps, the tolerance is unreachable; in this scenario every exit is by tolerance or by bracket collapse): every result is within the tolerance or is the better end of an adjacent-double bracket; at most 336 evaluations; deterministic</td>
+<td class="success">nonConvergedExit()</td>
+<td class="success">0.004s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Non-finite derivative after build (contract 9, R2 mutation survivor M12): a curve finite at every table node but NaN elsewhere makes lengthAt and parameterAt throw ArithmeticException, never return NaN</td>
+<td class="success">nonFiniteAfterBuild()</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">F3: a target equal to the length at a panel end (an end of the bracket is already within the tolerance) returns that end exactly, with no derivative evaluation</td>
+<td class="success">panelEndTargets()</td>
+<td class="success">0s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">F2: ratio mode is clamped to the panel value: a speed seen only by the partial integral's nodes cannot make lengthAt exceed the length at the panel end (F_k in [0, I2_k], contract 5.5)</td>
+<td class="success">partialClampedToPanel()</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">F2: pathological panels (I2/I1 overflowing, I1 = 0, I2 = 1000 I1, I1 = 1000 I2, I2/I1 underflowing) on finite tables: lengthAt and parameterAt are finite, monotone and follow the linear fallback of contract 5.5 exactly</td>
+<td class="success">pathologicalPanels()</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Stationary intervals (R2 mutation survivors M26, M15): parameterAt(length()) == t1 even when the last panels have zero length; a distance reached at the start of a stationary interval maps to its start (the smallest panel k with S_(k+1) &gt;= distance)</td>
+<td class="success">stationaryTail()</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">F1: nonzero subnormal-speed lines and constant-speed spirals converge with 16 panels; tau = max(abs, rel L0, 1024 MIN_VALUE); |L - L*| &lt;= rounding allowance with the absolute underflow term 8 K MIN_VALUE</td>
+<td class="success">subnormalConstantSpeed()</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">F3: ties go to the upper end: (a) a target exactly halfway across a panel shorter than 2 tau 2^-10 returns b_k; (b) after a collapse exit between adjacent doubles with exactly equal residuals, the upper double is returned</td>
+<td class="success">tieGoesToUpperEnd()</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+</table>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="https://www.gradle.org">Gradle 9.1.0</a> at Oct 20, 2026, 8:45:02 AM</p>
+</div>
+</div>
+</body>
+</html>

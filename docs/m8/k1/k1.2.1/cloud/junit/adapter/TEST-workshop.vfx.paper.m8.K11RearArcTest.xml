@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.paper.m8.K11RearArcTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-20T08:45:27.146Z" hostname="runnervmdkmh8" time="0.067">
+  <properties/>
+  <testcase name="arcIncludesBothEndsWithUniformSpacingAndDistinctTierSpans()" classname="workshop.vfx.paper.m8.K11RearArcTest" time="0.009"/>
+  <testcase name="waistCentroidRemainsBehindTheTurningPlayerThroughoutSway()" classname="workshop.vfx.paper.m8.K11RearArcTest" time="0.009"/>
+  <testcase name="swayHasNoLoopJumpAndSlowsAtBothTurnarounds()" classname="workshop.vfx.paper.m8.K11RearArcTest" time="0.007"/>
+  <testcase name="frontStaysClearForEveryTierPhaseAndBodyYaw()" classname="workshop.vfx.paper.m8.K11RearArcTest" time="0.024"/>
+  <testcase name="haloRetainsHeightRadiusAndSpinWithWiderParticleSeparation()" classname="workshop.vfx.paper.m8.K11RearArcTest" time="0.003"/>
+  <testcase name="tightBudgetStillEmitsOnlyRearArcPointsWithoutChangingSharedScheduling()" classname="workshop.vfx.paper.m8.K11RearArcTest" time="0.014"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

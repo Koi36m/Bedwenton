@@ -1,0 +1,403 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.1.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :clean UP-TO-DATE
+> Task :Bedwenton:compileJava UP-TO-DATE
+> Task :Bedwenton:processResources NO-SOURCE
+> Task :Bedwenton:classes UP-TO-DATE
+> Task :writeBuildProvenance
+> Task :Bedwenton:jar
+> Task :processResources
+> Task :compileJava
+> Task :classes
+> Task :compileTestJava
+> Task :processTestResources
+> Task :testClasses
+
+> Task :test
+
+AllocationOrderEmissionTest > Defensive caps binding (unaligned policy): the rank-0 ring is emitted first, whatever the input order; rotation alternates PASSED
+
+AllocationOrderEmissionTest > Aligned policy (placement and viewer budgets capped by the emission limits): M6 decides, the caps never bind PASSED
+
+AllocationOrderEmissionTest > Aligned policy over 300 random multi-ring scenarios: no EMISSION_LIMIT skip, attempted calls = planned placements PASSED
+
+ConfigurationAndIdentityTest > viewerInputMustBeUniqueSortedAndNonnegative() PASSED
+
+ConfigurationAndIdentityTest > threadOwnershipRefusesCrossThreadAndFalsePrimary() PASSED
+
+ConfigurationAndIdentityTest > budgetsAlignWithoutRaisingRequestedBudgets() PASSED
+
+ConfigurationAndIdentityTest > whitelistAndDustValidationAreClosedAndImmutable() PASSED
+
+ConfigurationAndIdentityTest > allIntegerBoundariesAndHardCeilings() PASSED
+
+ConfigurationAndIdentityTest > emissionReportsAreDefensiveSnapshots() PASSED
+
+ConfigurationAndIdentityTest > radiusIsFiniteAndBoundedBeforeRules() PASSED
+
+ConfigurationAndIdentityTest > invalidTypesAndCapsRefuseInsteadOfDefaulting() PASSED
+
+ConfigurationAndIdentityTest > idsUseBothUuidHalvesAndNeverReuseReleasedNumbers() PASSED
+
+DemoCommandsTest > unknownAndExtraArgumentsHaveNoSideEffects() PASSED
+
+DemoCommandsTest > adminStopAllIsSeparateFromOwnerStop() PASSED
+
+DemoCommandsTest > tiersAndDefaultRouteToProductionController() PASSED
+
+DemoCommandsTest > capsAreReportedAndRepeatedCommandsNeverAddHiddenOperations() PASSED
+
+DemoCommandsTest > suggestionsRespectGrammarAndAdminPermission() PASSED
+
+DemoCommandsTest > permissionAndPlayerBoundariesAreEnforced() PASSED
+
+K0RingDriverM7CompatTest > cancelledCallbackAndPreviousGenerationNeverEmit() PASSED
+
+K0RingDriverM7CompatTest > idleEnableThenOnePlannerForAllRingsAndNoDuplicateTickBudgets() PASSED
+
+K0RingDriverM7CompatTest > unloadAndMissingWorldStopOnlyAffectedRings() PASSED
+
+K0RingDriverM7CompatTest > expiryAndOwnerOfflineStopAndCancel() PASSED
+
+K0RingDriverM7CompatTest > teleportWorldChangeAndInvalidAnchorsFailClosed() PASSED
+
+K0RingDriverM7CompatTest > ownerFirstAndDuplicateEnumerationCannotReachM6() PASSED
+
+K0RingDriverM7CompatTest > permissionAndWorldEligibilityArePerRingAndRechecked() PASSED
+
+K0RingDriverM7CompatTest > styleFailuresPersistAcrossDriverTicksAndNextPlanExcludesStyle() PASSED
+
+K0RingDriverM7CompatTest > falsePrimaryRefusesTickAndCommandsBeforeHostAccess() PASSED
+
+K0RingDriverM7CompatTest > repeatedStartReplacesAndDoesNotMultiplyTasksAtCap() PASSED
+
+OwnerAwareEmissionTest > View permission granted: B sees both rings; revoked between planning and emission: B loses ring A only PASSED
+
+OwnerAwareEmissionTest > Missing ownership context: the delivery is skipped whole and counted; the other ring is unaffected PASSED
+
+OwnerAwareEmissionTest > A planned non-owner recipient with use but without view permission is refused for the other ring only PASSED
+
+OwnerAwareEmissionTest > Viewer selection: the owner is admitted before sorting and capping; the result is strictly increasing PASSED
+
+OwnerAwareEmissionTest > Owner's use permission revoked between planning and emission: the owner receives nothing of their ring PASSED
+
+OwnerAwareEmissionTest > Coincident rings, no view permission: each owner sees exactly their own ring PASSED
+
+OwnerAwareEmissionTest > Owner A holding view permission is still authorized for ring A by use, and for ring B by view PASSED
+
+PluginPackagingTest > syntheticCleanJarPasses() PASSED
+
+PluginPackagingTest > unresolvedAndWrongPluginVersionsAreRejected() PASSED
+
+PluginPackagingTest > sourceBoundaryHasNoPlatformCallsInCoreOrBroadcastAndAsyncInPaper() PASSED
+
+PluginPackagingTest > failedGradleCannotBeMaskedByStaleSuccessfulXml() PASSED
+
+PluginPackagingTest > eachServerAndTestDependencyNamespaceIsRejected() PASSED
+
+ProductionEmissionTest > skippedPointsAreNotPromotedBeyondRecipientPrefix() PASSED
+
+ProductionEmissionTest > pointValidationRejectsEveryNonfiniteAxisAndHonorsWorldEdges() PASSED
+
+ProductionEmissionTest > demoRecipePreservesCountsRadiiLoopAndStaticAnchor() PASSED
+
+ProductionEmissionTest > recipientPrefixesMatchIndependentSelectionFormulaBitwise() PASSED
+
+ProductionEmissionTest > limitsCountFailuresAndApplyAcrossRecipients() PASSED
+
+ProductionEmissionTest > allGateReasonsSkipOnlyTheirRecipientAndPreserveAccounting() PASSED
+
+RecipientRuleRobustnessTest > Request anchor x, y or z NaN, +infinity or -infinity: denied as INVALID_REQUEST_CONTEXT PASSED
+
+RecipientRuleRobustnessTest > View radius: NaN, infinite or negative is rejected at construction; 0 is valid (exact anchor only) PASSED
+
+RecipientRuleRobustnessTest > Authorization order for normal inputs is unchanged: offline, world, permission, then range checks PASSED
+
+RecipientRuleRobustnessTest > Viewer x, y or z NaN, +infinity or -infinity: denied as VIEWER_POSITION_INVALID (owner and non-owner) PASSED
+
+RecipientRuleRobustnessTest > Normal controls: in range allowed, exactly at the radius allowed, just beyond and huge finite coordinates denied PASSED
+
+RequestContextConsistencyTest > Invalid contexts (NaN or infinite anchor, negative owner or world id): the delivery is rejected whole PASSED
+
+RequestContextConsistencyTest > A viewer with a NaN position is refused (VIEWER_POSITION_INVALID); the other viewers are unaffected PASSED
+
+RequestContextConsistencyTest > One mismatched context (ring B's slot names ring A, owner A): only ring B is rejected; ring A is unaffected PASSED
+
+RequestContextConsistencyTest > Control: valid contexts; each owner sees its own ring; non-owners without view are refused; accounting balances PASSED
+
+RequestContextConsistencyTest > Swapped contexts (key ring A holds ring B's context with owner B, and vice versa): both deliveries rejected, nothing sent PASSED
+
+RingDriverTest > cancelledCallbackAndPreviousGenerationNeverEmit() PASSED
+
+RingDriverTest > idleEnableThenOnePlannerForAllRingsAndNoDuplicateTickBudgets() PASSED
+
+RingDriverTest > unloadAndMissingWorldStopOnlyAffectedRings() PASSED
+
+RingDriverTest > expiryAndOwnerOfflineStopAndCancel() PASSED
+
+RingDriverTest > teleportWorldChangeAndInvalidAnchorsFailClosed() PASSED
+
+RingDriverTest > ownerFirstAndDuplicateEnumerationCannotReachM6() PASSED
+
+RingDriverTest > permissionAndWorldEligibilityArePerRingAndRechecked() PASSED
+
+RingDriverTest > styleFailuresPersistAcrossDriverTicksAndNextPlanExcludesStyle() PASSED
+
+RingDriverTest > falsePrimaryRefusesTickAndCommandsBeforeHostAccess() PASSED
+
+RingDriverTest > repeatedStartReplacesAndDoesNotMultiplyTasksAtCap() PASSED
+
+StyleHealthTest > Third consecutive failure disables the style at once; its remaining points in the tick are skipped PASSED
+
+StyleHealthTest > All styles disabled: the planner skips the ring as unsupported before evaluation; a new session re-enables PASSED
+
+StyleHealthTest > Successes of another style do not reset the streak; the streak spans ticks PASSED
+
+StyleHealthTest > A success of the same style resets the streak: fail, fail, succeed, fail, fail does not disable PASSED
+
+StyleHealthTest > The next planning pass excludes the disabled style: M6 reports it unsupported, nothing of it is sent PASSED
+
+K0DraftIdentityTest > driverRejectsBadOwnerRangeWorldAndDuplicateIdsBeforePlanning() PASSED
+
+K0DraftIdentityTest > releasedOrReplayedViewerBindingTerminatesWithoutResurrection() PASSED
+
+K0DraftIdentityTest > ownerAndViewerSwapCannotRedirectToUseOnlyNonowner() PASSED
+
+K0DraftIdentityTest > staleFutureRecoverThenTwentyConsecutiveSkipsTerminate() PASSED
+
+K0DraftIdentityTest > completeOrderedReasonTableAndHeightBoundaries() PASSED
+
+K0DraftIdentityTest > everyNonfinitePositionAndYawIsRejectedBeforeEffectInvocation() PASSED
+
+K0DraftIdentityTest > knownWorldAndOwnerDraftsKeepContextAndOwnerIsolation() PASSED
+
+K0DraftIdentityTest > worldHeightAndChunkErrorsSkipWithoutCreatingMappings() PASSED
+
+K0DraftIdentityTest > driverDropsMalformedAndOversizeContributionsWithoutEmission() PASSED
+
+K0DraftIdentityTest > registryDropsEachForgedDraftDimensionAndDisposesOnce() PASSED
+
+K0M8OnlySchedulingTest > Stale callbacks: a callback from a cancelled generation never plans, also after an M8-only restart PASSED
+
+K0M8OnlySchedulingTest > Shutdown: close disposes M8 effects and rings, cancels the task, refuses later starts, and stale ticks do nothing PASSED
+
+K0M8OnlySchedulingTest > Natural end and termination: finished effects are disposed in the tick, and the task is cancelled when nothing remains PASSED
+
+K0M8OnlySchedulingTest > Ring and M8 together: exactly one planning call per tick containing both requests; one task PASSED
+
+K0M8OnlySchedulingTest > Aura only: first M8 start schedules the one task; each tick plans once with the aura request; stop cancels PASSED
+
+K0M8OnlySchedulingTest > Stationary trail with no live samples: task keeps lightweight ticks, planner is skipped, zero report; moving resumes planning PASSED
+
+K0SafetyTest > shutdownCancelsEvenIfAnInjectedContributorViolatesCloseContract() PASSED
+
+K0SafetyTest > entryPointsRejectOtherThreadsBeforeMutation() PASSED
+
+K0SafetyTest > reentrantFactoryCannotDestroyTheOldRegistration() PASSED
+
+K0SafetyTest > successfulReplacementCommitsBeforeDisposalAndNeverDoubleDisposes() PASSED
+
+K0SafetyTest > aliasingFactoryMustNotDisposeAnyExistingEffect() PASSED
+
+K0SafetyTest > failedStartCallbackCannotRunInAnyLaterGeneration() PASSED
+
+K0SafetyTest > disabledRoutingLeavesM7GrammarAndSuggestionsToOriginalParser() PASSED
+
+K0SafetyTest > boundedReplacementAndStopCyclesFreeCapacityWithoutTaskGrowth() PASSED
+
+K0SafetyTest > contributionExceptionsAreContainedAndOtherEffectsSurvive() PASSED
+
+K0SafetyTest > configurationDefaultsDisabledAndPreservesAllHardBounds() PASSED
+
+K0SharedCapacityTest > M7-only compatibility: without a contributor the hooked driver admits exactly as M7 (cap counts rings only) PASSED
+
+K0SharedCapacityTest > Per-player M8 cap: a third M8 kind is refused at 2 even below the global cap; replacement still allowed PASSED
+
+K0SharedCapacityTest > Rings first, then M8: at cap 2, two rings refuse a new aura; a ring replacement still succeeds PASSED
+
+K0SharedCapacityTest > Every activation order of a mixed set reaches exactly the cap and refuses the next start, whatever its kind PASSED
+
+K0SharedCapacityTest > M8 first, then rings: M8 effects count toward the ring path's cap; replacement of an M8 effect at cap succeeds PASSED
+
+K0SharedCapacityTest > Freed capacity is reusable by either path: stopping an aura admits a ring, stopping a ring admits an aura PASSED
+
+K0TransactionalStartTest > Refused admission (per-player or global cap) never calls the factory or the scheduler PASSED
+
+K0TransactionalStartTest > First registration, scheduler refuses: exception propagates, nothing registered, candidate disposed, no task; a retry works with a fresh id PASSED
+
+K0TransactionalStartTest > A candidate with the wrong id, owner or kind, or null, is rejected before the commit; the old effect is untouched PASSED
+
+K0TransactionalStartTest > Factory throws: on first registration nothing is registered and no task starts; on replacement the old effect is untouched PASSED
+
+K0TransactionalStartTest > Ring start in the hooked driver: a first-ring scheduling failure leaves no ring and no task; an aura start afterwards owns the one task PASSED
+
+K0TransactionalStartTest > Replacement, ensureRunning throws: the existing effect stays registered, undisposed and planned; only the candidate is disposed PASSED
+
+K0TransactionalStartTest > A throwing dispose of the replaced effect is contained after the commit: the new effect is registered and counted PASSED
+
+K0TransactionalStartTest > Successful replacement: committed, old disposed exactly once after the commit, count and task unchanged PASSED
+
+K11RearArcTest > arcIncludesBothEndsWithUniformSpacingAndDistinctTierSpans() PASSED
+
+K11RearArcTest > waistCentroidRemainsBehindTheTurningPlayerThroughoutSway() PASSED
+
+K11RearArcTest > swayHasNoLoopJumpAndSlowsAtBothTurnarounds() PASSED
+
+K11RearArcTest > frontStaysClearForEveryTierPhaseAndBodyYaw() PASSED
+
+K11RearArcTest > haloRetainsHeightRadiusAndSpinWithWiderParticleSeparation() PASSED
+
+K11RearArcTest > tightBudgetStillEmitsOnlyRearArcPointsWithoutChangingSharedScheduling() PASSED
+
+K12BackSigilTest > targetTierAllocationsFitExistingCapsAndAccountingWithOneGlobalPlan() PASSED
+
+K12BackSigilTest > teleportAndNewWorldUseFreshRearPoseWithoutRestartingPatternClock() PASSED
+
+K12BackSigilTest > strokesAreCurvedRatherThanStraightSpokes() PASSED
+
+K12BackSigilTest > haloCoordinatesAreBitIdenticalToCapturedVerifiedK11Baseline() PASSED
+
+K12BackSigilTest > rotationWrapIsContinuousAndRepeatsExactlyAfter80Ticks() PASSED
+
+K12BackSigilTest > backwardOffsetRotatesWithBodyYawRatherThanWorldDirections() PASSED
+
+K12BackSigilTest > joinedStrokesNeverDuplicateParticlesAtTheirSharedJunction() PASSED
+
+K12BackSigilTest > innerStrokesRotateOneQuarterTurnAroundLocalNormal() PASSED
+
+K12BackSigilTest > bothStrokesRemainStrictlyContainedThroughoutCompleteRotations() PASSED
+
+K12BackSigilTest > discNeverTurnsEdgeOnWhenInnerPatternRotates() PASSED
+
+K12BackSigilTest > stableOutlineRemainsCompleteAndCircularWhilePatternTurns() PASSED
+
+K12BackSigilTest > entireWhiteFormationIsInVerticalXYPlaneBehindTorsoAtEveryTier() PASSED
+
+K12BackSigilTest > allGeometryIsReusedAcrossTicksOwnersAndReplacement() PASSED
+
+K12BackSigilTest > asymmetricPatternCannotHideRotationThroughHalfTurnSymmetry() PASSED
+
+K1BudgetAndSchedulingTest > emissionAndViewerBudgetsAreAlignedAndFullyAccounted() PASSED
+
+K1BudgetAndSchedulingTest > ringAndAuraUseExactlyOneGlobalPlanAndOneTask() PASSED
+
+K1BudgetAndSchedulingTest > sustainedAllTierRunsKeepExactCountsAndNoSchedulingGrowth() PASSED
+
+K1BudgetAndSchedulingTest > zeroGenerationBudgetProducesNoCallsAndNoExtraTasks() PASSED
+
+K1BudgetAndSchedulingTest > capacityIsSharedInBothStartOrdersAndReplacementAtCap() PASSED
+
+K1BudgetAndSchedulingTest > perPlayerCapAndReplacementRespectK0Registry() PASSED
+
+K1BudgetAndSchedulingTest > strictSimpleCeilingNeverPromotesWhenBudgetAllowsHeavy() PASSED
+
+K1BudgetAndSchedulingTest > persistentCyanFailureDisablesOnlyThatStyleAndAccountingRemainsExact() PASSED
+
+K1BudgetAndSchedulingTest > longSoakStartStopWorldChangesRemainBoundedAndClear() PASSED
+
+K1BudgetAndSchedulingTest > unresolvedCyanStyleIsRemovedFromPlanningWithoutFallbackPayload() PASSED
+
+K1CommandsAndSafetyTest > strictCyanCatalogueDoesNotOverwriteHistoricalKeysOrM7() PASSED
+
+K1CommandsAndSafetyTest > permissionsAndConsoleFailBeforeMutation() PASSED
+
+K1CommandsAndSafetyTest > heavyRefusedBothDefaultAndExplicitAndSessionPreservesOld() PASSED
+
+K1CommandsAndSafetyTest > malformedGrammarAndFutureCommandsDoNotStart() PASSED
+
+K1CommandsAndSafetyTest > commandFailureIsReportedAndSuggestionsDoNotOfferFutureCheckpoints() PASSED
+
+K1CommandsAndSafetyTest > invalidM8SettingsRejectRatherThanClamp() PASSED
+
+K1CommandsAndSafetyTest > allExplicitTiersAndCaseInsensitiveOff() PASSED
+
+K1CommandsAndSafetyTest > defaultSimpleAndConfiguredBalanced() PASSED
+
+K1CommandsAndSafetyTest > timedSnapshotsUseInjectedDiagnosticsAndThreadChecks() PASSED
+
+K1CommandsAndSafetyTest > disabledCommandsAndSessionCannotStart() PASSED
+
+K1GeometryTest > bothLayersMatchIndependentFormulaAtAllTiersAndBoundaryTicks() PASSED
+
+K1GeometryTest > waistAndHaloRadiiHeightsAndNoSeamDuplicate() PASSED
+
+K1GeometryTest > recipeLifetimeBoundsRejectWithoutClamping() PASSED
+
+K1GeometryTest > deterministicFrameHasNoHiddenClockOrRandomInput() PASSED
+
+K1GeometryTest > rearSwayAndHaloSpinKeepTheirIndependentPeriods() PASSED
+
+K1GeometryTest > worldChangeContinuesWithSameRecipeClockAndNoInterpolatedPoints() PASSED
+
+K1GeometryTest > walkingSprintingJumpingAndFallingHaveExactCentres() PASSED
+
+K1GeometryTest > exactTierTotalsAndReservations() PASSED
+
+K1GeometryTest > headYawAndPitchDoNotTiltOrRotateAttachment() PASSED
+
+K1GeometryTest > yawMapsForwardLeftAndUp() PASSED
+
+K1GeometryTest > sceneAndShapesAreReusedAcrossFramesOwnersAndReplacement() PASSED
+
+K1GeometryTest > paletteAndRolesAreExact() PASSED
+
+K1IdentityAndPermissionsTest > realAuraDraftUsesBoundIdentityAndRejectsTamperedDirectContributions() PASSED
+
+K1IdentityAndPermissionsTest > viewerPermissionGrantRevokeAndOwnerUseAreRechecked() PASSED
+
+K1IdentityAndPermissionsTest > nonfinitePositionAndYawAxesNeverReachPlanner() PASSED
+
+K1IdentityAndPermissionsTest > staleAndFutureSnapshotsSkipThenRecoverWithoutRestartingClock() PASSED
+
+K1IdentityAndPermissionsTest > permissionRevokedBetweenPlanningAndEmissionIsFailClosed() PASSED
+
+K1IdentityAndPermissionsTest > invalidStreakTerminatesAtConfiguredLimitAndReadyResetsIt() PASSED
+
+K1IdentityAndPermissionsTest > ownerFirstSelectionUnderOneViewerCap() PASSED
+
+K1IdentityAndPermissionsTest > forgedViewerAndReleasedBindingTerminate() PASSED
+
+K1IdentityAndPermissionsTest > unknownMismatchedWorldHeightAndChunkFailClosed() PASSED
+
+K1IdentityAndPermissionsTest > forgedOwnerTerminatesBeforeAnyUnauthorizedEmission() PASSED
+
+K1IdentityAndPermissionsTest > viewersMustBeInCurrentWorldAndRange() PASSED
+
+K1IdentityAndPermissionsTest > ownersWithUseButNoViewSeeOnlyTheirOwnAura() PASSED
+
+K1LifecycleTest > allTierReplacementsAreSingleRegistrationAndDisposeOld() PASSED
+
+K1LifecycleTest > auraOffStopsOnlyAuraAndPreservesRing() PASSED
+
+K1LifecycleTest > thousandsOfReplacementsAndStopsHaveBoundedRegistrationsAndTasks() PASSED
+
+K1LifecycleTest > schedulerFailureLeavesNoRegistrationAndRetryWorks() PASSED
+
+K1LifecycleTest > duplicateTicksAndStoppedCallbacksCannotPlanAgain() PASSED
+
+K1LifecycleTest > noAutomaticStartAndAuraAloneUsesOneTask() PASSED
+
+K1LifecycleTest > disconnectTerminatesAndReleasedSessionCannotResume() PASSED
+
+K1LifecycleTest > shutdownDisposesAndForbidsAllLaterStarts() PASSED
+
+K1LifecycleTest > deathTerminatesAndCancelsBeforePlan() PASSED
+
+K1LifecycleTest > stopOwnerAndStopAllCleanUpOnlyIntendedOwners() PASSED
+
+K1LifecycleTest > failedStartPreservesExistingAuraAndTask() PASSED
+
+K1LifecycleTest > expirationIsExactEvenAfterSkippedSnapshots() PASSED
+
+K1SyntheticMeasurementsTest > recordAllTiersAndTwoViewerSustainedPipelineMeasurements() PASSED
+
+[Incubating] Problems report is available at: file:///home/runner/work/Bedwenton/Bedwenton/paper-adapter/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.1.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 21s
+9 actionable tasks: 7 executed, 2 up-to-date

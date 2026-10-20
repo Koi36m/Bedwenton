@@ -1,0 +1,30 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.1.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+[Incubating] Problems report is available at: file:///workspace/work/m8-k1_2_1/paper-adapter/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Could not determine the dependencies of task ':compileJava'.
+> Could not resolve all dependencies for configuration ':compileClasspath'.
+   > Could not resolve io.papermc.paper:paper-api:26.3.build.204-stable.
+     Required by:
+         root project 'bedwenton-vfx-paper'
+      > Could not resolve io.papermc.paper:paper-api:26.3.build.204-stable.
+         > Could not get resource 'https://repo.papermc.io/repository/maven-public/io/papermc/paper/paper-api/26.3.build.204-stable/paper-api-26.3.build.204-stable.pom'.
+            > Could not GET 'https://repo.papermc.io/repository/maven-public/io/papermc/paper/paper-api/26.3.build.204-stable/paper-api-26.3.build.204-stable.pom'. Received status code 403 from server: Forbidden
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to generate a Build Scan (Powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.1.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 9s

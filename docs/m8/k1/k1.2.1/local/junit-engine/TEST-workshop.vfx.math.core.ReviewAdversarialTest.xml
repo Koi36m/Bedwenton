@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.core.ReviewAdversarialTest" tests="18" skipped="0" failures="0" errors="0" timestamp="2026-10-20T08:40:57.380Z" hostname="15322502875c" time="15.606">
+  <properties/>
+  <testcase name="normalizedOr: 1e-12 of the exact unit vector for 200,000 extreme finite inputs; same fallback reference below LENGTH_EPS (section 2)" classname="workshop.vfx.math.core.ReviewAdversarialTest" time="6.216"/>
+  <testcase name="Tier 1 never throws and Tier 2 is total: NaN, infinities, -0.0, subnormals and MAX_VALUE in every operand (section 0A)" classname="workshop.vfx.math.core.ReviewAdversarialTest" time="0.994"/>
+  <testcase name="Pose.then/inverse: inside the domain never throw; outside, only ArithmeticException, never IllegalArgumentException (section 5)" classname="workshop.vfx.math.core.ReviewAdversarialTest" time="0.254"/>
+  <testcase name="slerp: constant angular speed; slerp(a, b, t) and slerp(a, -b, t) are the same rotation (section 3)" classname="workshop.vfx.math.core.ReviewAdversarialTest" time="0.039"/>
+  <testcase name="Quat.normalized: 1e-12 of the exact unit quaternion for 100,000 extreme inputs; exact IDENTITY for zero (section 3)" classname="workshop.vfx.math.core.ReviewAdversarialTest" time="3.707"/>
+  <testcase name="slerp: action equals the analytic great-circle position for |t| &lt;= 1e3 to 1e-9, incl. phi near 1e-8 and near pi (section 3, R3 domain)" classname="workshop.vfx.math.core.ReviewAdversarialTest" time="0.04"/>
+  <testcase name="Conventions: Euler helper equals Rodrigues X then Y then Z about fixed world axes for random angles (CONVENTIONS 3)" classname="workshop.vfx.math.core.ReviewAdversarialTest" time="0.012"/>
+  <testcase name="Quat.rotate of exactly-normalized quaternions matches Rodrigues to 1e-13 * |v| for |v| up to 1e100 (sections 0A, 6)" classname="workshop.vfx.math.core.ReviewAdversarialTest" time="0.022"/>
+  <testcase name="nlerp: shortest-sign (1-t)a + tb normalized, including extrapolation to |t| = 1e3 (section 3)" classname="workshop.vfx.math.core.ReviewAdversarialTest" time="0.031"/>
+  <testcase name="shortestArc near antiparallel: contract accuracy table, minimal angle, unit norm, half-turn axis rule (section 3)" classname="workshop.vfx.math.core.ReviewAdversarialTest" time="0.293"/>
+  <testcase name="Frame factories: valid at 1e-12 for extreme magnitudes and hints within a factor 2 of the 1e-8 threshold (section 4)" classname="workshop.vfx.math.core.ReviewAdversarialTest" time="0.326"/>
+  <testcase name="angleTo: 1e-12 absolute from 1e-9 to pi - 1e-6, sign-insensitive, both argument orders (section 3)" classname="workshop.vfx.math.core.ReviewAdversarialTest" time="0.066"/>
+  <testcase name="fromHeading equals the contract formula right = n(f x u), up = right x f, back = -f for well-conditioned input (section 4)" classname="workshop.vfx.math.core.ReviewAdversarialTest" time="0.855"/>
+  <testcase name="Pose near Minecraft's world border (|x|,|z| &lt;= 3e7): composition 1e-7, inverse and toLocal round trips 1e-6 (section 6)" classname="workshop.vfx.math.core.ReviewAdversarialTest" time="0.096"/>
+  <testcase name="fromFrame(q.toFrame()) is q (as a rotation) for half turns about arbitrary and diagonal axes and near-half turns (section 3)" classname="workshop.vfx.math.core.ReviewAdversarialTest" time="0.152"/>
+  <testcase name="alignY: x is the normalized perpendicular component of the hint, to within its conditioning (section 4)" classname="workshop.vfx.math.core.ReviewAdversarialTest" time="0.864"/>
+  <testcase name="transportY: 200,000-step walk with an antiparallel flip every 1,000 steps stays valid; y within 1e-12 of normalize(newY) (section 4)" classname="workshop.vfx.math.core.ReviewAdversarialTest" time="1.628"/>
+  <testcase name="Environment: the test JVM is Java 25 (contract header: Java 25)" classname="workshop.vfx.math.core.ReviewAdversarialTest" time="0.002"/>
+  <system-out><![CDATA[[M1 review] normalizedOr worst component error vs exact: 2.220446049250313E-16
+[M1 review] slerp |t|<=1e3 worst action error vs analytic: 9.056739506726039E-13
+[M1 review] shortestArc offset 0.1 worst error 8.065179992641965E-15 (allowed 1.0E-9)
+[M1 review] shortestArc offset 0.001 worst error 7.980693752677138E-13 (allowed 1.0E-9)
+[M1 review] shortestArc offset 1.0E-6 worst error 7.624904121111344E-10 (allowed 1.0E-9)
+[M1 review] shortestArc offset 1.0E-7 worst error 7.937575590433542E-9 (allowed 1.0E-8)
+[M1 review] shortestArc offset 1.0E-9 worst error 7.908609860608958E-7 (allowed 1.0E-6)
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

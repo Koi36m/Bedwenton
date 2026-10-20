@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - NumericPolicyTest</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<h1>NumericPolicyTest</h1>
+<div class="breadcrumbs">
+<a href="../index.html">all</a> &gt; 
+<a href="../packages/workshop.vfx.math.core.html">workshop.vfx.math.core</a> &gt; NumericPolicyTest</div>
+<div id="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox" id="tests">
+<div class="counter">13</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="failures">
+<div class="counter">0</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="ignored">
+<div class="counter">0</div>
+<p>ignored</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="duration">
+<div class="counter">0.221s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox success" id="successRate">
+<div class="percent">100%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="tab-container">
+<ul class="tabLinks">
+<li>
+<a href="#">Tests</a>
+</li>
+</ul>
+<div class="tab">
+<h2>Tests</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Method name</th>
+<th>Duration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tr>
+<td class="success">Tier 3: constructors keep throwing IllegalArgumentException for invalid inputs</td>
+<td class="success">constructorsStillThrowIllegalArgument()</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Tier 2: Frame factories always return a valid right-handed frame, WORLD for a degenerate axis, for every double input</td>
+<td class="success">frameFactoriesAreTotal()</td>
+<td class="success">0.113s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Tier 2: normalizedOr is total: fallback exactly for degenerate input, otherwise a finite unit vector</td>
+<td class="success">normalizedOrIsTotal()</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Tier 1: Pose.toWorld overflows to infinity (no exception, no clamping); Frame.toWorld likewise</td>
+<td class="success">poseEvaluationFollowsIeee()</td>
+<td class="success">0s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Tier 3: Pose.inverse throws ArithmeticException when the reciprocal scale or inverse translation is not representable</td>
+<td class="success">poseInverseRejectsNonRepresentableResult()</td>
+<td class="success">0s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Tier 3: Pose.then throws ArithmeticException when scale overflows or underflows to zero; two valid poses never give an invalid one</td>
+<td class="success">poseThenRejectsNonRepresentableScale()</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Tier 3: Pose.then throws ArithmeticException when the composed translation overflows</td>
+<td class="success">poseThenRejectsNonRepresentableTranslation()</td>
+<td class="success">0.001s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Tier 2: Quat.normalized and inverse are total: finite unit result for every double input, IDENTITY for zero or non-finite</td>
+<td class="success">quaternionNormalizationIsTotal()</td>
+<td class="success">0.046s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Tier 1: Vec3 and Quat overflow to infinity with no exception and no saturation</td>
+<td class="success">rawArithmeticOverflowsToInfinity()</td>
+<td class="success">0s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Tier 1: NaN and infinity propagate by IEEE rules (no sanitizing, no exceptions)</td>
+<td class="success">rawArithmeticPropagatesNaNAndInfinity()</td>
+<td class="success">0s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Tier 2: shortestArc is total: unit result for every pair; IDENTITY for degenerate input; correct mapping otherwise</td>
+<td class="success">shortestArcIsTotal()</td>
+<td class="success">0.043s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Supported magnitude: Pose with scale and translation up to 1e100 is finite and accurate; compositions of two stay finite</td>
+<td class="success">supportedMagnitudePose()</td>
+<td class="success">0.009s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Supported magnitude: Vec3, Quat.rotate and Frame stay finite and homogeneous up to 1e100</td>
+<td class="success">supportedMagnitudeVectors()</td>
+<td class="success">0.006s</td>
+<td class="success">passed</td>
+</tr>
+</table>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="https://www.gradle.org">Gradle 9.1.0</a> at Oct 20, 2026, 8:45:02 AM</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.scene.FrameContractTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-20T08:41:56.352Z" hostname="15322502875c" time="0.128">
+  <properties/>
+  <testcase name="Easing applies only to motions; batch timing and reveal use the layer's raw M2 progress" classname="workshop.vfx.scene.FrameContractTest" time="0.0"/>
+  <testcase name="Point counts: pointCount is the sum of batch sizes and never exceeds scene.maxPointsPerFrame(), at every instant of the example scenes" classname="workshop.vfx.scene.FrameContractTest" time="0.005"/>
+  <testcase name="Reveal PREFIX: k = n at progress &gt;= 1, else min(n - 1, floor(progress n)); 0 at the start, n - 1 just before the end, n when held after; a 1-point shape appears only at progress 1" classname="workshop.vfx.scene.FrameContractTest" time="0.113"/>
+  <testcase name="Exact single-point placement: with the identity anchor and no motion, every coordinate is returned exactly; with a translation-only anchor, exactly anchor + point (one rounding per coordinate)" classname="workshop.vfx.scene.FrameContractTest" time="0.0"/>
+  <testcase name="Order: batches follow layer insertion order (layerIndex increasing), points follow shape order; overlapping layers with identical timing and geometry are all emitted" classname="workshop.vfx.scene.FrameContractTest" time="0.002"/>
+  <testcase name="Immutability: batches and layers are unmodifiable; coordinates() is a copy; accessors outside [0, size) throw IndexOutOfBoundsException" classname="workshop.vfx.scene.FrameContractTest" time="0.005"/>
+  <testcase name="Omission: hidden layers (BEFORE, AFTER with ACTIVE_ONLY), empty shapes and empty reveals produce no batch; an empty scene gives an empty ACTIVE frame" classname="workshop.vfx.scene.FrameContractTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

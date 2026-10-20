@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.sample.SampleSetTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-20T08:41:52.028Z" hostname="15322502875c" time="1.166">
+  <properties/>
+  <testcase name="transformed(pose): the same parameters, and points bit for bit equal to curve.transformed(pose).point(t) (sample once, move every tick)" classname="workshop.vfx.math.sample.SampleSetTest" time="1.162"/>
+  <testcase name="Immutability: parameters() returns a copy; points() is unmodifiable; later changes to returned data do not affect the set" classname="workshop.vfx.math.sample.SampleSetTest" time="0.002"/>
+  <testcase name="SampleLimits: maxSamples in [1, 2^20], maxEvaluations in [256, 2^24]; ArcLengthTolerance: absolute finite &gt;= 0, relative in [2^-40, 2^-3]" classname="workshop.vfx.math.sample.SampleSetTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

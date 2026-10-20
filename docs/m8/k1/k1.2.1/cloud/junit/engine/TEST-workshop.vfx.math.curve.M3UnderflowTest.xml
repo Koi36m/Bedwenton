@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.curve.M3UnderflowTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-20T08:44:49.527Z" hostname="runnervmdkmh8" time="2.361">
+  <properties/>
+  <testcase name="A3: r0 = q, r1 = 2q, t = 1/2 (q = MIN_VALUE): no double is within the revision 2 bounds of the exact 1.5 q; the amended bounds hold (radius, spiral point, line)" classname="workshop.vfx.math.curve.M3UnderflowTest" time="0.0"/>
+  <testcase name="A3: lines and Beziers with subnormal control points, against the exact Bernstein form, within the amended bounds (absolute term 2 n^k G^n MIN_VALUE)" classname="workshop.vfx.math.curve.M3UnderflowTest" time="0.368"/>
+  <testcase name="A3: the radius underflow error is multiplied by w in the derivative and by w^2 in the second derivative (r0 = q, r1 = 2q, t = 1/2, turns 1000 and others)" classname="workshop.vfx.math.curve.M3UnderflowTest" time="0.079"/>
+  <testcase name="T4 (clarified): seams are exact up to the largest k for which the double product turns * k is finite; beyond that only 'no exception' is promised" classname="workshop.vfx.math.curve.M3UnderflowTest" time="0.001"/>
+  <testcase name="A3: radii, rise and products in the subnormal range and around MIN_NORMAL, on exact quarter phases, within the amended bounds" classname="workshop.vfx.math.curve.M3UnderflowTest" time="0.171"/>
+  <testcase name="A3: subnormal turns (w = 2 pi turns underflows) with radii up to 1e100: derivatives within the amended bounds (absolute term proportional to S)" classname="workshop.vfx.math.curve.M3UnderflowTest" time="0.376"/>
+  <testcase name="A3: the test tolerances are never below the contract bounds computed exactly (BigDecimal, pi rounded up), including subnormal inputs, and never grossly above them" classname="workshop.vfx.math.curve.M3UnderflowTest" time="1.364"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

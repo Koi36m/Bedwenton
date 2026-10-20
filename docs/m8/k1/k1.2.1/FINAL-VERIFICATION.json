@@ -1,0 +1,58 @@
+{
+  "status": "READY FOR INDEPENDENT K1.2.1 IMPLEMENTATION REVIEW",
+  "native_implementation": "ae85af8fc22a06ff7bc36ff4b0dbe1214d0d59a9",
+  "native_parent": "57e3caacc687617472104beee55b6918fa27e832",
+  "github_snapshot": "cbb5861e36ece81b08fcbb7622b40982874c2fe3",
+  "tested_tree": "fd0dff807a41c0ab04c5dee238e78e3333ff0318",
+  "counts": {
+    "tests": 603,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "xml": {
+    "engine": {
+      "tests": 415,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_files": 59
+    },
+    "adapter": {
+      "tests": 188,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_files": 24
+    }
+  },
+  "baseline_test_ids_retained": 603,
+  "new_tests": 0,
+  "jar_name": "bedwenton-vfx-paper-0.8.0-k1.2.1.jar",
+  "jar_size": 196541,
+  "jar_sha256": "b4cf753fbb89304da69fad9ccb4493fb4f61eb8a4c8b0255babdaaaf6916a214",
+  "outer_radius": 1.05,
+  "inner_scale": "1.05/0.78",
+  "back_offset": 0.85,
+  "centre_height": 1.25,
+  "rotation_ticks": 80,
+  "tier_points": [
+    20,
+    34,
+    44
+  ],
+  "halo": "unchanged, including bit-identical baseline coordinate test",
+  "production_java_changes": [
+    "AuraRecipe.java"
+  ],
+  "unchanged_baseline_files": 2149,
+  "production_compiler_warnings": 0,
+  "engine_runtime": "empty",
+  "adapter_runtime": "only accepted engine; Paper compileOnly",
+  "reference_datasets": "7/7 byte-identical, M6 regenerated twice",
+  "local_gradle_engine": "clean test and check successful",
+  "local_gradle_adapter": "dependency resolution failed: PaperMC HTTP403; adapter check not run locally",
+  "fresh_actions": "successful full engine and Paper adapter verification",
+  "real_server_smoke": "NOT RUN",
+  "acceptance": "PENDING OWNER/INDEPENDENT REVIEW"
+}

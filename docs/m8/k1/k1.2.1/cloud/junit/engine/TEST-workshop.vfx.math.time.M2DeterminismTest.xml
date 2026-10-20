@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.math.time.M2DeterminismTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-20T08:45:00.719Z" hostname="runnervmdkmh8" time="0.17">
+  <properties/>
+  <testcase name="Discontinuities: a cosmetic gap jumps forward by design; pause/resume or seek removes it; a reset tick counter is rejected for control (section 6.5)" classname="workshop.vfx.math.time.M2DeterminismTest" time="0.001"/>
+  <testcase name="Low TPS: GAME time follows ticks (half speed at 10 TPS), COSMETIC time follows supplied nanoseconds (real-time speed) (sections 3, 6.2)" classname="workshop.vfx.math.time.M2DeterminismTest" time="0.0"/>
+  <testcase name="Reversal: a negative rate runs a timing backwards through its start into BEFORE (sections 4, 5)" classname="workshop.vfx.math.time.M2DeterminismTest" time="0.0"/>
+  <testcase name="Integer pause/resume chains are exact: local time equals the playing span, after 100,000 control events (section 6.3)" classname="workshop.vfx.math.time.M2DeterminismTest" time="0.02"/>
+  <testcase name="Determinism: equal inputs give bit-identical outputs, across repeated calls and freshly built equal objects (section 6.1)" classname="workshop.vfx.math.time.M2DeterminismTest" time="0.043"/>
+  <testcase name="Path independence: skipped, irregular or out-of-order evaluation gives exactly the values of regular evaluation (section 6.2)" classname="workshop.vfx.math.time.M2DeterminismTest" time="0.001"/>
+  <testcase name="Long-running: 10 million consecutive ticks from 2^40 are exact integers with exact loop phases, no drift (section 6.4)" classname="workshop.vfx.math.time.M2DeterminismTest" time="0.084"/>
+  <testcase name="Fractional rate chains: the error after n re-anchorings is at most 2 n 2^-52 max|local| against exact arithmetic (section 6.4)" classname="workshop.vfx.math.time.M2DeterminismTest" time="0.018"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

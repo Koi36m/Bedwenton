@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.delivery.M6BoundaryTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-20T08:40:53.846Z" hostname="15322502875c" time="0.077">
+  <properties/>
+  <testcase name="No mutable static state: every static field is final, of a primitive, String, enum or empty-array constant" classname="workshop.vfx.delivery.M6BoundaryTest" time="0.001"/>
+  <testcase name="API shape: exactly the ten public types of section 2, with exactly the listed public members" classname="workshop.vfx.delivery.M6BoundaryTest" time="0.004"/>
+  <testcase name="Forbidden: clocks, randomness, threads, locks, logging, System and floating point in planning" classname="workshop.vfx.delivery.M6BoundaryTest" time="0.062"/>
+  <testcase name="Imports: only workshop.vfx.scene, M1 core, M2 time and java.util; never Bukkit, Paper, Minecraft, I/O, concurrency or reflection" classname="workshop.vfx.delivery.M6BoundaryTest" time="0.009"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

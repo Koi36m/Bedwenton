@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="workshop.vfx.paper.m8.K1BudgetAndSchedulingTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-20T08:45:27.285Z" hostname="runnervmdkmh8" time="1.217">
+  <properties/>
+  <testcase name="emissionAndViewerBudgetsAreAlignedAndFullyAccounted()" classname="workshop.vfx.paper.m8.K1BudgetAndSchedulingTest" time="0.003"/>
+  <testcase name="ringAndAuraUseExactlyOneGlobalPlanAndOneTask()" classname="workshop.vfx.paper.m8.K1BudgetAndSchedulingTest" time="0.001"/>
+  <testcase name="sustainedAllTierRunsKeepExactCountsAndNoSchedulingGrowth()" classname="workshop.vfx.paper.m8.K1BudgetAndSchedulingTest" time="0.26"/>
+  <testcase name="zeroGenerationBudgetProducesNoCallsAndNoExtraTasks()" classname="workshop.vfx.paper.m8.K1BudgetAndSchedulingTest" time="0.001"/>
+  <testcase name="capacityIsSharedInBothStartOrdersAndReplacementAtCap()" classname="workshop.vfx.paper.m8.K1BudgetAndSchedulingTest" time="0.001"/>
+  <testcase name="perPlayerCapAndReplacementRespectK0Registry()" classname="workshop.vfx.paper.m8.K1BudgetAndSchedulingTest" time="0.0"/>
+  <testcase name="strictSimpleCeilingNeverPromotesWhenBudgetAllowsHeavy()" classname="workshop.vfx.paper.m8.K1BudgetAndSchedulingTest" time="0.0"/>
+  <testcase name="persistentCyanFailureDisablesOnlyThatStyleAndAccountingRemainsExact()" classname="workshop.vfx.paper.m8.K1BudgetAndSchedulingTest" time="0.001"/>
+  <testcase name="longSoakStartStopWorldChangesRemainBoundedAndClear()" classname="workshop.vfx.paper.m8.K1BudgetAndSchedulingTest" time="0.947"/>
+  <testcase name="unresolvedCyanStyleIsRemovedFromPlanningWithoutFallbackPayload()" classname="workshop.vfx.paper.m8.K1BudgetAndSchedulingTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
