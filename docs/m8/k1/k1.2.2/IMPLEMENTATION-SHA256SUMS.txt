@@ -1,0 +1,16 @@
+50cce5b8422ec59fa602248ab780b2099738109a002026a4238421e7469f769c  .github/workflows/m8-k1-2-2-java25-verification.yml
+663dbc300ac9dc8636ccfffb6eae81da4ad2e0a8ba5f49956fe486e735406522  docs/m8/k1/M8-K1.2.2-CLARITY-PASS.md
+dae593b5cc0513d09e4b0a5b33f0098c2b6dd3593187b375c26538b393af0977  paper-adapter/gradle.properties
+1de0e3b8b63e0d74d9bffc5c2f5ce1f0df68d8ab953f1aaed3157b15b81aff33  paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraEffect.java
+00e608aae5b7d6fadf3195866b7148fc9843238a334dc2fb2e536d3b0c0d44d4  paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraRecipe.java
+04a3334c568df40a2293298dd03fcfc4651ee22ae4d7373f6d87b01de17ef2bb  paper-adapter/src/main/java/workshop/vfx/paper/m8/AuraSession.java
+fd5cf0fd826b276977f2994431e7205b7f8ea01e2d9e1a8ba54f640b641b3fe1  paper-adapter/src/test/java/workshop/vfx/paper/m8/K11RearArcTest.java
+8ab529c9443869ac809dc0a82837f7d2c0844825ce9afc7fa148488bc495eb3d  paper-adapter/src/test/java/workshop/vfx/paper/m8/K122ClarityTest.java
+2ac92292f2f9ea64578dbb42ef20e1f589dc4decd6028639981c8bfa2feead42  paper-adapter/src/test/java/workshop/vfx/paper/m8/K12BackSigilTest.java
+5835ced40d6848748ceaa05d3bc1f15a7e524118c64a6bd7b89e09b853de4558  paper-adapter/src/test/java/workshop/vfx/paper/m8/K1BudgetAndSchedulingTest.java
+a057b77ddf8a127de73b815197121b94a0c9beb23b21b425c62e80788964b433  paper-adapter/src/test/java/workshop/vfx/paper/m8/K1Fixture.java
+a8def8e32f803d285c50dadb6e0a6b0860b2bcaf5a392e345ec9d131b5b2218a  paper-adapter/src/test/java/workshop/vfx/paper/m8/K1GeometryTest.java
+1cf55081982e68430c08e9ca90c8cae70cbb196170fce7305027cf16a5241410  paper-adapter/src/test/java/workshop/vfx/paper/m8/K1IdentityAndPermissionsTest.java
+51d2b580d252eb95d69d1d08949bc71d2fd5bd05791cefda91e77224d677b3e7  paper-adapter/src/test/java/workshop/vfx/paper/m8/K1SyntheticMeasurementsTest.java
+670f1ecea51e34ca8dca8fe7641b77c1793f9c6360898ab8bba168deb119f496  paper-adapter/tools/m8-k1-2-2/summarize.py
+728c50935dc3487b02fb94ce8628dfcf99992d8edf08d92569f0bb45ec209aed  paper-adapter/tools/m8-k1-2-2/verify.sh

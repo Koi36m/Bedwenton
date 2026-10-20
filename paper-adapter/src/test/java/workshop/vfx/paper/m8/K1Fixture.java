@@ -21,6 +21,7 @@ final class K1Fixture {
     final TimedAnchorSource snapshots;
     final RingDriver driver;
     final DemoConfig config;
+    final EffectRecipe fullGeometry;
     long tick=100;int schedules,cancels,plans,reads;
     Runnable callback,afterPlan=()->{};
     boolean failSchedule,failCyan,failRod;
@@ -31,7 +32,7 @@ final class K1Fixture {
     K1Fixture(){this(Map.of(),Map.of());}
     K1Fixture(Map<String,Object> settings,Map<String,Object> m8){
         config=DemoConfig.from(settings);
-        var m=new HashMap<String,Object>(Map.of("enabled",true));m.putAll(m8);M8Config mc=M8Config.from(m);
+        var m=new HashMap<String,Object>(Map.of("enabled",true));m.putAll(m8);M8Config mc=M8Config.from(m);fullGeometry=AuraRecipe.create(mc.auraLifetimeTicks());
         for(UUID p:List.of(A,B,C)){position.put(p,new double[]{0,64,0,0,0,0});worlds.put(p,W);}
         snapshots=new TimedAnchorSource(thread,this::snapshot,System::nanoTime);
         registry=new DynamicEffectRegistry(thread,snapshots,ids,mc.maxEffectsPerPlayer(),mc.invalidAnchorTicksToTerminate());
@@ -62,6 +63,8 @@ final class K1Fixture {
     void step(){tick++;run();}
     void ring(UUID owner){driver.start(owner,worlds.get(owner),0,64,0,QualityTier.BALANCED);}
     EffectDraft draft(UUID owner){return registry.drafts(tick).stream().filter(d->d.owner().equals(owner)).findFirst().orElseThrow();}
+    // Geometry-only checks intentionally evaluate the unchanged full production recipe at every phase.
+    EffectFrame geometryFrame(EffectDraft d){return fullGeometry.variant(d.tier()).evaluate(d.anchor(),d.playback(),d.now());}
     static EffectFrame frame(EffectDraft d){return d.recipe().variant(d.tier()).evaluate(d.anchor(),d.playback(),d.now());}
     long sendsTo(UUID p){long id=ids.viewerId(p);return sends.stream().filter(s->s.viewer()==id).count();}
     void balanced(){start(QualityTier.BALANCED);}

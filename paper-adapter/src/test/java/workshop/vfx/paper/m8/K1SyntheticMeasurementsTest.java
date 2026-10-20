@@ -32,11 +32,12 @@ class K1SyntheticMeasurementsTest {
                 f.tick++;
             }
             long expectedPerFrame=scenario==0?20:scenario==1?34:scenario==2?44:88;
-            assertEquals(expectedPerFrame*1200,generated);assertEquals(generated*(scenario==3?2:1),placements);
+            long haloPerFrame=scenario==0?0:scenario==1?6:scenario==2?8:16;
+            assertEquals(expectedPerFrame*300+haloPerFrame*900,generated);assertEquals(generated*(scenario==3?2:1),placements);
             assertEquals(placements,ok);assertEquals(0,failed);assertEquals(1,f.schedules);
             if(scenario>0)json.append(',');
-            json.append("{\"scenario\":\"").append(scenario==3?"two-heavy-auras-two-viewers":tier.name()).append("\",\"generated_per_frame\":").append(expectedPerFrame)
-                .append(",\"generated_total\":").append(generated).append(",\"planned_placements\":").append(placements)
+            json.append("{\"scenario\":\"").append(scenario==3?"two-heavy-auras-two-viewers":tier.name()).append("\",\"generated_per_white_pulse\":").append(expectedPerFrame)
+                .append(",\"generated_on_quiet_tick\":").append(haloPerFrame).append(",\"white_cadence_ticks\":4").append(",\"generated_total\":").append(generated).append(",\"planned_placements\":").append(placements)
                 .append(",\"successful_calls\":").append(ok).append(",\"failed_calls\":").append(failed)
                 .append(",\"planner_ns\":").append(stats(planner)).append(",\"emitter_ns\":").append(stats(emitter))
                 .append(",\"snapshot_reads_ns\":").append(stats(snapshot)).append(",\"whole_fake_tick_ns\":").append(stats(total)).append('}');

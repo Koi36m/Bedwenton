@@ -1,6 +1,7 @@
 package workshop.vfx.paper.m8;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import workshop.vfx.delivery.*;
@@ -72,5 +73,16 @@ public final class AuraRecipe {
                 QualityTier.BALANCED, scene(16, 6, 6, lifetime), QualityTier.HEAVY, scene(20, 8, 8, lifetime)),
             Map.of("orbit", LayerRole.ESSENTIAL, "stroke-a", LayerRole.STANDARD,
                 "stroke-b", LayerRole.STANDARD, "halo", LayerRole.STANDARD));
+    }
+
+    /** Session-cached non-pulse variant: reuse the exact halo layer; omit white points before M6 budgeting. */
+    static EffectRecipe withoutSigil(EffectRecipe full) {
+        var variants = new EnumMap<QualityTier, EffectScene>(QualityTier.class);
+        for (QualityTier tier : full.tiers()) {
+            EffectScene scene = full.variant(tier);
+            variants.put(tier, EffectScene.of(scene.domain(), scene.lifetimeTicks(),
+                scene.layers().stream().filter(layer -> layer.name().equals("halo")).toList(), scene.limits()));
+        }
+        return EffectRecipe.of(full.name(), full.priority(), variants, Map.of("halo", full.role("halo")));
     }
 }

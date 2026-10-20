@@ -1,0 +1,201 @@
+Begin **Bedwenton M8 K1.2.2 — Sigil Clarity Pass ONLY**.
+
+Continue from the verified K1.2.1 implementation.
+
+## Baseline
+
+Repository: `Koi36m/Bedwenton`
+
+Relevant baseline:
+- K1.2.1 native implementation: `ae85af8fc22a06ff7bc36ff4b0dbe1214d0d59a9`
+- Verified GitHub-tested snapshot: `cbb5861e36ece81b08fcbb7622b40982874c2fe3`
+- K1.2.1 automated verification: 603/603 PASS
+- K1.2.1 evidence branch: `m8-k1-2-1-review-evidence`
+
+Preserve all accepted M1–M6, M7, K0, K1, K1.1, K1.2, and K1.2.1 functionality except for the authorized visual clarity adjustment below.
+
+Do not begin K2.
+
+## Why this pass is needed
+
+The K1.2.1 back-mounted sigil now has the correct size and placement, but in Minecraft the white END_ROD particles visually accumulate into a dense glowing mass.
+
+This makes the rotating inner design hard to read.
+
+The owner wants to keep the END_ROD aesthetic, but reduce visual crowding.
+
+## Objective
+
+Implement a **clarity pass only**:
+
+- keep the white END_ROD sigil
+- keep the cyan halo
+- keep the same geometry and placement
+- keep the same 80-tick inner rotation
+- reduce white particle crowding by emitting the white sigil less frequently
+
+## Required visual change
+
+### White sigil emission cadence
+
+Do not attempt to change vanilla END_ROD lifetime directly.
+
+Instead, reduce the emission cadence of the **white back-mounted sigil**.
+
+Required behavior:
+- the white outer ring and white inner rotating strokes should emit less often than every tick
+- target: emit the white sigil **once every 4 ticks**
+- preserve the same geometric positions sampled from the current design
+- preserve the same rotation phase progression over time
+- preserve the same vertical outline and rotating internal design
+- preserve the same tier geometry and counts:
+  - Simple: 20
+  - Balanced: 34
+  - Heavy: 44
+
+Interpretation:
+- the sigil’s underlying motion/rotation still advances continuously according to the current deterministic timing model
+- only the frequency of emitted white particles is reduced
+
+### Cyan halo
+
+Keep the cyan halo behavior unchanged unless a very small technical adjustment is absolutely necessary.
+
+The owner specifically chose to reduce END_ROD clutter rather than replace the effect with another particle type.
+
+## Preserve geometry and placement
+
+Keep the K1.2.1 visual layout unchanged unless a tiny technical correction is required:
+
+- white sigil radius: 1.05
+- backward offset: 0.85
+- center height: 1.25 above feet
+- vertical back-mounted ring
+- internal rotating curved strokes
+- 80-tick internal rotation
+- cyan halo unchanged
+
+Do not enlarge, shrink, or redesign the sigil in this pass unless unavoidable.
+
+## Required behavior that must remain unchanged
+
+Preserve all current behavior:
+- `/vfxdemo aura`
+- `/vfxdemo aura simple`
+- `/vfxdemo aura balanced`
+- `/vfxdemo aura heavy`
+- `/vfxdemo aura off`
+- `/vfxdemo stop`
+- `/vfxdemo stop all`
+- `/vfxdemo status`
+
+Preserve:
+- player following
+- body-yaw attachment
+- walking/sprinting/jumping behavior
+- teleport continuation
+- dimension continuation
+- death/disconnect cleanup
+- replacement
+- permissions
+- identity validation
+- transactional start
+- shared K0 scheduler
+- one global M6 planning path
+- global budgets
+- lifecycle safety
+
+Do not loosen fail-closed checks.
+
+## Performance / scheduling requirements
+
+This must remain a lightweight visual refinement.
+
+Do not:
+- add new scheduled tasks
+- add per-effect timers outside the existing scheduling model
+- add new particle layers
+- add new dependencies
+- use NMS
+- use reflection
+- load chunks
+- broadcast particles globally
+- change the cyan halo into another particle family
+
+If emission throttling requires a small internal cadence gate, implement it in the smallest additive way possible and document it.
+
+Ensure skipped white-emission ticks do not corrupt scheduling, budgeting, accounting, or lifecycle behavior.
+
+## Documentation
+
+Add a concise document such as:
+
+`docs/m8/k1/M8-K1.2.2-CLARITY-PASS.md`
+
+Document:
+- that END_ROD lifetime cannot be directly shortened through Paper
+- that white sigil clarity is improved by reduced emission cadence
+- exact white-emission cadence chosen
+- whether the cyan halo cadence is unchanged
+- whether any budgeting/accounting treatment changed
+
+## Testing requirements
+
+Preserve the full existing baseline and rerun the relevant verification.
+
+At minimum:
+- all existing 603 baseline tests
+- update or add tests for white-emission cadence if needed
+- verify that the sigil still rotates correctly even when not emitted every tick
+- verify that geometry/placement is unchanged
+- verify that halo behavior is unchanged
+- verify that lifecycle, permissions, and cleanup are unchanged
+- verify that scheduler/task counts remain unchanged
+- verify that accounting still behaves correctly
+
+Do not weaken meaningful assertions merely to make the build pass.
+
+## Deliverables
+
+Provide:
+1. updated source
+2. compiled plugin JAR if build succeeds
+3. Git provenance
+4. SHA-256 manifest
+5. implementation report
+6. K1.2.2 clarity-pass note
+7. test summary
+8. focused smoke checklist for:
+   - visual clarity of the white sigil
+   - visibility of the inner rotating design
+   - comparison to K1.2.1
+   - movement and following
+   - basic performance observation
+
+## Scope boundary
+
+Authorized:
+- K1.2.2 clarity pass only
+
+Not authorized:
+- K2 Movement Trail
+- particle-family replacement
+- major geometry redesign
+- scheduler redesign
+- global cinematic systems
+- unrelated refactors
+- merge into main
+- live deployment
+- production release
+
+## Completion requirement
+
+Stop after K1.2.2 implementation and verification.
+
+Report either:
+
+READY FOR INDEPENDENT K1.2.2 IMPLEMENTATION REVIEW
+
+or
+
+BLOCKED

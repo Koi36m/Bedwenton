@@ -16,6 +16,7 @@ public final class AuraSession {
     private final DynamicEffectRegistry registry;
     private final M8Config config;
     private final EffectRecipe recipe;
+    private final EffectRecipe haloOnly;
 
     public AuraSession(ThreadGuard thread, SessionIds ids, AnchorSource anchors,
                        DynamicEffectRegistry registry, M8Config config) {
@@ -23,6 +24,7 @@ public final class AuraSession {
         this.anchors = Objects.requireNonNull(anchors); this.registry = Objects.requireNonNull(registry);
         this.config = Objects.requireNonNull(config); guard = new AnchorIdentityGuard(ids, thread);
         recipe = AuraRecipe.create(config.auraLifetimeTicks());
+        haloOnly = AuraRecipe.withoutSigil(recipe);
     }
 
     public long start(UUID owner, QualityTier tier, long tick) {
@@ -34,7 +36,7 @@ public final class AuraSession {
         if (verdict.state() != AnchorState.READY)
             throw new IllegalArgumentException("Aura anchor unavailable: " + verdict.reason());
         return registry.start(owner, EffectKind.AURA, (id, bound) ->
-            new AuraEffect(thread, guard, id, bound, tick, config.auraLifetimeTicks(), recipe, tier));
+            new AuraEffect(thread, guard, id, bound, tick, config.auraLifetimeTicks(), recipe, haloOnly, tier));
     }
 
     public void stop(UUID owner) { thread.check(); registry.stop(owner, EffectKind.AURA); }

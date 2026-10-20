@@ -20,15 +20,17 @@ public final class AuraEffect implements DynamicEffect {
     private final long id, startTick;
     private final int lifetime;
     private final EffectRecipe recipe;
+    private final EffectRecipe haloOnly;
     private final QualityTier tier;
     private final Playback playback;
     private boolean disposed;
 
     // Session-owned construction ensures the configured lifetime and shared recipe cannot disagree.
     AuraEffect(ThreadGuard thread, AnchorIdentityGuard guard, long id, AnchorBinding binding,
-               long startTick, int lifetime, EffectRecipe recipe, QualityTier tier) {
+               long startTick, int lifetime, EffectRecipe recipe, EffectRecipe haloOnly, QualityTier tier) {
         this.thread = Objects.requireNonNull(thread); this.guard = Objects.requireNonNull(guard);
         this.binding = Objects.requireNonNull(binding); this.recipe = Objects.requireNonNull(recipe);
+        this.haloOnly = Objects.requireNonNull(haloOnly);
         this.tier = Objects.requireNonNull(tier);
         if (id < DynamicEffectRegistry.FIRST_ID || lifetime < 20 || lifetime > 12000)
             throw new IllegalArgumentException("Invalid aura identity or lifetime");
@@ -52,8 +54,10 @@ public final class AuraEffect implements DynamicEffect {
         double half = -StrictMath.toRadians(snapshot.bodyYawDegrees()) / 2;
         Pose anchor = new Pose(new Vec3(snapshot.x(), snapshot.y(), snapshot.z()),
             new Quat(StrictMath.cos(half), 0, StrictMath.sin(half), 0), 1);
+        // Start-relative cadence, derived from the existing clock: no timer, accumulated phase or catch-up bursts.
+        EffectRecipe visible = (tick - startTick) % 4 == 0 ? recipe : haloOnly;
         return Optional.of(new EffectDraft(EffectKind.AURA, id, binding.owner(), binding.ownerViewerId(),
-            snapshot.worldId(), anchor, recipe, tier, playback, TimePoint.gameTick(tick), tick - startTick));
+            snapshot.worldId(), anchor, visible, tier, playback, TimePoint.gameTick(tick), tick - startTick));
     }
     @Override public void dispose() { thread.check(); disposed = true; }
 }

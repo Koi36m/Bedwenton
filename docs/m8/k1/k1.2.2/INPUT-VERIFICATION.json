@@ -1,0 +1,12 @@
+{
+  "native_baseline_evidence": "79aa4260c3f3cd5ff8ef6414809511884072d8e5",
+  "native_baseline_implementation": "ae85af8fc22a06ff7bc36ff4b0dbe1214d0d59a9",
+  "github_baseline_source": "cbb5861e36ece81b08fcbb7622b40982874c2fe3",
+  "github_baseline_evidence": "531456f91a690c6052ac5f14e4b03b391d6e47f5",
+  "baseline_tested_tree": "fd0dff807a41c0ab04c5dee238e78e3333ff0318",
+  "baseline_evidence_tree": "4282c728be7843a1a9e292e1a0b14dd0dee9f8d7",
+  "recovery": "Exact local clone, strict fsck pass; original commits and ancestry preserved",
+  "unchanged_baseline_files": 2428,
+  "original_cases": 603,
+  "new_cases": 8
+}
