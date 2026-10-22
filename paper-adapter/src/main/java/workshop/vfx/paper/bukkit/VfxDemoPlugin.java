@@ -36,6 +36,9 @@ import workshop.vfx.paper.m8.AuraSession;
 import workshop.vfx.paper.m8.M8Commands;
 import workshop.vfx.paper.m8.M8StyleCatalog;
 import workshop.vfx.paper.m8.TimedAnchorSource;
+import workshop.vfx.paper.reference.ReferenceCommands;
+import workshop.vfx.paper.reference.ReferenceSession;
+import workshop.vfx.paper.reference.ReferenceStyleCatalog;
 
 /** Ordinary Paper adapter. All platform calls run exclusively on the main thread. */
 public final class VfxDemoPlugin extends JavaPlugin implements Listener {
@@ -51,6 +54,8 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
     private DemoCommands commands;
     private M8Commands m8Commands;
     private AuraSession auras;
+    private ReferenceSession reference;
+    private ReferenceCommands referenceCommands;
     private TimedAnchorSource anchorTiming;
     private final Properties provenance = new Properties();
     private long lastDebugTick = Long.MIN_VALUE;
@@ -80,14 +85,18 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
                 driver = new RingDriver(thread,new PaperHost(),config,ids,health,this::validatePoint,this::send,DeliveryPlanner::plan,registry);
                 registry.bind(driver);
                 auras = new AuraSession(thread,ids,anchorTiming,registry,m8Config);
+                reference = new ReferenceSession(thread,ids,anchorTiming,registry,m8Config);
             } else {
                 registry = null;
                 auras = null; anchorTiming = null;
+                reference = null;
                 driver = new RingDriver(thread,new PaperHost(),config,ids,health,this::validatePoint,this::send);
             }
             commands = new DemoCommands(thread,config.defaultTier());
             m8Commands = new M8Commands(thread,m8Config);
+            referenceCommands = new ReferenceCommands(thread,m8Config);
             registerCommand("vfxdemo","Opt-in static ring and Arcane Halo aura",List.of(),new PaperCommand());
+            registerCommand("vfxreference","Experimental ten-second native particle reference prototype",List.of(),new ReferenceCommand());
             Bukkit.getPluginManager().registerEvents(this,this);
             getLogger().info("Bedwenton VFX " + getPluginMeta().getVersion() + "; engine tree=" + provenance.getProperty("engineTree")
                 + "; paper-api=" + provenance.getProperty("paperApiVersion") + "; server=" + Bukkit.getVersion()
@@ -98,7 +107,7 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
         }
     }
     private void resolveCatalogue() {
-        var catalogue = m8Config.enabled() ? M8StyleCatalog.whitelist() : DemoStyleCatalog.whitelist();
+        var catalogue = m8Config.enabled() ? ReferenceStyleCatalog.whitelist() : DemoStyleCatalog.whitelist();
         for (var entry : catalogue.entrySet()) {
             try {
                 Particle particle; Object data;
@@ -122,6 +131,7 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
         if (driver != null) driver.close();
         registry = null;
         auras = null; anchorTiming = null; m8Commands = null;
+        reference = null; referenceCommands = null;
         Bukkit.getScheduler().cancelTasks(this);
         if (ids != null) ids.clear();
         particles.clear(); health = null; commands = null;
@@ -185,6 +195,24 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
                 }
             },1L,1L);
             return task::cancel;
+        }
+    }
+    private final class ReferenceCommand implements BasicCommand {
+        @Override public String permission() { return USE; }
+        @Override public void execute(CommandSourceStack source, String[] args) {
+            thread.check();if(referenceCommands==null||driver==null)return;
+            Player player=source.getExecutor() instanceof Player p?p:null;
+            referenceCommands.execute(new ReferenceCommands.Endpoint() {
+                @Override public boolean permitted(){return source.getSender().hasPermission(USE);}
+                @Override public boolean player(){return player!=null;}
+                @Override public void start(workshop.vfx.delivery.QualityTier tier){reference.start(player.getUniqueId(),tier,Bukkit.getCurrentTick());}
+                @Override public void stop(){reference.stop(player.getUniqueId());}
+                @Override public String status(){return reference.status(player.getUniqueId());}
+                @Override public void reply(String text){source.getSender().sendMessage(text);}
+            },args);
+        }
+        @Override public Collection<String> suggest(CommandSourceStack source,String[] args) {
+            thread.check();return referenceCommands==null||!source.getSender().hasPermission(USE)?List.of():referenceCommands.suggest(args);
         }
     }
     private final class PaperCommand implements BasicCommand {

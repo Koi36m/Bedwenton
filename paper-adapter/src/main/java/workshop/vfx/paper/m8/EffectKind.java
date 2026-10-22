@@ -9,5 +9,7 @@ public enum EffectKind {
     /** Showcase B: bounded movement trail behind its owner. */
     TRAIL,
     /** Showcase C: short, static-anchored, multi-phase animation that ends by itself. */
-    ACTIVATION
+    ACTIVATION,
+    /** Isolated ten-second reference prototype; not any staged K2/K3/K4 showcase. */
+    REFERENCE
 }

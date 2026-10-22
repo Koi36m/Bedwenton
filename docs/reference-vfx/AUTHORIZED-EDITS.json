@@ -1,0 +1,14 @@
+{
+  "paper-adapter/gradle.properties": {
+    "old_sha256": "dae593b5cc0513d09e4b0a5b33f0098c2b6dd3593187b375c26538b393af0977",
+    "new_sha256": "a453bf2320d1f7993ad64f2dec9da29e5637e5810ad13e9635e1ce342d923f3f"
+  },
+  "paper-adapter/src/main/java/workshop/vfx/paper/bukkit/VfxDemoPlugin.java": {
+    "old_sha256": "9534b277291415b3c4ab88bf179d41e5fe1198cb5fd1c53e7bd9148dff520b3c",
+    "new_sha256": "ce3521a351b01ceb194284b065deb69c314a82c5d6dced53fb78d01ca0df5ecf"
+  },
+  "paper-adapter/src/main/java/workshop/vfx/paper/m8/EffectKind.java": {
+    "old_sha256": "ebcf5f93b9ae538ca0ca87d18b3a9c76f4cbcef2e309bbce612cbf8c20e10125",
+    "new_sha256": "3ca787ce7a749de7423a275c5505d2e8e92da8cf7fbbd64aef257ff23d094f1b"
+  }
+}

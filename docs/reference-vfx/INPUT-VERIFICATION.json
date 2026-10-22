@@ -1,0 +1,15 @@
+{
+  "native_baseline": "92a8f759dd81691e050eda3612eb480d134f473e",
+  "github_baseline": "e1f81c2709a83f3b5fa9d714548b2e641bb10a5d",
+  "baseline_tree": "6b4eb0ba54fef5277998e1a8d21bfe797c1eed3a",
+  "native_recovery": "Exact local clone; original refs restored; no history reconstructed",
+  "reference_url": "https://youtu.be/LqVTFFpzYz8",
+  "segment_seconds": [
+    0,
+    10
+  ],
+  "reference_frames": "UNAVAILABLE: browser returned page title/footer only; written owner brief used; fidelity unverified",
+  "unchanged_baseline_files": 2453,
+  "baseline_case_ids": 611,
+  "new_cases": 20
+}
