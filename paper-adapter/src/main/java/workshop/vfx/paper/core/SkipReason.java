@@ -17,5 +17,9 @@ public enum SkipReason {
     VIEWER_POSITION_INVALID,
     VIEWER_OUT_OF_RANGE,
     /** Point level. */
-    POINT_NOT_FINITE, POINT_OUTSIDE_WORLD, STYLE_DISABLED, EMISSION_LIMIT
+    POINT_NOT_FINITE, POINT_OUTSIDE_WORLD, STYLE_DISABLED, EMISSION_LIMIT,
+    /** Delivery level: stream metadata/frame cannot safely describe one opposing pair. */
+    INVALID_DIRECTIONAL_CONTEXT,
+    /** Recipient level: M6 selected fewer than both stream placements. */
+    INCOMPLETE_STREAM_PAIR
 }

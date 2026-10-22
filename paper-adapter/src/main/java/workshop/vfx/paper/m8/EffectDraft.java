@@ -1,6 +1,9 @@
 package workshop.vfx.paper.m8;
 
 import java.util.UUID;
+import java.util.Map;
+import workshop.vfx.paper.core.DirectionalEmission;
+import workshop.vfx.scene.StyleKey;
 import workshop.vfx.delivery.EffectRecipe;
 import workshop.vfx.delivery.QualityTier;
 import workshop.vfx.math.core.Pose;
@@ -18,4 +21,11 @@ import workshop.vfx.math.time.TimePoint;
  * @param frameOrdinal the effect clock: tick - effect start tick (drives M6 thinning phase); never the scene clock
  */
 public record EffectDraft(EffectKind kind, long requestId, UUID owner, long ownerViewerId, int worldId, Pose anchor,
-        EffectRecipe recipe, QualityTier tier, Playback playback, TimePoint now, long frameOrdinal) { }
+        EffectRecipe recipe, QualityTier tier, Playback playback, TimePoint now, long frameOrdinal,
+        Map<StyleKey,DirectionalEmission> directions) {
+    public EffectDraft { directions=Map.copyOf(directions); }
+    public EffectDraft(EffectKind kind,long requestId,UUID owner,long ownerViewerId,int worldId,Pose anchor,
+                       EffectRecipe recipe,QualityTier tier,Playback playback,TimePoint now,long frameOrdinal) {
+        this(kind,requestId,owner,ownerViewerId,worldId,anchor,recipe,tier,playback,now,frameOrdinal,Map.of());
+    }
+}

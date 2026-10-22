@@ -10,4 +10,10 @@ import workshop.vfx.scene.StyleKey;
 @FunctionalInterface
 public interface ParticleSink {
     void send(long viewerId, int worldId, StyleKey style, double x, double y, double z);
+
+    /** Unsupported implementations fail closed; a directional placement must never fall back to positional send. */
+    default void sendDirectional(long viewerId, int worldId, StyleKey style, double x, double y, double z,
+                                 DirectionalEmission motion) {
+        throw new UnsupportedOperationException("Directional END_ROD sink unavailable");
+    }
 }

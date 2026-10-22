@@ -37,10 +37,20 @@ public final class DefaultPlanEmitter implements PlanEmitter {
                     : c.requestId() != d.requestId() ? SkipReason.MISMATCHED_REQUEST_CONTEXT
                     : !validContext(c) ? SkipReason.INVALID_REQUEST_CONTEXT : null;
             if (bad != null) { sd.merge(bad, 1L, Long::sum); inSkippedDeliveries += d.placements(); continue; }
+            boolean directional=!c.directions().isEmpty() || d.frame().batches().stream().anyMatch(b->DirectionalEmission.STYLES.contains(b.style()));
+            if(directional&&!DirectionalEmission.validPair(d.frame(),c.directions())) {
+                sd.merge(SkipReason.INVALID_DIRECTIONAL_CONTEXT,1L,Long::sum);inSkippedDeliveries+=d.placements();continue;
+            }
             for (int r = 0; r < d.recipientCount(); r++) {
                 long viewer = d.recipient(r);
                 Optional<SkipReason> g = gate.check(c, viewer);
                 if (g.isPresent()) { sr.merge(g.get(), 1L, Long::sum); inSkippedRecipients += d.recipientPoints(r); continue; }
+                if(directional) {
+                    SkipReason refusal=d.recipientPoints(r)!=2||d.keptPoints()!=2 ? SkipReason.INCOMPLETE_STREAM_PAIR
+                        : health.isDisabled(DirectionalEmission.A)||health.isDisabled(DirectionalEmission.B) ? SkipReason.STYLE_DISABLED
+                        : calls>limits.maxCallsPerTick()-2 || perViewer.getOrDefault(viewer,0)>limits.maxCallsPerViewerPerTick()-2 ? SkipReason.EMISSION_LIMIT : null;
+                    if(refusal!=null){sr.merge(refusal,1L,Long::sum);inSkippedRecipients+=d.recipientPoints(r);continue;}
+                }
                 int remaining = d.recipientPoints(r);
                 for (int pos = 0; pos < d.orderedBatchCount() && remaining > 0; pos++) {
                     FrameBatch b = d.frame().batches().get(d.orderedBatch(pos));
@@ -58,7 +68,8 @@ public final class DefaultPlanEmitter implements PlanEmitter {
                         }
                         calls++; perViewer.put(viewer, pvCount + 1); attempted++;
                         try {
-                            sink.send(viewer, c.worldId(), style, x, y, z);
+                            if(directional)sink.sendDirectional(viewer,c.worldId(),style,x,y,z,c.directions().get(style));
+                            else sink.send(viewer, c.worldId(), style, x, y, z);
                             succeeded++; health.recordSuccess(style);
                         } catch (RuntimeException e) {
                             failed++;

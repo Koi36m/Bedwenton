@@ -1,6 +1,7 @@
 package workshop.vfx.paper.m8;
 import workshop.vfx.math.time.TimeDomain;
 import workshop.vfx.paper.core.SessionIds;
+import workshop.vfx.paper.core.DirectionalEmission;
 /** Defence in depth before a draft becomes a request or an ownership context. */
 public final class DraftIdentityGuard {
     private DraftIdentityGuard() { }
@@ -12,6 +13,7 @@ public final class DraftIdentityGuard {
         if (d.recipe().domain() != TimeDomain.GAME || d.playback().anchor().domain() != TimeDomain.GAME
                 || d.now().domain() != TimeDomain.GAME || d.now().value() != tick) return false;
         var a = d.anchor().translation();
-        return Double.isFinite(a.x()) && Double.isFinite(a.y()) && Double.isFinite(a.z());
+        if(!Double.isFinite(a.x()) || !Double.isFinite(a.y()) || !Double.isFinite(a.z()))return false;
+        return d.kind()==EffectKind.STREAMS ? d.directions().keySet().equals(DirectionalEmission.STYLES) : d.directions().isEmpty();
     }
 }

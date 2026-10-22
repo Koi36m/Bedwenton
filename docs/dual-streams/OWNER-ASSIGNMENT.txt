@@ -1,0 +1,211 @@
+# Bedwenton — Dual-Stream END_ROD Experiment
+
+**Assignment:** Implement a minimal, isolated proof-of-concept based on the owner's newly proposed two-emitter particle technique.
+
+## 1. Baseline and authorization
+
+Repository: `Koi36m/Bedwenton`
+
+Start from the verified Reference VFX source:
+
+- Native implementation: `a372703e61a9a3014031d49d8ab9e2c0a859c3ea`
+- GitHub-tested source: `9108e679b012f111b5a1fc51039965d213b43947`
+- Prior verification: 631/631 tests passed
+
+Create a separate experimental branch.
+
+Do not overwrite the existing `/vfxreference` prototype, Arcane Halo, or K1.2.2.
+
+## 2. New design hypothesis
+
+The owner believes the reference video's large rotating white shape may be formed by **two directional END_ROD particle streams**, rather than by separately plotting an outer circle and its internal curves.
+
+Test that hypothesis directly.
+
+**Emitter A:** Spawn exactly one END_ROD particle with an initially upward-pointing velocity.
+
+**Emitter B:** Spawn exactly one END_ROD particle with an initially downward-pointing velocity.
+
+Both emitters originate at or very near the same point behind the player's torso.
+
+Their emission directions rotate together over time while staying 180 degrees apart.
+
+Do not interpret this as two emitters spinning in opposite angular directions.
+
+## 3. Mathematics
+
+Let `age` be the number of game ticks since activation.
+
+Initial rotation period: 80 ticks.
+
+Use the vertical plane behind the player's body.
+
+Define:
+
+`theta = PI/2 + 2*PI*(age % 80)/80`
+
+`directionA = (cos(theta), sin(theta), 0)`
+
+`directionB = -directionA`
+
+These are player-local unit directions.
+
+Transform both directions into world space using the current player body yaw.
+
+Do not rotate directions using head yaw or camera pitch.
+
+The emitters share a stationary player-relative origin:
+
+- Center height: approximately feet +1.55 blocks.
+- Backward offset: approximately 1.0 block.
+- Local vertical XY plane.
+
+Both new particle directions must change with the animation phase.
+
+The mathematical period should continue advancing on ticks without emissions.
+
+## 4. Directional END_ROD spawning
+
+Paper documents directional emission using:
+
+- `Particle.END_ROD`
+- `count = 0`
+- offset X/Y/Z as the direction
+- nonzero `extra` as the speed multiplier
+
+For every emission step, send one particle using direction A and one using direction B.
+
+Begin with a conservative speed around 0.15, subject to actual Paper 26.3 behavior.
+
+Test three bounded speed presets if useful:
+
+- Slow: 0.10
+- Normal: 0.15
+- Fast: 0.22
+
+These are experimental starting values, not guaranteed final physical velocities.
+
+Initial cadence: one opposing pair every 4 ticks.
+
+Do not emit an array of stationary geometry points.
+
+Do not pre-create a circle or any Bézier strokes.
+
+Do not add head, ground, crown or ambient particles to this experiment.
+
+The objective is to determine whether the two moving streams naturally form a visually readable rotating shape.
+
+## 5. Important integration constraint
+
+The existing M7 Paper adapter and M6 delivery system primarily support positioned particles.
+
+**Do not silently bypass the existing M6 planning, permission validation, recipient filtering, capacity limits or accounting to emit directional particles.**
+
+First inspect the existing ParticleSink, PlanEmitter, RingDriver, delivery contracts and Paper adapter.
+
+Implement the smallest safe adapter-side directional emission extension if feasible.
+
+Requirements:
+
+- Preserve frozen M1–M6 contracts.
+- Preserve the shared global scheduler.
+- Preserve one shared M6 planning pass.
+- Validate finite positions and velocity directions.
+- Maintain exact recipient authorization.
+- Count every emitted directional particle toward applicable global budgets.
+- Do not globally broadcast particles.
+- Do not create a second independent scheduler.
+- Do not add NMS, reflection or unsupported packet libraries.
+
+If the current architecture cannot safely carry directional particle information through the established validated delivery path without substantial architectural changes, stop and report **BLOCKED** with the smallest proposed extension.
+
+Do not fake support by silently replacing the experiment with positional particles.
+
+## 6. Prototype controls
+
+Provide a separate test command, such as:
+
+`/vfxstreams normal`
+
+Supported actions should include:
+
+- start normal
+- optionally select slow/fast presets
+- stop
+- status
+
+Preserve existing `m8.enabled`, `bedwenton.vfxdemo.use`, permission isolation and heavy restrictions where applicable.
+
+No automatic activation.
+
+Test lifetime: 200 game ticks.
+
+Movement, teleport, dimension changes, death, disconnect, expiration and shutdown should continue using existing effect lifecycle protections.
+
+Already-spawned vanilla particles may naturally remain until their client-side lifetime expires.
+
+## 7. Expected visual behavior
+
+A successful experiment should demonstrate:
+
+1. Two particles emitted from the same general location.
+2. Opposite initial movement directions.
+3. Direction vectors rotating continuously.
+4. Earlier particles remaining visible briefly, creating trailing curves.
+5. A recognizable rotating two-stream shape emerging naturally from those trails.
+6. Considerably less white crowding than our original predefined geometric circle.
+
+Do not claim the exact reference appearance is guaranteed.
+
+The owner will evaluate whether it actually resembles the original video.
+
+## 8. Automated verification
+
+Preserve all existing baseline tests.
+
+Add tests for:
+
+- opposing unit vectors;
+- starting vertical orientation;
+- 90°, 180° and 360° rotation phases;
+- player body-yaw conversion;
+- exact two-particle emission steps;
+- cadence and lifetime;
+- speed validation;
+- global budget reservation and accounting;
+- recipient permission isolation;
+- single scheduler and planner;
+- stop/cleanup and stale callback protection;
+- preservation of the original Reference VFX and Arcane Halo.
+
+Run Java 25, Gradle 9.1.0, pinned Paper 26.3 API verification, JAR checks and all seven frozen reference regenerations.
+
+## 9. Deliverables
+
+Provide the compiled experimental JAR, source, test summary, exact Git provenance, SHA-256 manifest and a focused Minecraft smoke checklist.
+
+The smoke checklist should prioritize:
+
+- watching both particles travel;
+- verifying the rotated emission directions;
+- determining whether the trails form the desired illusion;
+- testing speed and cadence;
+- checking for particle buildup.
+
+No full old-checkpoint retest is required in Minecraft without an observed regression.
+
+## 10. Scope boundaries
+
+Authorized: isolated dual-stream END_ROD experiment.
+
+Not authorized: replacing existing effects, implementing K2–K4, redesigning the engine, merging, releasing or deploying to the live SMP.
+
+Stop after implementation and verification.
+
+Report:
+
+**READY FOR INDEPENDENT DUAL-STREAM IMPLEMENTATION REVIEW**
+
+or
+
+**BLOCKED**.

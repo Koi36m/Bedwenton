@@ -1,0 +1,13 @@
+{
+  "native_baseline": "a372703e61a9a3014031d49d8ab9e2c0a859c3ea",
+  "github_baseline": "9108e679b012f111b5a1fc51039965d213b43947",
+  "baseline_tree": "876d66f4eb04923c46dc4a04b6cc9af4d29d92eb",
+  "original_history": "Exact native clone, refs preserved; separate branch from specified implementation",
+  "video_name": "1022.mp4",
+  "video_sha256": "da14c10e7180658d6bf3c1dce3626ae7666853a2caad0e25d54647e147857ba0",
+  "video_bytes": 11505534,
+  "video_inspection": "First10seconds only, nominal2fps contact sheet and10fps around6.0\u20136.8seconds; observed rotating white lobes/envelope; emitter mechanism not proven",
+  "unchanged_baseline_files": 2462,
+  "baseline_case_ids": 631,
+  "new_tests": 28
+}

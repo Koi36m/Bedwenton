@@ -170,7 +170,7 @@ public final class RingDriver implements EffectScheduler {
         for (EffectDraft d : drafts) {
             if (!DraftIdentityGuard.accepts(d,ids,tick) || !draftIds.add(d.requestId())) { rejectedDrafts++; continue; }
             Vec3 a = d.anchor().translation();
-            RequestContext context = new RequestContext(d.requestId(),d.ownerViewerId(),d.worldId(),a.x(),a.y(),a.z());
+            RequestContext context = new RequestContext(d.requestId(),d.ownerViewerId(),d.worldId(),a.x(),a.y(),a.z(),d.directions());
             boolean ownerEligible = rule.decide(context,d.ownerViewerId(),host.facts(d.owner())).isEmpty();
             TreeSet<Long> others = new TreeSet<>();
             for (UUID player : players) {

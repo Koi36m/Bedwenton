@@ -11,5 +11,7 @@ public enum EffectKind {
     /** Showcase C: short, static-anchored, multi-phase animation that ends by itself. */
     ACTIVATION,
     /** Isolated ten-second reference prototype; not any staged K2/K3/K4 showcase. */
-    REFERENCE
+    REFERENCE,
+    /** Isolated two-particle directional END_ROD hypothesis test. */
+    STREAMS
 }

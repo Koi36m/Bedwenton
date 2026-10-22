@@ -1,5 +1,8 @@
 package workshop.vfx.paper.core;
 
+import java.util.Map;
+import workshop.vfx.scene.StyleKey;
+
 /**
  * Everything the emitter and gate need to know about one planned request,
  * captured on the main thread at planning time and keyed by {@code requestId} (= the M6 {@code DeliveryRequest.id()}).
@@ -9,4 +12,10 @@ package workshop.vfx.paper.core;
  * or has a non-finite anchor or a negative owner or world id ({@link SkipReason#INVALID_REQUEST_CONTEXT}).
  * Nothing is substituted, reconstructed or inferred.
  */
-public record RequestContext(long requestId, long ownerViewerId, int worldId, double anchorX, double anchorY, double anchorZ) { }
+public record RequestContext(long requestId, long ownerViewerId, int worldId, double anchorX, double anchorY, double anchorZ,
+                             Map<StyleKey,DirectionalEmission> directions) {
+    public RequestContext { directions=Map.copyOf(directions); }
+    public RequestContext(long requestId,long ownerViewerId,int worldId,double anchorX,double anchorY,double anchorZ) {
+        this(requestId,ownerViewerId,worldId,anchorX,anchorY,anchorZ,Map.of());
+    }
+}

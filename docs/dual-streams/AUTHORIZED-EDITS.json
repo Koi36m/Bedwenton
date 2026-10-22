@@ -1,0 +1,42 @@
+{
+  "paper-adapter/gradle.properties": {
+    "old_sha256": "a453bf2320d1f7993ad64f2dec9da29e5637e5810ad13e9635e1ce342d923f3f",
+    "new_sha256": "75e5a645671e5d28a05d8a74b1cebce282c84dc687de480bf2aae66defd12509"
+  },
+  "paper-adapter/src/main/java/workshop/vfx/paper/bukkit/VfxDemoPlugin.java": {
+    "old_sha256": "ce3521a351b01ceb194284b065deb69c314a82c5d6dced53fb78d01ca0df5ecf",
+    "new_sha256": "119f0525f84cadaa80c0ff08837318e5b5dbf86c22d4b6ca98faf4c406b03646"
+  },
+  "paper-adapter/src/main/java/workshop/vfx/paper/core/DefaultPlanEmitter.java": {
+    "old_sha256": "978bf22e6b7116ab7e4f9eda3054aa8cf60698e932d262ba40e74084a3f833d8",
+    "new_sha256": "b305771896a858f8bbb7c35eafdd472539b9806c8cff789f5a24fb3c803bb9fa"
+  },
+  "paper-adapter/src/main/java/workshop/vfx/paper/core/ParticleSink.java": {
+    "old_sha256": "b6a2e443b181d16230f1a1d1a89d6645043699cd1fa203ff34e76acec420cef3",
+    "new_sha256": "f4e1e14a310ea1e15ab85a08e3f7c7248ba25e6052b06396156382c688e9b293"
+  },
+  "paper-adapter/src/main/java/workshop/vfx/paper/core/RequestContext.java": {
+    "old_sha256": "09cd67be3d79b647509da4a1c4fbd7c4e2a3bd3815b6aa51314122849f7ef63b",
+    "new_sha256": "d78f42ebe162025a33b832cfe222efe062825905e067a799f9f129ed78655001"
+  },
+  "paper-adapter/src/main/java/workshop/vfx/paper/core/RingDriver.java": {
+    "old_sha256": "5cf02938b4e35abdab5a7d47cd30259aef062e7f16990b5583df1c23d1508015",
+    "new_sha256": "cd7abea0e822f8dfab752db9d5ae5f4ce468ab5b64d7cf35b289c8d753abd544"
+  },
+  "paper-adapter/src/main/java/workshop/vfx/paper/core/SkipReason.java": {
+    "old_sha256": "36768321d382de2096d546d94762732b33ad1dcf1fac459de2b284127009a645",
+    "new_sha256": "41d0fcd2a32b559aced2a517c54bb187544ced1751a05fee468a3b15fbfd3998"
+  },
+  "paper-adapter/src/main/java/workshop/vfx/paper/m8/DraftIdentityGuard.java": {
+    "old_sha256": "8b78a23e6c49247269a73c2bfa92769ff9ed7ef33b83e7c707dd143462218794",
+    "new_sha256": "a463d38bd1e02dcc3ee5eb1e047ac7620c1d3a5b9897a3bec60dc2faed7ab010"
+  },
+  "paper-adapter/src/main/java/workshop/vfx/paper/m8/EffectDraft.java": {
+    "old_sha256": "f144da6be6a8911f60fe2030d1a8b613a975adcbfd252f85e5e20ebcb2c9fddb",
+    "new_sha256": "84c609eb3d7480c97e8a9226602e0887038c62e1746b9b22fbc8781feb0a27bb"
+  },
+  "paper-adapter/src/main/java/workshop/vfx/paper/m8/EffectKind.java": {
+    "old_sha256": "3ca787ce7a749de7423a275c5505d2e8e92da8cf7fbbd64aef257ff23d094f1b",
+    "new_sha256": "291c67b17af1004bbb6d340f86eadf053ebe1f2c89cdc9c798056dd07704947c"
+  }
+}

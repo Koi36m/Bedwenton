@@ -39,6 +39,7 @@ import workshop.vfx.paper.m8.TimedAnchorSource;
 import workshop.vfx.paper.reference.ReferenceCommands;
 import workshop.vfx.paper.reference.ReferenceSession;
 import workshop.vfx.paper.reference.ReferenceStyleCatalog;
+import workshop.vfx.paper.streams.*;
 
 /** Ordinary Paper adapter. All platform calls run exclusively on the main thread. */
 public final class VfxDemoPlugin extends JavaPlugin implements Listener {
@@ -56,6 +57,8 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
     private AuraSession auras;
     private ReferenceSession reference;
     private ReferenceCommands referenceCommands;
+    private StreamsSession streams;
+    private StreamsCommands streamsCommands;
     private TimedAnchorSource anchorTiming;
     private final Properties provenance = new Properties();
     private long lastDebugTick = Long.MIN_VALUE;
@@ -82,21 +85,25 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
                 anchorTiming = new TimedAnchorSource(thread,new PaperAnchorSource(thread,ids),System::nanoTime);
                 registry = new DynamicEffectRegistry(thread,anchorTiming,ids,
                     m8Config.maxEffectsPerPlayer(),m8Config.invalidAnchorTicksToTerminate());
-                driver = new RingDriver(thread,new PaperHost(),config,ids,health,this::validatePoint,this::send,DeliveryPlanner::plan,registry);
+                driver = new RingDriver(thread,new PaperHost(),config,ids,health,this::validatePoint,particleSink(),DeliveryPlanner::plan,registry);
                 registry.bind(driver);
                 auras = new AuraSession(thread,ids,anchorTiming,registry,m8Config);
                 reference = new ReferenceSession(thread,ids,anchorTiming,registry,m8Config);
+                streams = new StreamsSession(thread,ids,anchorTiming,registry,m8Config);
             } else {
                 registry = null;
                 auras = null; anchorTiming = null;
                 reference = null;
+                streams = null;
                 driver = new RingDriver(thread,new PaperHost(),config,ids,health,this::validatePoint,this::send);
             }
             commands = new DemoCommands(thread,config.defaultTier());
             m8Commands = new M8Commands(thread,m8Config);
             referenceCommands = new ReferenceCommands(thread,m8Config);
+            streamsCommands = new StreamsCommands(thread,m8Config);
             registerCommand("vfxdemo","Opt-in static ring and Arcane Halo aura",List.of(),new PaperCommand());
             registerCommand("vfxreference","Experimental ten-second native particle reference prototype",List.of(),new ReferenceCommand());
+            registerCommand("vfxstreams","Experimental directional END_ROD pair",List.of(),new StreamsCommand());
             Bukkit.getPluginManager().registerEvents(this,this);
             getLogger().info("Bedwenton VFX " + getPluginMeta().getVersion() + "; engine tree=" + provenance.getProperty("engineTree")
                 + "; paper-api=" + provenance.getProperty("paperApiVersion") + "; server=" + Bukkit.getVersion()
@@ -107,7 +114,7 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
         }
     }
     private void resolveCatalogue() {
-        var catalogue = m8Config.enabled() ? ReferenceStyleCatalog.whitelist() : DemoStyleCatalog.whitelist();
+        var catalogue = m8Config.enabled() ? StreamsStyleCatalog.whitelist() : DemoStyleCatalog.whitelist();
         for (var entry : catalogue.entrySet()) {
             try {
                 Particle particle; Object data;
@@ -132,6 +139,7 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
         registry = null;
         auras = null; anchorTiming = null; m8Commands = null;
         reference = null; referenceCommands = null;
+        streams = null; streamsCommands = null;
         Bukkit.getScheduler().cancelTasks(this);
         if (ids != null) ids.clear();
         particles.clear(); health = null; commands = null;
@@ -158,6 +166,25 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
         if (player == null || !player.isOnline() || !player.isValid() || !player.getWorld().getUID().equals(world) || resolved == null)
             throw new IllegalStateException("Particle recipient or style unavailable");
         player.spawnParticle(resolved.particle(),x,y,z,0,0.0,0.0,0.0,0.0,resolved.data(),false);
+    }
+    private ParticleSink particleSink() {
+        return new ParticleSink() {
+            @Override public void send(long viewer,int world,StyleKey style,double x,double y,double z) {
+                VfxDemoPlugin.this.send(viewer,world,style,x,y,z);
+            }
+            @Override public void sendDirectional(long viewer,int world,StyleKey style,double x,double y,double z,DirectionalEmission motion) {
+                thread.check();
+                if(!DirectionalEmission.STYLES.contains(style)||motion==null||!OwnerAwareRecipientRule.finite(x,y,z))
+                    throw new IllegalArgumentException("Invalid directional placement");
+                UUID uuid=ids.viewer(viewer);Player player=uuid==null?null:Bukkit.getPlayer(uuid);
+                UUID target=ids.world(world);ResolvedParticle resolved=particles.get(style);
+                if(player==null||!player.isOnline()||!player.isValid()||!player.getWorld().getUID().equals(target)
+                        ||resolved==null||resolved.particle()!=Particle.END_ROD)
+                    throw new IllegalStateException("Directional recipient or END_ROD unavailable");
+                var direction=motion.direction();
+                player.spawnParticle(Particle.END_ROD,x,y,z,0,direction.x(),direction.y(),direction.z(),motion.speed(),null,false);
+            }
+        };
     }
     private final class PaperHost implements RingDriver.Host {
         @Override public long tick() { thread.check(); return Bukkit.getCurrentTick(); }
@@ -195,6 +222,24 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
                 }
             },1L,1L);
             return task::cancel;
+        }
+    }
+    private final class StreamsCommand implements BasicCommand {
+        @Override public String permission(){return USE;}
+        @Override public void execute(CommandSourceStack source,String[] args){
+            thread.check();if(streamsCommands==null||driver==null)return;
+            Player player=source.getExecutor() instanceof Player p?p:null;
+            streamsCommands.execute(new StreamsCommands.Endpoint(){
+                public boolean permitted(){return source.getSender().hasPermission(USE);}
+                public boolean player(){return player!=null;}
+                public void start(StreamSpeed speed){streams.start(player.getUniqueId(),speed,Bukkit.getCurrentTick());}
+                public void stop(){streams.stop(player.getUniqueId());}
+                public String status(){return streams.status(player.getUniqueId());}
+                public void reply(String text){source.getSender().sendMessage(text);}
+            },args);
+        }
+        @Override public Collection<String> suggest(CommandSourceStack source,String[] args){
+            thread.check();return streamsCommands==null||!source.getSender().hasPermission(USE)?List.of():streamsCommands.suggest(args);
         }
     }
     private final class ReferenceCommand implements BasicCommand {
