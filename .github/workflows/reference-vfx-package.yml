@@ -1,0 +1,59 @@
+name: Reference VFX Review Package
+on:
+  push:
+    branches: [experiment/reference-vfx-review]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v5
+        with:
+          name: reference-java25-verification-39757032499
+          run-id: 39757032499
+          github-token: ${{ github.token }}
+          path: _review_evidence
+      - name: Preserve tested source, original JAR, full verification and published Git history
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code 9108e679b012f111b5a1fc51039965d213b43947 HEAD -- paper-adapter src verification gradle build.gradle settings.gradle
+          sha256sum -c docs/reference-vfx/IMPLEMENTATION-SHA256SUMS.txt
+          sha256sum -c docs/reference-vfx/FROZEN-BASELINE-SHA256SUMS.txt
+          mkdir -p "$RUNNER_TEMP/reference-delivery"
+          git archive --format=zip --prefix=bedwenton-reference-vfx/ -o "$RUNNER_TEMP/reference-delivery/bedwenton-reference-vfx-source.zip" HEAD
+          git bundle create "$RUNNER_TEMP/reference-delivery/bedwenton-reference-vfx-github-snapshot.git.bundle" HEAD
+          git bundle verify "$RUNNER_TEMP/reference-delivery/bedwenton-reference-vfx-github-snapshot.git.bundle"
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os,shutil,subprocess,zipfile
+          root=Path('.');out=Path(os.environ['RUNNER_TEMP'])/'reference-delivery';ev=root/'_review_evidence'
+          jars=list(ev.rglob('bedwenton-vfx-paper-0.8.0-reference.1.jar'));assert len(jars)==1
+          jar=jars[0];assert hashlib.sha256(jar.read_bytes()).hexdigest()=='562bb69dc9d6ae879cf6f36fdfa3ef38db93e293786430ee0c90943d034591b5'
+          shutil.copyfile(jar,out/jar.name)
+          cp=dict(github_evidence=subprocess.check_output(['git','rev-parse','HEAD']).decode().strip(),github_final_tree=subprocess.check_output(['git','rev-parse','HEAD^{tree}']).decode().strip(),github_tested_source='9108e679b012f111b5a1fc51039965d213b43947',tested_source_tree='876d66f4eb04923c46dc4a04b6cc9af4d29d92eb',native_implementation='a372703e61a9a3014031d49d8ab9e2c0a859c3ea',bundle_kind='Published GitHub snapshot ancestry; distinct from native history bundle preserved locally',verification_run='https://github.com/Koi36m/Bedwenton/actions/runs/39757032499',tests=631,visual_reference_match='UNVERIFIED; video frames unavailable',minecraft_smoke='NOT RUN')
+          (out/'GIT-CHECKPOINT.json').write_text(json.dumps(cp,indent=2)+'\n')
+          prefix='bedwenton-reference-vfx/'
+          with zipfile.ZipFile(out/'bedwenton-reference-vfx-source.zip','a',compression=zipfile.ZIP_DEFLATED) as z:
+              z.writestr(prefix+'DELIVERY-CHECKPOINT.json',(out/'GIT-CHECKPOINT.json').read_bytes())
+              for p in sorted(ev.rglob('*')):
+                  if p.is_file():z.write(p,prefix+'verification-evidence/'+str(p.relative_to(ev)))
+              names=sorted(n for n in z.namelist() if not n.endswith('/'))
+              z.writestr(prefix+'SOURCE-SHA256SUMS.txt',''.join(hashlib.sha256(z.read(n)).hexdigest()+'  '+n.removeprefix(prefix)+'\n' for n in names))
+              assert z.testzip() is None
+          (out/'SHA256SUMS.txt').write_text(''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n' for p in sorted(out.iterdir()) if p.name!='SHA256SUMS.txt'))
+          PY
+          cd "$RUNNER_TEMP/reference-delivery"
+          sha256sum -c SHA256SUMS.txt
+      - uses: actions/upload-artifact@v6
+        with:
+          name: bedwenton-reference-vfx-review-package
+          if-no-files-found: error
+          retention-days: 90
+          path: ${{ runner.temp }}/reference-delivery/

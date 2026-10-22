@@ -1,0 +1,6 @@
+41fed2acfd70d8ade986f873f65369b31fa65ef33c8edaeb268f35aaa9937d83  docs/reference-vfx/FINAL-VERIFICATION.json
+268ae59478ab49fa9200beadca5178d5dee8a6b2d9fe5200c85ce906e2bef1bb  docs/reference-vfx/ACTIONS-ARTIFACTS.json
+212acb21107650709bfbfbb3aca6f0d9b9f8e80848e12d0970c260f38ef60d9d  docs/reference-vfx/TEST-SUMMARY.json
+6689549837f56c99990fb85892751f395e326b8573ea889c6f5302e906f95578  docs/reference-vfx/JAVA-GRADLE-VERSIONS.txt
+bc9c0305bdc04aec644543e50a622e4a881c67104b4f0fba16b7947f1e1b7a5d  docs/reference-vfx/REFERENCE-VFX-IMPLEMENTATION-REPORT.md
+bd9afcd01d0cc9fa6f5dd21c35bc9a25496672987be66528c545d45d28c820a2  .github/workflows/reference-vfx-package.yml
