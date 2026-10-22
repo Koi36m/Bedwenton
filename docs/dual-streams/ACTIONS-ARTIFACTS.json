@@ -1,0 +1,42 @@
+{
+  "artifacts": [
+    {
+      "id": 12419148840,
+      "name": "streams-java25-verification-39764375954",
+      "size_in_bytes": 1938321,
+      "url": "https://api.github.com/repos/Koi36m/Bedwenton/actions/artifacts/12419148840",
+      "archive_download_url": "https://api.github.com/repos/Koi36m/Bedwenton/actions/artifacts/12419148840/zip",
+      "expired": false,
+      "created_at": "2026-10-22T10:38:53Z",
+      "expires_at": "2027-01-20T10:36:33Z",
+      "updated_at": "2026-10-22T10:38:53Z",
+      "digest": "sha256:495006e6358489e04687d855509c37a8a53db367319af5e1bb582492632f1868",
+      "workflow_run": {
+        "id": 39764375954,
+        "repository_id": 1419934059,
+        "head_repository_id": 1419934059,
+        "head_branch": "experiment/dual-stream-end-rod-actions",
+        "head_sha": "325f58aa3034c51aa34ef1cb05eb5c0a1e51dfb3"
+      }
+    },
+    {
+      "id": 12419064261,
+      "name": "bedwenton-vfx-paper-0.8.0-streams.1",
+      "size_in_bytes": 216743,
+      "url": "https://api.github.com/repos/Koi36m/Bedwenton/actions/artifacts/12419064261",
+      "archive_download_url": "https://api.github.com/repos/Koi36m/Bedwenton/actions/artifacts/12419064261/zip",
+      "expired": false,
+      "created_at": "2026-10-22T10:38:54Z",
+      "expires_at": "2027-01-20T10:36:33Z",
+      "updated_at": "2026-10-22T10:38:54Z",
+      "digest": "sha256:a75c5b15d6aa88f0da1658daaa2feeda4ccd817f0191f74901bed6200617703f",
+      "workflow_run": {
+        "id": 39764375954,
+        "repository_id": 1419934059,
+        "head_repository_id": 1419934059,
+        "head_branch": "experiment/dual-stream-end-rod-actions",
+        "head_sha": "325f58aa3034c51aa34ef1cb05eb5c0a1e51dfb3"
+      }
+    }
+  ]
+}
