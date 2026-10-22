@@ -5,7 +5,7 @@
   },
   "paper-adapter/src/main/java/workshop/vfx/paper/bukkit/VfxDemoPlugin.java": {
     "old_sha256": "ce3521a351b01ceb194284b065deb69c314a82c5d6dced53fb78d01ca0df5ecf",
-    "new_sha256": "119f0525f84cadaa80c0ff08837318e5b5dbf86c22d4b6ca98faf4c406b03646"
+    "new_sha256": "6e1a6d54a0b07fadd254adcd463d224848cc7aae7deb0e91912fdd79ab159041"
   },
   "paper-adapter/src/main/java/workshop/vfx/paper/core/DefaultPlanEmitter.java": {
     "old_sha256": "978bf22e6b7116ab7e4f9eda3054aa8cf60698e932d262ba40e74084a3f833d8",

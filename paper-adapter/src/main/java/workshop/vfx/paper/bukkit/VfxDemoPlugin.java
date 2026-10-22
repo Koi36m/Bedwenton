@@ -174,7 +174,7 @@ public final class VfxDemoPlugin extends JavaPlugin implements Listener {
             }
             @Override public void sendDirectional(long viewer,int world,StyleKey style,double x,double y,double z,DirectionalEmission motion) {
                 thread.check();
-                if(!DirectionalEmission.STYLES.contains(style)||motion==null||!OwnerAwareRecipientRule.finite(x,y,z))
+                if(!DirectionalEmission.STYLES.contains(style)||motion==null||!Double.isFinite(x)||!Double.isFinite(y)||!Double.isFinite(z))
                     throw new IllegalArgumentException("Invalid directional placement");
                 UUID uuid=ids.viewer(viewer);Player player=uuid==null?null:Bukkit.getPlayer(uuid);
                 UUID target=ids.world(world);ResolvedParticle resolved=particles.get(style);
